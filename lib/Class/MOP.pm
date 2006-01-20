@@ -75,7 +75,7 @@ protocol.
 
 =head2 The Class protocol
 
-=head3 Creation
+=head3 Class construction
 
 These methods handle creating Class objects, which can be used to 
 both create new classes, and analyze pre-existing ones. 
@@ -108,7 +108,20 @@ an array of C<@superclasses>, a hash of C<%methods> and a hash
 of C<%attributes>. This method is used by both C<load> and 
 C<create>.
 
-This method also stores the Class object for you inside Class::MOP.
+=back
+
+=head3 Instance construction
+
+=over 4
+
+=item <create_instance ($canidate, %params)>
+
+This will construct and instance using the C<$canidate> as storage 
+(currently on HASH references are supported). This will collect all 
+the applicable attribute meta-objects and layout out the fields in the 
+C<$canidate>, it will then initialize them using either use the 
+corresponding key in C<%params> or any default value or initializer 
+found in the attribute meta-object.
 
 =back
 
@@ -209,17 +222,45 @@ information given, and can not easily discover information on their own.
 
 =over 4
 
-=item C<>
+=item C<add_attribute ($attribute_name, $attribute_meta_object)>
 
-=item C<>
+This stores a C<$attribute_meta_object> in the Class object and associates it 
+with the C<$attribute_name>. Unlike methods, attributes within the MOP are stored 
+as meta-information only. They will be used later to construct instances from
+(see C<create_instance> above). More details about the attribute meta-objects can 
+be found in the L<The Attribute protocol> section of this document.
 
-=item C<>
+=item C<has_attribute ($attribute_name)>
 
-=item C<>
+Checks to see if this Class has an attribute by the name of C<$attribute_name> 
+and returns a boolean.
 
-=item C<>
+=item C<get_attribute ($attribute_name)>
 
-=item C<>
+Returns the attribute meta-object associated with C<$attribute_name>, if none is 
+found, it will return undef. 
+
+=item C<remove_attribute ($attribute_name)>
+
+This will remove the attribute meta-object stored at C<$attribute_name>, then return 
+the removed attribute meta-object. 
+
+B<NOTE:> Removing an attribute will only affect future instances of the class, it 
+will not make any attempt to remove the attribute from any existing instances of the 
+class.
+
+=item C<get_attribute_list>
+
+This returns a list of attribute names which are defined in the local class. If you 
+want a list of all applicable attributes for a class, use the 
+C<compute_all_applicable_attributes> method.
+
+=item C<compute_all_applicable_attributes>
+
+This will traverse the inheritance heirachy and return a list of HASH references for
+all the applicable attributes for this class. The HASH references will contain the 
+following information; the attribute name, the class which the attribute is associated
+with and the actual attribute meta-object
 
 =back
 
@@ -229,7 +270,7 @@ information given, and can not easily discover information on their own.
 
 =item "The Art of the Meta Object Protocol"
 
-=item CLOS
+=item "Advances in Object-Oriented Metalevel Architecture and Reflection"
 
 =back
 
