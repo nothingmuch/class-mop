@@ -103,7 +103,7 @@ which have been exported by other packages into this one.
 
 =item B<initialize ($package_name, @superclasses, %methods, %attributes)>
 
-This creates the actual Class object given a C<$package_nam>, 
+This creates the actual Class object given a C<$package_name>, 
 an array of C<@superclasses>, a hash of C<%methods> and a hash 
 of C<%attributes>. This method is used by both C<load> and 
 C<create>.
@@ -191,12 +191,12 @@ HASH references, each one containing the following information; method
 name, the name of the class in which the method lives and a CODE reference 
 for the actual method.
 
-=item C<find_methods_by_name ($method_name)>
+=item C<find_all_methods_by_name ($method_name)>
 
 This will traverse the inheritence hierarchy and locate all methods 
 with a given C<$method_name>. Similar to C<compute_all_applicable_methods>
 it returns a list of HASH references with the following information; 
-method name (which will always be the same as C<$method_name), the name of 
+method name (which will always be the same as C<$method_name>), the name of 
 the class in which the method lives and a CODE reference for the actual method.
 
 =back
