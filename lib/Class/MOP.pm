@@ -201,66 +201,70 @@ methods, use the C<compute_all_applicable_methods> method.
 This will return a list of all the methods names this Class will 
 support, taking into account inheritance. The list will be a list of 
 HASH references, each one containing the following information; method 
-name, the name of the class in which the method lives and a CODE reference 
-for the actual method.
+name, the name of the class in which the method lives and a CODE 
+reference for the actual method.
 
 =item C<find_all_methods_by_name ($method_name)>
 
 This will traverse the inheritence hierarchy and locate all methods 
-with a given C<$method_name>. Similar to C<compute_all_applicable_methods>
-it returns a list of HASH references with the following information; 
-method name (which will always be the same as C<$method_name>), the name of 
-the class in which the method lives and a CODE reference for the actual method.
+with a given C<$method_name>. Similar to 
+C<compute_all_applicable_methods> it returns a list of HASH references 
+with the following information; method name (which will always be the 
+same as C<$method_name>), the name of the class in which the method 
+lives and a CODE reference for the actual method.
 
 =back
 
 =head2 Attributes
 
-It should be noted that since there is no one consistent way to define the 
-attributes of a class in Perl 5. These methods can only work with the 
-information given, and can not easily discover information on their own.
+It should be noted that since there is no one consistent way to define 
+the attributes of a class in Perl 5. These methods can only work with 
+the information given, and can not easily discover information on 
+their own.
 
 =over 4
 
 =item C<add_attribute ($attribute_name, $attribute_meta_object)>
 
-This stores a C<$attribute_meta_object> in the Class object and associates it 
-with the C<$attribute_name>. Unlike methods, attributes within the MOP are stored 
-as meta-information only. They will be used later to construct instances from
-(see C<create_instance> above). More details about the attribute meta-objects can 
-be found in the L<The Attribute protocol> section of this document.
+This stores a C<$attribute_meta_object> in the Class object and 
+associates it with the C<$attribute_name>. Unlike methods, attributes 
+within the MOP are stored as meta-information only. They will be used 
+later to construct instances from (see C<create_instance> above). More 
+details about the attribute meta-objects can be found in the L<The 
+Attribute protocol> section of this document.
 
 =item C<has_attribute ($attribute_name)>
 
-Checks to see if this Class has an attribute by the name of C<$attribute_name> 
-and returns a boolean.
+Checks to see if this Class has an attribute by the name of 
+C<$attribute_name> and returns a boolean.
 
 =item C<get_attribute ($attribute_name)>
 
-Returns the attribute meta-object associated with C<$attribute_name>, if none is 
-found, it will return undef. 
+Returns the attribute meta-object associated with C<$attribute_name>, 
+if none is found, it will return undef. 
 
 =item C<remove_attribute ($attribute_name)>
 
-This will remove the attribute meta-object stored at C<$attribute_name>, then return 
-the removed attribute meta-object. 
+This will remove the attribute meta-object stored at 
+C<$attribute_name>, then return the removed attribute meta-object. 
 
-B<NOTE:> Removing an attribute will only affect future instances of the class, it 
-will not make any attempt to remove the attribute from any existing instances of the 
-class.
+B<NOTE:> Removing an attribute will only affect future instances of 
+the class, it will not make any attempt to remove the attribute from 
+any existing instances of the class.
 
 =item C<get_attribute_list>
 
-This returns a list of attribute names which are defined in the local class. If you 
-want a list of all applicable attributes for a class, use the 
-C<compute_all_applicable_attributes> method.
+This returns a list of attribute names which are defined in the local 
+class. If you want a list of all applicable attributes for a class, 
+use the C<compute_all_applicable_attributes> method.
 
 =item C<compute_all_applicable_attributes>
 
-This will traverse the inheritance heirachy and return a list of HASH references for
-all the applicable attributes for this class. The HASH references will contain the 
-following information; the attribute name, the class which the attribute is associated
-with and the actual attribute meta-object
+This will traverse the inheritance heirachy and return a list of HASH 
+references for all the applicable attributes for this class. The HASH 
+references will contain the following information; the attribute name, 
+the class which the attribute is associated with and the actual 
+attribute meta-object
 
 =back
 
@@ -288,6 +292,3 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
 =cut
-
-
-
