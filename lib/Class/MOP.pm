@@ -25,7 +25,7 @@ Class::MOP - A Meta Object Protocol for Perl 5
 This module is an attempt to create a meta object protocol for the 
 Perl 5 object system. It makes no attempt to change the behavior or 
 characteristics of the Perl 5 object system, only to create a 
-protocol for it's manipulation and introspection.
+protocol for its manipulation and introspection.
 
 That said, it does attempt to create the tools for building a rich 
 set of extensions to the Perl 5 object system. Every attempt has been 
@@ -117,7 +117,7 @@ C<create>.
 =item <create_instance ($canidate, %params)>
 
 This will construct and instance using the C<$canidate> as storage 
-(currently on HASH references are supported). This will collect all 
+(currently only HASH references are supported). This will collect all 
 the applicable attribute meta-objects and layout out the fields in the 
 C<$canidate>, it will then initialize them using either use the 
 corresponding key in C<%params> or any default value or initializer 
