@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
@@ -68,19 +68,51 @@ sub class_precedence_list {
     );   
 }
 
+## Methods
+
+sub add_method {
+    my ($self, $method_name, $method) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";
+    (reftype($method) && reftype($method) eq 'CODE')
+        || confess "Your code block must be a CODE reference";
+    my $full_method_name = ($self->name . '::' . $method_name);    
+        
+    no strict 'refs';
+    *{$full_method_name} = subname $full_method_name => $method;
+}
+
+sub has_method {
+    my ($self, $method_name, $method) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";    
+    
+    my $sub_name = ($self->name . '::' . $method_name);    
+        
+    no strict 'refs';
+    return 0 unless defined &{$sub_name};        
+    return 0 unless _find_subroutine_package(\&{$sub_name}) eq $self->name;
+    return 1;
+}
+
+sub get_method {
+    my ($self, $method_name, $method) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";
+
+    no strict 'refs';    
+    return \&{$self->name . '::' . $method_name} 
+        if $self->has_method($method_name);    
+}
+
 ## Private Utility Methods
 
-# borrowed from Class::Trait 0.20 - Thanks Ovid :)
+# initially borrowed from Class::Trait 0.20 - Thanks Ovid :)
+# later re-worked to support subs named with Sub::Name
 sub _find_subroutine_package {
     my $sub     = shift;
-    my $package = '';
-    eval {
-        my $stash = svref_2object($sub)->STASH;
-        $package = $stash->NAME 
-            if $stash && $stash->can('NAME');
-    };
-    confess "Could not determine calling package: $@" 
-        if $@;
+    my $package = eval { svref_2object($sub)->GV->STASH->NAME };
+    confess "Could not determine calling package: $@" if $@;
     return $package;
 }
 

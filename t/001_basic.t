@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Test::More no_plan => 1;
+use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');   
@@ -65,5 +66,3 @@ is_deeply(
     [ $Baz->class_precedence_list ], 
     [ 'Baz', 'Bar', 'Foo', 'UNIVERSAL' ], 
     '... Baz->class_precedence_list == (Baz, Bar, Foo, UNIVERSAL)');
-
-
