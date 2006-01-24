@@ -160,9 +160,6 @@ in which method dispatch will be done.
 
 =head3 Methods
 
-B<NOTE>: These methods makes every attempt to ignore subroutines
-which have been exported by other packages into this one.
-
 =over 4
 
 =item B<add_method ($method_name, $method)>
@@ -180,6 +177,25 @@ such.
 This just provides a simple way to check if the Class implements 
 a specific C<$method_name>. It will I<not> however, attempt to check 
 if the class inherits the method.
+
+This will correctly ignore functions imported from other packages, 
+and will correctly handle functions defined outside of the package 
+that use a fully qualified name (C<sub Package::name { ... }>). It 
+will B<not> handle anon functions stored in the package using symbol 
+tables, unless the anon function is first named using B<Sub::Name>.
+For instance, this will not return true with C<has_method>:
+
+  *{$pkg . '::' . $name} = sub { ... };
+
+However, this will DWIM:
+
+  my $full_name = $pkg . '::' . $name;
+  my $sub = sub { ... };
+  Sub::Name::subname($full_name, $sub);
+  *{$full_name} = $sub;
+
+B<NOTE:> this code need not be so tedious, it is only this way to 
+illustrate my point more clearly.
 
 =item B<get_method ($method_name)>
 
