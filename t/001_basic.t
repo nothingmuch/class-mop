@@ -19,10 +19,10 @@ BEGIN {
     our @ISA = ('Foo');
 }
 
-my $Foo = Foo->meta();
+my $Foo = Class::MOP::Class->initialize('Foo');
 isa_ok($Foo, 'Class::MOP::Class');
 
-my $Bar = Bar->meta();
+my $Bar = Class::MOP::Class->initialize('Bar');
 isa_ok($Bar, 'Class::MOP::Class');
 
 is($Foo->name, 'Foo', '... Foo->name == Foo');
@@ -55,7 +55,7 @@ my $Baz = Class::MOP::Class->create(
                 superclasses => [ 'Bar' ]
             ));
 isa_ok($Baz, 'Class::MOP::Class');
-is(Baz->meta, $Baz, '... our metaclasses are singletons');
+is(Class::MOP::Class->initialize('Baz'), $Baz, '... our metaclasses are singletons');
 
 is($Baz->name, 'Baz', '... Baz->name == Baz');
 is($Baz->version, '0.10', '... Baz->version == 0.10');

@@ -8,11 +8,11 @@ use Scalar::Util 'blessed';
 
 our $VERSION = '0.01';
 
-my %METAS;
-sub UNIVERSAL::meta { 
-    my $class = blessed($_[0]) || $_[0];
-    $METAS{$class} ||= Class::MOP::Class->initialize($class) 
-}
+# my %METAS;
+# sub UNIVERSAL::meta { 
+#     my $class = blessed($_[0]) || $_[0];
+#     $METAS{$class} ||= Class::MOP::Class->initialize($class) 
+# }
 
 1;
 
@@ -40,6 +40,25 @@ set of extensions to the Perl 5 object system. Every attempt has been
 made for these tools to keep to the spirit of the Perl 5 object 
 system that we all know and love.
 
+=head2 What is a Meta Object Protocol?
+
+A meta object protocol is an API to an object system. 
+
+To be more specific, it is a set of abstractions of the components of 
+an object system (typically things like; classes, object, methods, 
+object attributes, etc.). These abstractions can then be used to both 
+inspect and manipulate the object system which they describe.
+
+It can be said that there are two MOPs for any object system; the 
+implicit MOP, and the explicit MOP. The implicit MOP handles things 
+like method dispatch or inheritance, which happen automatically as 
+part of how the object system works. The explicit MOP typically 
+handles the introspection/reflection features of the object system. 
+All object systems have implicit MOPs, without one, they would not 
+work. Explict MOPs however as less common, and depending on the 
+language can vary from restrictive (Reflection in Java or C#) to 
+wide open (CLOS is a perfect example). 
+
 =head2 Who is this module for?
 
 This module is specifically for anyone who has ever created or 
@@ -48,6 +67,36 @@ this module will provide will hopefully make it easier to do more
 complex things with Perl 5 classes by removing such barriers as 
 the need to hack the symbol tables, or understand the fine details 
 of method dispatch. 
+
+=head2 What changes do I have to make to use this module?
+
+This module was designed to be as unintrusive as possible. So many of 
+it's features are accessible without B<any> change to your existsing 
+code at all. It is meant to be a compliment to your existing code and 
+not an intrusion on your code base.
+
+The only feature which requires additions to your code are the 
+attribute handling and instance construction features. The only reason 
+for this is because Perl 5's object system does not actually have 
+these features built in. More information about this feature can be 
+found below.
+
+=head2 A Note about Performance?
+
+It is a common misconception that explict MOPs are performance drains. 
+But this is not a universal truth at all, it is an side-effect of 
+specific implementations. For instance, using Java reflection is much 
+slower because the JVM cannot take advantage of any compiler 
+optimizations, and the JVM has to deal with much more runtime type 
+information as well. Reflection in C# is marginally better as it was 
+designed into the language and runtime (the CLR). In contrast, CLOS 
+(the Common Lisp Object System) was built to support an explicit MOP, 
+and so performance is tuned for it. 
+
+This library in particular does it's absolute best to avoid putting 
+B<any> drain at all upon your code's performance, while still trying 
+to make sure it is fast as well (although only as a secondary 
+concern).
 
 =head1 PROTOCOLS
 
@@ -178,24 +227,23 @@ This just provides a simple way to check if the Class implements
 a specific C<$method_name>. It will I<not> however, attempt to check 
 if the class inherits the method.
 
-This will correctly ignore functions imported from other packages, 
-and will correctly handle functions defined outside of the package 
-that use a fully qualified name (C<sub Package::name { ... }>). It 
-will B<not> handle anon functions stored in the package using symbol 
-tables, unless the anon function is first named using B<Sub::Name>.
-For instance, this will not return true with C<has_method>:
+This will correctly handle functions defined outside of the package 
+that use a fully qualified name (C<sub Package::name { ... }>).
 
-  *{$pkg . '::' . $name} = sub { ... };
+This will correctly handle functions renamed with B<Sub::Name> and 
+installed using the symbol tables. However, if you are naming the 
+subroutine outside of the package scope, you must use the fully 
+qualified name, including the package name, for C<has_method> to 
+correctly identify it. 
 
-However, this will DWIM:
+This will attempt to correctly ignore functions imported from other 
+packages using B<Exporter>. It breaks down if the function imported 
+is an C<__ANON__> sub (such as with C<use constant>), which very well 
+may be a valid method being applied to the class. 
 
-  my $full_name = $pkg . '::' . $name;
-  my $sub = sub { ... };
-  Sub::Name::subname($full_name, $sub);
-  *{$full_name} = $sub;
-
-B<NOTE:> this code need not be so tedious, it is only this way to 
-illustrate my point more clearly.
+In short, this method cannot always be trusted to determine if the 
+C<$method_name> is actually a method. However, it will DWIM about 
+90% of the time, so it's a small trade off IMO.
 
 =item B<get_method ($method_name)>
 

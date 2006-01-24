@@ -13,26 +13,37 @@ our $VERSION = '0.01';
 
 # Creation
 
-sub initialize {
-    my ($class, $package_name) = @_;
-    (defined $package_name)
-        || confess "You must pass a package name";
-    bless \$package_name => $class;
+{
+    # Metaclasses are singletons, so we cache them here.
+    # there is no need to worry about destruction though
+    # because they should die only when the program dies.
+    # After all, do package definitions even get reaped?
+    my %METAS;
+    sub initialize {
+        my ($class, $package_name) = @_;
+        (defined $package_name && $package_name)
+            || confess "You must pass a package name";
+        $METAS{$package_name} ||= bless \$package_name => blessed($class) || $class;
+    }
 }
 
 sub create {
     my ($class, $package_name, $package_version, %options) = @_;
-    (defined $package_name)
+    (defined $package_name && $package_name)
         || confess "You must pass a package name";
     my $code = "package $package_name;";
     $code .= "\$$package_name\:\:VERSION = '$package_version';" 
         if defined $package_version;
     eval $code;
     confess "creation of $package_name failed : $@" if $@;    
-    my $meta = $package_name->meta;
+    my $meta = $class->initialize($package_name);
     $meta->superclasses(@{$options{superclasses}})
         if exists $options{superclasses};
-    # ... rest to come later ...
+    if (exists $options{methods}) {
+        foreach my $method_name (keys %{$options{methods}}) {
+            $meta->add_method($method_name, $options{methods}->{$method_name});
+        }
+    }
     return $meta;
 }
 
@@ -60,10 +71,17 @@ sub superclasses {
 
 sub class_precedence_list {
     my $self = shift;
+    # NOTE:
+    # We need to check for ciruclar inheirtance here.
+    # This will do nothing if all is well, and blow
+    # up otherwise. Yes, it's an ugly hack, better 
+    # suggestions are welcome.
+    { $self->name->isa('This is a test for circular inheritance') }
+    # ... and no back to our regularly scheduled program
     (
         $self->name, 
         map { 
-            $_->meta->class_precedence_list()
+            $self->initialize($_)->class_precedence_list()
         } $self->superclasses()
     );   
 }
@@ -82,17 +100,26 @@ sub add_method {
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
-sub has_method {
-    my ($self, $method_name, $method) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";    
+{
+
+    ## private utility functions for has_method
+    my $_find_subroutine_package_name = sub { eval { svref_2object($_[0])->GV->STASH->NAME } };
+    my $_find_subroutine_name         = sub { eval { svref_2object($_[0])->GV->NAME        } };
+
+    sub has_method {
+        my ($self, $method_name, $method) = @_;
+        (defined $method_name && $method_name)
+            || confess "You must define a method name";    
     
-    my $sub_name = ($self->name . '::' . $method_name);    
+        my $sub_name = ($self->name . '::' . $method_name);    
         
-    no strict 'refs';
-    return 0 unless defined &{$sub_name};        
-    return 0 unless _find_subroutine_package(\&{$sub_name}) eq $self->name;
-    return 1;
+        no strict 'refs';
+        return 0 if !defined(&{$sub_name});        
+        return 0 if $_find_subroutine_package_name->(\&{$sub_name}) ne $self->name &&
+                    $_find_subroutine_name->(\&{$sub_name})         ne '__ANON__';
+        return 1;
+    }
+
 }
 
 sub get_method {
@@ -102,18 +129,8 @@ sub get_method {
 
     no strict 'refs';    
     return \&{$self->name . '::' . $method_name} 
-        if $self->has_method($method_name);    
-}
-
-## Private Utility Methods
-
-# initially borrowed from Class::Trait 0.20 - Thanks Ovid :)
-# later re-worked to support subs named with Sub::Name
-sub _find_subroutine_package {
-    my $sub     = shift;
-    my $package = eval { svref_2object($sub)->GV->STASH->NAME };
-    confess "Could not determine calling package: $@" if $@;
-    return $package;
+        if $self->has_method($method_name);   
+    return; # <--- make sure to return undef
 }
 
 1;
