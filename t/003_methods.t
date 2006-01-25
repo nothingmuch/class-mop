@@ -5,7 +5,6 @@ use warnings;
 
 use Test::More no_plan => 1;
 use Test::Exception;
-use Test::Deep;
 
 BEGIN {
     use_ok('Class::MOP');   
@@ -83,6 +82,29 @@ is_deeply(
     [ qw(FOO_CONSTANT bang bar baz blah bling evaled_foo floob foo) ],
     '... got the right method list for Foo');
 
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } $Foo->compute_all_applicable_methods() ],
+    [
+        map {
+            {
+            name  => $_,
+            class => 'Foo',
+            code  => $Foo->get_method($_) 
+            }
+        } qw(
+            FOO_CONSTANT
+            bang 
+            bar 
+            baz 
+            blah 
+            bling 
+            evaled_foo 
+            floob 
+            foo
+        )
+    ],
+    '... got the right list of applicable methods for Foo');
+
 is($Foo->remove_method('foo'), $foo, '... removed the foo method');
 ok(!$Foo->has_method('foo'), '... !Foo->has_method(foo) we just removed it');
 dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
@@ -129,4 +151,40 @@ is(Bar->foo, 'Bar::foo v2', '... Bar->foo == "Bar::foo v2"');
 is_deeply(
     [ sort $Bar->get_method_list ],
     [ qw(bar foo) ],
-    '... got the right method list for Bar');
+    '... got the right method list for Bar');  
+    
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } $Bar->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'bang',
+            class => 'Foo',
+            code  => $Foo->get_method('bang') 
+        },
+        {
+            name  => 'bar',
+            class => 'Bar',
+            code  => $Bar->get_method('bar')            
+        },
+        (map {
+            {
+                name  => $_,
+                class => 'Foo',
+                code  => $Foo->get_method($_) 
+            }
+        } qw(        
+            baz 
+            blah 
+            bling 
+            evaled_foo 
+            floob 
+        )),
+        {
+            name  => 'foo',
+            class => 'Bar',
+            code  => $Bar->get_method('foo')            
+        },        
+    ],
+    '... got the right list of applicable methods for Bar');
+
+

@@ -280,6 +280,11 @@ with the following information; method name (which will always be the
 same as C<$method_name>), the name of the class in which the method 
 lives and a CODE reference for the actual method.
 
+The list of methods produced is a distinct list, meaning there are no 
+duplicates in it. This is especially useful for things like object 
+initialization and destruction where you only want the method called 
+once, and in the correct order.
+
 =back
 
 =head3 Attributes

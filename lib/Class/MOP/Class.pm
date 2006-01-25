@@ -92,6 +92,7 @@ sub add_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
+    # use reftype here to allow for blessed subs ...
     (reftype($method) && reftype($method) eq 'CODE')
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
@@ -151,9 +152,82 @@ sub remove_method {
 sub get_method_list {
     my $self = shift;
     no strict 'refs';
-    grep { 
-        defined &{$self->name . '::' . $_} && $self->has_method($_) 
-    } %{$self->name . '::'};
+    grep { $self->has_method($_) } %{$self->name . '::'};
+}
+
+sub compute_all_applicable_methods {
+    my $self = shift;
+    my @methods;
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my (%seen_class, %seen_method);
+    foreach my $class ($self->class_precedence_list()) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        foreach my $method_name ($meta->get_method_list()) { 
+            next if exists $seen_method{$method_name};
+            $seen_method{$method_name}++;
+            push @methods => {
+                name  => $method_name, 
+                class => $class,
+                code  => $meta->get_method($method_name)
+            };
+        }
+    }
+    return @methods;
+}
+
+## Recursive Version of compute_all_applicable_methods
+# sub compute_all_applicable_methods {
+#     my ($self, $seen) = @_;
+#     $seen ||= {};
+#     (
+#         (map { 
+#             if (exists $seen->{$_}) { 
+#                 ();
+#             }
+#             else {
+#                 $seen->{$_}++;
+#                 {
+#                     name  => $_, 
+#                     class => $self->name,
+#                     code  => $self->get_method($_)
+#                 };
+#             }
+#         } $self->get_method_list()),
+#         map { 
+#             $self->initialize($_)->compute_all_applicable_methods($seen)
+#         } $self->superclasses()
+#     );
+# }
+
+sub find_all_methods_by_name {
+    my ($self, $method_name) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name to find";    
+    my @methods;
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my %seen_class;
+    foreach my $class ($self->class_precedence_list()) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        push @methods => {
+            name  => $method_name, 
+            class => $class,
+            code  => $meta->get_method($method_name)
+        } if $meta->has_method($method_name);
+    }
+    return @methods;
+
 }
 
 1;

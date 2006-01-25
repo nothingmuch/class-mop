@@ -1,0 +1,225 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Test::More no_plan => 1;
+use Test::Exception;
+
+BEGIN {
+    use_ok('Class::MOP');   
+    use_ok('Class::MOP::Class');        
+}
+
+=pod
+
+The following class hierarhcy is very contrived 
+and totally horrid (it won't work under C3 even),
+but it tests a number of aspect of this module.
+
+A more real-world example would be a nice addition :)
+
+=cut
+
+{
+    package Foo;
+    
+    sub BUILD { 'Foo::BUILD' }    
+    sub foo { 'Foo::foo' }
+    
+    package Bar;
+    our @ISA = ('Foo');
+    
+    sub BUILD { 'Bar::BUILD' }    
+    sub bar { 'Bar::bar' }     
+    
+    package Baz;
+    our @ISA = ('Bar');
+    
+    sub BUILD { 'Baz::BUILD' }    
+    sub baz { 'Baz::baz' }
+    sub foo { 'Baz::foo' }           
+    
+    package Foo::Bar;
+    our @ISA = ('Foo', 'Bar');
+    
+    sub BUILD { 'Foo::Bar::BUILD' }    
+    sub foobar { 'Foo::Bar::foobar' }    
+    
+    package Foo::Bar::Baz;
+    our @ISA = ('Foo', 'Bar', 'Baz');
+    
+    sub BUILD { 'Foo::Bar::Baz::BUILD' }    
+    sub bar { 'Foo::Bar::Baz::bar' }    
+    sub foobarbaz { 'Foo::Bar::Baz::foobarbaz' }    
+}
+
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo')->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Foo',
+            code  => \&Foo::BUILD 
+        },    
+        {
+            name  => 'foo',
+            class => 'Foo',
+            code  => \&Foo::foo 
+        },       
+    ],
+    '... got the right list of applicable methods for Foo');
+    
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Bar')->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Bar',
+            code  => \&Bar::BUILD 
+        },    
+        {
+            name  => 'bar',
+            class => 'Bar',
+            code  => \&Bar::bar  
+        },
+        {
+            name  => 'foo',
+            class => 'Foo',
+            code  => \&Foo::foo  
+        },       
+    ],
+    '... got the right list of applicable methods for Bar');
+    
+
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Baz')->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Baz',
+            code  => \&Baz::BUILD 
+        },    
+        {
+            name  => 'bar',
+            class => 'Bar',
+            code  => \&Bar::bar  
+        },
+        {
+            name  => 'baz',
+            class => 'Baz',
+            code  => \&Baz::baz  
+        },        
+        {
+            name  => 'foo',
+            class => 'Baz',
+            code  => \&Baz::foo  
+        },       
+    ],
+    '... got the right list of applicable methods for Baz');
+
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar')->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Foo::Bar',
+            code  => \&Foo::Bar::BUILD 
+        },    
+        {
+            name  => 'bar',
+            class => 'Bar',
+            code  => \&Bar::bar  
+        },
+        {
+            name  => 'foo',
+            class => 'Foo',
+            code  => \&Foo::foo  
+        },       
+        {
+            name  => 'foobar',
+            class => 'Foo::Bar',
+            code  => \&Foo::Bar::foobar  
+        },        
+    ],
+    '... got the right list of applicable methods for Foo::Bar');
+
+is_deeply(
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar::Baz')->compute_all_applicable_methods() ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Foo::Bar::Baz',
+            code  => \&Foo::Bar::Baz::BUILD 
+        },    
+        {
+            name  => 'bar',
+            class => 'Foo::Bar::Baz',
+            code  => \&Foo::Bar::Baz::bar  
+        },
+        {
+            name  => 'baz',
+            class => 'Baz',
+            code  => \&Baz::baz  
+        },        
+        {
+            name  => 'foo',
+            class => 'Foo',
+            code  => \&Foo::foo  
+        },   
+        {
+            name  => 'foobarbaz',
+            class => 'Foo::Bar::Baz',
+            code  => \&Foo::Bar::Baz::foobarbaz  
+        },            
+    ],
+    '... got the right list of applicable methods for Foo::Bar::Baz');
+
+## find_all_methods_by_name
+
+is_deeply(
+    [ Class::MOP::Class->initialize('Foo::Bar')->find_all_methods_by_name('BUILD') ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Foo::Bar',
+            code  => \&Foo::Bar::BUILD 
+        },    
+        {
+            name  => 'BUILD',
+            class => 'Foo',
+            code  => \&Foo::BUILD 
+        },    
+        {
+            name  => 'BUILD',
+            class => 'Bar',
+            code  => \&Bar::BUILD 
+        }
+    ],
+    '... got the right list of BUILD methods for Foo::Bar');
+
+is_deeply(
+    [ Class::MOP::Class->initialize('Foo::Bar::Baz')->find_all_methods_by_name('BUILD') ],
+    [
+        {
+            name  => 'BUILD',
+            class => 'Foo::Bar::Baz',
+            code  => \&Foo::Bar::Baz::BUILD 
+        },    
+        {
+            name  => 'BUILD',
+            class => 'Foo',
+            code  => \&Foo::BUILD 
+        },    
+        {
+            name  => 'BUILD',
+            class => 'Bar',
+            code  => \&Bar::BUILD 
+        },    
+        {
+            name  => 'BUILD',
+            class => 'Baz',
+            code  => \&Baz::BUILD 
+        },        
+    ],
+    '... got the right list of BUILD methods for Foo::Bar::Baz');
