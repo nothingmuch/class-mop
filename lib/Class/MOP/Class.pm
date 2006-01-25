@@ -97,6 +97,7 @@ sub add_method {
     my $full_method_name = ($self->name . '::' . $method_name);    
         
     no strict 'refs';
+    no warnings 'redefine';
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
@@ -107,7 +108,7 @@ sub add_method {
     my $_find_subroutine_name         = sub { eval { svref_2object($_[0])->GV->NAME        } };
 
     sub has_method {
-        my ($self, $method_name, $method) = @_;
+        my ($self, $method_name) = @_;
         (defined $method_name && $method_name)
             || confess "You must define a method name";    
     
@@ -123,14 +124,36 @@ sub add_method {
 }
 
 sub get_method {
-    my ($self, $method_name, $method) = @_;
+    my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
     no strict 'refs';    
     return \&{$self->name . '::' . $method_name} 
         if $self->has_method($method_name);   
-    return; # <--- make sure to return undef
+    return; # <- make sure to return undef
+}
+
+sub remove_method {
+    my ($self, $method_name) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";
+    
+    my $removed_method = $self->get_method($method_name);    
+    
+    no strict 'refs';
+    delete ${$self->name . '::'}{$method_name}
+        if defined $removed_method;
+        
+    return $removed_method;
+}
+
+sub get_method_list {
+    my $self = shift;
+    no strict 'refs';
+    grep { 
+        defined &{$self->name . '::' . $_} && $self->has_method($_) 
+    } %{$self->name . '::'};
 }
 
 1;

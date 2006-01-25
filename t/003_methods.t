@@ -5,6 +5,7 @@ use warnings;
 
 use Test::More no_plan => 1;
 use Test::Exception;
+use Test::Deep;
 
 BEGIN {
     use_ok('Class::MOP');   
@@ -77,10 +78,34 @@ ok(!$Foo->has_method('boom'), '... !Foo->has_method(boom) (defined in main:: usi
 ok(!$Foo->has_method('not_a_real_method'), '... !Foo->has_method(not_a_real_method) (does not exist)');
 is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real_method) == undef');
 
+is_deeply(
+    [ sort $Foo->get_method_list ],
+    [ qw(FOO_CONSTANT bang bar baz blah bling evaled_foo floob foo) ],
+    '... got the right method list for Foo');
+
+is($Foo->remove_method('foo'), $foo, '... removed the foo method');
+ok(!$Foo->has_method('foo'), '... !Foo->has_method(foo) we just removed it');
+dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
+
+is_deeply(
+    [ sort $Foo->get_method_list ],
+    [ qw(FOO_CONSTANT bang bar baz blah bling evaled_foo floob) ],
+    '... got the right method list for Foo');
+
+ok($Foo->remove_method('FOO_CONSTANT'), '... removed the FOO_CONSTANT method');
+ok(!$Foo->has_method('FOO_CONSTANT'), '... !Foo->has_method(FOO_CONSTANT) we just removed it');
+dies_ok { Foo->FOO_CONSTANT } '... cannot call Foo->FOO_CONSTANT because it is not there';
+
+is_deeply(
+    [ sort $Foo->get_method_list ],
+    [ qw(bang bar baz blah bling evaled_foo floob) ],
+    '... got the right method list for Foo');
+
 # ... test our class creator 
 
 my $Bar = Class::MOP::Class->create(
             'Bar' => '0.10' => (
+                superclasses => [ 'Foo' ],
                 methods => {
                     foo => sub { 'Bar::foo' },
                     bar => sub { 'Bar::bar' },                    
@@ -100,3 +125,8 @@ lives_ok {
 
 ok($Bar->has_method('foo'), '... Bar-> (still) has_method(foo)');
 is(Bar->foo, 'Bar::foo v2', '... Bar->foo == "Bar::foo v2"');
+
+is_deeply(
+    [ sort $Bar->get_method_list ],
+    [ qw(bar foo) ],
+    '... got the right method list for Bar');
