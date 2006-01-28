@@ -10,16 +10,21 @@ BEGIN {
     use_ok('Class::MOP::Class');        
 }
 
-
 my $meta = Class::MOP::Class->initialize('Class::MOP::Class');
 isa_ok($meta, 'Class::MOP::Class');
 
 foreach my $method_name (qw(
     initialize create
+    
     name version
+    
     superclasses class_precedence_list
+    
     has_method get_method add_method remove_method 
     get_method_list compute_all_applicable_methods find_all_methods_by_name
+    
+    has_attribute get_attribute add_attribute remove_attribute
+    get_attribute_list compute_all_applicable_attributes create_all_accessors
     )) {
     ok($meta->has_method($method_name), '... Class::MOP::Class->has_method(' . $method_name . ')');
     {

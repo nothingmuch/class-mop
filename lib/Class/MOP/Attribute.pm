@@ -75,6 +75,83 @@ Class::MOP::Attribute - Attribute Meta Object
 
 =head1 DESCRIPTION
 
+The Attribute Protocol is almost entirely an invention of this module. This is
+because Perl 5 does not have consistent notion of what is an attribute 
+of a class. There are so many ways in which this is done, and very few 
+(if any) are discoverable by this module.
+
+So, all that said, this module attempts to inject some order into this 
+chaos, by introducing a more consistent approach.
+
+=head1 METHODS
+
+=head2 Creation
+
+=over 4
+
+=item B<new ($name, %accessor_description, $class_initialization_arg, $default_value)>
+
+=back 
+
+=head2 Informational
+
+=over 4
+
+=item B<name>
+
+=item B<accessor>
+
+=item B<reader>
+
+=item B<writer>
+
+=item B<init_arg>
+
+=item B<default>
+
+=back
+
+=head2 Informational predicates
+
+=over 4
+
+=item B<has_accessor>
+
+Returns true if this attribute uses a get/set accessor, and false 
+otherwise
+
+=item B<has_reader>
+
+Returns true if this attribute has a reader, and false otherwise
+
+=item B<has_writer>
+
+Returns true if this attribute has a writer, and false otherwise
+
+=item B<has_init_arg>
+
+Returns true if this attribute has a class intialization argument, and 
+false otherwise
+
+=item B<has_default>
+
+Returns true if this attribute has a default value, and false 
+otherwise.
+
+=back
+
+=head2 Attribute Accessor generation
+
+=over 4
+
+=item B<generate_accessor>
+
+This allows the attribute to generate code for it's own accessor 
+methods. This is mostly part of an internal protocol between the class 
+and it's own attributes, see the C<create_all_accessors> method above.
+
+=back
+
 =head1 AUTHOR
 
 Stevan Little E<gt>stevan@iinteractive.comE<lt>

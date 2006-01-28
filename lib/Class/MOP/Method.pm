@@ -20,6 +20,11 @@ Class::MOP::Method - Method Meta Object
 
 =head1 DESCRIPTION
 
+The Method Protocol is very small, since methods in Perl 5 are just 
+subroutines within the particular package. Basically all we do is to 
+bless the subroutine and provide some very simple introspection 
+methods for it.
+
 =head1 AUTHOR
 
 Stevan Little E<gt>stevan@iinteractive.comE<lt>
