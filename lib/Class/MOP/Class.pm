@@ -23,7 +23,7 @@ our $VERSION = '0.01';
         my ($class, $package_name) = @_;
         (defined $package_name && $package_name)
             || confess "You must pass a package name";
-        $METAS{$package_name} ||= bless [ $package_name, {} ] => blessed($class) || $class;
+        $METAS{$package_name} ||= bless \$package_name => blessed($class) || $class;
     }
 }
 
@@ -49,7 +49,7 @@ sub create {
 
 # Informational 
 
-sub name { ${$_[0]}[0] }
+sub name { ${$_[0]} }
 
 sub version {  
     my $self = shift;
