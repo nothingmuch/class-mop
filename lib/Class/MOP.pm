@@ -6,13 +6,21 @@ use warnings;
 
 use Scalar::Util 'blessed';
 
+use Class::MOP::Class;
+use Class::MOP::Attribute;
+use Class::MOP::Method;
+
 our $VERSION = '0.01';
 
-# my %METAS;
-# sub UNIVERSAL::meta { 
-#     my $class = blessed($_[0]) || $_[0];
-#     $METAS{$class} ||= Class::MOP::Class->initialize($class) 
-# }
+sub import {
+    shift;
+    return unless @_;
+    if ($_[0] eq ':universal') {
+        *UNIVERSAL::meta = sub { 
+            Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) 
+        };
+    }
+}
 
 1;
 
@@ -26,7 +34,11 @@ Class::MOP - A Meta Object Protocol for Perl 5
 
 =head1 SYNOPSIS
 
-  # ... coming soon
+  use Class::MOP ':universal';
+  
+  package Foo;
+  
+  Foo->meta->add_method('foo' => sub { ... });
 
 =head1 DESCRIPTON
 
@@ -77,16 +89,18 @@ of method dispatch.
 
 =head2 What changes do I have to make to use this module?
 
-This module was designed to be as unintrusive as possible. So many of 
+This module was designed to be as unintrusive as possible. Many of 
 it's features are accessible without B<any> change to your existsing 
 code at all. It is meant to be a compliment to your existing code and 
-not an intrusion on your code base.
+not an intrusion on your code base. Unlike many other B<Class::> 
+modules, this module does require you subclass it, or even that you 
+C<use> it in within your module's package. 
 
-The only feature which requires additions to your code are the 
-attribute handling and instance construction features. The only reason 
-for this is because Perl 5's object system does not actually have 
-these features built in. More information about this feature can be 
-found below.
+The only features which requires additions to your code are the 
+attribute handling and instance construction features, and these are
+both optional features as well. The only reason for this is because 
+Perl 5's object system does not actually have these features built 
+in. More information about this feature can be found below.
 
 =head2 A Note about Performance?
 
@@ -101,9 +115,9 @@ designed into the language and runtime (the CLR). In contrast, CLOS
 and so performance is tuned for it. 
 
 This library in particular does it's absolute best to avoid putting 
-B<any> drain at all upon your code's performance, while still trying 
-to make sure it is fast as well (although only as a secondary 
-concern).
+B<any> drain at all upon your code's performance. In fact, by itself 
+it does nothing to affect your existing code. So you only pay for 
+what you actually use.
 
 =head1 PROTOCOLS
 

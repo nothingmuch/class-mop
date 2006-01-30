@@ -10,10 +10,12 @@ BEGIN {
     use_ok('Class::MOP::Class');        
 }
 
-my $meta = Class::MOP::Class->initialize('Class::MOP::Class');
+my $meta = Class::MOP::Class->meta();
 isa_ok($meta, 'Class::MOP::Class');
 
 foreach my $method_name (qw(
+    meta
+    
     initialize create
     
     name version
@@ -24,7 +26,7 @@ foreach my $method_name (qw(
     get_method_list compute_all_applicable_methods find_all_methods_by_name
     
     has_attribute get_attribute add_attribute remove_attribute
-    get_attribute_list compute_all_applicable_attributes create_all_accessors
+    get_attribute_list compute_all_applicable_attributes
     )) {
     ok($meta->has_method($method_name), '... Class::MOP::Class->has_method(' . $method_name . ')');
     {
@@ -33,6 +35,15 @@ foreach my $method_name (qw(
            \&{'Class::MOP::Class::' . $method_name},
            '... Class::MOP::Class->get_method(' . $method_name . ') == &Class::MOP::Class::' . $method_name);        
     }
+}
+
+foreach my $non_method_name (qw(
+    confess
+    blessed reftype
+    subname
+    svref_2object
+    )) {
+    ok(!$meta->has_method($non_method_name), '... NOT Class::MOP::Class->has_method(' . $non_method_name . ')');        
 }
 
 is($meta->name, 'Class::MOP::Class', '... Class::MOP::Class->name');

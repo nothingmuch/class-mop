@@ -4,9 +4,15 @@ package Class::MOP::Attribute;
 use strict;
 use warnings;
 
-use Carp 'confess';
+use Carp         'confess';
+use Scalar::Util 'blessed';
+
+use Class::MOP::Class;
+use Class::MOP::Method;
 
 our $VERSION = '0.01';
+
+sub meta { Class::MOP::Class->initialize($_[0]) }
 
 sub new {
     my $class   = shift;
@@ -15,7 +21,10 @@ sub new {
         
     (defined $name && $name ne '')
         || confess "You must provide a name for the attribute";
-    
+    (!exists $options{reader} && !exists $options{writer})
+        || confess "You cannot declare an accessor and reader and/or writer functions"
+            if exists $options{accessor};
+            
     bless {
         name     => $name,
         accessor => $options{accessor},
@@ -43,10 +52,64 @@ sub init_arg     { (shift)->{init_arg}         }
 sub has_default  { (shift)->{default}  ? 1 : 0 }
 sub default      { (shift)->{default}          }
 
-sub generate_accessor {
-    my $self = shift;
-    # ... 
+sub install_accessors {
+    my ($self, $class) = @_;
+    (blessed($class) && $class->isa('Class::MOP::Class'))
+        || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
+        
+    if ($self->has_accessor()) {
+        $class->add_method($self->accessor() => Class::MOP::Attribute::Accessor->wrap(sub {
+            $_[0]->{$self->name} = $_[1] if scalar(@_) == 2;
+            $_[0]->{$self->name};
+        }));
+    }
+    else {
+        if ($self->has_reader()) {         
+            $class->add_method($self->reader() => Class::MOP::Attribute::Accessor->wrap(sub { 
+                $_[0]->{$self->name};
+            }));        
+        }
+        if ($self->has_writer()) {
+            $class->add_method($self->writer() => Class::MOP::Attribute::Accessor->wrap(sub {
+                $_[0]->{$self->name} = $_[1];
+                return;
+            }));            
+        }
+    }
 }
+
+sub remove_accessors {
+    my ($self, $class) = @_;
+    (blessed($class) && $class->isa('Class::MOP::Class'))
+        || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
+        
+    if ($self->has_accessor()) {
+        my $method = $class->get_method($self->accessor);
+        $class->remove_method($self->accessor)
+            if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
+    }
+    else {
+        if ($self->has_reader()) {
+            my $method = $class->get_method($self->reader);
+            $class->remove_method($self->reader)
+                if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
+        }
+        if ($self->has_writer()) {
+            my $method = $class->get_method($self->writer);
+            $class->remove_method($self->writer)
+                if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
+        }
+    }        
+}
+
+package Class::MOP::Attribute::Accessor;
+
+use strict;
+use warnings;
+
+our $VERSION = '0.01';
+
+our @ISA = ('Class::MOP::Method');
 
 1;
 
@@ -144,11 +207,23 @@ otherwise.
 
 =over 4
 
-=item B<generate_accessor>
+=item B<install_accessors ($class)>
 
-This allows the attribute to generate code for it's own accessor 
-methods. This is mostly part of an internal protocol between the class 
-and it's own attributes, see the C<create_all_accessors> method above.
+This allows the attribute to generate and install code for it's own 
+accessor methods. This is called by C<Class::MOP::Class::add_attribute>.
+
+=item B<remove_accessors ($class)>
+
+This allows the attribute to remove the method for it's own 
+accessor. This is called by C<Class::MOP::Class::remove_attribute>.
+
+=back
+
+=head2 Introspection
+
+=over 4
+
+=item B<meta>
 
 =back
 

@@ -4,7 +4,24 @@ package Class::MOP::Method;
 use strict;
 use warnings;
 
+use Carp         'confess';
+use Scalar::Util 'reftype';
+
+use Class::MOP::Class;
+
 our $VERSION = '0.01';
+
+sub meta { Class::MOP::Class->initialize($_[0]) }
+
+sub wrap { 
+    my $class = shift;
+    my $code  = shift;
+    
+    (reftype($code) && reftype($code) eq 'CODE')
+        || confess "You must supply a CODE reference to wrap";
+    
+    bless $code => $class;
+}
  
 1;
 
@@ -24,6 +41,16 @@ The Method Protocol is very small, since methods in Perl 5 are just
 subroutines within the particular package. Basically all we do is to 
 bless the subroutine and provide some very simple introspection 
 methods for it.
+
+=head1 METHODS
+
+=over 4
+
+=item B<wrap (&code)>
+
+=item B<meta>
+
+=back
 
 =head1 AUTHOR
 

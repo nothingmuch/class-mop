@@ -11,6 +11,10 @@ use B            'svref_2object';
 
 our $VERSION = '0.01';
 
+# Self-introspection
+
+sub meta { $_[0]->initialize($_[0]) }
+
 # Creation
 
 {
@@ -42,11 +46,21 @@ sub create {
     my $meta = $class->initialize($package_name);
     $meta->superclasses(@{$options{superclasses}})
         if exists $options{superclasses};
+    # NOTE:
+    # process attributes first, so that they can 
+    # install accessors, but locally defined methods
+    # can then overwrite them. It is maybe a little odd, but
+    # I think this should be the order of things.
+    if (exists $options{attributes}) {
+        foreach my $attr_name (keys %{$options{attributes}}) {
+            $meta->add_attribute($attr_name, $options{attributes}->{$attr_name});
+        }
+    }        
     if (exists $options{methods}) {
         foreach my $method_name (keys %{$options{methods}}) {
             $meta->add_method($method_name, $options{methods}->{$method_name});
         }
-    }
+    }  
     return $meta;
 }
 
@@ -115,8 +129,8 @@ sub add_method {
 {
 
     ## private utility functions for has_method
-    my $_find_subroutine_package_name = sub { eval { svref_2object($_[0])->GV->STASH->NAME } };
-    my $_find_subroutine_name         = sub { eval { svref_2object($_[0])->GV->NAME        } };
+    my $_find_subroutine_package_name = sub { eval { svref_2object($_[0])->GV->STASH->NAME } || '' };
+    my $_find_subroutine_name         = sub { eval { svref_2object($_[0])->GV->NAME        } || '' };
 
     sub has_method {
         my ($self, $method_name) = @_;
@@ -219,12 +233,11 @@ sub find_all_methods_by_name {
 ## Attributes
 
 sub add_attribute {
-    my ($self, $attribute_name, $attribute) = @_;
-    (defined $attribute_name && $attribute_name)
-        || confess "You must define an attribute name";
+    my ($self,$attribute) = @_;
     (blessed($attribute) && $attribute->isa('Class::MOP::Attribute'))
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
-    $self->{'%:attrs'}->{$attribute_name} = $attribute;
+    $attribute->install_accessors($self);        
+    $self->{'%:attrs'}->{$attribute->name} = $attribute;
 }
 
 sub has_attribute {
@@ -249,6 +262,7 @@ sub remove_attribute {
     my $removed_attribute = $self->{'%:attrs'}->{$attribute_name};    
     delete $self->{'%:attrs'}->{$attribute_name} 
         if defined $removed_attribute;
+    $removed_attribute->remove_accessors($self);        
     return $removed_attribute;
 } 
 
@@ -282,10 +296,7 @@ sub compute_all_applicable_attributes {
     }
     return @attrs;    
 }
- 
-sub create_all_accessors {
-    
-}
+
 
 1;
 
@@ -302,6 +313,16 @@ Class::MOP::Class - Class Meta Object
 =head1 DESCRIPTION
 
 =head1 METHODS
+
+=head2 Self Introspection
+
+=over 4
+
+=item B<meta>
+
+This allows Class::MOP::Class to actually introspect itself.
+
+=back
 
 =head2 Class construction
 
@@ -507,13 +528,7 @@ This will traverse the inheritance heirachy and return a list of HASH
 references for all the applicable attributes for this class. The HASH 
 references will contain the following information; the attribute name, 
 the class which the attribute is associated with and the actual 
-attribute meta-object
-
-=item B<create_all_accessors>
-
-This will communicate with all of the classes attributes to create
-and install the appropriate accessors. (see L<The Attribute Protocol> 
-below for more details).
+attribute meta-object.
 
 =back
 
