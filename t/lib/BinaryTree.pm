@@ -1,4 +1,6 @@
 
+use Class::MOP ':universal';
+
 package BinaryTree;
 
 use strict;
@@ -6,12 +8,10 @@ use warnings;
 
 our $VERSION = '0.01';
 
-use Class::MOP ':universal';
-
 __PACKAGE__->meta->add_attribute(
     Class::MOP::Attribute->new('_uid' => (
-        reader => 'getUID',
-        writer => 'setUID',
+        reader  => 'getUID',
+        writer  => 'setUID',
         default => sub { 
             my $instance = shift;
             ("$instance" =~ /\((.*?)\)$/);
@@ -29,14 +29,9 @@ __PACKAGE__->meta->add_attribute(
 
 __PACKAGE__->meta->add_attribute(      
     Class::MOP::Attribute->new('_parent' => (
+        predicate => 'hasParent',
         reader    => 'getParent',
-        writer    => 'setParent',
-        predicate => {
-            'isRoot' => sub {
-            	my ($self) = @_;
-            	return not defined $self->{_parent};                    
-            }
-        }
+        writer    => 'setParent'
     ))
 );
 
@@ -47,9 +42,8 @@ __PACKAGE__->meta->add_attribute(
         writer => { 
             'setLeft' => sub {
                 my ($self, $tree) = @_;
-            	$tree->setParent($self);
-                $self->{_left} = $tree;
-                $tree->setDepth($self->getDepth() + 1);    
+            	$tree->setParent($self) if defined $tree;
+                $self->{_left} = $tree;    
                 $self;                    
             }
        },
@@ -63,28 +57,9 @@ __PACKAGE__->meta->add_attribute(
         writer => {
             'setRight' => sub {
                 my ($self, $tree) = @_;   
-            	$tree->setParent($self);
-                $self->{_right} = $tree;    
-                $tree->setDepth($self->getDepth() + 1);    
+            	$tree->setParent($self) if defined $tree;
+                $self->{_right} = $tree;      
                 $self;                    
-            }
-        }
-    ))
-);
-
-__PACKAGE__->meta->add_attribute(            
-    Class::MOP::Attribute->new('_depth' => (
-        default => 0,
-        reader  => 'getDepth',
-        writer  => {
-            'setDepth' => sub {
-                my ($self, $depth) = @_;
-                unless ($self->isLeaf()) {
-                    $self->fixDepth();
-                }
-                else {
-                    $self->{_depth} = $depth; 
-                }                    
             }
         }
     ))
@@ -97,19 +72,17 @@ sub new {
         
 sub removeLeft {
     my ($self) = @_;
-    my $left = $self->{_left};
+    my $left = $self->getLeft();
     $left->setParent(undef);   
-    $left->setDepth(0);
-    $self->{_left} = undef;     
+    $self->setLeft(undef);     
     return $left;
 }
 
 sub removeRight {
     my ($self) = @_;
-    my $right = $self->{_right};
+    my $right = $self->getRight;
     $right->setParent(undef);   
-    $right->setDepth(0);
-    $self->{_right} = undef;    
+    $self->setRight(undef);    
     return $right;
 }
              
@@ -118,54 +91,43 @@ sub isLeaf {
 	return (!$self->hasLeft && !$self->hasRight);
 }
 
-sub fixDepth {
+sub isRoot {
 	my ($self) = @_;
-	# make sure the tree's depth 
-	# is up to date all the way down
-	$self->traverse(sub {
-			my ($tree) = @_;
-            unless ($tree->isRoot()) {
-                $tree->{_depth} = $tree->getParent()->getDepth() + 1;            
-            }
-            else {
-                $tree->{_depth} = 0;
-            }
-		}
-	);
+	return !$self->hasParent;                    
 }
      
 sub traverse {
 	my ($self, $func) = @_;
     $func->($self);
-    $self->{_left}->traverse($func) if defined $self->{_left};    
-    $self->{_right}->traverse($func) if defined $self->{_right};
+    $self->getLeft->traverse($func)  if $self->hasLeft;    
+    $self->getRight->traverse($func) if $self->hasRight;
 }
 
 sub mirror {
     my ($self) = @_;
     # swap left for right
-    my $temp = $self->{_left};
-    $self->{_left} = $self->{_right};
-    $self->{_right} = $temp;
+    my $left = $self->getLeft;
+    $self->setLeft($self->getRight());
+    $self->setRight($left);
     # and recurse
-    $self->{_left}->mirror() if $self->hasLeft();
-    $self->{_right}->mirror() if $self->hasRight();
+    $self->getLeft->mirror()  if $self->hasLeft();
+    $self->getRight->mirror() if $self->hasRight();
     $self;
 }
 
 sub size {
     my ($self) = @_;
     my $size = 1;
-    $size += $self->{_left}->size() if $self->hasLeft();
-    $size += $self->{_right}->size() if $self->hasRight();    
+    $size += $self->getLeft->size()  if $self->hasLeft();
+    $size += $self->getRight->size() if $self->hasRight();    
     return $size;
 }
 
 sub height {
     my ($self) = @_;
     my ($left_height, $right_height) = (0, 0);
-    $left_height = $self->{_left}->height() if $self->hasLeft();
-    $right_height = $self->{_right}->height() if $self->hasRight();    
+    $left_height = $self->getLeft->height()   if $self->hasLeft();
+    $right_height = $self->getRight->height() if $self->hasRight();    
     return 1 + (($left_height > $right_height) ? $left_height : $right_height);
 }                      
 
