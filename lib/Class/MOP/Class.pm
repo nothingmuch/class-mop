@@ -52,8 +52,8 @@ sub create {
     # can then overwrite them. It is maybe a little odd, but
     # I think this should be the order of things.
     if (exists $options{attributes}) {
-        foreach my $attr_name (keys %{$options{attributes}}) {
-            $meta->add_attribute($attr_name, $options{attributes}->{$attr_name});
+        foreach my $attr (@{$options{attributes}}) {
+            $meta->add_attribute($attr);
         }
     }        
     if (exists $options{methods}) {
@@ -67,8 +67,22 @@ sub create {
 # Instance Construction
 
 sub construct_instance {
-    my ($canidate, %params) = @_;
-    # ...
+    my ($class, %params) = @_;
+    my $instance = {};
+    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
+        # if the attr has an init_arg, use that, otherwise,
+        # use the attributes name itself as the init_arg
+        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        # try to fetch the init arg from the %params ...
+        my $val;        
+        $val = $params{$init_arg} if exists $params{$init_arg};
+        # if nothing was in the %params, we can use the 
+        # attribute's default value (if it has one)
+        $val ||= $attr->default() if $attr->has_default();
+        # now add this to the instance structure
+        $instance->{$attr->name} = $val;
+    }
+    return $instance;
 }
 
 # Informational 
@@ -355,12 +369,12 @@ This initializes a Class object for a given a C<$package_name>.
 
 =over 4
 
-=item B<construct_instance ($canidate, %params)>
+=item B<construct_instance (%params)>
 
-This will construct and instance using the C<$canidate> as storage 
+This will construct and instance using a HASH ref as storage 
 (currently only HASH references are supported). This will collect all 
 the applicable attribute meta-objects and layout out the fields in the 
-C<$canidate>, it will then initialize them using either use the 
+HASH ref, it will then initialize them using either use the 
 corresponding key in C<%params> or any default value or initializer 
 found in the attribute meta-object.
 

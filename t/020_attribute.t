@@ -89,26 +89,54 @@ BEGIN {
 }
 
 dies_ok {
-    my $attr = Class::MOP::Attribute->new('$foo', (
+    Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         reader   => 'get_foo',
     ));
 } '... cannot create accessors with reader/writers';
 
 dies_ok {
-    my $attr = Class::MOP::Attribute->new('$foo', (
+    Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         writer   => 'set_foo',
     ));
 } '... cannot create accessors with reader/writers';
 
 dies_ok {
-    my $attr = Class::MOP::Attribute->new('$foo', (
+    Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         reader   => 'get_foo',        
         writer   => 'set_foo',
     ));
 } '... cannot create accessors with reader/writers';
+
+dies_ok {
+    Class::MOP::Attribute->new();
+} '... no name argument';
+
+dies_ok {
+    Class::MOP::Attribute->new('');
+} '... bad name argument';
+
+dies_ok {
+    Class::MOP::Attribute->new(0);
+} '... bad name argument';
+
+dies_ok {
+    Class::MOP::Attribute->install_accessors();
+} '... bad install_accessors argument';
+
+dies_ok {
+    Class::MOP::Attribute->install_accessors(bless {} => 'Fail');
+} '... bad install_accessors argument';
+
+dies_ok {
+    Class::MOP::Attribute->remove_accessors();
+} '... bad remove_accessors argument';
+
+dies_ok {
+    Class::MOP::Attribute->remove_accessors(bless {} => 'Fail');
+} '... bad remove_accessors argument';
 
 
 {

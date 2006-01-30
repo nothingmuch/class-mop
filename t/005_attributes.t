@@ -87,6 +87,55 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
             },                        
         ],
         '... got the right list of applicable attributes for Baz');
+    
+    my $attr;
+    lives_ok {
+        $attr = $meta->remove_attribute('$baz');
+    } '... removed the $baz attribute successfully';
+    is($attr, $BAZ_ATTR, '... got the right attribute back for Baz');           
+    
+    ok(!$meta->has_attribute('$baz'), '... Baz no longer has $baz attribute'); 
+
+    ok(!$meta->has_method('get_baz'), '... a reader has been removed');
+    ok(!$meta->has_method('set_baz'), '... a writer has been removed');
+
+    is_deeply(
+        [ sort { $a->{name} cmp $b->{name} } $meta->compute_all_applicable_attributes() ],
+        [ 
+            {
+                name      => '$bar',
+                class     => 'Bar',
+                attribute => $BAR_ATTR
+            },
+            {
+                name      => '$foo',
+                class     => 'Foo',
+                attribute => $FOO_ATTR
+            },                        
+        ],
+        '... got the right list of applicable attributes for Baz');
+
+     {
+         my $attr;
+         lives_ok {
+             $attr = Bar->meta->remove_attribute('$bar');
+         } '... removed the $bar attribute successfully';
+         is($attr, $BAR_ATTR, '... got the right attribute back for Bar');           
+
+         ok(!Bar->meta->has_attribute('$bar'), '... Bar no longer has $bar attribute'); 
+
+         ok(!Bar->meta->has_method('bar'), '... a accessor has been removed');
+     }
+
+     is_deeply(
+         [ sort { $a->{name} cmp $b->{name} } $meta->compute_all_applicable_attributes() ],
+         [ 
+             {
+                 name      => '$foo',
+                 class     => 'Foo',
+                 attribute => $FOO_ATTR
+             },                        
+         ],
+         '... got the right list of applicable attributes for Baz');
+
 }
-
-

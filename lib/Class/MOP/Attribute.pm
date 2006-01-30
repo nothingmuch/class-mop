@@ -19,7 +19,7 @@ sub new {
     my $name    = shift;
     my %options = @_;    
         
-    (defined $name && $name ne '')
+    (defined $name && $name)
         || confess "You must provide a name for the attribute";
     (!exists $options{reader} && !exists $options{writer})
         || confess "You cannot declare an accessor and reader and/or writer functions"
