@@ -23,7 +23,10 @@ our $VERSION = '0.01';
         my ($class, $package_name) = @_;
         (defined $package_name && $package_name)
             || confess "You must pass a package name";
-        $METAS{$package_name} ||= bless \$package_name => blessed($class) || $class;
+        $METAS{$package_name} ||= bless { 
+            '$:pkg'   => $package_name, 
+            '%:attrs' => {} 
+        } => blessed($class) || $class;
     }
 }
 
@@ -47,9 +50,16 @@ sub create {
     return $meta;
 }
 
+# Instance Construction
+
+sub construct_instance {
+    my ($canidate, %params) = @_;
+    # ...
+}
+
 # Informational 
 
-sub name { ${$_[0]} }
+sub name { $_[0]->{'$:pkg'} }
 
 sub version {  
     my $self = shift;
@@ -181,30 +191,6 @@ sub compute_all_applicable_methods {
     return @methods;
 }
 
-## Recursive Version of compute_all_applicable_methods
-# sub compute_all_applicable_methods {
-#     my ($self, $seen) = @_;
-#     $seen ||= {};
-#     (
-#         (map { 
-#             if (exists $seen->{$_}) { 
-#                 ();
-#             }
-#             else {
-#                 $seen->{$_}++;
-#                 {
-#                     name  => $_, 
-#                     class => $self->name,
-#                     code  => $self->get_method($_)
-#                 };
-#             }
-#         } $self->get_method_list()),
-#         map { 
-#             $self->initialize($_)->compute_all_applicable_methods($seen)
-#         } $self->superclasses()
-#     );
-# }
-
 sub find_all_methods_by_name {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
@@ -232,13 +218,74 @@ sub find_all_methods_by_name {
 
 ## Attributes
 
-sub has_attribute {} 
-sub get_attribute {} 
-sub add_attribute {} 
-sub remove_attribute {} 
-sub get_attribute_list {} 
-sub compute_all_applicable_attributes {} 
-sub create_all_accessors {}
+sub add_attribute {
+    my ($self, $attribute_name, $attribute) = @_;
+    (defined $attribute_name && $attribute_name)
+        || confess "You must define an attribute name";
+    (blessed($attribute) && $attribute->isa('Class::MOP::Attribute'))
+        || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
+    $self->{'%:attrs'}->{$attribute_name} = $attribute;
+}
+
+sub has_attribute {
+    my ($self, $attribute_name) = @_;
+    (defined $attribute_name && $attribute_name)
+        || confess "You must define an attribute name";
+    exists $self->{'%:attrs'}->{$attribute_name} ? 1 : 0;    
+} 
+
+sub get_attribute {
+    my ($self, $attribute_name) = @_;
+    (defined $attribute_name && $attribute_name)
+        || confess "You must define an attribute name";
+    return $self->{'%:attrs'}->{$attribute_name} 
+        if $self->has_attribute($attribute_name);    
+} 
+
+sub remove_attribute {
+    my ($self, $attribute_name) = @_;
+    (defined $attribute_name && $attribute_name)
+        || confess "You must define an attribute name";
+    my $removed_attribute = $self->{'%:attrs'}->{$attribute_name};    
+    delete $self->{'%:attrs'}->{$attribute_name} 
+        if defined $removed_attribute;
+    return $removed_attribute;
+} 
+
+sub get_attribute_list {
+    my $self = shift;
+    keys %{$self->{'%:attrs'}};
+} 
+
+sub compute_all_applicable_attributes {
+    my $self = shift;
+    my @attrs;
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my (%seen_class, %seen_attr);
+    foreach my $class ($self->class_precedence_list()) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        foreach my $attr_name ($meta->get_attribute_list()) { 
+            next if exists $seen_attr{$attr_name};
+            $seen_attr{$attr_name}++;
+            push @attrs => {
+                name      => $attr_name, 
+                class     => $class,
+                attribute => $meta->get_attribute($attr_name)
+            };
+        }
+    }
+    return @attrs;    
+}
+ 
+sub create_all_accessors {
+    
+}
 
 1;
 

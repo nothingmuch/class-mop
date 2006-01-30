@@ -59,6 +59,13 @@ work. Explict MOPs however as less common, and depending on the
 language can vary from restrictive (Reflection in Java or C#) to 
 wide open (CLOS is a perfect example). 
 
+=head2 Yet Another Class Builder!! Why?
+
+This is B<not> a class builder so much as it is a I<class builder 
+B<builder>>. My intent is that an end user does not use this module 
+directly, but instead this module is used by module authors to 
+build extensions and features onto the Perl 5 object system. 
+
 =head2 Who is this module for?
 
 This module is specifically for anyone who has ever created or 
