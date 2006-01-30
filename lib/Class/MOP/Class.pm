@@ -78,7 +78,7 @@ sub construct_instance {
         $val = $params{$init_arg} if exists $params{$init_arg};
         # if nothing was in the %params, we can use the 
         # attribute's default value (if it has one)
-        $val ||= $attr->default() if $attr->has_default();
+        $val ||= $attr->default($instance) if $attr->has_default();
         # now add this to the instance structure
         $instance->{$attr->name} = $val;
     }

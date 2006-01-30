@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'reftype';
 
 use Class::MOP::Class;
 use Class::MOP::Method;
@@ -26,31 +26,38 @@ sub new {
             if exists $options{accessor};
             
     bless {
-        name     => $name,
-        accessor => $options{accessor},
-        reader   => $options{reader},
-        writer   => $options{writer},
-        init_arg => $options{init_arg},
-        default  => $options{default}
+        name      => $name,
+        accessor  => $options{accessor},
+        reader    => $options{reader},
+        writer    => $options{writer},
+        predicate => $options{predicate},
+        init_arg  => $options{init_arg},
+        default   => $options{default}
     } => $class;
 }
 
-sub name         { (shift)->{name}             }
+sub name { $_[0]->{name} }
 
-sub has_accessor { (shift)->{accessor} ? 1 : 0 }
-sub accessor     { (shift)->{accessor}         } 
+sub has_accessor  { defined($_[0]->{accessor}) ? 1 : 0  }
+sub has_reader    { defined($_[0]->{reader}) ? 1 : 0    }
+sub has_writer    { defined($_[0]->{writer}) ? 1 : 0    }
+sub has_predicate { defined($_[0]->{predicate}) ? 1 : 0 }
+sub has_init_arg  { defined($_[0]->{init_arg}) ? 1 : 0  }
+sub has_default   { defined($_[0]->{default}) ? 1 : 0   }
 
-sub has_reader   { (shift)->{reader}   ? 1 : 0 }
-sub reader       { (shift)->{reader}           }
+sub accessor  { $_[0]->{accessor}  } 
+sub reader    { $_[0]->{reader}    }
+sub writer    { $_[0]->{writer}    }
+sub predicate { $_[0]->{predicate} }
+sub init_arg  { $_[0]->{init_arg}  }
 
-sub has_writer   { (shift)->{writer}   ? 1 : 0 }
-sub writer       { (shift)->{writer}           }
-
-sub has_init_arg { (shift)->{init_arg} ? 1 : 0 }
-sub init_arg     { (shift)->{init_arg}         }
-
-sub has_default  { (shift)->{default}  ? 1 : 0 }
-sub default      { (shift)->{default}          }
+sub default { 
+    my $self = shift;
+    if (reftype($self->{default}) && reftype($self->{default}) eq 'CODE') {
+        return $self->{default}->(shift);
+    }           
+    $self->{default};
+}
 
 sub install_accessors {
     my ($self, $class) = @_;
@@ -58,24 +65,58 @@ sub install_accessors {
         || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
         
     if ($self->has_accessor()) {
-        $class->add_method($self->accessor() => Class::MOP::Attribute::Accessor->wrap(sub {
-            $_[0]->{$self->name} = $_[1] if scalar(@_) == 2;
-            $_[0]->{$self->name};
-        }));
+        my $accessor = $self->accessor();
+        if (reftype($accessor) && reftype($accessor) eq 'HASH') {
+            my ($name, $method) = each %{$accessor};
+            $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
+        }
+        else {
+            $class->add_method($accessor => Class::MOP::Attribute::Accessor->wrap(sub {
+                $_[0]->{$self->name} = $_[1] if scalar(@_) == 2;
+                $_[0]->{$self->name};
+            }));
+        }
     }
     else {
-        if ($self->has_reader()) {         
-            $class->add_method($self->reader() => Class::MOP::Attribute::Accessor->wrap(sub { 
-                $_[0]->{$self->name};
-            }));        
+        if ($self->has_reader()) {      
+            my $reader = $self->reader();
+            if (reftype($reader) && reftype($reader) eq 'HASH') {
+                my ($name, $method) = each %{$reader};
+                $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
+            }
+            else {             
+                $class->add_method($reader => Class::MOP::Attribute::Accessor->wrap(sub { 
+                    $_[0]->{$self->name};
+                }));        
+            }
         }
         if ($self->has_writer()) {
-            $class->add_method($self->writer() => Class::MOP::Attribute::Accessor->wrap(sub {
-                $_[0]->{$self->name} = $_[1];
-                return;
-            }));            
+            my $writer = $self->writer();
+            if (reftype($writer) && reftype($writer) eq 'HASH') {
+                my ($name, $method) = each %{$writer};
+                $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
+            }
+            else {            
+                $class->add_method($writer => Class::MOP::Attribute::Accessor->wrap(sub {
+                    $_[0]->{$self->name} = $_[1];
+                    return;
+                }));            
+            }
         }
     }
+    
+    if ($self->has_predicate()) {
+        my $predicate = $self->predicate();
+        if (reftype($predicate) && reftype($predicate) eq 'HASH') {
+            my ($name, $method) = each %{$predicate};
+            $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
+        }
+        else {
+            $class->add_method($predicate => Class::MOP::Attribute::Accessor->wrap(sub {
+                defined $_[0]->{$self->name} ? 1 : 0;
+            }));
+        }
+    }    
 }
 
 sub remove_accessors {
@@ -84,22 +125,44 @@ sub remove_accessors {
         || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
         
     if ($self->has_accessor()) {
-        my $method = $class->get_method($self->accessor);
-        $class->remove_method($self->accessor)
+        my $accessor = $self->accessor();
+        if (reftype($accessor) && reftype($accessor) eq 'HASH') {
+            ($accessor) = keys %{$accessor};
+        }        
+        my $method = $class->get_method($accessor);
+        $class->remove_method($accessor)
             if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
     }
     else {
         if ($self->has_reader()) {
-            my $method = $class->get_method($self->reader);
-            $class->remove_method($self->reader)
+            my $reader = $self->reader();
+            if (reftype($reader) && reftype($reader) eq 'HASH') {
+                ($reader) = keys %{$reader};
+            }            
+            my $method = $class->get_method($reader);
+            $class->remove_method($reader)
                 if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
         }
         if ($self->has_writer()) {
-            my $method = $class->get_method($self->writer);
-            $class->remove_method($self->writer)
+            my $writer = $self->writer();
+            if (reftype($writer) && reftype($writer) eq 'HASH') {
+                ($writer) = keys %{$writer};
+            }            
+            my $method = $class->get_method($writer);
+            $class->remove_method($writer)
                 if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
         }
-    }        
+    }  
+    
+    if ($self->has_predicate()) {
+        my $predicate = $self->predicate();
+        if (reftype($predicate) && reftype($predicate) eq 'HASH') {
+            ($predicate) = keys %{$predicate};
+        }        
+        my $method = $class->get_method($predicate);
+        $class->remove_method($predicate)
+            if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
+    }          
 }
 
 package Class::MOP::Attribute::Accessor;
@@ -168,6 +231,8 @@ chaos, by introducing a more consistent approach.
 
 =item B<writer>
 
+=item B<predicate>
+
 =item B<init_arg>
 
 =item B<default>
@@ -190,6 +255,10 @@ Returns true if this attribute has a reader, and false otherwise
 =item B<has_writer>
 
 Returns true if this attribute has a writer, and false otherwise
+
+=item B<has_predicate>
+
+Returns true if this attribute has a predicate, and false otherwise
 
 =item B<has_init_arg>
 
