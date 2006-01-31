@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Scalar::Util 'blessed';
+use Carp         'confess';
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -21,6 +22,68 @@ sub import {
         };
     }
 }
+
+## Bootstrapping
+
+# We need to add in the meta-attributes here so that 
+# any subclass of Class::MOP::* will be able to 
+# inherit them using &construct_instance
+
+## Class::MOP::Class
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('$:pkg' => (
+        init_arg => ':pkg'
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('%:attrs' => (
+        init_arg => ':attrs',
+        default  => sub { {} }
+    ))
+);
+
+## Class::MOP::Attribute
+
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('name'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('accessor'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('reader'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('writer'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('predicate'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('init_arg'));
+Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('default'));
+
+# NOTE: (meta-circularity)
+# This should be one of the last things done
+# it will "tie the knot" with Class::MOP::Attribute
+# so that it uses the attributes meta-objects 
+# to construct itself. 
+Class::MOP::Attribute->meta->add_method('new' => sub {
+    my $class   = shift;
+    my $name    = shift;
+    my %options = @_;    
+        
+    (defined $name && $name)
+        || confess "You must provide a name for the attribute";
+    (!exists $options{reader} && !exists $options{writer})
+        || confess "You cannot declare an accessor and reader and/or writer functions"
+            if exists $options{accessor};
+            
+    bless $class->meta->construct_instance(name => $name, %options) => $class;
+});
+
+# NOTE: (meta-circularity)
+# This is how we "tie the knot" for the class
+# meta-objects. This is used to construct the
+# Class::MOP::Class instances after all the 
+# bootstrapping is complete.
+Class::MOP::Class->meta->add_method('construct_class_instance' => sub {
+    my ($class, $package_name) = @_;
+    (defined $package_name && $package_name)
+        || confess "You must pass a package name";      
+    bless Class::MOP::Class->meta->construct_instance(':pkg' => $package_name) => blessed($class) || $class        
+});
 
 1;
 

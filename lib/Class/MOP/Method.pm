@@ -7,11 +7,12 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'reftype';
 
-use Class::MOP::Class;
-
 our $VERSION = '0.01';
 
-sub meta { Class::MOP::Class->initialize($_[0]) }
+sub meta { 
+    require Class::MOP::Class;
+    Class::MOP::Class->initialize($_[0]) 
+}
 
 sub wrap { 
     my $class = shift;

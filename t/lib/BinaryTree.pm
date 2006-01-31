@@ -9,7 +9,7 @@ use warnings;
 our $VERSION = '0.01';
 
 __PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('_uid' => (
+    Class::MOP::Attribute->new('$:uid' => (
         reader  => 'getUID',
         writer  => 'setUID',
         default => sub { 
@@ -20,7 +20,7 @@ __PACKAGE__->meta->add_attribute(
 );
 
 __PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('_node' => (
+    Class::MOP::Attribute->new('$:node' => (
         reader   => 'getNodeValue',
         writer   => 'setNodeValue',
         init_arg => ':node'
@@ -28,7 +28,7 @@ __PACKAGE__->meta->add_attribute(
 );
 
 __PACKAGE__->meta->add_attribute(      
-    Class::MOP::Attribute->new('_parent' => (
+    Class::MOP::Attribute->new('$:parent' => (
         predicate => 'hasParent',
         reader    => 'getParent',
         writer    => 'setParent'
@@ -36,14 +36,14 @@ __PACKAGE__->meta->add_attribute(
 );
 
 __PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('_left' => (
+    Class::MOP::Attribute->new('$:left' => (
         predicate => 'hasLeft',         
         reader    => 'getLeft',
         writer => { 
             'setLeft' => sub {
                 my ($self, $tree) = @_;
             	$tree->setParent($self) if defined $tree;
-                $self->{_left} = $tree;    
+                $self->{'$:left'} = $tree;    
                 $self;                    
             }
        },
@@ -51,14 +51,14 @@ __PACKAGE__->meta->add_attribute(
 );
 
 __PACKAGE__->meta->add_attribute(  
-    Class::MOP::Attribute->new('_right' => (
+    Class::MOP::Attribute->new('$:right' => (
         predicate => 'hasRight',           
         reader    => 'getRight',
         writer => {
             'setRight' => sub {
                 my ($self, $tree) = @_;   
             	$tree->setParent($self) if defined $tree;
-                $self->{_right} = $tree;      
+                $self->{'$:right'} = $tree;      
                 $self;                    
             }
         }

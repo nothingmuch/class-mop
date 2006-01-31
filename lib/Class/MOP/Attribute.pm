@@ -7,13 +7,22 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
 
-use Class::MOP::Class;
-use Class::MOP::Method;
-
 our $VERSION = '0.01';
 
-sub meta { Class::MOP::Class->initialize($_[0]) }
+sub meta { 
+    require Class::MOP::Class;
+    Class::MOP::Class->initialize($_[0]) 
+}
 
+# NOTE: (meta-circularity)
+# This method will be replaces in the 
+# boostrap section of Class::MOP, by 
+# a new version which uses the 
+# &Class::MOP::Class::construct_instance
+# method to build an attribute meta-object
+# which itself is described with attribute
+# meta-objects. 
+#     - Ain't meta-circularity grand? :)
 sub new {
     my $class   = shift;
     my $name    = shift;
@@ -38,12 +47,12 @@ sub new {
 
 sub name { $_[0]->{name} }
 
-sub has_accessor  { defined($_[0]->{accessor}) ? 1 : 0  }
-sub has_reader    { defined($_[0]->{reader}) ? 1 : 0    }
-sub has_writer    { defined($_[0]->{writer}) ? 1 : 0    }
+sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
+sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
+sub has_writer    { defined($_[0]->{writer})    ? 1 : 0 }
 sub has_predicate { defined($_[0]->{predicate}) ? 1 : 0 }
-sub has_init_arg  { defined($_[0]->{init_arg}) ? 1 : 0  }
-sub has_default   { defined($_[0]->{default}) ? 1 : 0   }
+sub has_init_arg  { defined($_[0]->{init_arg})  ? 1 : 0 }
+sub has_default   { defined($_[0]->{default})   ? 1 : 0 }
 
 sub accessor  { $_[0]->{accessor}  } 
 sub reader    { $_[0]->{reader}    }
@@ -54,69 +63,69 @@ sub init_arg  { $_[0]->{init_arg}  }
 sub default { 
     my $self = shift;
     if (reftype($self->{default}) && reftype($self->{default}) eq 'CODE') {
+        # if the default is a CODE ref, then 
+        # we pass in the instance and default
+        # can return a value based on that 
+        # instance. Somewhat crude, but works.
         return $self->{default}->(shift);
     }           
     $self->{default};
 }
 
-sub install_accessors {
-    my ($self, $class) = @_;
-    (blessed($class) && $class->isa('Class::MOP::Class'))
-        || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
-        
-    if ($self->has_accessor()) {
-        my $accessor = $self->accessor();
+{
+    # this is just a utility routine to 
+    # handle the details of accessors
+    my $_inspect_accessor = sub {
+        my ($attr_name, $type, $accessor) = @_;
+    
+        my %ACCESSOR_TEMPLATES = (
+            'accessor' => sub {
+                $_[0]->{$attr_name} = $_[1] if scalar(@_) == 2;
+                $_[0]->{$attr_name};
+            },
+            'reader' => sub { 
+                $_[0]->{$attr_name};
+            },
+            'writer' => sub {
+                $_[0]->{$attr_name} = $_[1];
+                return;
+            },
+            'predicate' => sub {
+                return defined $_[0]->{$attr_name} ? 1 : 0;
+            }            
+        );    
+    
         if (reftype($accessor) && reftype($accessor) eq 'HASH') {
             my ($name, $method) = each %{$accessor};
-            $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
+            return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
         }
         else {
-            $class->add_method($accessor => Class::MOP::Attribute::Accessor->wrap(sub {
-                $_[0]->{$self->name} = $_[1] if scalar(@_) == 2;
-                $_[0]->{$self->name};
-            }));
-        }
-    }
-    else {
-        if ($self->has_reader()) {      
-            my $reader = $self->reader();
-            if (reftype($reader) && reftype($reader) eq 'HASH') {
-                my ($name, $method) = each %{$reader};
-                $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
-            }
-            else {             
-                $class->add_method($reader => Class::MOP::Attribute::Accessor->wrap(sub { 
-                    $_[0]->{$self->name};
-                }));        
-            }
-        }
-        if ($self->has_writer()) {
-            my $writer = $self->writer();
-            if (reftype($writer) && reftype($writer) eq 'HASH') {
-                my ($name, $method) = each %{$writer};
-                $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
-            }
-            else {            
-                $class->add_method($writer => Class::MOP::Attribute::Accessor->wrap(sub {
-                    $_[0]->{$self->name} = $_[1];
-                    return;
-                }));            
-            }
-        }
+            return ($accessor => Class::MOP::Attribute::Accessor->wrap($ACCESSOR_TEMPLATES{$type}));
+        }    
+    };
+
+    sub install_accessors {
+        my ($self, $class) = @_;
+        (blessed($class) && $class->isa('Class::MOP::Class'))
+            || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
+        
+        $class->add_method(
+            $_inspect_accessor->($self->name, 'accessor' => $self->accessor())
+        ) if $self->has_accessor();
+
+        $class->add_method(            
+            $_inspect_accessor->($self->name, 'reader' => $self->reader())
+        ) if $self->has_reader();
+    
+        $class->add_method(
+            $_inspect_accessor->($self->name, 'writer' => $self->writer())
+        ) if $self->has_writer();
+    
+        $class->add_method(
+            $_inspect_accessor->($self->name, 'predicate' => $self->predicate())
+        ) if $self->has_predicate();
     }
     
-    if ($self->has_predicate()) {
-        my $predicate = $self->predicate();
-        if (reftype($predicate) && reftype($predicate) eq 'HASH') {
-            my ($name, $method) = each %{$predicate};
-            $class->add_method($name, Class::MOP::Attribute::Accessor->wrap($method));        
-        }
-        else {
-            $class->add_method($predicate => Class::MOP::Attribute::Accessor->wrap(sub {
-                defined $_[0]->{$self->name} ? 1 : 0;
-            }));
-        }
-    }    
 }
 
 sub remove_accessors {
@@ -169,6 +178,8 @@ package Class::MOP::Attribute::Accessor;
 
 use strict;
 use warnings;
+
+use Class::MOP::Method;
 
 our $VERSION = '0.01';
 

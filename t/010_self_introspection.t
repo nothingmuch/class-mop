@@ -7,6 +7,7 @@ use Test::More no_plan => 1;
 use Test::Exception;
 
 BEGIN {
+    use_ok('Class::MOP');
     use_ok('Class::MOP::Class');        
 }
 
@@ -44,6 +45,13 @@ foreach my $non_method_name (qw(
     svref_2object
     )) {
     ok(!$meta->has_method($non_method_name), '... NOT Class::MOP::Class->has_method(' . $non_method_name . ')');        
+}
+
+foreach my $attribute_name (
+    '$:pkg', '%:attrs'
+    ) {
+    ok($meta->has_attribute($attribute_name), '... Class::MOP::Class->has_attribute(' . $attribute_name . ')');        
+    isa_ok($meta->get_attribute($attribute_name), 'Class::MOP::Attribute');            
 }
 
 is($meta->name, 'Class::MOP::Class', '... Class::MOP::Class->name');

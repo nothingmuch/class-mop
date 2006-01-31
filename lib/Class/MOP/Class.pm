@@ -26,11 +26,25 @@ sub meta { $_[0]->initialize($_[0]) }
     sub initialize {
         my ($class, $package_name) = @_;
         (defined $package_name && $package_name)
-            || confess "You must pass a package name";
-        $METAS{$package_name} ||= bless { 
+            || confess "You must pass a package name";        
+        return $METAS{$package_name} if exists $METAS{$package_name};
+        $METAS{$package_name} = $class->construct_class_instance($package_name);
+    }
+    
+    # NOTE: (meta-circularity) 
+    # this is a special form of &construct_instance 
+    # (see below), which is used to construct class
+    # meta-object instances. It will be replaces in 
+    # the bootstrap section in Class::MOP with one 
+    # which uses the normal &construct_instance.
+    sub construct_class_instance {
+        my ($class, $package_name) = @_;
+        (defined $package_name && $package_name)
+            || confess "You must pass a package name";        
+        bless { 
             '$:pkg'   => $package_name, 
             '%:attrs' => {} 
-        } => blessed($class) || $class;
+        } => blessed($class) || $class        
     }
 }
 
@@ -311,7 +325,6 @@ sub compute_all_applicable_attributes {
     return @attrs;    
 }
 
-
 1;
 
 __END__
@@ -377,6 +390,14 @@ the applicable attribute meta-objects and layout out the fields in the
 HASH ref, it will then initialize them using either use the 
 corresponding key in C<%params> or any default value or initializer 
 found in the attribute meta-object.
+
+=item B<construct_class_instance ($package_name)>
+
+This will construct an instance of B<Class::MOP::Class>, it is 
+here so that we can actually "tie the knot" for B<Class::MOP::Class> 
+to use C<construct_instance> once all the bootstrapping is done. This 
+method is used internally by C<initialize> and should never be called
+from outside of that method really.
 
 =back
 

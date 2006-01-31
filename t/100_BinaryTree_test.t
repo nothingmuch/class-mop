@@ -3,9 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 67;
+use Test::More tests => 68;
 
 BEGIN { 
+    use_ok('Class::MOP');    
     use_ok('t::lib::BinaryTree');
 }
 

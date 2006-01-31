@@ -22,7 +22,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
 {
     package Foo;
 
-    my $meta = __PACKAGE__->meta;
+    my $meta = Foo->meta;
     ::lives_ok {
         $meta->add_attribute($FOO_ATTR);
     } '... we added an attribute to Foo successfully';
@@ -35,7 +35,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     package Bar;
     our @ISA = ('Foo');
     
-    my $meta = __PACKAGE__->meta;
+    my $meta = Bar->meta;
     ::lives_ok {
         $meta->add_attribute($BAR_ATTR);
     } '... we added an attribute to Bar successfully';
@@ -49,7 +49,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     package Baz;
     our @ISA = ('Bar');
     
-    my $meta = __PACKAGE__->meta;
+    my $meta = Baz->meta;
     ::lives_ok {
         $meta->add_attribute($BAZ_ATTR);
     } '... we added an attribute to Baz successfully';
