@@ -23,7 +23,16 @@ sub import {
     }
 }
 
-## Bootstrapping
+## ----------------------------------------------------------------------------
+## Bootstrapping 
+## ----------------------------------------------------------------------------
+## The code below here is to bootstrap our MOP with itself. This is also 
+## sometimes called "tying the knot". By doing this, we make it much easier
+## to extend the MOP through subclassing and such since now you can use the
+## MOP itself to extend itself. 
+## 
+## Yes, I know, thats weird and insane, but it's a good thing, trust me :)
+## ---------------------------------------------------------------------------- 
 
 # We need to add in the meta-attributes here so that 
 # any subclass of Class::MOP::* will be able to 
@@ -226,6 +235,8 @@ See L<Class::MOP::Method> for more details.
 =item "The Art of the Meta Object Protocol"
 
 =item "Advances in Object-Oriented Metalevel Architecture and Reflection"
+
+=item "Putting MetaClasses to Work"
 
 =back
 

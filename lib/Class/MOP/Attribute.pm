@@ -79,20 +79,20 @@ sub default {
         my ($attr_name, $type, $accessor) = @_;
     
         my %ACCESSOR_TEMPLATES = (
-            'accessor' => sub {
-                $_[0]->{$attr_name} = $_[1] if scalar(@_) == 2;
-                $_[0]->{$attr_name};
-            },
-            'reader' => sub { 
-                $_[0]->{$attr_name};
-            },
-            'writer' => sub {
-                $_[0]->{$attr_name} = $_[1];
+            'accessor' => qq{sub {
+                \$_[0]->{'$attr_name'} = \$_[1] if scalar(\@_) == 2;
+                \$_[0]->{'$attr_name'};
+            }},
+            'reader' => qq{sub {
+                \$_[0]->{'$attr_name'};
+            }},
+            'writer' => qq{sub {
+                \$_[0]->{'$attr_name'} = \$_[1];
                 return;
-            },
-            'predicate' => sub {
-                return defined $_[0]->{$attr_name} ? 1 : 0;
-            }            
+            }},
+            'predicate' => qq{sub {
+                return defined \$_[0]->{'$attr_name'} ? 1 : 0;
+            }}
         );    
     
         if (reftype($accessor) && reftype($accessor) eq 'HASH') {
@@ -100,7 +100,9 @@ sub default {
             return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
         }
         else {
-            return ($accessor => Class::MOP::Attribute::Accessor->wrap($ACCESSOR_TEMPLATES{$type}));
+            my $method = eval $ACCESSOR_TEMPLATES{$type};
+            confess "Could not create the $type for $attr_name CODE(\n" . $ACCESSOR_TEMPLATES{$type} . "\n) : $@" if $@;
+            return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));
         }    
     };
 
@@ -108,7 +110,6 @@ sub default {
         my ($self, $class) = @_;
         (blessed($class) && $class->isa('Class::MOP::Class'))
             || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
-        
         $class->add_method(
             $_inspect_accessor->($self->name, 'accessor' => $self->accessor())
         ) if $self->has_accessor();
@@ -124,54 +125,33 @@ sub default {
         $class->add_method(
             $_inspect_accessor->($self->name, 'predicate' => $self->predicate())
         ) if $self->has_predicate();
+        return;
     }
     
 }
 
-sub remove_accessors {
-    my ($self, $class) = @_;
-    (blessed($class) && $class->isa('Class::MOP::Class'))
-        || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
-        
-    if ($self->has_accessor()) {
-        my $accessor = $self->accessor();
+{
+    my $_remove_accessor = sub {
+        my ($accessor, $class) = @_;
         if (reftype($accessor) && reftype($accessor) eq 'HASH') {
             ($accessor) = keys %{$accessor};
         }        
-        my $method = $class->get_method($accessor);
-        $class->remove_method($accessor)
+        my $method = $class->get_method($accessor);   
+        $class->remove_method($accessor) 
             if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
-    }
-    else {
-        if ($self->has_reader()) {
-            my $reader = $self->reader();
-            if (reftype($reader) && reftype($reader) eq 'HASH') {
-                ($reader) = keys %{$reader};
-            }            
-            my $method = $class->get_method($reader);
-            $class->remove_method($reader)
-                if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
-        }
-        if ($self->has_writer()) {
-            my $writer = $self->writer();
-            if (reftype($writer) && reftype($writer) eq 'HASH') {
-                ($writer) = keys %{$writer};
-            }            
-            my $method = $class->get_method($writer);
-            $class->remove_method($writer)
-                if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
-        }
-    }  
+    };
     
-    if ($self->has_predicate()) {
-        my $predicate = $self->predicate();
-        if (reftype($predicate) && reftype($predicate) eq 'HASH') {
-            ($predicate) = keys %{$predicate};
-        }        
-        my $method = $class->get_method($predicate);
-        $class->remove_method($predicate)
-            if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
-    }          
+    sub remove_accessors {
+        my ($self, $class) = @_;
+        (blessed($class) && $class->isa('Class::MOP::Class'))
+            || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
+        $_remove_accessor->($self->accessor(),  $class) if $self->has_accessor();
+        $_remove_accessor->($self->reader(),    $class) if $self->has_reader();
+        $_remove_accessor->($self->writer(),    $class) if $self->has_writer();
+        $_remove_accessor->($self->predicate(), $class) if $self->has_predicate();
+        return;                        
+    }
+
 }
 
 package Class::MOP::Attribute::Accessor;
