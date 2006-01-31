@@ -206,7 +206,23 @@ chaos, by introducing a more consistent approach.
 
 =over 4
 
-=item B<new ($name, %accessor_description, $class_initialization_arg, $default_value)>
+=item B<new ($name, %options)>
+
+=over 4
+
+=item I<accessor>
+
+=item I<reader>
+
+=item I<writer>
+
+=item I<predicate>
+
+=item I<init_arg>
+
+=item I<default>
+
+=back
 
 =back 
 
