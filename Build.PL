@@ -9,17 +9,17 @@ my $build = Module::Build->new(
     module_name => 'Class::MOP',
     license => 'perl',
     requires => {
-        'perl'            => '5.6.0',
-        'Scalar::Util'    => '1.17',
-        'Carp'            => '0',
-        'B'               => '0',
-        'Sub::Name'       => '0',
+        'perl'         => '5.6.0',
+        'Scalar::Util' => '1.17',
+        'Sub::Name'    => '0.02',
+        'Carp'         => '0.01',
+        'B'            => '0',        
     },
     optional => {
     },
     build_requires => {
         'Test::More'      => '0.47',
-        'Test::Exception' => '0',        
+        'Test::Exception' => '0.21',
     },
     create_makefile_pl => 'traditional',
     recursive_test_files => 1,

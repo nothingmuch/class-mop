@@ -1,0 +1,17 @@
+^_build
+^Build$
+^blib
+~$
+\.bak$
+^MANIFEST\.SKIP$
+CVS
+\.svn
+cover_db
+\..*\.sw.?$
+^Makefile$
+^pm_to_blib$
+^MakeMaker-\d
+^blibdirs$
+\.old$
+^#.*#$
+^\.#
