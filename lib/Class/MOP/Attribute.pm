@@ -90,7 +90,7 @@ sub default {
                 \$_[0]->{'$attr_name'} = \$_[1];
             }},
             'predicate' => qq{sub {
-                return defined \$_[0]->{'$attr_name'} ? 1 : 0;
+                defined \$_[0]->{'$attr_name'} ? 1 : 0;
             }}
         );    
     

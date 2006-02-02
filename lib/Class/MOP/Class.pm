@@ -331,6 +331,57 @@ sub compute_all_applicable_attributes {
     return @attrs;    
 }
 
+# Class attributes
+
+sub add_package_variable {
+    my ($self, $variable, $initial_value) = @_;
+    (defined $variable && $variable =~ /^[\$\@\%]/)
+        || confess "variable name does not have a sigil";
+    
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    if (defined $initial_value) {
+        no strict 'refs';
+        *{$self->name . '::' . $name} = $initial_value;
+    }
+    else {
+        eval $sigil . $self->name . '::' . $name;
+        confess "Could not create package variable ($variable) because : $@" if $@;
+    }
+}
+
+sub has_package_variable {
+    my ($self, $variable) = @_;
+    (defined $variable && $variable =~ /^[\$\@\%]/)
+        || confess "variable name does not have a sigil";
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    no strict 'refs';
+    defined ${$self->name . '::'}{$name} ? 1 : 0;
+}
+
+sub get_package_variable {
+    my ($self, $variable) = @_;
+    (defined $variable && $variable =~ /^[\$\@\%]/)
+        || confess "variable name does not have a sigil";
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    no strict 'refs';
+    # try to fetch it first,.. see what happens
+    eval '\\' . $sigil . $self->name . '::' . $name;
+    confess "Could not get the package variable ($variable) because : $@" if $@;    
+    # if we didn't die, then we can return it
+    # NOTE:
+    # this is not ideal, better suggestions are welcome
+    eval '\\' . $sigil . $self->name . '::' . $name;   
+}
+
+sub remove_package_variable {
+    my ($self, $variable) = @_;
+    (defined $variable && $variable =~ /^[\$\@\%]/)
+        || confess "variable name does not have a sigil";
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    no strict 'refs';
+    delete ${$self->name . '::'}{$name};
+}
+
 1;
 
 __END__
@@ -614,6 +665,39 @@ references for all the applicable attributes for this class. The HASH
 references will contain the following information; the attribute name, 
 the class which the attribute is associated with and the actual 
 attribute meta-object.
+
+=back
+
+=head2 Package Variables
+
+Since Perl's classes are built atop the Perl package system, it is 
+fairly common to use package scoped variables for things like static 
+class variables. The following methods are convience methods for 
+the creation and inspection of package scoped variables.
+
+=over 4
+
+=item B<add_package_variable ($variable_name, ?$initial_value)>
+
+Given a C<$variable_name>, which must contain a leading sigil, this 
+method will create that variable within the package which houses the 
+class. It also takes an optional C<$initial_value>, which must be a 
+reference of the same type as the sigil of the C<$variable_name> 
+implies.
+
+=item B<get_package_variable ($variable_name)>
+
+This will return a reference to the package variable in 
+C<$variable_name>. 
+
+=item B<has_package_variable ($variable_name)>
+
+Returns true (C<1>) if there is a package variable defined for 
+C<$variable_name>, and false (C<0>) otherwise.
+
+=item B<remove_package_variable ($variable_name)>
+
+This will attempt to remove the package variable at C<$variable_name>.
 
 =back
 
