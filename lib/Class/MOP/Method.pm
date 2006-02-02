@@ -65,7 +65,7 @@ to this class.
 
 =head1 AUTHOR
 
-Stevan Little E<gt>stevan@iinteractive.comE<lt>
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

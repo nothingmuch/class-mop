@@ -212,7 +212,7 @@ object attributes.
 =item B<new ($name, ?%options)>
 
 An attribute must (at the very least), have a C<$name>. All other 
-C<%options> are contained added as key-valeue pairs. Acceptable keys
+C<%options> are contained added as key-value pairs. Acceptable keys
 are as follows:
 
 =over 4
@@ -274,7 +274,7 @@ an exercise to the reader :).
 
 =back
 
-This I<accessor>, I<reader>, I<writer> and I<predicate> keys can 
+The I<accessor>, I<reader>, I<writer> and I<predicate> keys can 
 contain either; the name of the method and an appropriate default 
 one will be generated for you, B<or> a HASH ref containing exactly one 
 key (which will be used as the name of the method) and one value, 
@@ -353,7 +353,7 @@ argument C<$instance> into it and return the value.
 
 =head2 Informational predicates
 
-These are all basic predicate methodfor the values passed into C<new>.
+These are all basic predicate methods for the values passed into C<new>.
 
 =over 4
 
@@ -378,13 +378,13 @@ These are all basic predicate methodfor the values passed into C<new>.
 =item B<install_accessors ($class)>
 
 This allows the attribute to generate and install code for it's own 
-accessor/reader/writer/predicate methods. This is called by 
+I<accessor/reader/writer/predicate> methods. This is called by 
 C<Class::MOP::Class::add_attribute>.
 
 =item B<remove_accessors ($class)>
 
 This allows the attribute to remove the method for it's own 
-accessor/reader/writer/predicate. This is called by 
+I<accessor/reader/writer/predicate>. This is called by 
 C<Class::MOP::Class::remove_attribute>.
 
 =back
@@ -407,7 +407,7 @@ of the MOP when subclassing it.
 
 =head1 AUTHOR
 
-Stevan Little E<gt>stevan@iinteractive.comE<lt>
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

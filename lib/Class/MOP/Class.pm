@@ -454,8 +454,9 @@ of the MOP when subclassing it.
 
 =head2 Class construction
 
-These methods handle creating Class objects, which can be used to 
-both create new classes, and analyze pre-existing ones. 
+These methods will handle creating B<Class::MOP::Class> objects, 
+which can be used to both create new classes, and analyze 
+pre-existing classes. 
 
 This module will internally store references to all the instances 
 you create with these methods, so that they do not need to be 
@@ -464,33 +465,19 @@ created any more than nessecary. Basically, they are singletons.
 =over 4
 
 =item B<create ($package_name, ?$package_version,
-                superclasses => ?@superclasses, 
-                methods      => ?%methods, 
-                attributes   => ?%attributes)>
+                superclasses =E<gt> ?@superclasses, 
+                methods      =E<gt> ?%methods, 
+                attributes   =E<gt> ?%attributes)>
 
-This returns the basic Class object, bringing the specified 
+This returns a B<Class::MOP::Class> object, bringing the specified 
 C<$package_name> into existence and adding any of the 
 C<$package_version>, C<@superclasses>, C<%methods> and C<%attributes> 
 to it.
 
 =item B<initialize ($package_name)>
 
-This initializes a Class object for a given a C<$package_name>.
-
-=back
-
-=head2 Instance construction
-
-=over 4
-
-=item B<construct_instance (%params)>
-
-This will construct and instance using a HASH ref as storage 
-(currently only HASH references are supported). This will collect all 
-the applicable attribute meta-objects and layout out the fields in the 
-HASH ref, it will then initialize them using either use the 
-corresponding key in C<%params> or any default value or initializer 
-found in the attribute meta-object.
+This initializes and returns returns a B<Class::MOP::Class> object 
+for a given a C<$package_name>.
 
 =item B<construct_class_instance ($package_name)>
 
@@ -502,19 +489,41 @@ from outside of that method really.
 
 =back
 
+=head2 Object instance construction
+
+This method is used to construct an instace structure suitable for 
+C<bless>-ing into your package of choice. It works in conjunction 
+with the Attribute protocol to collect all applicable attributes. 
+
+This method is B<entirely optional>, it is up to you whether you want 
+to use it or not.
+
+=over 4
+
+=item B<construct_instance (%params)>
+
+This will construct and instance using a HASH ref as storage 
+(currently only HASH references are supported). This will collect all 
+the applicable attributes and layout out the fields in the HASH ref, 
+it will then initialize them using either use the corresponding key 
+in C<%params> or any default value or initializer found in the 
+attribute meta-object.
+
+=back
+
 =head2 Informational 
 
 =over 4
 
 =item B<name>
 
-This is a read-only attribute which returns the package name that 
-the Class is stored in.
+This is a read-only attribute which returns the package name for the 
+given B<Class::MOP::Class> instance.
 
 =item B<version>
 
 This is a read-only attribute which returns the C<$VERSION> of the 
-package the Class is stored in.
+package for the given B<Class::MOP::Class> instance.
 
 =back
 
@@ -525,13 +534,14 @@ package the Class is stored in.
 =item B<superclasses (?@superclasses)>
 
 This is a read-write attribute which represents the superclass 
-relationships of this Class. Basically, it can get and set the 
-C<@ISA> for you.
+relationships of the class the B<Class::MOP::Class> instance is
+associated with. Basically, it can get and set the C<@ISA> for you.
 
 =item B<class_precedence_list>
 
-This computes the a list of the Class's ancestors in the same order 
-in which method dispatch will be done. 
+This computes the a list of all the class's ancestors in the same order 
+in which method dispatch will be done. This is similair to 
+what B<Class::ISA::super_path> does, but we don't remove duplicate names.
 
 =back
 
@@ -542,18 +552,19 @@ in which method dispatch will be done.
 =item B<add_method ($method_name, $method)>
 
 This will take a C<$method_name> and CODE reference to that 
-C<$method> and install it into the Class. 
+C<$method> and install it into the class's package. 
 
-B<NOTE> : This does absolutely nothing special to C<$method> 
+B<NOTE>: 
+This does absolutely nothing special to C<$method> 
 other than use B<Sub::Name> to make sure it is tagged with the 
 correct name, and therefore show up correctly in stack traces and 
 such.
 
 =item B<has_method ($method_name)>
 
-This just provides a simple way to check if the Class implements 
+This just provides a simple way to check if the class implements 
 a specific C<$method_name>. It will I<not> however, attempt to check 
-if the class inherits the method.
+if the class inherits the method (use C<UNIVERSAL::can> for that).
 
 This will correctly handle functions defined outside of the package 
 that use a fully qualified name (C<sub Package::name { ... }>).
@@ -571,7 +582,7 @@ may be a valid method being applied to the class.
 
 In short, this method cannot always be trusted to determine if the 
 C<$method_name> is actually a method. However, it will DWIM about 
-90% of the time, so it's a small trade off IMO.
+90% of the time, so it's a small trade off I think.
 
 =item B<get_method ($method_name)>
 
@@ -580,7 +591,7 @@ or return undef if that method does not exist.
 
 =item B<remove_method ($method_name)>
 
-This will attempt to remove a given C<$method_name> from the Class. 
+This will attempt to remove a given C<$method_name> from the class. 
 It will return the CODE reference that it has removed, and will 
 attempt to use B<Sub::Name> to clear the methods associated name.
 
@@ -593,8 +604,8 @@ methods, use the C<compute_all_applicable_methods> method.
 
 =item B<compute_all_applicable_methods>
 
-This will return a list of all the methods names this Class will 
-support, taking into account inheritance. The list will be a list of 
+This will return a list of all the methods names this class will 
+respond to, taking into account inheritance. The list will be a list of 
 HASH references, each one containing the following information; method 
 name, the name of the class in which the method lives and a CODE 
 reference for the actual method.
@@ -620,22 +631,28 @@ once, and in the correct order.
 It should be noted that since there is no one consistent way to define 
 the attributes of a class in Perl 5. These methods can only work with 
 the information given, and can not easily discover information on 
-their own.
+their own. See L<Class::MOP::Attribute> for more details.
 
 =over 4
 
 =item B<add_attribute ($attribute_name, $attribute_meta_object)>
 
-This stores a C<$attribute_meta_object> in the Class object and 
-associates it with the C<$attribute_name>. Unlike methods, attributes 
-within the MOP are stored as meta-information only. They will be used 
-later to construct instances from (see C<construct_instance> above).
+This stores a C<$attribute_meta_object> in the B<Class::MOP::Class> 
+instance associated with the given class, and associates it with 
+the C<$attribute_name>. Unlike methods, attributes within the MOP 
+are stored as meta-information only. They will be used later to 
+construct instances from (see C<construct_instance> above).
 More details about the attribute meta-objects can be found in the 
-L<The Attribute protocol> section of this document.
+L<Class::MOP::Attribute> or the L<Class::MOP/The Attribute protocol>
+section.
+
+It should be noted that any accessor, reader/writer or predicate 
+methods which the C<$attribute_meta_object> has will be installed 
+into the class at this time.
 
 =item B<has_attribute ($attribute_name)>
 
-Checks to see if this Class has an attribute by the name of 
+Checks to see if this class has an attribute by the name of 
 C<$attribute_name> and returns a boolean.
 
 =item B<get_attribute ($attribute_name)>
@@ -648,9 +665,17 @@ if none is found, it will return undef.
 This will remove the attribute meta-object stored at 
 C<$attribute_name>, then return the removed attribute meta-object. 
 
-B<NOTE:> Removing an attribute will only affect future instances of 
+B<NOTE:> 
+Removing an attribute will only affect future instances of 
 the class, it will not make any attempt to remove the attribute from 
 any existing instances of the class.
+
+It should be noted that any accessor, reader/writer or predicate 
+methods which the attribute meta-object stored at C<$attribute_name> 
+has will be removed from the class at this time. This B<will> make 
+these attributes somewhat inaccessable in previously created 
+instances. But if you are crazy enough to do this at runtime, then 
+you are crazy enough to deal with something like this :).
 
 =item B<get_attribute_list>
 
@@ -703,7 +728,7 @@ This will attempt to remove the package variable at C<$variable_name>.
 
 =head1 AUTHOR
 
-Stevan Little E<gt>stevan@iinteractive.comE<lt>
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

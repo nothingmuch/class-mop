@@ -101,7 +101,8 @@ Class::MOP - A Meta Object Protocol for Perl 5
 
 =head1 SYNOPSIS
 
-  # ... 
+  # ... This will come later, for now see
+  # the other SYNOPSIS for more information
 
 =head1 DESCRIPTON
 
@@ -156,12 +157,12 @@ This module was designed to be as unintrusive as possible. Many of
 it's features are accessible without B<any> change to your existsing 
 code at all. It is meant to be a compliment to your existing code and 
 not an intrusion on your code base. Unlike many other B<Class::> 
-modules, this module does require you subclass it, or even that you 
-C<use> it in within your module's package. 
+modules, this module B<does not> require you subclass it, or even that 
+you C<use> it in within your module's package. 
 
 The only features which requires additions to your code are the 
 attribute handling and instance construction features, and these are
-both optional features as well. The only reason for this is because 
+both completely optional features. The only reason for this is because 
 Perl 5's object system does not actually have these features built 
 in. More information about this feature can be found below.
 
@@ -217,15 +218,14 @@ See L<Class::MOP::Method> for more details.
 
 =back
 
-head1 BUGS
-
-All complex software has bugs lurking in it, and this module is no 
-exception. If you find a bug please either email me, or add the bug
-to cpan-RT.
-
 =head1 SEE ALSO
 
 =head2 Books
+
+There are very few books out on Meta Object Protocols and Metaclasses 
+because it is such an esoteric topic. The following books are really 
+the only ones I have found. If you know of any more, B<I<please>> 
+email me and let me know, I would love to hear about them.
 
 =over 4
 
@@ -234,6 +234,8 @@ to cpan-RT.
 =item "Advances in Object-Oriented Metalevel Architecture and Reflection"
 
 =item "Putting MetaClasses to Work"
+
+=item "Smalltalk: The Language"
 
 =back
 
@@ -253,11 +255,56 @@ to cpan-RT.
 
 =back
 
+=head1 SIMILAR MODULES
+
+As I have said above, this module is a class-builder-builder, so it is 
+not the same thing as modules like L<Class::Accessor> and 
+L<Class::MethodMaker>. That being said there are very few modules on CPAN 
+with similar goals to this module. The one I have found which is most 
+like this module is L<Class::Meta>, although it's philosophy is very 
+different from this module. 
+
+To start with, it provides wrappers around common Perl data types, and even 
+extends those types with more specific subtypes. This module does not 
+go into that area at all. 
+
+L<Class::Meta> also seems to create it's own custom meta-object protocol, 
+which is both more restrictive and more featureful than the vanilla 
+Perl 5 one. This module attempts to model the existing Perl 5 MOP as it is.
+
+It's introspection capabilities also seem to be heavily rooted in this 
+custom MOP, so that you can only introspect classes which are already 
+created with L<Class::Meta>. This module does not make such restictions.
+
+Now, all this said, L<Class::Meta> is much more featureful than B<Class::MOP> 
+would ever try to be. But B<Class::MOP> has some features which L<Class::Meta>
+could not easily implement. It would be very possible to completely re-implement 
+L<Class::Meta> using B<Class::MOP> and bring some of these features to 
+L<Class::Meta> though. 
+
+But in the end, this module's admitedly ambitious goals have no direct equal 
+on CPAN since surely no one has been crazy enough to try something as silly 
+as this ;) until now.
+
+=head1 BUGS
+
+All complex software has bugs lurking in it, and this module is no 
+exception. If you find a bug please either email me, or add the bug
+to cpan-RT.
+
+=head1 ACKNOWLEDGEMENTS
+
+=over 4
+
+=item Rob Kinyon E<lt>rob@iinteractive.comE<gt>
+
+Thanks to Rob for actually getting the development of this module kick-started. 
+
+=back
+
 =head1 AUTHOR
 
-Stevan Little E<gt>stevan@iinteractive.comE<lt>
-
-Rob Kinyon E<gt>rob@iinteractive.comE<lt>
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
