@@ -106,11 +106,7 @@ Class::MOP - A Meta Object Protocol for Perl 5
 
 =head1 SYNOPSIS
 
-  use Class::MOP ':universal';
-  
-  package Foo;
-  
-  Foo->meta->add_method('foo' => sub { ... });
+  # ... 
 
 =head1 DESCRIPTON
 

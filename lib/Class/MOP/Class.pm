@@ -337,7 +337,44 @@ Class::MOP::Class - Class Meta Object
 
 =head1 SYNOPSIS
 
+  # use this for introspection ...
+  
+  package Foo;
+  sub meta { Class::MOP::Class->initialize(__PACKAGE__) }
+  
+  # elsewhere in the code ...
+  
+  # add a method to Foo ...
+  Foo->meta->add_method('bar' => sub { ... })
+  
+  # get a list of all the classes searched 
+  # the method dispatcher in the correct order 
+  Foo->meta->class_precedence_list()
+  
+  # remove a method from Foo
+  Foo->meta->remove_method('bar');
+  
+  # or use this to actually create classes ...
+  
+  Class::MOP::Class->create('Bar' => '0.01' => (
+      superclasses => [ 'Foo' ],
+      attributes => [
+          Class::MOP:::Attribute->new('$bar'),
+          Class::MOP:::Attribute->new('$baz'),          
+      ],
+      methods => {
+          calculate_bar => sub { ... },
+          construct_baz => sub { ... }          
+      }
+  ));
+
 =head1 DESCRIPTION
+
+This is the largest and currently most complex part of the Perl 5 
+meta-object protocol. It controls the introspection and 
+manipulation of Perl 5 classes (and it can create them too). The 
+best way to understand what this module can do, is to read the 
+documentation for each of it's methods.
 
 =head1 METHODS
 
@@ -347,7 +384,14 @@ Class::MOP::Class - Class Meta Object
 
 =item B<meta>
 
-This allows Class::MOP::Class to actually introspect itself.
+This will return a B<Class::MOP::Class> instance which is related 
+to this class. Thereby allowing B<Class::MOP::Class> to actually 
+introspect itself.
+
+As with B<Class::MOP::Attribute>, B<Class::MOP> will actually 
+bootstrap this module by installing a number of attribute meta-objects 
+into it's metaclass. This will allow this class to reap all the benifits 
+of the MOP when subclassing it. 
 
 =back
 

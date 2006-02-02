@@ -88,7 +88,6 @@ sub default {
             }},
             'writer' => qq{sub {
                 \$_[0]->{'$attr_name'} = \$_[1];
-                return;
             }},
             'predicate' => qq{sub {
                 return defined \$_[0]->{'$attr_name'} ? 1 : 0;
@@ -178,27 +177,31 @@ Class::MOP::Attribute - Attribute Meta Object
 =head1 SYNOPSIS
   
   Class::MOP::Attribute->new('$foo' => (
-      accessor => 'foo',        # dual purpose get/set accessor
-      init_arg => '-foo',       # class->new will look for a -foo key
-      default  => 'BAR IS BAZ!' # if no -foo key is provided, use this
+      accessor  => 'foo',        # dual purpose get/set accessor
+      predicate => 'has_foo'     # predicate check for defined-ness      
+      init_arg  => '-foo',       # class->new will look for a -foo key
+      default   => 'BAR IS BAZ!' # if no -foo key is provided, use this
   ));
   
   Class::MOP::Attribute->new('$.bar' => (
-      reader   => 'bar',        # getter
-      writer   => 'set_bar',    # setter      
-      init_arg => '-bar',       # class->new will look for a -bar key
+      reader    => 'bar',        # getter
+      writer    => 'set_bar',    # setter     
+      predicate => 'has_bar'     # predicate check for defined-ness      
+      init_arg  => ':bar',       # class->new will look for a :bar key
       # no default value means it is undef
   ));
 
 =head1 DESCRIPTION
 
-The Attribute Protocol is almost entirely an invention of this module. This is
-because Perl 5 does not have consistent notion of what is an attribute 
-of a class. There are so many ways in which this is done, and very few 
-(if any) are discoverable by this module.
+The Attribute Protocol is almost entirely an invention of this module,
+and is completely optional to this MOP. This is because Perl 5 does not 
+have consistent notion of what is an attribute of a class. There are 
+so many ways in which this is done, and very few (if any) are 
+easily discoverable by this module.
 
 So, all that said, this module attempts to inject some order into this 
-chaos, by introducing a more consistent approach.
+chaos, by introducing a consistent API which can be used to create 
+object attributes.
 
 =head1 METHODS
 
@@ -206,27 +209,125 @@ chaos, by introducing a more consistent approach.
 
 =over 4
 
-=item B<new ($name, %options)>
+=item B<new ($name, ?%options)>
+
+An attribute must (at the very least), have a C<$name>. All other 
+C<%options> are contained added as key-valeue pairs. Acceptable keys
+are as follows:
+
+=over 4
+
+=item I<init_arg>
+
+This should be a string value representing the expected key in 
+an initialization hash. For instance, if we have an I<init_arg> 
+value of C<-foo>, then the following code will Just Work.
+
+  MyClass->meta->construct_instance(-foo => "Hello There");
+
+=item I<default>
+
+The value of this key is the default value which 
+C<Class::MOP::Class::construct_instance> will initialize the 
+attribute to. 
+
+B<NOTE:>
+If the value is a simple scalar (string or number), then it can 
+be just passed as is. However, if you wish to initialize it with 
+a HASH or ARRAY ref, then you need to wrap that inside a CODE 
+reference, like so:
+
+  Class::MOP::Attribute->new('@foo' => (
+      default => sub { [] },
+  ));
+  
+  # or ...  
+  
+  Class::MOP::Attribute->new('%foo' => (
+      default => sub { {} },
+  ));  
+
+If you wish to initialize an attribute with a CODE reference 
+itself, then you need to wrap that in a subroutine as well, like
+so:
+  
+  Class::MOP::Attribute->new('&foo' => (
+      default => sub { sub { print "Hello World" } },
+  ));
+
+And lastly, if the value of your attribute is dependent upon 
+some other aspect of the instance structure, then you can take 
+advantage of the fact that when the I<default> value is a CODE 
+reference, it is passed the raw (unblessed) instance structure 
+as it's only argument. So you can do things like this:
+
+  Class::MOP::Attribute->new('$object_identity' => (
+      default => sub { Scalar::Util::refaddr($_[0]) },
+  ));
+
+This last feature is fairly limited as there is no gurantee of 
+the order of attribute initializations, so you cannot perform 
+any kind of dependent initializations. However, if this is 
+something you need, you could subclass B<Class::MOP::Class> and 
+this class to acheive it. However, this is currently left as 
+an exercise to the reader :).
+
+=back
+
+This I<accessor>, I<reader>, I<writer> and I<predicate> keys can 
+contain either; the name of the method and an appropriate default 
+one will be generated for you, B<or> a HASH ref containing exactly one 
+key (which will be used as the name of the method) and one value, 
+which should contain a CODE reference which will be installed as 
+the method itself.
 
 =over 4
 
 =item I<accessor>
 
+The I<accessor> is a standard perl-style read/write accessor. It will 
+return the value of the attribute, and if a value is passed as an argument, 
+it will assign that value to the attribute.
+
+B<NOTE:>
+This method will properly handle the following code, by assigning an 
+C<undef> value to the attribute.
+
+  $object->set_something(undef);
+
 =item I<reader>
+
+This is a basic read-only accessor, it will just return the value of 
+the attribute.
 
 =item I<writer>
 
+This is a basic write accessor, it accepts a single argument, and 
+assigns that value to the attribute. This method does not intentially 
+return a value, however perl will return the result of the last 
+expression in the subroutine, which returns in this returning the 
+same value that it was passed. 
+
+B<NOTE:>
+This method will properly handle the following code, by assigning an 
+C<undef> value to the attribute.
+
+  $object->set_something();
+
 =item I<predicate>
 
-=item I<init_arg>
-
-=item I<default>
+This is a basic test to see if the value of the attribute is not 
+C<undef>. It will return true (C<1>) if the attribute's value is 
+defined, and false (C<0>) otherwise.
 
 =back
 
 =back 
 
 =head2 Informational
+
+These are all basic read-only value accessors for the values 
+passed into C<new>. I think they are pretty much self-explanitory.
 
 =over 4
 
@@ -242,40 +343,31 @@ chaos, by introducing a more consistent approach.
 
 =item B<init_arg>
 
-=item B<default>
+=item B<default (?$instance)>
+
+As noted in the documentation for C<new> above, if the I<default> 
+value is a CODE reference, this accessor will pass a single additional
+argument C<$instance> into it and return the value.
 
 =back
 
 =head2 Informational predicates
 
+These are all basic predicate methodfor the values passed into C<new>.
+
 =over 4
 
 =item B<has_accessor>
 
-Returns true if this attribute uses a get/set accessor, and false 
-otherwise
-
 =item B<has_reader>
-
-Returns true if this attribute has a reader, and false otherwise
 
 =item B<has_writer>
 
-Returns true if this attribute has a writer, and false otherwise
-
 =item B<has_predicate>
-
-Returns true if this attribute has a predicate, and false otherwise
 
 =item B<has_init_arg>
 
-Returns true if this attribute has a class intialization argument, and 
-false otherwise
-
 =item B<has_default>
-
-Returns true if this attribute has a default value, and false 
-otherwise.
 
 =back
 
@@ -286,12 +378,14 @@ otherwise.
 =item B<install_accessors ($class)>
 
 This allows the attribute to generate and install code for it's own 
-accessor methods. This is called by C<Class::MOP::Class::add_attribute>.
+accessor/reader/writer/predicate methods. This is called by 
+C<Class::MOP::Class::add_attribute>.
 
 =item B<remove_accessors ($class)>
 
 This allows the attribute to remove the method for it's own 
-accessor. This is called by C<Class::MOP::Class::remove_attribute>.
+accessor/reader/writer/predicate. This is called by 
+C<Class::MOP::Class::remove_attribute>.
 
 =back
 
@@ -300,6 +394,14 @@ accessor. This is called by C<Class::MOP::Class::remove_attribute>.
 =over 4
 
 =item B<meta>
+
+This will return a B<Class::MOP::Class> instance which is related 
+to this class.
+
+It should also be noted that B<Class::MOP> will actually bootstrap 
+this module by installing a number of attribute meta-objects into 
+it's metaclass. This will allow this class to reap all the benifits 
+of the MOP when subclassing it. 
 
 =back
 
