@@ -21,6 +21,13 @@ sub import {
             Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) 
         };
     }
+    else {
+        my $pkg = caller();
+        no strict 'refs';
+        *{$pkg . '::' . $_[0]} = sub { 
+            Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) 
+        };        
+    }
 }
 
 ## ----------------------------------------------------------------------------
@@ -80,18 +87,6 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
             if exists $options{accessor};
             
     bless $class->meta->construct_instance(name => $name, %options) => $class;
-});
-
-# NOTE: (meta-circularity)
-# This is how we "tie the knot" for the class
-# meta-objects. This is used to construct the
-# Class::MOP::Class instances after all the 
-# bootstrapping is complete.
-Class::MOP::Class->meta->add_method('construct_class_instance' => sub {
-    my ($class, $package_name) = @_;
-    (defined $package_name && $package_name)
-        || confess "You must pass a package name";      
-    bless Class::MOP::Class->meta->construct_instance(':pkg' => $package_name) => blessed($class) || $class        
 });
 
 1;

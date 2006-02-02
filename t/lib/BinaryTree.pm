@@ -1,10 +1,10 @@
 
-use Class::MOP ':universal';
-
 package BinaryTree;
 
 use strict;
 use warnings;
+
+use Class::MOP 'meta';
 
 our $VERSION = '0.01';
 

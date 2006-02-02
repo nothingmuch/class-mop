@@ -34,17 +34,23 @@ sub meta { $_[0]->initialize($_[0]) }
     # NOTE: (meta-circularity) 
     # this is a special form of &construct_instance 
     # (see below), which is used to construct class
-    # meta-object instances. It will be replaces in 
-    # the bootstrap section in Class::MOP with one 
-    # which uses the normal &construct_instance.
+    # meta-object instances for any Class::MOP::* 
+    # class. All other classes will use the more 
+    # normal &construct_instance.
     sub construct_class_instance {
         my ($class, $package_name) = @_;
         (defined $package_name && $package_name)
-            || confess "You must pass a package name";        
-        bless { 
-            '$:pkg'   => $package_name, 
-            '%:attrs' => {} 
-        } => blessed($class) || $class        
+            || confess "You must pass a package name";    
+        $class = blessed($class) || $class;
+        if ($class =~ /^Class::MOP::/) {    
+            bless { 
+                '$:pkg'   => $package_name, 
+                '%:attrs' => {} 
+            } => $class;
+        }
+        else {
+            bless $class->meta->construct_instance(':pkg' => $package_name) => $class
+        }
     }
 }
 
