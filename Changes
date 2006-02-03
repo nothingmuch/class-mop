@@ -1,5 +1,15 @@
 Revision history for Perl extension Class-MOP.
 
+0.05
+    * Class::MOP::Class
+      - added the &attribute_metaclass and &method_metaclass
+        functions which return a metaclass name to use for 
+        attributes/methods respectively
+        
+    * examples/
+      - adjusted the example code and tests to use the new
+        &attribute_metaclass feature of Class::MOP::Class
+
 0.04 Fri Feb. 3, 2006
     * Class::MOP::Class
       - some documentation suggestions from #perl6

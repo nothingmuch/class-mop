@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # Self-introspection
 
@@ -146,6 +146,9 @@ sub class_precedence_list {
 
 ## Methods
 
+# un-used right now ...
+sub method_metaclass { 'Class::MOP::Method' }
+
 sub add_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
@@ -266,10 +269,16 @@ sub find_all_methods_by_name {
 
 ## Attributes
 
+sub attribute_metaclass { 'Class::MOP::Attribute' }
+
 sub add_attribute {
-    my ($self,$attribute) = @_;
-    (blessed($attribute) && $attribute->isa('Class::MOP::Attribute'))
-        || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
+    my $self      = shift;
+    # either we have an attribute object already
+    # or we need to create one from the args provided
+    my $attribute = blessed($_[0]) ? $_[0] : $self->attribute_metaclass->new(@_);
+    # make sure it is derived from the correct type though
+    ($attribute->isa('Class::MOP::Attribute'))
+        || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
     $attribute->attach_to_class($self);
     $attribute->install_accessors();        
     $self->{'%:attrs'}->{$attribute->name} = $attribute;
@@ -558,6 +567,8 @@ what B<Class::ISA::super_path> does, but we don't remove duplicate names.
 
 =over 4
 
+=item B<method_metaclass>
+
 =item B<add_method ($method_name, $method)>
 
 This will take a C<$method_name> and CODE reference to that 
@@ -643,6 +654,8 @@ the information given, and can not easily discover information on
 their own. See L<Class::MOP::Attribute> for more details.
 
 =over 4
+
+=item B<attribute_metaclass>
 
 =item B<add_attribute ($attribute_name, $attribute_meta_object)>
 

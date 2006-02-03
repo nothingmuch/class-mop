@@ -34,6 +34,8 @@ sub construct_instance {
     return $instance;
 }
 
+sub attribute_metaclass { 'InsideOutClass::Attribute' }
+
 package # hide the package from PAUSE
     InsideOutClass::Attribute;
 
@@ -96,12 +98,10 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
   
   sub meta { InsideOutClass->initialize($_[0]) }
   
-  __PACKAGE__->meta->add_attribute(
-      InsideOutClass::Attribute->new('foo' => (
-          reader => 'get_foo',
-          writer => 'set_foo'
-      ))
-  );    
+  __PACKAGE__->meta->add_attribute('foo' => (
+      reader => 'get_foo',
+      writer => 'set_foo'
+  ));    
   
   sub new  {
       my $class = shift;

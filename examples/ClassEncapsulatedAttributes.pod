@@ -38,6 +38,8 @@ sub construct_instance {
     return $instance;
 }
 
+sub attribute_metaclass { 'ClassEncapsulatedAttributes::Attribute' }
+
 package # hide the package from PAUSE
     ClassEncapsulatedAttributes::Attribute;
 
@@ -101,12 +103,10 @@ ClassEncapsulatedAttributes - A set of example metaclasses with class encapsulat
   
   sub meta { ClassEncapsulatedAttributes->initialize($_[0]) }
   
-  Foo->meta->add_attribute(
-      ClassEncapsulatedAttributes::Attribute->new('foo' => (
-          accessor  => 'Foo_foo',
-          default   => 'init in FOO'
-      ))
-  );   
+  Foo->meta->add_attribute('foo' => (
+      accessor  => 'Foo_foo',
+      default   => 'init in FOO'
+  ));
   
   sub new  {
       my $class = shift;
@@ -117,12 +117,10 @@ ClassEncapsulatedAttributes - A set of example metaclasses with class encapsulat
   our @ISA = ('Foo');
   
   # duplicate the attribute name here
-  Bar->meta->add_attribute(
-      ClassEncapsulatedAttributes::Attribute->new('foo' => (
-          accessor  => 'Bar_foo',
-          default   => 'init in BAR'            
-      ))
-  );      
+  Bar->meta->add_attribute('foo' => (
+      accessor  => 'Bar_foo',
+      default   => 'init in BAR'            
+  ));      
   
   # ... later in other code ...
   

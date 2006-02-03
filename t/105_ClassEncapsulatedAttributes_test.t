@@ -16,21 +16,17 @@ BEGIN {
     
     sub meta { ClassEncapsulatedAttributes->initialize($_[0]) }
     
-    Foo->meta->add_attribute(
-        ClassEncapsulatedAttributes::Attribute->new('foo' => (
-            accessor  => 'foo',
-            predicate => 'has_foo',            
-            default   => 'init in FOO'
-        ))
-    );
+    Foo->meta->add_attribute('foo' => (
+        accessor  => 'foo',
+        predicate => 'has_foo',            
+        default   => 'init in FOO'
+    ));
     
-    Foo->meta->add_attribute(
-        ClassEncapsulatedAttributes::Attribute->new('bar' => (
-            reader  => 'get_bar',
-            writer  => 'set_bar',
-            default => 'init in FOO'
-        ))
-    );    
+    Foo->meta->add_attribute('bar' => (
+        reader  => 'get_bar',
+        writer  => 'set_bar',
+        default => 'init in FOO'
+    ));
     
     sub new  {
         my $class = shift;
@@ -40,21 +36,17 @@ BEGIN {
     package Bar;
     our @ISA = ('Foo');
     
-    Bar->meta->add_attribute(
-        ClassEncapsulatedAttributes::Attribute->new('foo' => (
-            accessor  => 'foo',
-            predicate => 'has_foo',
-            default   => 'init in BAR'            
-        ))
-    );  
+    Bar->meta->add_attribute('foo' => (
+        accessor  => 'foo',
+        predicate => 'has_foo',
+        default   => 'init in BAR'            
+    ));
     
-    Bar->meta->add_attribute(
-        ClassEncapsulatedAttributes::Attribute->new('bar' => (
-            reader  => 'get_bar',
-            writer  => 'set_bar',
-            default => 'init in BAR'          
-        ))
-    );    
+    Bar->meta->add_attribute('bar' => (
+        reader  => 'get_bar',
+        writer  => 'set_bar',
+        default => 'init in BAR'          
+    ));
     
     sub SUPER_foo     { (shift)->SUPER::foo(@_)     }
     sub SUPER_has_foo { (shift)->SUPER::foo(@_)     }    
