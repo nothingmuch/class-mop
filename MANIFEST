@@ -2,6 +2,9 @@ Changes
 Makefile.PL
 MANIFEST
 README
+examples/InsideOutClass.pm
+examples/InstanceCountingClass.pm
+examples/Perl6Attribute.pm
 lib/Class/MOP.pm
 lib/Class/MOP/Attribute.pm
 lib/Class/MOP/Class.pm
@@ -18,10 +21,9 @@ t/012_package_variables.t
 t/020_attribute.t
 t/030_method.t
 t/100_BinaryTree_test.t
-t/101_CountingClass_test.t
+t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t
+t/103_Perl6Attribute_test.t
 t/pod.t
 t/pod_coverage.t
 t/lib/BinaryTree.pm
-t/lib/CountingClass.pm
-t/lib/InsideOutClass.pm
