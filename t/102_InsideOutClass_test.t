@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More no_plan => 2;
+use Test::More tests => 19;
 
 BEGIN { 
     use_ok('Class::MOP');    
@@ -16,14 +16,14 @@ BEGIN {
     sub meta { InsideOutClass->initialize($_[0]) }
     
     Foo->meta->add_attribute(
-        InsideOutAttribute->new('foo' => (
+        InsideOutClass::Attribute->new('foo' => (
             accessor  => 'foo',
             predicate => 'has_foo',
         ))
     );
     
     Foo->meta->add_attribute(
-        InsideOutAttribute->new('bar' => (
+        InsideOutClass::Attribute->new('bar' => (
             reader  => 'get_bar',
             writer  => 'set_bar',
             default => 'FOO is BAR'            

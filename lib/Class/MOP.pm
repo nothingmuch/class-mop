@@ -11,7 +11,7 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub import {
     shift;
