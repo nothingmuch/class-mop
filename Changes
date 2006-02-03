@@ -7,9 +7,12 @@ Revision history for Perl extension Class-MOP.
       - refactored method generation code
       - attributes are now associated with class directly
     
-    * examples
+    * examples/
       - refactored the InsideOut example to take advantage 
         of the Class::MOP::Attribute refactoring
+      - changed example files to .pod files and hide thier
+        package names from PAUSE (I don't want to own these
+        namespaces really, they are just examples)
 
 0.02 Thurs Feb. 2, 2006
     - moving examples from t/lib/* to examples/*
