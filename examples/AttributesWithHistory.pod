@@ -97,7 +97,7 @@ AttributesWithHistory - An example attribute metaclass which keeps a history of 
   
   sub new  {
       my $class = shift;
-      bless $class->meta->construct_instance() => $class;
+      bless $class->meta->construct_instance(@_) => $class;
   }
   
 =head1 DESCRIPTION
@@ -122,4 +122,3 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-

@@ -1,7 +1,16 @@
 Revision history for Perl extension Class-MOP.
 
 0.04 
-    - some documentation suggestions from #perl6
+    * Class::MOP::Class
+      - some documentation suggestions from #perl6
+    
+    * Class::MOP::Attribute
+      - improved error messages    
+    
+    * examples/
+      - added new examples:
+        - AttributesWithHistory
+        - 
 
 0.03 Fri Feb. 3, 2006
     - converted to Module::Build instead of EU::MM

@@ -33,7 +33,7 @@ BEGIN {
     
     sub new  {
         my $class = shift;
-        bless $class->meta->construct_instance() => $class;
+        bless $class->meta->construct_instance(@_) => $class;
     }
 }
 

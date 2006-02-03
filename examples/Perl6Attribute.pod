@@ -47,7 +47,7 @@ Perl6Attribute - An example attribute metaclass for Perl 6 style attributes
   
   sub new  {
       my $class = shift;
-      bless $class->meta->construct_instance() => $class;
+      bless $class->meta->construct_instance(@_) => $class;
   }
 
 =head1 DESCRIPTION

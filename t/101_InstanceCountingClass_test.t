@@ -26,7 +26,7 @@ a simple demonstration of how to make a metaclass.
     sub meta { InstanceCountingClass->initialize($_[0]) }
     sub new  {
         my $class = shift;
-        bless $class->meta->construct_instance() => $class;
+        bless $class->meta->construct_instance(@_) => $class;
     }
     
     package Bar;
