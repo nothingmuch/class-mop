@@ -13,7 +13,6 @@ use base 'Class::MOP::Class';
 
 sub construct_instance {
     my ($class, %params) = @_;
-    #use Data::Dumper; warn Dumper \%params;    
     my $instance = {};
     foreach my $current_class ($class->class_precedence_list()) {
         $instance->{$current_class} = {} 
@@ -36,7 +35,6 @@ sub construct_instance {
             $instance->{$current_class}->{$attr_name} = $val;
         }
     }  
-    #use Data::Dumper; warn Dumper $instance;
     return $instance;
 }
 
@@ -143,6 +141,15 @@ ClassEncapsulatedAttributes - A set of example metaclasses with class encapsulat
   prints $bar->Foo_foo(); # Bar::foo  
   
 =head1 DESCRIPTION
+
+This is an example metaclass which encapsulates a class's 
+attributes on a per-class basis. This means that there is no
+possibility of name clashes with inherited attributes. This 
+is similar to how C++ handles its data members. 
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Yuval "nothingmuch" Kogman for the idea for this example.
 
 =head1 AUTHOR
 
