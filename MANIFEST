@@ -4,6 +4,8 @@ Makefile.PL
 MANIFEST
 README
 META.yml
+examples/AttributesWithHistory.pod
+examples/ClassEncapsulatedAttributes.pod
 examples/InsideOutClass.pod
 examples/InstanceCountingClass.pod
 examples/Perl6Attribute.pod
@@ -26,6 +28,8 @@ t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t
 t/103_Perl6Attribute_test.t
+t/104_AttributesWithHistory_test.t
+t/105_ClassEncapsulatedAttributes_test.t
 t/pod.t
 t/pod_coverage.t
 t/lib/BinaryTree.pm
