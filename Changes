@@ -1,4 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+0.02 Thurs Feb. 2, 2006
+    - moving examples from t/lib/* to examples/*
+        - adding POD documentation to the examples
+
 0.01 Thurs Feb. 2, 2006
     - Initial release
