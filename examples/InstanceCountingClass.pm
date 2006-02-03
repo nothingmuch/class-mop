@@ -1,5 +1,5 @@
 
-package CountingClass;
+package InstanceCountingClass;
 
 use strict;
 use warnings;

@@ -7,7 +7,7 @@ use Test::More tests => 12;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    use_ok('t::lib::CountingClass');
+    use_ok('examples::InstanceCountingClass');
 }
 
 =pod
@@ -22,7 +22,7 @@ a simple demonstration of how to make a metaclass.
 {
     package Foo;
     
-    sub meta { CountingClass->initialize($_[0]) }
+    sub meta { InstanceCountingClass->initialize($_[0]) }
     sub new  {
         my $class = shift;
         bless $class->meta->construct_instance() => $class;

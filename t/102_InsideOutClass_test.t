@@ -7,7 +7,7 @@ use Test::More no_plan => 2;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    use_ok('t::lib::InsideOutClass');
+    use_ok('examples::InsideOutClass');
 }
 
 {
