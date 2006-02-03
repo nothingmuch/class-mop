@@ -539,6 +539,13 @@ This is a read-write attribute which represents the superclass
 relationships of the class the B<Class::MOP::Class> instance is
 associated with. Basically, it can get and set the C<@ISA> for you.
 
+B<NOTE:>
+Perl will occasionally perform some C<@ISA> and method caching, if 
+you decide to change your superclass relationship at runtime (which 
+is quite insane and very much not recommened), then you should be 
+aware of this and the fact that this module does not make any 
+attempt to address this issue.
+
 =item B<class_precedence_list>
 
 This computes the a list of all the class's ancestors in the same order 

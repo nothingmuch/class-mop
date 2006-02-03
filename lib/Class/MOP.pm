@@ -154,7 +154,7 @@ of method dispatch.
 =head2 What changes do I have to make to use this module?
 
 This module was designed to be as unintrusive as possible. Many of 
-it's features are accessible without B<any> change to your existsing 
+its features are accessible without B<any> change to your existsing 
 code at all. It is meant to be a compliment to your existing code and 
 not an intrusion on your code base. Unlike many other B<Class::> 
 modules, this module B<does not> require you subclass it, or even that 

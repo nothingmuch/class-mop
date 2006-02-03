@@ -135,7 +135,7 @@ sub process_accessors {
         if (my $method = $self->$generator($self->name)) {
             return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));            
         }
-        confess "Could not create the methods for " . $self->name . " because : $@";
+        confess "Could not create the '$type' method for " . $self->name . " because : $@";
     }    
 }
 
