@@ -1,5 +1,6 @@
 
-package InstanceCountingClass;
+package # hide the package from PAUSE
+    InstanceCountingClass;
 
 use strict;
 use warnings;

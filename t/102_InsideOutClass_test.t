@@ -4,10 +4,11 @@ use strict;
 use warnings;
 
 use Test::More tests => 19;
+use File::Spec;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    use_ok('examples::InsideOutClass');
+    require_ok(File::Spec->catdir('examples', 'InsideOutClass.pod'));
 }
 
 {

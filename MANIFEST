@@ -4,9 +4,9 @@ Makefile.PL
 MANIFEST
 README
 META.yml
-examples/InsideOutClass.pm
-examples/InstanceCountingClass.pm
-examples/Perl6Attribute.pm
+examples/InsideOutClass.pod
+examples/InstanceCountingClass.pod
+examples/Perl6Attribute.pod
 lib/Class/MOP.pm
 lib/Class/MOP/Attribute.pm
 lib/Class/MOP/Class.pm

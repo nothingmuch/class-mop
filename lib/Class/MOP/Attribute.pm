@@ -5,9 +5,9 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub meta { 
     require Class::MOP::Class;
@@ -41,7 +41,10 @@ sub new {
         writer    => $options{writer},
         predicate => $options{predicate},
         init_arg  => $options{init_arg},
-        default   => $options{default}
+        default   => $options{default},
+        # keep a weakened link to the 
+        # class we are associated with
+        associated_class => undef,
     } => $class;
 }
 
@@ -72,61 +75,90 @@ sub default {
     $self->{default};
 }
 
-{
-    # this is just a utility routine to 
-    # handle the details of accessors
-    my $_inspect_accessor = sub {
-        my ($attr_name, $type, $accessor) = @_;
-    
-        my %ACCESSOR_TEMPLATES = (
-            'accessor' => qq{sub {
-                \$_[0]->{'$attr_name'} = \$_[1] if scalar(\@_) == 2;
-                \$_[0]->{'$attr_name'};
-            }},
-            'reader' => qq{sub {
-                \$_[0]->{'$attr_name'};
-            }},
-            'writer' => qq{sub {
-                \$_[0]->{'$attr_name'} = \$_[1];
-            }},
-            'predicate' => qq{sub {
-                defined \$_[0]->{'$attr_name'} ? 1 : 0;
-            }}
-        );    
-    
-        if (reftype($accessor) && reftype($accessor) eq 'HASH') {
-            my ($name, $method) = each %{$accessor};
-            return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
-        }
-        else {
-            my $method = eval $ACCESSOR_TEMPLATES{$type};
-            confess "Could not create the $type for $attr_name CODE(\n" . $ACCESSOR_TEMPLATES{$type} . "\n) : $@" if $@;
-            return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));
-        }    
-    };
+# class association 
 
-    sub install_accessors {
-        my ($self, $class) = @_;
-        (blessed($class) && $class->isa('Class::MOP::Class'))
-            || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
-        $class->add_method(
-            $_inspect_accessor->($self->name, 'accessor' => $self->accessor())
-        ) if $self->has_accessor();
+sub associated_class { $_[0]->{associated_class} }
 
-        $class->add_method(            
-            $_inspect_accessor->($self->name, 'reader' => $self->reader())
-        ) if $self->has_reader();
-    
-        $class->add_method(
-            $_inspect_accessor->($self->name, 'writer' => $self->writer())
-        ) if $self->has_writer();
-    
-        $class->add_method(
-            $_inspect_accessor->($self->name, 'predicate' => $self->predicate())
-        ) if $self->has_predicate();
-        return;
+sub attach_to_class {
+    my ($self, $class) = @_;
+    (blessed($class) && $class->isa('Class::MOP::Class'))
+        || confess "You must pass a Class::MOP::Class instance (or a subclass)";
+    weaken($self->{associated_class} = $class);    
+}
+
+sub detach_from_class {
+    my $self = shift;
+    $self->{associated_class} = undef;        
+}
+
+## Method generation helpers
+
+sub generate_accessor_method {
+    my ($self, $attr_name) = @_;
+    eval qq{sub {
+        \$_[0]->{'$attr_name'} = \$_[1] if scalar(\@_) == 2;
+        \$_[0]->{'$attr_name'};
+    }};
+}
+
+sub generate_reader_method {
+    my ($self, $attr_name) = @_; 
+    eval qq{sub {
+        \$_[0]->{'$attr_name'};
+    }};   
+}
+
+sub generate_writer_method {
+    my ($self, $attr_name) = @_; 
+    eval qq{sub {
+        \$_[0]->{'$attr_name'} = \$_[1];
+    }};
+}
+
+sub generate_predicate_method {
+    my ($self, $attr_name) = @_; 
+    eval qq{sub {
+        defined \$_[0]->{'$attr_name'} ? 1 : 0;
+    }};
+}
+
+sub process_accessors {
+    my ($self, $type, $accessor) = @_;
+    if (reftype($accessor) && reftype($accessor) eq 'HASH') {
+        my ($name, $method) = each %{$accessor};
+        return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
+    else {
+        my $generator = $self->can('generate_' . $type . '_method');
+        ($generator)
+            || confess "There is no method generator for the type='$type'";
+        if (my $method = $self->$generator($self->name)) {
+            return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));            
+        }
+        confess "Could not create the methods for " . $self->name . " because : $@";
+    }    
+}
+
+sub install_accessors {
+    my $self  = shift;
+    my $class = $self->associated_class;
     
+    $class->add_method(
+        $self->process_accessors('accessor' => $self->accessor())
+    ) if $self->has_accessor();
+
+    $class->add_method(            
+        $self->process_accessors('reader' => $self->reader())
+    ) if $self->has_reader();
+
+    $class->add_method(
+        $self->process_accessors('writer' => $self->writer())
+    ) if $self->has_writer();
+
+    $class->add_method(
+        $self->process_accessors('predicate' => $self->predicate())
+    ) if $self->has_predicate();
+    return;
 }
 
 {
@@ -141,13 +173,11 @@ sub default {
     };
     
     sub remove_accessors {
-        my ($self, $class) = @_;
-        (blessed($class) && $class->isa('Class::MOP::Class'))
-            || confess "You must pass a Class::MOP::Class instance (or a subclass)";    
-        $_remove_accessor->($self->accessor(),  $class) if $self->has_accessor();
-        $_remove_accessor->($self->reader(),    $class) if $self->has_reader();
-        $_remove_accessor->($self->writer(),    $class) if $self->has_writer();
-        $_remove_accessor->($self->predicate(), $class) if $self->has_predicate();
+        my $self = shift;
+        $_remove_accessor->($self->accessor(),  $self->associated_class()) if $self->has_accessor();
+        $_remove_accessor->($self->reader(),    $self->associated_class()) if $self->has_reader();
+        $_remove_accessor->($self->writer(),    $self->associated_class()) if $self->has_writer();
+        $_remove_accessor->($self->predicate(), $self->associated_class()) if $self->has_predicate();
         return;                        
     }
 
@@ -371,17 +401,52 @@ These are all basic predicate methods for the values passed into C<new>.
 
 =back
 
+=head2 Class association
+
+=over 4
+
+=item B<associated_class>
+
+=item B<attach_to_class ($class)>
+
+=item B<detach_from_class>
+
+=back
+
 =head2 Attribute Accessor generation
 
 =over 4
 
-=item B<install_accessors ($class)>
+=item B<install_accessors>
 
 This allows the attribute to generate and install code for it's own 
 I<accessor/reader/writer/predicate> methods. This is called by 
 C<Class::MOP::Class::add_attribute>.
 
-=item B<remove_accessors ($class)>
+This method will call C<process_accessors> for each of the possible 
+method types (accessor, reader, writer & predicate).
+
+=item B<process_accessors ($type, $value)>
+
+This takes a C<$type> (accessor, reader, writer or predicate), and 
+a C<$value> (the value passed into the constructor for each of the
+different types). It will then either generate the method itself 
+(using the C<generate_*_method> methods listed below) or it will 
+use the custom method passed through the constructor. 
+
+=over 4
+
+=item B<generate_accessor_method ($attr_name)>
+
+=item B<generate_predicate_method ($attr_name)>
+
+=item B<generate_reader_method ($attr_name)>
+
+=item B<generate_writer_method ($attr_name)>
+
+=back
+
+=item B<remove_accessors>
 
 This allows the attribute to remove the method for it's own 
 I<accessor/reader/writer/predicate>. This is called by 

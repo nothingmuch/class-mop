@@ -1,0 +1,151 @@
+
+package # hide the package from PAUSE
+    InsideOutClass;
+
+use strict;
+use warnings;
+
+use Class::MOP 'meta';
+
+our $VERSION = '0.02';
+
+use Scalar::Util 'refaddr';
+
+use base 'Class::MOP::Class';
+
+sub construct_instance {
+    my ($class, %params) = @_;
+    # create a scalar ref to use as 
+    # the inside-out instance
+    my $instance = \(my $var);
+    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
+        # if the attr has an init_arg, use that, otherwise,
+        # use the attributes name itself as the init_arg
+        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        # try to fetch the init arg from the %params ...
+        my $val;        
+        $val = $params{$init_arg} if exists $params{$init_arg};
+        # if nothing was in the %params, we can use the 
+        # attribute's default value (if it has one)
+        $val ||= $attr->default($instance) if $attr->has_default();
+        # now add this to the instance structure
+        $class->get_package_variable('%' . $attr->name)->{ refaddr($instance) } = $val;
+    }    
+    return $instance;
+}
+
+package # hide the package from PAUSE
+    InsideOutClass::Attribute;
+
+use strict;
+use warnings;
+
+use Class::MOP 'meta';
+
+our $VERSION = '0.03';
+
+use Scalar::Util 'refaddr';
+
+use base 'Class::MOP::Attribute';
+
+sub generate_accessor_method {
+    my ($self, $attr_name) = @_;
+    $attr_name = ($self->associated_class->name . '::' . $attr_name);
+    eval 'sub {
+        $' . $attr_name . '{ refaddr($_[0]) } = $_[1] if scalar(@_) == 2;
+        $' . $attr_name . '{ refaddr($_[0]) };
+    }';
+}
+
+sub generate_reader_method {
+    my ($self, $attr_name) = @_;     
+    eval 'sub {
+        $' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) };
+    }';   
+}
+
+sub generate_writer_method {
+    my ($self, $attr_name) = @_; 
+    eval 'sub {
+        $' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) } = $_[1];
+    }';
+}
+
+sub generate_predicate_method {
+    my ($self, $attr_name) = @_; 
+    eval 'sub {
+        defined($' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) }) ? 1 : 0;
+    }';
+}
+
+## &remove_attribute is left as an exercise for the reader :)
+
+1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+InsideOutClass - A set of example metaclasses which implement the Inside-Out technique
+
+=head1 SYNOPSIS
+
+  package Foo;
+  
+  sub meta { InsideOutClass->initialize($_[0]) }
+  
+  __PACKAGE__->meta->add_attribute(
+      InsideOutClass::Attribute->new('foo' => (
+          reader => 'get_foo',
+          writer => 'set_foo'
+      ))
+  );    
+  
+  sub new  {
+      my $class = shift;
+      bless $class->meta->construct_instance() => $class;
+  }  
+
+  # now you can just use the class as normal
+
+=head1 DESCRIPTION
+
+This is a set of example metaclasses which implement the Inside-Out 
+class technique. What follows is a brief explaination of the code 
+found in this module.
+
+First step is to subclass B<Class::MOP::Class> and override the 
+C<construct_instance> method. The default C<construct_instance> 
+will create a HASH reference using the parameters and attribute 
+default values. Since inside-out objects don't use HASH refs, and 
+use package variables instead, we need to write code to handle 
+this difference. 
+
+The next step is to create the subclass of B<Class::MOP::Attribute> 
+and override the method generation code. This requires overloading 
+C<generate_accessor_method>, C<generate_reader_method>, 
+C<generate_writer_method> and C<generate_predicate_method>. All 
+other aspects are taken care of with the existing B<Class::MOP::Attribute> 
+infastructure.
+
+And that is pretty much all. Of course I am ignoring need for 
+inside-out objects to be C<DESTROY>-ed, and some other details as 
+well, but this is an example. A real implementation is left as an 
+exercise to the reader.
+
+=head1 AUTHOR
+
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
+=cut

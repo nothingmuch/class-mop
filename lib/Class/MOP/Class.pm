@@ -270,7 +270,8 @@ sub add_attribute {
     my ($self,$attribute) = @_;
     (blessed($attribute) && $attribute->isa('Class::MOP::Attribute'))
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
-    $attribute->install_accessors($self);        
+    $attribute->attach_to_class($self);
+    $attribute->install_accessors();        
     $self->{'%:attrs'}->{$attribute->name} = $attribute;
 }
 
@@ -295,8 +296,9 @@ sub remove_attribute {
         || confess "You must define an attribute name";
     my $removed_attribute = $self->{'%:attrs'}->{$attribute_name};    
     delete $self->{'%:attrs'}->{$attribute_name} 
-        if defined $removed_attribute;
-    $removed_attribute->remove_accessors($self);        
+        if defined $removed_attribute;        
+    $removed_attribute->remove_accessors();        
+    $removed_attribute->detach_from_class();    
     return $removed_attribute;
 } 
 
