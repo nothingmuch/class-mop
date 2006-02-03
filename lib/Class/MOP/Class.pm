@@ -24,11 +24,12 @@ sub meta { $_[0]->initialize($_[0]) }
     # After all, do package definitions even get reaped?
     my %METAS;
     sub initialize {
-        my ($class, $package_name) = @_;
+        my $class        = shift;
+        my $package_name = shift;
         (defined $package_name && $package_name)
             || confess "You must pass a package name";        
         return $METAS{$package_name} if exists $METAS{$package_name};
-        $METAS{$package_name} = $class->construct_class_instance($package_name);
+        $METAS{$package_name} = $class->construct_class_instance($package_name, @_);
     }
     
     # NOTE: (meta-circularity) 
@@ -38,18 +39,21 @@ sub meta { $_[0]->initialize($_[0]) }
     # class. All other classes will use the more 
     # normal &construct_instance.
     sub construct_class_instance {
-        my ($class, $package_name) = @_;
+        my $class        = shift;
+        my $package_name = shift;
         (defined $package_name && $package_name)
             || confess "You must pass a package name";    
         $class = blessed($class) || $class;
         if ($class =~ /^Class::MOP::/) {    
             bless { 
-                '$:pkg'   => $package_name, 
-                '%:attrs' => {} 
+                '$:package'             => $package_name, 
+                '%:attributes'          => {},
+                '$:attribute_metaclass' => 'Class::MOP::Attribute',
+                '$:method_metaclass'    => 'Class::MOP::Method',                
             } => $class;
         }
         else {
-            bless $class->meta->construct_instance(':pkg' => $package_name) => $class
+            bless $class->meta->construct_instance(':package' => $package_name, @_) => $class
         }
     }
 }
@@ -107,7 +111,7 @@ sub construct_instance {
 
 # Informational 
 
-sub name { $_[0]->{'$:pkg'} }
+sub name { $_[0]->{'$:package'} }
 
 sub version {  
     my $self = shift;
@@ -147,7 +151,7 @@ sub class_precedence_list {
 ## Methods
 
 # un-used right now ...
-sub method_metaclass { 'Class::MOP::Method' }
+sub method_metaclass { $_[0]->{'$:method_metaclass'} }
 
 sub add_method {
     my ($self, $method_name, $method) = @_;
@@ -269,7 +273,7 @@ sub find_all_methods_by_name {
 
 ## Attributes
 
-sub attribute_metaclass { 'Class::MOP::Attribute' }
+sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 
 sub add_attribute {
     my $self      = shift;

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 56;
+use Test::More tests => 60;
 use Test::Exception;
 
 BEGIN {
@@ -48,7 +48,8 @@ foreach my $non_method_name (qw(
 }
 
 foreach my $attribute_name (
-    '$:pkg', '%:attrs'
+    '$:package', '%:attributes', 
+    '$:attribute_metaclass', '$:method_metaclass'
     ) {
     ok($meta->has_attribute($attribute_name), '... Class::MOP::Class->has_attribute(' . $attribute_name . ')');        
     isa_ok($meta->get_attribute($attribute_name), 'Class::MOP::Attribute');            

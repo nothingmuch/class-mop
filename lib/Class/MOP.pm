@@ -48,15 +48,29 @@ sub import {
 ## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('$:pkg' => (
-        init_arg => ':pkg'
+    Class::MOP::Attribute->new('$:package' => (
+        init_arg => ':package'
     ))
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('%:attrs' => (
-        init_arg => ':attrs',
+    Class::MOP::Attribute->new('%:attributes' => (
+        init_arg => ':attributes',
         default  => sub { {} }
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('$:attribute_metaclass' => (
+        init_arg => ':attribute_metaclass',
+        default  => 'Class::MOP::Attribute',
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('$:method_metaclass' => (
+        init_arg => ':method_metaclass',
+        default  => 'Class::MOP::Method',        
     ))
 );
 
