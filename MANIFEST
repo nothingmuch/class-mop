@@ -1,7 +1,9 @@
+Build.PL
 Changes
 Makefile.PL
 MANIFEST
 README
+META.yml
 examples/InsideOutClass.pm
 examples/InstanceCountingClass.pm
 examples/Perl6Attribute.pm
