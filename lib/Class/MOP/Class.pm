@@ -9,11 +9,11 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # Self-introspection
 
-sub meta { $_[0]->initialize($_[0]) }
+sub meta { Class::MOP::Class->initialize($_[0]) }
 
 # Creation
 

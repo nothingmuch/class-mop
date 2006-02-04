@@ -5,9 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-use Class::MOP 'meta';
-
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'Class::MOP::Class';
 
@@ -34,9 +32,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-use Class::MOP 'meta';
-
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'Class::MOP::Attribute';
 
