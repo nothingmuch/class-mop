@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More no_plan => 29;
+use Test::More tests => 26;
 use File::Spec;
 
 BEGIN { 

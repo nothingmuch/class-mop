@@ -1,5 +1,6 @@
 
-package LazyClass;
+package # hide the package from PAUSE
+    LazyClass;
 
 use strict;
 use warnings;
@@ -27,7 +28,8 @@ sub construct_instance {
     return $instance;    
 }
 
-package LazyClass::Attribute;
+package # hide the package from PAUSE
+    LazyClass::Attribute;
 
 use strict;
 use warnings;
