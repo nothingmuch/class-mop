@@ -8,6 +8,7 @@ examples/AttributesWithHistory.pod
 examples/ClassEncapsulatedAttributes.pod
 examples/InsideOutClass.pod
 examples/InstanceCountingClass.pod
+examples/LazyClass.pod
 examples/Perl6Attribute.pod
 lib/Class/MOP.pm
 lib/Class/MOP/Attribute.pm
@@ -31,6 +32,7 @@ t/102_InsideOutClass_test.t
 t/103_Perl6Attribute_test.t
 t/104_AttributesWithHistory_test.t
 t/105_ClassEncapsulatedAttributes_test.t
+t/106_LazyClass_test.t
 t/pod.t
 t/pod_coverage.t
 t/lib/BinaryTree.pm
