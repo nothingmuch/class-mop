@@ -14,7 +14,7 @@ BEGIN {
 {
     package Foo;
     
-    sub meta { ClassEncapsulatedAttributes->initialize($_[0]) }
+    use metaclass 'ClassEncapsulatedAttributes';
     
     Foo->meta->add_attribute('foo' => (
         accessor  => 'foo',

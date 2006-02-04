@@ -90,14 +90,12 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
 
   package Foo;
   
-  sub meta { 
-      InsideOutClass->initialize($_[0] => (
-         # tell our metaclass to use the 
-         # InsideOut attribute metclass 
-         # to construct all it's attributes
-        ':attribute_metaclass' => 'InsideOutClass::Attribute'
-      )) 
-  }
+  use metaclass 'InsideOutClass' => (
+     # tell our metaclass to use the 
+     # InsideOut attribute metclass 
+     # to construct all it's attributes
+    ':attribute_metaclass' => 'InsideOutClass::Attribute'
+  );
   
   __PACKAGE__->meta->add_attribute('foo' => (
       reader => 'get_foo',

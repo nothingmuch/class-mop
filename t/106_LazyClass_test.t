@@ -14,11 +14,9 @@ BEGIN {
 {
     package BinaryTree;
     
-    sub meta {
-        LazyClass->initialize($_[0] => (
-            ':attribute_metaclass' => 'LazyClass::Attribute'
-        ));
-    }
+    use metaclass 'LazyClass' => (
+        ':attribute_metaclass' => 'LazyClass::Attribute'
+    );
 
     BinaryTree->meta->add_attribute('$:node' => (
         accessor => 'node',

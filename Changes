@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.06 
+    * metaclass
+      - adding new metaclass pragma to make assiging the 
+        metaclass a little more straightforward
+
     * Class::MOP::Class
       - fixing minor meta-circularity issue with &meta, it 
         is now more useful for subclasses
@@ -8,6 +12,7 @@ Revision history for Perl extension Class-MOP.
     * examples/
       - adjusting code to use the &Class::MOP::Class::meta
         fix detailed above
+      - adjusting code to use the metaclass pragma
       
 0.05 Sat Feb. 4, 2006
     * Class::MOP::Class
