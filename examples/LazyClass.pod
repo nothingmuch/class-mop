@@ -1,0 +1,138 @@
+
+package LazyClass;
+
+use strict;
+use warnings;
+
+use Class::MOP 'meta';
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Class';
+
+sub construct_instance {
+    my ($class, %params) = @_;
+    my $instance = {};
+    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
+        # if the attr has an init_arg, use that, otherwise,
+        # use the attributes name itself as the init_arg
+        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        # try to fetch the init arg from the %params ...
+        my $val;        
+        $val = $params{$init_arg} if exists $params{$init_arg};
+        # now add this to the instance structure
+        # only if we have found a value at all
+        $instance->{$attr->name} = $val if defined $val;
+    }
+    return $instance;    
+}
+
+package LazyClass::Attribute;
+
+use strict;
+use warnings;
+
+use Class::MOP 'meta';
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Attribute';
+
+sub generate_accessor_method {
+    my ($self, $attr_name) = @_;
+    sub {
+        if (scalar(@_) == 2) {
+            $_[0]->{$attr_name} = $_[1];
+        }
+        else {
+            if (!exists $_[0]->{$attr_name}) {
+                my $attr = $self->associated_class->get_attribute($attr_name);
+                $_[0]->{$attr_name} = $attr->has_default ? $attr->default($_[0]) : undef;           
+            }            
+            $_[0]->{$attr_name};            
+        }
+    };
+}
+
+sub generate_reader_method {
+    my ($self, $attr_name) = @_; 
+    sub {
+        if (!exists $_[0]->{$attr_name}) {
+            my $attr = $self->associated_class->get_attribute($attr_name);
+            $_[0]->{$attr_name} = $attr->has_default ? $attr->default($_[0]) : undef;           
+        }
+        $_[0]->{$attr_name};
+    };   
+}
+
+1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+LazyClass - An example metaclass with lazy initialization
+
+=head1 SYNOPSIS
+
+  package BinaryTree;
+  
+  sub meta {
+      LazyClass->initialize($_[0] => (
+          ':attribute_metaclass' => 'LazyClass::Attribute'
+      ));
+  }
+  
+  BinaryTree->meta->add_attribute('$:node' => (
+      accessor => 'node',
+      init_arg => ':node'
+  ));
+  
+  BinaryTree->meta->add_attribute('$:left' => (
+      reader  => 'left',
+      default => sub { BinaryTree->new() }
+  ));
+  
+  BinaryTree->meta->add_attribute('$:right' => (
+      reader  => 'right',
+      default => sub { BinaryTree->new() }    
+  ));    
+  
+  sub new {
+      my $class = shift;
+      bless $class->meta->construct_instance(@_) => $class;
+  }
+  
+  # ... later in code
+  
+  my $btree = BinaryTree->new();
+  # ... $btree is an empty hash, no keys are initialized yet
+
+=head1 DESCRIPTION
+
+This is an example metclass in which all attributes are created 
+lazily. This means that no entries are made in the instance HASH 
+until the last possible moment. 
+
+The example above of a binary tree is a good use for such a 
+metaclass because it allows the class to be space efficient 
+without complicating the programing of it. This would also be 
+ideal for a class which has a large amount of attributes, 
+several of which are optional. 
+
+=head1 AUTHOR
+
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
