@@ -55,6 +55,10 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
             } => $class;
         }
         else {
+            # NOTE:
+            # it is safe to use meta here because
+            # class will always be a subclass of 
+            # Class::MOP::Class, which defines meta
             bless $class->meta->construct_instance(':package' => $package_name, @_) => $class
         }
     }
@@ -92,6 +96,10 @@ sub create {
 
 # Instance Construction & Cloning
 
+sub new_object {
+    my $class = shift;
+    bless $class->construct_instance(@_) => $class->name;
+}
 
 sub construct_instance {
     my ($class, %params) = @_;
@@ -107,6 +115,12 @@ sub construct_instance {
         $instance->{$attr->name} = $val;
     }
     return $instance;
+}
+
+sub clone_object {
+    my $class    = shift;
+    my $instance = shift;
+    bless $class->clone_instance($instance, @_) => $class->name;
 }
 
 sub clone_instance {
@@ -526,6 +540,20 @@ to use them or not.
 
 =over 4
 
+=item B<new_object (%params)>
+
+This is a convience method for creating a new object of the class, and 
+blessing it into the appropriate package as well. Ideally your class 
+would call a C<new> this method like so:
+
+  sub MyClass::new { 
+      my ($class, %param) = @_;
+      $class->meta->new_object(%params);
+  }
+
+Of course the ideal place for this would actually be in C<UNIVERSAL::> 
+but that is considered bad style, so we do not do that.
+
 =item B<construct_instance (%params)>
 
 This method is used to construct an instace structure suitable for 
@@ -538,6 +566,20 @@ the applicable attributes and layout out the fields in the HASH ref,
 it will then initialize them using either use the corresponding key 
 in C<%params> or any default value or initializer found in the 
 attribute meta-object.
+
+=item B<clone_object ($instance, %params)>
+
+This is a convience method for cloning an object instance, then  
+blessing it into the appropriate package. Ideally your class 
+would call a C<clone> this method like so:
+
+  sub MyClass::clone {
+      my ($self, %param) = @_;
+      $self->meta->clone_object($self, %params);
+  }
+
+Of course the ideal place for this would actually be in C<UNIVERSAL::> 
+but that is considered bad style, so we do not do that.
 
 =item B<clone_instance($instance, %params)>
 

@@ -4,7 +4,7 @@ TODO
 
 - clean up all ->initialize($_[0]) handling
 
-(DONE)
+(PARTIALLY DONE) - needs tests
   
 We should always be sure that $_[0] is a package name, and not 
 a blessed intstance.
@@ -17,7 +17,7 @@ All the info in the HASH is discoverable through the meta-object.
 
 - General Purpose &clone_instance method
 
-(PARTIALLY DONE) - need to implement the deep cloning
+(PARTIALLY DONE) - need to implement the deep cloning & tests
 
 It can be a method of the metaclass, like construct_instance is, 
 actually it should be called clone_instance, and it should
@@ -27,15 +27,17 @@ class to implement, as is the construct_instance.
 
 - General Purpose &new_object and &clone_object method
 
+(PARTIALLY DONE) - needs tests
+
 I seem to be writing a new method each time, but since we dont
 have a Object class to always inherit from, this is needed.
 However, there is nothing to say that I cannot do something like:
  
-  Foo->meta->new_object()
+  Foo->meta->new_object(%params)
 
 and ...
 
-  $foo->meta->clone_object()
+  $foo->meta->clone_object($foo, %params)
 
 Give it some more thought, but I think it is the best way to 
 approach this.

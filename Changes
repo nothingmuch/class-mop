@@ -13,7 +13,13 @@ Revision history for Perl extension Class-MOP.
         since all the same info can be gotten from the 
         attribute meta-object itself
           - updated docs & tests to reflect
-
+      - added &clone_instance method which does a deep clone
+        of the instance structure created by &construct_instance
+          - added docs & tests for this
+      - added &new_object and &clone_object convience methods to
+        return blessed new or cloned instances
+          - added docs & tests for this
+          
     * examples/
       - adjusting code to use the &Class::MOP::Class::meta
         fix detailed above
