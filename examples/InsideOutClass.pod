@@ -16,7 +16,7 @@ sub construct_instance {
     # create a scalar ref to use as 
     # the inside-out instance
     my $instance = \(my $var);
-    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->compute_all_applicable_attributes()) {
         # if the attr has an init_arg, use that, otherwise,
         # use the attributes name itself as the init_arg
         my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;

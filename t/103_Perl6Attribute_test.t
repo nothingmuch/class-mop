@@ -14,7 +14,7 @@ BEGIN {
 {
     package Foo;
     
-    use Class::MOP 'meta';
+    use metaclass;
     
     Foo->meta->add_attribute(Perl6Attribute->new('$.foo'));
     Foo->meta->add_attribute(Perl6Attribute->new('@.bar'));    

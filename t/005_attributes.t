@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 33;
 use Test::Exception;
 
 BEGIN { 
@@ -68,25 +68,18 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     isa_ok($meta, 'Class::MOP::Class');
     
     is_deeply(
-        [ sort { $a->{name} cmp $b->{name} } $meta->compute_all_applicable_attributes() ],
+        [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
         [ 
-            {
-                name      => '$bar',
-                class     => 'Bar',
-                attribute => $BAR_ATTR
-            },
-            {
-                name      => '$baz',
-                class     => 'Baz',
-                attribute => $BAZ_ATTR
-            },
-            {
-                name      => '$foo',
-                class     => 'Foo',
-                attribute => $FOO_ATTR
-            },                        
+            $BAR_ATTR,
+            $BAZ_ATTR,
+            $FOO_ATTR,                        
         ],
         '... got the right list of applicable attributes for Baz');
+        
+    is_deeply(
+        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ Bar->meta, Baz->meta, Foo->meta ],
+        '... got the right list of associated classes from the applicable attributes for Baz');        
     
     my $attr;
     lives_ok {
@@ -100,20 +93,17 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     ok(!$meta->has_method('set_baz'), '... a writer has been removed');
 
     is_deeply(
-        [ sort { $a->{name} cmp $b->{name} } $meta->compute_all_applicable_attributes() ],
+        [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
         [ 
-            {
-                name      => '$bar',
-                class     => 'Bar',
-                attribute => $BAR_ATTR
-            },
-            {
-                name      => '$foo',
-                class     => 'Foo',
-                attribute => $FOO_ATTR
-            },                        
+            $BAR_ATTR,
+            $FOO_ATTR,                        
         ],
         '... got the right list of applicable attributes for Baz');
+
+    is_deeply(
+        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ Bar->meta, Foo->meta ],
+        '... got the right list of associated classes from the applicable attributes for Baz');
 
      {
          my $attr;
@@ -128,14 +118,15 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
      }
 
      is_deeply(
-         [ sort { $a->{name} cmp $b->{name} } $meta->compute_all_applicable_attributes() ],
+         [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
          [ 
-             {
-                 name      => '$foo',
-                 class     => 'Foo',
-                 attribute => $FOO_ATTR
-             },                        
+             $FOO_ATTR,                        
          ],
          '... got the right list of applicable attributes for Baz');
+
+     is_deeply(
+         [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+         [ Foo->meta ],
+         '... got the right list of associated classes from the applicable attributes for Baz');
 
 }

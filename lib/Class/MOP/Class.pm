@@ -27,7 +27,9 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
         my $class        = shift;
         my $package_name = shift;
         (defined $package_name && $package_name)
-            || confess "You must pass a package name";        
+            || confess "You must pass a package name";    
+        # make sure the package name is not blessed
+        $package_name = blessed($package_name) || $package_name;
         return $METAS{$package_name} if exists $METAS{$package_name};
         $METAS{$package_name} = $class->construct_class_instance($package_name, @_);
     }
@@ -88,25 +90,42 @@ sub create {
     return $meta;
 }
 
-# Instance Construction
+# Instance Construction & Cloning
+
 
 sub construct_instance {
     my ($class, %params) = @_;
     my $instance = {};
-    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
-        # if the attr has an init_arg, use that, otherwise,
-        # use the attributes name itself as the init_arg
+    foreach my $attr ($class->compute_all_applicable_attributes()) {
         my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
         # try to fetch the init arg from the %params ...
         my $val;        
         $val = $params{$init_arg} if exists $params{$init_arg};
         # if nothing was in the %params, we can use the 
         # attribute's default value (if it has one)
-        $val ||= $attr->default($instance) if $attr->has_default();
-        # now add this to the instance structure
+        $val ||= $attr->default($instance) if $attr->has_default();            
         $instance->{$attr->name} = $val;
     }
     return $instance;
+}
+
+sub clone_instance {
+    my ($class, $self, %params) = @_;
+    (blessed($self))
+        || confess "You can only clone instances, \$self is not a blessed instance";
+    # NOTE:
+    # this should actually do a deep clone
+    # instead of this cheap hack. I will 
+    # add that in later. 
+    # (use the Class::Cloneable::Util code)
+    my $clone = { %{$self} }; 
+    foreach my $attr ($class->compute_all_applicable_attributes()) {
+        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        # try to fetch the init arg from the %params ...        
+        $clone->{$attr->name} = $params{$init_arg} 
+            if exists $params{$init_arg};
+    }
+    return $clone;    
 }
 
 # Informational 
@@ -336,11 +355,7 @@ sub compute_all_applicable_attributes {
         foreach my $attr_name ($meta->get_attribute_list()) { 
             next if exists $seen_attr{$attr_name};
             $seen_attr{$attr_name}++;
-            push @attrs => {
-                name      => $attr_name, 
-                class     => $class,
-                attribute => $meta->get_attribute($attr_name)
-            };
+            push @attrs => $meta->get_attribute($attr_name);
         }
     }
     return @attrs;    
@@ -504,18 +519,18 @@ from outside of that method really.
 
 =back
 
-=head2 Object instance construction
+=head2 Object instance construction and cloning
 
-This method is used to construct an instace structure suitable for 
-C<bless>-ing into your package of choice. It works in conjunction 
-with the Attribute protocol to collect all applicable attributes. 
-
-This method is B<entirely optional>, it is up to you whether you want 
-to use it or not.
+These methods are B<entirely optional>, it is up to you whether you want 
+to use them or not.
 
 =over 4
 
 =item B<construct_instance (%params)>
+
+This method is used to construct an instace structure suitable for 
+C<bless>-ing into your package of choice. It works in conjunction 
+with the Attribute protocol to collect all applicable attributes.
 
 This will construct and instance using a HASH ref as storage 
 (currently only HASH references are supported). This will collect all 
@@ -523,6 +538,18 @@ the applicable attributes and layout out the fields in the HASH ref,
 it will then initialize them using either use the corresponding key 
 in C<%params> or any default value or initializer found in the 
 attribute meta-object.
+
+=item B<clone_instance($instance, %params)>
+
+This method is a compliment of C<construct_instance> (which means if 
+you override C<construct_instance>, you need to override this one too).
+
+This method will clone the C<$instance> structure created by the 
+C<construct_instance> method, and apply any C<%params> passed to it 
+to change the attribute values. The structure returned is (like with 
+C<construct_instance>) an unC<bless>ed HASH reference, it is your 
+responsibility to then bless this cloned structure into the right 
+class.
 
 =back
 
@@ -711,11 +738,11 @@ use the C<compute_all_applicable_attributes> method.
 
 =item B<compute_all_applicable_attributes>
 
-This will traverse the inheritance heirachy and return a list of HASH 
-references for all the applicable attributes for this class. The HASH 
-references will contain the following information; the attribute name, 
-the class which the attribute is associated with and the actual 
-attribute meta-object.
+This will traverse the inheritance heirachy and return a list of all 
+the applicable attributes for this class. It does not construct a 
+HASH reference like C<compute_all_applicable_methods> because all 
+that same information is discoverable through the attribute 
+meta-object itself.
 
 =back
 

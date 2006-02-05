@@ -12,7 +12,7 @@ use base 'Class::MOP::Class';
 sub construct_instance {
     my ($class, %params) = @_;
     my $instance = {};
-    foreach my $attr (map { $_->{attribute} } $class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->compute_all_applicable_attributes()) {
         # if the attr has an init_arg, use that, otherwise,
         # use the attributes name itself as the init_arg
         my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;

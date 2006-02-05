@@ -8,6 +8,11 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - fixing minor meta-circularity issue with &meta, it 
         is now more useful for subclasses
+      - &compute_all_applicable_attributes now just returns
+        the attribute meta-object, rather than the HASH ref
+        since all the same info can be gotten from the 
+        attribute meta-object itself
+          - updated docs & tests to reflect
 
     * examples/
       - adjusting code to use the &Class::MOP::Class::meta
