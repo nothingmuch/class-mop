@@ -1,0 +1,80 @@
+---------------------------------------------------------------------
+TODO
+---------------------------------------------------------------------
+
+- clean up all ->initialize($_[0]) handling
+
+(DONE)
+  
+We should always be sure that $_[0] is a package name, and not 
+a blessed intstance.
+
+- make &compute_all_applicable_attributes not return a HASH
+
+(DONE)
+
+All the info in the HASH is discoverable through the meta-object.
+
+- General Purpose &clone_instance method
+
+(PARTIALLY DONE) - need to implement the deep cloning
+
+It can be a method of the metaclass, like construct_instance is, 
+actually it should be called clone_instance, and it should
+be thought of as a low-level cloning function, so it should not 
+do any blessing or anything of the sort. That is left for the 
+class to implement, as is the construct_instance.
+
+- General Purpose &new_object and &clone_object method
+
+I seem to be writing a new method each time, but since we dont
+have a Object class to always inherit from, this is needed.
+However, there is nothing to say that I cannot do something like:
+ 
+  Foo->meta->new_object()
+
+and ...
+
+  $foo->meta->clone_object()
+
+Give it some more thought, but I think it is the best way to 
+approach this.
+
+- Role/Trait/Scalar-style mixin mechanism
+
+This is fairly simple with the MOP, but the trick comes with 
+any SUPER:: calls. This will be a very tricky problem I think.
+
+* see Class::Trait::Base, and maybe use anon-classes for this.
+* review the Scalar model for mix-ins
+* I like the Class does Role, Role isa Class from Perl 6 idea.
+
+- metaclass.pm
+
+Should handle metaclass incompatibility issue, and do it through 
+class mixin composition.
+
+- Prototype-style example
+
+Make a C::MOP::Class subclass which has an AUTOLOAD method, the 
+method will DWIM depending up on the value it is passed.
+
+  Foo->prototype->say_hello(sub { print "Hello" });
+
+This will turn into this:
+
+  Foo->prototype->add_method('say_hello' => sub { print "Hello" });
+
+I am not sure how we should handle non-method arguments, mostly 
+because those would be static prototype variables, which would 
+translate to class package variables. 
+
+- Make a Class::MOP::Package 
+
+Class::MOP::Class would be a subclass of this, but I am not sure 
+this is worth the time. 
+
+
+
+
+
