@@ -4,10 +4,19 @@ Revision history for Perl extension Class-MOP.
     * metaclass
       - adding new metaclass pragma to make assiging the 
         metaclass a little more straightforward
+        
+    * Class::MOP
+      - clean up bootstrapping to include more complete 
+        attribute definitions for Class::MOP::Class and 
+        Class::MOP::Attribute (accessors, readers, writers, 
+        etc.) ... it is redundant, but is useful meta-info
+        to have around.
 
     * Class::MOP::Class
       - fixing minor meta-circularity issue with &meta, it 
         is now more useful for subclasses
+      - added &get_attribute_map as an accessor for the 
+        hash of attribute meta objects
       - &compute_all_applicable_attributes now just returns
         the attribute meta-object, rather than the HASH ref
         since all the same info can be gotten from the 

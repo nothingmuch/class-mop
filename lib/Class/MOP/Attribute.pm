@@ -33,6 +33,8 @@ sub new {
     (!exists $options{reader} && !exists $options{writer})
         || confess "You cannot declare an accessor and reader and/or writer functions"
             if exists $options{accessor};
+    
+    $options{init_arg} = $name if not exists $options{init_arg};
             
     bless {
         name      => $name,
@@ -48,7 +50,13 @@ sub new {
     } => $class;
 }
 
+# NOTE:
+# the next bunch of methods will get bootstrapped 
+# away in the Class::MOP bootstrapping section
+
 sub name { $_[0]->{name} }
+
+sub associated_class { $_[0]->{associated_class} }
 
 sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
 sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
@@ -63,6 +71,9 @@ sub writer    { $_[0]->{writer}    }
 sub predicate { $_[0]->{predicate} }
 sub init_arg  { $_[0]->{init_arg}  }
 
+# end bootstrapped away method section.
+# (all methods below here are kept intact)
+
 sub default { 
     my $self = shift;
     if (reftype($self->{default}) && reftype($self->{default}) eq 'CODE') {
@@ -76,8 +87,6 @@ sub default {
 }
 
 # class association 
-
-sub associated_class { $_[0]->{associated_class} }
 
 sub attach_to_class {
     my ($self, $class) = @_;
@@ -254,6 +263,9 @@ an initialization hash. For instance, if we have an I<init_arg>
 value of C<-foo>, then the following code will Just Work.
 
   MyClass->meta->construct_instance(-foo => "Hello There");
+
+In an init_arg is not assigned, it will automatically use the 
+value of C<$name>.
 
 =item I<default>
 

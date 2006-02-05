@@ -49,12 +49,14 @@ sub import {
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:package' => (
-        init_arg => ':package'
+        reader   => 'name',
+        init_arg => ':package',
     ))
 );
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('%:attributes' => (
+        reader   => 'get_attribute_map',
         init_arg => ':attributes',
         default  => sub { {} }
     ))
@@ -62,6 +64,7 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:attribute_metaclass' => (
+        reader   => 'attribute_metaclass',
         init_arg => ':attribute_metaclass',
         default  => 'Class::MOP::Attribute',
     ))
@@ -69,6 +72,7 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:method_metaclass' => (
+        reader   => 'method_metaclass',
         init_arg => ':method_metaclass',
         default  => 'Class::MOP::Method',        
     ))
@@ -76,13 +80,60 @@ Class::MOP::Class->meta->add_attribute(
 
 ## Class::MOP::Attribute
 
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('name'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('accessor'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('reader'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('writer'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('predicate'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('init_arg'));
-Class::MOP::Attribute->meta->add_attribute(Class::MOP::Attribute->new('default'));
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('name' => (
+        reader => 'name'
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('associated_class' => (
+        reader => 'associated_class'
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('accessor' => (
+        reader    => 'accessor',
+        predicate => 'has_accessor',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('reader' => (
+        reader    => 'reader',
+        predicate => 'has_reader',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('writer' => (
+        reader    => 'writer',
+        predicate => 'has_writer',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('predicate' => (
+        reader    => 'predicate',
+        predicate => 'has_predicate',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('init_arg' => (
+        reader    => 'init_arg',
+        predicate => 'has_init_arg',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('default' => (
+        # default has a custom 'reader' method ...
+        predicate => 'has_default',
+    ))
+);
+
 
 # NOTE: (meta-circularity)
 # This should be one of the last things done
@@ -99,6 +150,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
     (!exists $options{reader} && !exists $options{writer})
         || confess "You cannot declare an accessor and reader and/or writer functions"
             if exists $options{accessor};
+    $options{init_arg} = $name if not exists $options{init_arg};
             
     bless $class->meta->construct_instance(name => $name, %options) => blessed($class) || $class;
 });

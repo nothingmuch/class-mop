@@ -2,6 +2,20 @@
 TODO
 ---------------------------------------------------------------------
 
+- have the init_arg be automagically filled in if it is not present
+
+(DONE)
+
+This will simplify some code, and really is not very expensive anyway
+
+- clean up bootstrapping to include the accessors, etc for attributes
+
+(PARTIALLY DONE) - could use some tests 
+
+Having all this meta-info is useful actually, so why not add it, and 
+let the methods get overwritten if they need to be, its a small price
+to pay for what we get from it.
+
 - clean up all ->initialize($_[0]) handling
 
 (PARTIALLY DONE) - needs tests

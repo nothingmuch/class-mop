@@ -94,6 +94,17 @@ sub create {
     return $meta;
 }
 
+## Attribute readers
+
+# NOTE:
+# all these attribute readers will be bootstrapped 
+# away in the Class::MOP bootstrap section
+
+sub name                { $_[0]->{'$:package'}             }
+sub get_attribute_map   { $_[0]->{'%:attributes'}          }
+sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
+sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
+
 # Instance Construction & Cloning
 
 sub new_object {
@@ -119,7 +130,7 @@ sub construct_instance {
 
 sub clone_object {
     my $class    = shift;
-    my $instance = shift;
+    my $instance = shift; 
     bless $class->clone_instance($instance, @_) => $class->name;
 }
 
@@ -144,7 +155,8 @@ sub clone_instance {
 
 # Informational 
 
-sub name { $_[0]->{'$:package'} }
+# &name should be here too, but it is above
+# because it gets bootstrapped away
 
 sub version {  
     my $self = shift;
@@ -182,9 +194,6 @@ sub class_precedence_list {
 }
 
 ## Methods
-
-# un-used right now ...
-sub method_metaclass { $_[0]->{'$:method_metaclass'} }
 
 sub add_method {
     my ($self, $method_name, $method) = @_;
@@ -306,8 +315,6 @@ sub find_all_methods_by_name {
 
 ## Attributes
 
-sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
-
 sub add_attribute {
     my $self      = shift;
     # either we have an attribute object already
@@ -318,21 +325,21 @@ sub add_attribute {
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
     $attribute->attach_to_class($self);
     $attribute->install_accessors();        
-    $self->{'%:attrs'}->{$attribute->name} = $attribute;
+    $self->get_attribute_map->{$attribute->name} = $attribute;
 }
 
 sub has_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    exists $self->{'%:attrs'}->{$attribute_name} ? 1 : 0;    
+    exists $self->get_attribute_map->{$attribute_name} ? 1 : 0;    
 } 
 
 sub get_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    return $self->{'%:attrs'}->{$attribute_name} 
+    return $self->get_attribute_map->{$attribute_name} 
         if $self->has_attribute($attribute_name);    
 } 
 
@@ -340,8 +347,8 @@ sub remove_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    my $removed_attribute = $self->{'%:attrs'}->{$attribute_name};    
-    delete $self->{'%:attrs'}->{$attribute_name} 
+    my $removed_attribute = $self->get_attribute_map->{$attribute_name};    
+    delete $self->get_attribute_map->{$attribute_name} 
         if defined $removed_attribute;        
     $removed_attribute->remove_accessors();        
     $removed_attribute->detach_from_class();    
@@ -350,7 +357,7 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    keys %{$self->{'%:attrs'}};
+    keys %{$self->get_attribute_map};
 } 
 
 sub compute_all_applicable_attributes {
@@ -729,6 +736,8 @@ their own. See L<Class::MOP::Attribute> for more details.
 =over 4
 
 =item B<attribute_metaclass>
+
+=item B<get_attribute_map>
 
 =item B<add_attribute ($attribute_name, $attribute_meta_object)>
 

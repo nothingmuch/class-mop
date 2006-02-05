@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 64;
+use Test::More tests => 65;
 use Test::Exception;
 
 BEGIN {
@@ -16,11 +16,12 @@ BEGIN {
     isa_ok($attr, 'Class::MOP::Attribute');
 
     is($attr->name, '$foo', '... $attr->name == $foo');
+    ok($attr->has_init_arg, '... $attr does have an init_arg');
+    is($attr->init_arg, '$foo', '... $attr init_arg is the name');        
     
     ok(!$attr->has_accessor, '... $attr does not have an accessor');
     ok(!$attr->has_reader, '... $attr does not have an reader');
     ok(!$attr->has_writer, '... $attr does not have an writer');
-    ok(!$attr->has_init_arg, '... $attr does not have an init_arg');
     ok(!$attr->has_default, '... $attr does not have an default');                
 }
 
