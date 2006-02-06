@@ -22,8 +22,8 @@ BEGIN {
     
     sub new  {
         my $class = shift;
-        bless $class->meta->construct_instance(@_) => $class;
-    }        
+        $class->meta->new_object(@_);
+    }      
 }
 
 my $foo = Foo->new();

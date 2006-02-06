@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 32;
 use Test::Exception;
 
 BEGIN {
@@ -91,6 +91,11 @@ isa_ok($foo, 'Foo');
 my $bar = $bar_meta->new_object();
 isa_ok($bar, 'Bar');
 isa_ok($bar, 'Foo');
+
+my $baz = $baz_meta->new_object();
+isa_ok($baz, 'Baz');
+isa_ok($baz, 'Bar');
+isa_ok($baz, 'Foo');
 
 my $cloned_foo = $foo_meta->clone_object($foo);
 isa_ok($cloned_foo, 'Foo');

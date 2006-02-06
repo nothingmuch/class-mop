@@ -147,12 +147,16 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
         
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
-    (!exists $options{reader} && !exists $options{writer})
-        || confess "You cannot declare an accessor and reader and/or writer functions"
-            if exists $options{accessor};
-    $options{init_arg} = $name if not exists $options{init_arg};
+    $options{init_arg} = $name 
+        if not exists $options{init_arg};
 
-    bless $class->meta->construct_instance(name => $name, %options) => blessed($class) || $class;
+    # return the new object
+    $class->meta->new_object(name => $name, %options);
+});
+
+Class::MOP::Attribute->meta->add_method('clone' => sub {
+    my $self = shift;
+    $self->meta->clone_object($self, @_);    
 });
 
 1;

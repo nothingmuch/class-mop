@@ -40,7 +40,7 @@ InstanceCountingClass - An example metaclass which counts instances
   
   sub new  {
       my $class = shift;
-      bless $class->meta->construct_instance(@_) => $class;
+      $class->meta->new_object(@_);
   }
 
   # ... meanwhile, somewhere in the code

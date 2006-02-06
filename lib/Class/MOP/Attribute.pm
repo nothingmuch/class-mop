@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 sub meta { 
     require Class::MOP::Class;
@@ -30,11 +30,8 @@ sub new {
         
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
-    (!exists $options{reader} && !exists $options{writer})
-        || confess "You cannot declare an accessor and reader and/or writer functions"
-            if exists $options{accessor};
-    
-    $options{init_arg} = $name if not exists $options{init_arg};
+    $options{init_arg} = $name 
+        if not exists $options{init_arg};
             
     bless {
         name      => $name,
@@ -48,6 +45,19 @@ sub new {
         # class we are associated with
         associated_class => undef,
     } => $class;
+}
+
+# NOTE:
+# this is a primative (and kludgy) clone operation 
+# for now, it will be repleace in the Class::MOP
+# bootstrap with a proper one, however we know 
+# that this one will work fine for now.
+sub clone {
+    my $self    = shift;
+    my %options = @_;
+    (blessed($self))
+        || confess "Can only clone an instance";
+    return bless { %{$self}, %options } => blessed($self);
 }
 
 # NOTE:
@@ -253,6 +263,8 @@ object attributes.
 An attribute must (at the very least), have a C<$name>. All other 
 C<%options> are contained added as key-value pairs. Acceptable keys
 are as follows:
+
+=item B<clone (%options)>
 
 =over 4
 

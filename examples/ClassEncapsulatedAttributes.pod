@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Class::MOP::Class';
 
@@ -111,7 +111,7 @@ ClassEncapsulatedAttributes - A set of example metaclasses with class encapsulat
   
   sub new  {
       my $class = shift;
-      bless $class->meta->construct_instance(@_) => $class;
+      $class->meta->new_object(@_);
   }
   
   package Bar;

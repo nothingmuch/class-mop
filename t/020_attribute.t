@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 65;
+use Test::More tests => 62;
 use Test::Exception;
 
 BEGIN {
@@ -22,7 +22,13 @@ BEGIN {
     ok(!$attr->has_accessor, '... $attr does not have an accessor');
     ok(!$attr->has_reader, '... $attr does not have an reader');
     ok(!$attr->has_writer, '... $attr does not have an writer');
-    ok(!$attr->has_default, '... $attr does not have an default');                
+    ok(!$attr->has_default, '... $attr does not have an default');  
+    
+    my $attr_clone = $attr->clone();
+    isa_ok($attr_clone, 'Class::MOP::Attribute');
+    isnt($attr, $attr_clone, '... but they are different instances');
+    
+    is_deeply($attr, $attr_clone, '... but they are the same inside');
 }
 
 {
@@ -41,7 +47,13 @@ BEGIN {
     
     ok(!$attr->has_accessor, '... $attr does not have an accessor');
     ok(!$attr->has_reader, '... $attr does not have an reader');
-    ok(!$attr->has_writer, '... $attr does not have an writer');               
+    ok(!$attr->has_writer, '... $attr does not have an writer');   
+    
+    my $attr_clone = $attr->clone();
+    isa_ok($attr_clone, 'Class::MOP::Attribute');
+    isnt($attr, $attr_clone, '... but they are different instances');
+    
+    is_deeply($attr, $attr_clone, '... but they are the same inside');                
 }
 
 {
@@ -63,7 +75,13 @@ BEGIN {
     is($attr->accessor, 'foo', '... $attr->accessor == foo');
     
     ok(!$attr->has_reader, '... $attr does not have an reader');
-    ok(!$attr->has_writer, '... $attr does not have an writer');               
+    ok(!$attr->has_writer, '... $attr does not have an writer');   
+    
+    my $attr_clone = $attr->clone();
+    isa_ok($attr_clone, 'Class::MOP::Attribute');
+    isnt($attr, $attr_clone, '... but they are different instnaces');
+    
+    is_deeply($attr, $attr_clone, '... but they are the same inside');                
 }
 
 {
@@ -87,30 +105,45 @@ BEGIN {
     ok($attr->has_writer, '... $attr does have an writer');
     is($attr->writer, 'set_foo', '... $attr->writer == set_foo');    
 
-    ok(!$attr->has_accessor, '... $attr does not have an accessor');    
+    ok(!$attr->has_accessor, '... $attr does not have an accessor'); 
+    
+    my $attr_clone = $attr->clone();
+    isa_ok($attr_clone, 'Class::MOP::Attribute');
+    isnt($attr, $attr_clone, '... but they are different instnaces');
+    
+    is_deeply($attr, $attr_clone, '... but they are the same inside');       
 }
 
-dies_ok {
+# NOTE:
+# the next three tests once tested that 
+# the code would fail, but we lifted the 
+# restriction so you can have an accessor 
+# along with a reader/writer pair (I mean 
+# why not really). So now they test that 
+# it works, which is kinda silly, but it 
+# tests the API change, so I keep it.
+
+lives_ok {
     Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         reader   => 'get_foo',
     ));
-} '... cannot create accessors with reader/writers';
+} '... can create accessors with reader/writers';
 
-dies_ok {
+lives_ok {
     Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         writer   => 'set_foo',
     ));
-} '... cannot create accessors with reader/writers';
+} '... can create accessors with reader/writers';
 
-dies_ok {
+lives_ok {
     Class::MOP::Attribute->new('$foo', (
         accessor => 'foo',
         reader   => 'get_foo',        
         writer   => 'set_foo',
     ));
-} '... cannot create accessors with reader/writers';
+} '... can create accessors with reader/writers';
 
 dies_ok {
     Class::MOP::Attribute->new();
@@ -139,25 +172,3 @@ dies_ok {
 dies_ok {
     Class::MOP::Attribute->remove_accessors(bless {} => 'Fail');
 } '... bad remove_accessors argument';
-
-
-{
-    my $meta = Class::MOP::Attribute->meta();
-    isa_ok($meta, 'Class::MOP::Class');
-    
-    foreach my $method_name (qw(
-        meta 
-        new
-        has_accessor accessor
-        has_writer   writer
-        has_reader   reader
-        has_init_arg init_arg
-        has_default  default
-        install_accessors
-        remove_accessors
-        )) {
-        ok($meta->has_method($method_name), '... Class::MOP::Attribute->has_method(' . $method_name . ')');
-    }
-    
-    
-}

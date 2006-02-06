@@ -10,7 +10,7 @@ This will simplify some code, and really is not very expensive anyway
 
 - clean up bootstrapping to include the accessors, etc for attributes
 
-(PARTIALLY DONE) - could use some tests 
+(DONE)
 
 Having all this meta-info is useful actually, so why not add it, and 
 let the methods get overwritten if they need to be, its a small price
@@ -18,7 +18,7 @@ to pay for what we get from it.
 
 - clean up all ->initialize($_[0]) handling
 
-(PARTIALLY DONE) - needs tests
+(DONE)
   
 We should always be sure that $_[0] is a package name, and not 
 a blessed intstance.
@@ -41,7 +41,7 @@ class to implement, as is the construct_instance.
 
 - General Purpose &new_object and &clone_object method
 
-(PARTIALLY DONE) - needs tests
+(PARTIALLY DONE) - needs more tests
 
 I seem to be writing a new method each time, but since we dont
 have a Object class to always inherit from, this is needed.

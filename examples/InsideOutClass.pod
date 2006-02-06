@@ -104,8 +104,8 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
   
   sub new  {
       my $class = shift;
-      bless $class->meta->construct_instance(@_) => $class;
-  }  
+      $class->meta->new_object(@_);
+  } 
 
   # now you can just use the class as normal
 

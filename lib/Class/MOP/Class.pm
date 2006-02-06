@@ -6,6 +6,7 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
+use Hash::Util   'lock_keys';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
@@ -150,6 +151,63 @@ sub clone_object {
     bless $class->clone_instance($instance, @_) => blessed($instance);
 }
 
+#{
+#    sub _deep_clone {       
+#        my ($object, $cache) = @_;
+#        return $object unless ref($object);
+#        # check for an active cache
+#        return _deep_clone_ref($object, ($cache = {}), 'HASH') if not defined $cache;      
+#        # if we have it in the cache them return the cached clone
+#        return $cache->{$object} if exists $cache->{$object};
+#        # now try it as an object, which will in
+#        # turn try it as ref if its not an object
+#        # and store it in case we run into a circular ref
+#        $cache->{$object} = _deep_clone_object($object, $cache);    
+#    }
+#
+#    sub _deep_clone_object {
+#        my ($object, $cache) = @_;
+#        # check to see if its an object, with a clone method    
+#        # or if we have an object, with no clone method, then
+#        # we will respect its encapsulation, and not muck with 
+#        # its internals. Basically, we assume it does not want
+#        # to be cloned    
+#        return $cache->{$object} = ($object->can('clone') ? $object->clone() : $object) 
+#            if blessed($object);
+#        return $cache->{$object} = _deep_clone_ref($object, $cache);     
+#    }
+#
+#    sub _deep_clone_ref { 
+#        my ($object, $cache, $ref_type) = @_;
+#        $ref_type ||= ref($object);
+#        my ($clone, $tied);
+#        if ($ref_type eq 'HASH') {
+#            $clone = {};
+#            tie %{$clone}, ref $tied if $tied = tied(%{$object});    
+#            %{$clone} = map { ref($_) ? _deep_clone($_, $cache) : $_ } %{$object};
+#        } 
+#        elsif ($ref_type eq 'ARRAY') {
+#            $clone = [];
+#            tie @{$clone}, ref $tied if $tied = tied(@{$object});
+#            @{$clone} = map { ref($_) ? _deep_clone($_, $cache) : $_ } @{$object};
+#        } 
+#        elsif ($ref_type eq 'REF' or $ref_type eq 'SCALAR') {
+#            my $var = "";
+#            $clone = \$var;
+#            tie ${$clone}, ref $tied if $tied = tied(${$object});
+#            ${$clone} = _deep_clone(${$object}, $cache);
+#        } 
+#        else {
+#            # shallow copy reference to code, glob, regex
+#            $clone = $object;
+#        }
+#        # store it in our cache
+#        $cache->{$object} = $clone;
+#        # and return the clone
+#        return $clone;    
+#    }    
+#}
+
 sub clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
@@ -159,7 +217,7 @@ sub clone_instance {
     # instead of this cheap hack. I will 
     # add that in later. 
     # (use the Class::Cloneable::Util code)
-    my $clone = { %{$instance} }; 
+    my $clone = { %{$instance} }; #_deep_clone($instance); 
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         my $init_arg = $attr->init_arg();
         # try to fetch the init arg from the %params ...        
