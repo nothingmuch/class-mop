@@ -81,6 +81,8 @@ isa_ok($baz_meta, 'MyMetaClass');
 is($my_meta->new_object(':package' => 'Baz'), $baz_meta, '... got the right Baz->meta singleton');
 is($my_meta->clone_object($baz_meta), $baz_meta, '... cloning got the right Baz->meta singleton');
 
+$baz_meta->superclasses('Bar');
+
 # now create a regular objects for real
 
 my $foo = $foo_meta->new_object();
