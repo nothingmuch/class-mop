@@ -151,7 +151,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
         || confess "You cannot declare an accessor and reader and/or writer functions"
             if exists $options{accessor};
     $options{init_arg} = $name if not exists $options{init_arg};
-            
+
     bless $class->meta->construct_instance(name => $name, %options) => blessed($class) || $class;
 });
 

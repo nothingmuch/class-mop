@@ -22,7 +22,8 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
     # there is no need to worry about destruction though
     # because they should die only when the program dies.
     # After all, do package definitions even get reaped?
-    my %METAS;
+    my %METAS;    
+    
     sub initialize {
         my $class        = shift;
         my $package_name = shift;
@@ -30,8 +31,7 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
             || confess "You must pass a package name";    
         # make sure the package name is not blessed
         $package_name = blessed($package_name) || $package_name;
-        return $METAS{$package_name} if exists $METAS{$package_name};
-        $METAS{$package_name} = $class->construct_class_instance($package_name, @_);
+        $class->construct_class_instance(':package' => $package_name, @_);
     }
     
     # NOTE: (meta-circularity) 
@@ -42,12 +42,14 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
     # normal &construct_instance.
     sub construct_class_instance {
         my $class        = shift;
-        my $package_name = shift;
+        my %options      = @_;
+        my $package_name = $options{':package'};
         (defined $package_name && $package_name)
-            || confess "You must pass a package name";    
+            || confess "You must pass a package name";  
+        return $METAS{$package_name} if exists $METAS{$package_name};              
         $class = blessed($class) || $class;
         if ($class =~ /^Class::MOP::/) {    
-            bless { 
+            $METAS{$package_name} = bless { 
                 '$:package'             => $package_name, 
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => 'Class::MOP::Attribute',
@@ -59,7 +61,7 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
             # it is safe to use meta here because
             # class will always be a subclass of 
             # Class::MOP::Class, which defines meta
-            bless $class->meta->construct_instance(':package' => $package_name, @_) => $class
+            $METAS{$package_name} = bless $class->meta->construct_instance(%options) => $class
         }
     }
 }
@@ -109,6 +111,13 @@ sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
 
 sub new_object {
     my $class = shift;
+    # NOTE:
+    # we need to protect the integrity of the 
+    # Class::MOP::Class singletons here, so we
+    # delegate this to &construct_class_instance
+    # which will deal with the singletons
+    return $class->construct_class_instance(@_)
+        if $class->name->isa('Class::MOP::Class');
     bless $class->construct_instance(@_) => $class->name;
 }
 
@@ -116,7 +125,7 @@ sub construct_instance {
     my ($class, %params) = @_;
     my $instance = {};
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        my $init_arg = $attr->init_arg();
         # try to fetch the init arg from the %params ...
         my $val;        
         $val = $params{$init_arg} if exists $params{$init_arg};
@@ -131,21 +140,28 @@ sub construct_instance {
 sub clone_object {
     my $class    = shift;
     my $instance = shift; 
-    bless $class->clone_instance($instance, @_) => $class->name;
+    (blessed($instance) && $instance->isa($class->name))
+        || confess "You must pass an instance ($instance) of the metaclass (" . $class->name . ")";
+    # NOTE:
+    # we need to protect the integrity of the 
+    # Class::MOP::Class singletons here, they 
+    # should not be cloned
+    return $instance if $instance->isa('Class::MOP::Class');   
+    bless $class->clone_instance($instance, @_) => blessed($instance);
 }
 
 sub clone_instance {
-    my ($class, $self, %params) = @_;
-    (blessed($self))
+    my ($class, $instance, %params) = @_;
+    (blessed($instance))
         || confess "You can only clone instances, \$self is not a blessed instance";
     # NOTE:
     # this should actually do a deep clone
     # instead of this cheap hack. I will 
     # add that in later. 
     # (use the Class::Cloneable::Util code)
-    my $clone = { %{$self} }; 
+    my $clone = { %{$instance} }; 
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        my $init_arg = $attr->has_init_arg() ? $attr->init_arg() : $attr->name;
+        my $init_arg = $attr->init_arg();
         # try to fetch the init arg from the %params ...        
         $clone->{$attr->name} = $params{$init_arg} 
             if exists $params{$init_arg};
@@ -530,7 +546,7 @@ to it.
 This initializes and returns returns a B<Class::MOP::Class> object 
 for a given a C<$package_name>.
 
-=item B<construct_class_instance ($package_name)>
+=item B<construct_class_instance (%options)>
 
 This will construct an instance of B<Class::MOP::Class>, it is 
 here so that we can actually "tie the knot" for B<Class::MOP::Class> 
