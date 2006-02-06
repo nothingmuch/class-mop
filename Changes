@@ -27,7 +27,10 @@ Revision history for Perl extension Class-MOP.
           - added docs & tests for this
       - added &new_object and &clone_object convience methods to
         return blessed new or cloned instances
+          - they handle Class::MOP::Class singletons correctly too
           - added docs & tests for this
+      - cleaned up the &constuct_class_instance so that it behaves
+        more like &construct_instance (and managed the singletons too)
           
     * examples/
       - adjusting code to use the &Class::MOP::Class::meta
