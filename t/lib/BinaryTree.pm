@@ -4,70 +4,60 @@ package BinaryTree;
 use strict;
 use warnings;
 
-use Class::MOP 'meta';
+use metaclass;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('$:uid' => (
-        reader  => 'getUID',
-        writer  => 'setUID',
-        default => sub { 
-            my $instance = shift;
-            ("$instance" =~ /\((.*?)\)$/);
+BinaryTree->meta->add_attribute('$:uid' => (
+    reader  => 'getUID',
+    writer  => 'setUID',
+    default => sub { 
+        my $instance = shift;
+        ("$instance" =~ /\((.*?)\)$/);
+    }
+));
+
+BinaryTree->meta->add_attribute('$:node' => (
+    reader   => 'getNodeValue',
+    writer   => 'setNodeValue',
+    init_arg => ':node'
+));
+
+BinaryTree->meta->add_attribute('$:parent' => (
+    predicate => 'hasParent',
+    reader    => 'getParent',
+    writer    => 'setParent'
+));
+
+BinaryTree->meta->add_attribute('$:left' => (
+    predicate => 'hasLeft',         
+    reader    => 'getLeft',
+    writer => { 
+        'setLeft' => sub {
+            my ($self, $tree) = @_;
+        	$tree->setParent($self) if defined $tree;
+            $self->{'$:left'} = $tree;    
+            $self;                    
         }
-    ))
-);
+   },
+));
 
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('$:node' => (
-        reader   => 'getNodeValue',
-        writer   => 'setNodeValue',
-        init_arg => ':node'
-    ))
-);
-
-__PACKAGE__->meta->add_attribute(      
-    Class::MOP::Attribute->new('$:parent' => (
-        predicate => 'hasParent',
-        reader    => 'getParent',
-        writer    => 'setParent'
-    ))
-);
-
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('$:left' => (
-        predicate => 'hasLeft',         
-        reader    => 'getLeft',
-        writer => { 
-            'setLeft' => sub {
-                my ($self, $tree) = @_;
-            	$tree->setParent($self) if defined $tree;
-                $self->{'$:left'} = $tree;    
-                $self;                    
-            }
-       },
-    ))
-);
-
-__PACKAGE__->meta->add_attribute(  
-    Class::MOP::Attribute->new('$:right' => (
-        predicate => 'hasRight',           
-        reader    => 'getRight',
-        writer => {
-            'setRight' => sub {
-                my ($self, $tree) = @_;   
-            	$tree->setParent($self) if defined $tree;
-                $self->{'$:right'} = $tree;      
-                $self;                    
-            }
+BinaryTree->meta->add_attribute('$:right' => (
+    predicate => 'hasRight',           
+    reader    => 'getRight',
+    writer => {
+        'setRight' => sub {
+            my ($self, $tree) = @_;   
+        	$tree->setParent($self) if defined $tree;
+            $self->{'$:right'} = $tree;      
+            $self;                    
         }
-    ))
-);
+    }
+));
 
 sub new {
     my $class = shift;
-    bless $class->meta->construct_instance(':node' => shift) => $class;            
+    $class->meta->new_object(':node' => shift);            
 }    
         
 sub removeLeft {
@@ -131,3 +121,4 @@ sub height {
     return 1 + (($left_height > $right_height) ? $left_height : $right_height);
 }                      
 
+1;
