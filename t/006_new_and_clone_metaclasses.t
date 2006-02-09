@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 32;
+use Test::More tests => 36;
 use Test::Exception;
 
 BEGIN {
@@ -107,4 +107,24 @@ isnt($cloned_foo, $foo, '... $cloned_foo is a new object different from $foo');
 dies_ok {
     $foo_meta->clone_object($meta);
 } '... this dies as expected';  
+
+# test stuff
+
+{
+    package FooBar;
+    use metaclass;
+    
+    FooBar->meta->add_attribute('test');
+}
+
+my $attr = FooBar->meta->get_attribute('test');
+isa_ok($attr, 'Class::MOP::Attribute');
+
+my $attr_clone = $attr->clone();
+isa_ok($attr_clone, 'Class::MOP::Attribute');
+
+isnt($attr, $attr_clone, '... we successfully cloned our attributes');
+is($attr->associated_class, 
+   $attr_clone->associated_class, 
+   '... we successfully did not clone our associated metaclass');
 

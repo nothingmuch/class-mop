@@ -79,7 +79,7 @@ BEGIN {
     
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
-    isnt($attr, $attr_clone, '... but they are different instnaces');
+    isnt($attr, $attr_clone, '... but they are different instances');
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');                
 }
@@ -109,7 +109,7 @@ BEGIN {
     
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
-    isnt($attr, $attr_clone, '... but they are different instnaces');
+    isnt($attr, $attr_clone, '... but they are different instances');
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');       
 }
