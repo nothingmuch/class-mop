@@ -1,8 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
-0.06 
+0.06 Thurs Feb. 9, 2006
     * metaclass
-      - adding new metaclass pragma to make assiging the 
+      - adding new metaclass pragma to make setting up the 
         metaclass a little more straightforward
         
     * Class::MOP
@@ -25,12 +25,16 @@ Revision history for Perl extension Class-MOP.
       - added &clone_instance method which does a deep clone
         of the instance structure created by &construct_instance
           - added docs & tests for this
+          - added Clone as a dependency
       - added &new_object and &clone_object convience methods to
         return blessed new or cloned instances
           - they handle Class::MOP::Class singletons correctly too
           - added docs & tests for this
       - cleaned up the &constuct_class_instance so that it behaves
         more like &construct_instance (and managed the singletons too)
+      - added the &check_metaclass_compatibility method to make sure
+        that metaclasses are upward and downward compatible.
+          - added tests and docs for this
           
     * examples/
       - adjusting code to use the &Class::MOP::Class::meta

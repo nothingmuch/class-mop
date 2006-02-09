@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 113;
+use Test::More tests => 115;
 use Test::Exception;
 
 BEGIN {
@@ -21,6 +21,7 @@ my @methods = qw(
     
     new_object clone_object
     construct_instance construct_class_instance clone_instance
+    check_metaclass_compatability
     
     name version
     

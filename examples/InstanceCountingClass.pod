@@ -9,17 +9,15 @@ our $VERSION = '0.02';
 
 use base 'Class::MOP::Class';
 
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('$:count' => (
-        reader  => 'get_count',
-        default => 0
-    ))
-);
+InstanceCountingClass->meta->add_attribute('$:count' => (
+    reader  => 'get_count',
+    default => 0
+));
 
 sub construct_instance {
     my ($class, %params) = @_;
     $class->{'$:count'}++;
-    return $class->SUPER::construct_instance();
+    return $class->SUPER::construct_instance(%params);
 }
 
 1;

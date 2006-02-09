@@ -49,12 +49,14 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
             || confess "You must pass a package name";  
         return $METAS{$package_name} if exists $METAS{$package_name};              
         $class = blessed($class) || $class;
+        # now create the metaclass
+        my $meta;
         if ($class =~ /^Class::MOP::/) {    
-            $METAS{$package_name} = bless { 
+            $meta = bless { 
                 '$:package'             => $package_name, 
                 '%:attributes'          => {},
-                '$:attribute_metaclass' => 'Class::MOP::Attribute',
-                '$:method_metaclass'    => 'Class::MOP::Method',                
+                '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
+                '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',                
             } => $class;
         }
         else {
@@ -62,8 +64,30 @@ sub meta { Class::MOP::Class->initialize($_[0]) }
             # it is safe to use meta here because
             # class will always be a subclass of 
             # Class::MOP::Class, which defines meta
-            $METAS{$package_name} = bless $class->meta->construct_instance(%options) => $class
+            $meta = bless $class->meta->construct_instance(%options) => $class
         }
+        # and check the metaclass compatibility
+        $meta->check_metaclass_compatability();
+        $METAS{$package_name} = $meta;
+    }
+    
+    sub check_metaclass_compatability {
+        my $self = shift;
+
+        # this is always okay ...
+        return if blessed($self) eq 'Class::MOP::Class';
+
+        my @class_list = $self->class_precedence_list;
+        shift @class_list; # shift off $self->name
+
+        foreach my $class_name (@class_list) { 
+            next unless $METAS{$class_name};
+            my $meta = $METAS{$class_name};
+            ($self->isa(blessed($meta)))
+                || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
+                           " is not compatible with the " . 
+                           $class_name . "->meta => (" . (blessed($meta)) . ")";
+        }        
     }
 }
 
@@ -555,6 +579,14 @@ here so that we can actually "tie the knot" for B<Class::MOP::Class>
 to use C<construct_instance> once all the bootstrapping is done. This 
 method is used internally by C<initialize> and should never be called
 from outside of that method really.
+
+=item B<check_metaclass_compatability>
+
+This method is called as the very last thing in the 
+C<construct_class_instance> method. This will check that the 
+metaclass you are creating is compatible with the metaclasses of all 
+your ancestors. For more inforamtion about metaclass compatibility 
+see the C<About Metaclass compatibility> section in L<Class::MOP>.
 
 =back
 
