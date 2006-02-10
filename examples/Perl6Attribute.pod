@@ -39,8 +39,6 @@ Perl6Attribute - An example attribute metaclass for Perl 6 style attributes
 
   package Foo;
   
-  use Class::MOP 'meta';
-  
   Foo->meta->add_attribute(Perl6Attribute->new('$.foo'));
   Foo->meta->add_attribute(Perl6Attribute->new('@.bar'));    
   Foo->meta->add_attribute(Perl6Attribute->new('%.baz'));    

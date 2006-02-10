@@ -12,9 +12,9 @@ use Clone         ();
 
 our $VERSION = '0.03';
 
-# Self-introspection
+# Self-introspection 
 
-sub meta { Class::MOP::Class->initialize($_[0]) }
+sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 
 # Creation
 
@@ -101,6 +101,11 @@ sub create {
     eval $code;
     confess "creation of $package_name failed : $@" if $@;    
     my $meta = $class->initialize($package_name);
+    
+    $meta->add_method('meta' => sub { 
+        Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
+    });
+    
     $meta->superclasses(@{$options{superclasses}})
         if exists $options{superclasses};
     # NOTE:
@@ -358,7 +363,7 @@ sub find_all_methods_by_name {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
-        my $meta = $self->initialize($class);
+        my $meta = $self->initialize($class);;
         push @methods => {
             name  => $method_name, 
             class => $class,
@@ -493,22 +498,19 @@ sub remove_package_variable {
 
 sub mixin {
     my ($self, $mixin) = @_;
-    $mixin = $self->initialize($mixin) unless blessed($mixin);
+    $mixin = $self->initialize($mixin) 
+        unless blessed($mixin);
     
-    my @attributes = map { $mixin->get_attribute($_)->clone() } 
-                     $mixin->get_attribute_list;
-    my %methods    = map  { 
-                         my $method = $mixin->get_method($_);
-                         if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor')) {
-                             ();
-                         }
-                         else {
-                             ($_ => $method)
-                         }
-                     } $mixin->get_method_list;    
+    my @attributes = map { 
+        $mixin->get_attribute($_)->clone() 
+    } $mixin->get_attribute_list;                     
+    
+    my %methods = map  { 
+        my $method = $mixin->get_method($_);
+        (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'))
+            ? () : ($_ => $method)
+    } $mixin->get_method_list;    
 
-    # test the superclass thing detailed in the test
-    
     foreach my $attr (@attributes) {
         $self->add_attribute($attr) 
             unless $self->has_attribute($attr->name);
@@ -533,11 +535,6 @@ Class::MOP::Class - Class Meta Object
 =head1 SYNOPSIS
 
   # use this for introspection ...
-  
-  package Foo;
-  sub meta { Class::MOP::Class->initialize(__PACKAGE__) }
-  
-  # elsewhere in the code ...
   
   # add a method to Foo ...
   Foo->meta->add_method('bar' => sub { ... })

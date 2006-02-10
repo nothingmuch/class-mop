@@ -7,11 +7,12 @@ use Test::More tests => 34;
 use Test::Exception;
 
 BEGIN {
-    use_ok('Class::MOP', ':universal');        
+    use_ok('Class::MOP');        
 }
 
 {
     package Foo;
+    use metaclass;
 }
 
 ok(!defined($Foo::{foo}), '... the %foo slot has not been created yet');

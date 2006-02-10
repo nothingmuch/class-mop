@@ -22,7 +22,7 @@ sub construct_instance {
     foreach my $current_class ($class->class_precedence_list()) {
         $instance->{$current_class} = {} 
             unless exists $instance->{$current_class};
-        my $meta = $class->initialize($current_class);
+        my $meta = $current_class->meta;
         foreach my $attr_name ($meta->get_attribute_list()) {
             my $attr = $meta->get_attribute($attr_name);
             # if the attr has an init_arg, use that, otherwise,

@@ -22,6 +22,7 @@ B   C
 
 {
     package My::A;
+    use metaclass;
     package My::B;
     our @ISA = ('My::A');
     package My::C;
@@ -31,7 +32,7 @@ B   C
 }
 
 is_deeply(
-    [ Class::MOP::Class->initialize('My::D')->class_precedence_list ], 
+    [ My::D->meta->class_precedence_list ], 
     [ 'My::D', 'My::B', 'My::A', 'My::C', 'My::A' ], 
     '... My::D->meta->class_precedence_list == (D B A C A)');
 
@@ -47,6 +48,7 @@ is_deeply(
 
 {
     package My::2::A;
+    use metaclass;    
     our @ISA = ('My::2::C');
         
     package My::2::B;
@@ -56,7 +58,7 @@ is_deeply(
     our @ISA = ('My::2::B');           
 }
 
-eval { Class::MOP::Class->initialize('My::2::B')->class_precedence_list };
+eval { My::2::B->meta->class_precedence_list };
 ok($@, '... recursive inheritance breaks correctly :)');
 
 =pod
@@ -72,6 +74,7 @@ ok($@, '... recursive inheritance breaks correctly :)');
 
 {
     package My::3::A;
+    use metaclass;    
     package My::3::B;
     our @ISA = ('My::3::A');
     package My::3::C;
@@ -81,7 +84,7 @@ ok($@, '... recursive inheritance breaks correctly :)');
 }
 
 is_deeply(
-    [ Class::MOP::Class->initialize('My::3::D')->class_precedence_list ], 
+    [ My::3::D->meta->class_precedence_list ], 
     [ 'My::3::D', 'My::3::B', 'My::3::A', 'My::3::C', 'My::3::A', 'My::3::B', 'My::3::A' ], 
     '... My::3::D->meta->class_precedence_list == (D B A C A B A)');
 
@@ -97,6 +100,7 @@ my @CLASS_PRECEDENCE_LIST;
 
 {
     package Foo;
+    use metaclass;    
     
     sub CPL { push @CLASS_PRECEDENCE_LIST => 'Foo' }    
     
@@ -109,6 +113,7 @@ my @CLASS_PRECEDENCE_LIST;
     }       
     
     package Baz;
+    use metaclass;    
     our @ISA = ('Bar');
     
     sub CPL { 
@@ -137,7 +142,7 @@ my @CLASS_PRECEDENCE_LIST;
 Foo::Bar::Baz->CPL();
 
 is_deeply(
-    [ Class::MOP::Class->initialize('Foo::Bar::Baz')->class_precedence_list ], 
+    [ Foo::Bar::Baz->meta->class_precedence_list ], 
     [ @CLASS_PRECEDENCE_LIST ], 
     '... Foo::Bar::Baz->meta->class_precedence_list == @CLASS_PRECEDENCE_LIST');
 

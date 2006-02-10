@@ -161,7 +161,7 @@ is(Bar->foo, 'Bar::foo v2', '... Bar->foo == "Bar::foo v2"');
 
 is_deeply(
     [ sort $Bar->get_method_list ],
-    [ qw(bar foo) ],
+    [ qw(bar foo meta) ],
     '... got the right method list for Bar');  
     
 is_deeply(
@@ -195,6 +195,11 @@ is_deeply(
             class => 'Bar',
             code  => $Bar->get_method('foo')            
         },        
+        {
+            name  => 'meta',
+            class => 'Bar',
+            code  => $Bar->get_method('meta')            
+        }        
     ],
     '... got the right list of applicable methods for Bar');
 

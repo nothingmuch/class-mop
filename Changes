@@ -2,8 +2,17 @@ Revision history for Perl extension Class-MOP.
 
 0.07
     - adding more tests
+        - test for compatability with Class::C3
     - added SUPER as a dependency (because we need runtime
-      dispatching of SUPER calls for traits)
+      dispatching of SUPER calls for mixins)
+      
+    * Class::MOP
+      - no longer optionally exports to UNIVERSAL::meta or
+        creates a custom metaclass generator, use the 
+        metaclass pragma instead.
+      
+    * Class::MOP::Class
+      - adding in &mixin method to do Scala style mixins
 
 0.06 Thurs Feb. 9, 2006
     * metaclass

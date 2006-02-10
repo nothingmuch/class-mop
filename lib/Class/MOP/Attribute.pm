@@ -7,11 +7,11 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub meta { 
     require Class::MOP::Class;
-    Class::MOP::Class->initialize($_[0]) 
+    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
 # NOTE: (meta-circularity)

@@ -7,7 +7,7 @@ use Test::More tests => 33;
 use Test::Exception;
 
 BEGIN { 
-    use_ok('Class::MOP', ':universal'); 
+    use_ok('Class::MOP'); 
 }
 
 my $FOO_ATTR = Class::MOP::Attribute->new('$foo');
@@ -21,6 +21,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
 
 {
     package Foo;
+    use metaclass;
 
     my $meta = Foo->meta;
     ::lives_ok {

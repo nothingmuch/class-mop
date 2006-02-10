@@ -7,11 +7,12 @@ use Test::More tests => 27;
 use Test::Exception;
 
 BEGIN {
-    use_ok('Class::MOP', ':universal');        
+    use_ok('Class::MOP');        
 }
 
 {
     package Point;
+    use metaclass;
 
     Point->meta->add_attribute('$.x' => (
         reader   => 'x',

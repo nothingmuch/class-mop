@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 8;
 use Test::Exception;
 
 BEGIN {
@@ -20,7 +20,6 @@ isa_ok($meta, 'Class::MOP::Class');
     isa_ok($meta, 'Class::MOP::Class');
     
     foreach my $method_name (qw(
-        meta 
         wrap
         )) {
         ok($meta->has_method($method_name), '... Class::MOP::Method->has_method(' . $method_name . ')');

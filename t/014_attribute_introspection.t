@@ -15,7 +15,7 @@ BEGIN {
     isa_ok($meta, 'Class::MOP::Class');
     
     my @methods = qw(
-        meta 
+        meta
         new clone
         name
         has_accessor  accessor

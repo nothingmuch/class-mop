@@ -7,7 +7,7 @@ use Test::More tests => 27;
 use Test::Exception;
 
 BEGIN {
-    use_ok('Class::MOP', ':universal');        
+    use_ok('Class::MOP');        
 }
 
 my $Point = Class::MOP::Class->create('Point' => '0.01' => (

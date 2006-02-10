@@ -13,16 +13,17 @@ BEGIN {
 
 {   
     package Foo;
+    use metaclass;
     our $VERSION = '0.01';
     
     package Bar;
     our @ISA = ('Foo');
 }
 
-my $Foo = Class::MOP::Class->initialize('Foo');
+my $Foo = Foo->meta;
 isa_ok($Foo, 'Class::MOP::Class');
 
-my $Bar = Class::MOP::Class->initialize('Bar');
+my $Bar = Bar->meta;
 isa_ok($Bar, 'Class::MOP::Class');
 
 is($Foo->name, 'Foo', '... Foo->name == Foo');
@@ -55,7 +56,7 @@ my $Baz = Class::MOP::Class->create(
                 superclasses => [ 'Bar' ]
             ));
 isa_ok($Baz, 'Class::MOP::Class');
-is(Class::MOP::Class->initialize('Baz'), $Baz, '... our metaclasses are singletons');
+is(Baz->meta, $Baz, '... our metaclasses are singletons');
 
 is($Baz->name, 'Baz', '... Baz->name == Baz');
 is($Baz->version, '0.10', '... Baz->version == 0.10');

@@ -80,8 +80,6 @@ AttributesWithHistory - An example attribute metaclass which keeps a history of 
   
   package Foo;
   
-  use Class::MOP 'meta';
-  
   Foo->meta->add_attribute(AttributesWithHistory->new('foo' => (
       accessor         => 'foo',
       history_accessor => 'get_foo_history',

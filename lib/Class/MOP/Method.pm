@@ -5,13 +5,13 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'reftype';
+use Scalar::Util 'reftype', 'blessed';
 
 our $VERSION = '0.01';
 
 sub meta { 
     require Class::MOP::Class;
-    Class::MOP::Class->initialize($_[0]) 
+    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
 sub wrap { 

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More no_plan => 4;
+use Test::More tests => 4;
 
 =pod
 
@@ -24,7 +24,7 @@ code above is well-formed.
   }
   
   class ColoredPoint2D(u: Int, v: Int, c: String) extends Point2D(u, v) {
-    var color = c;
+    val color = c;
     def setColor(newCol: String): Unit = color = newCol;
     override def toString() = super.toString() + ", col = " + color;
   }
@@ -110,3 +110,5 @@ isa_ok($colored_point_3d, 'Point2D');
 is($colored_point_3d->toString(),
    'x = 1, y = 2, z = 3, col = blue',
    '... got the right toString method');
+
+

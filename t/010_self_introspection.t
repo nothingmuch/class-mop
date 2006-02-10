@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 115;
+use Test::More tests => 119;
 use Test::Exception;
 
 BEGIN {
@@ -29,13 +29,15 @@ my @methods = qw(
     
     superclasses class_precedence_list
     
-    has_method get_method add_method remove_method 
+    has_method get_method add_method remove_method alias_method
     get_method_list compute_all_applicable_methods find_all_methods_by_name
     
     has_attribute get_attribute add_attribute remove_attribute
     get_attribute_list get_attribute_map compute_all_applicable_attributes
     
     add_package_variable get_package_variable has_package_variable remove_package_variable
+    
+    mixin
     );
     
 is_deeply([ sort @methods ], [ sort $meta->get_method_list ], '... got the correct method list');
