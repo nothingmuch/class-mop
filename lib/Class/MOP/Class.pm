@@ -251,6 +251,20 @@ sub add_method {
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
+sub alias_method {
+    my ($self, $method_name, $method) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";
+    # use reftype here to allow for blessed subs ...
+    (reftype($method) && reftype($method) eq 'CODE')
+        || confess "Your code block must be a CODE reference";
+    my $full_method_name = ($self->name . '::' . $method_name);    
+        
+    no strict 'refs';
+    no warnings 'redefine';
+    *{$full_method_name} = $method;
+}
+
 {
 
     ## private utility functions for has_method
@@ -473,6 +487,37 @@ sub remove_package_variable {
     my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     no strict 'refs';
     delete ${$self->name . '::'}{$name};
+}
+
+# class mixins
+
+sub mixin {
+    my ($self, $mixin) = @_;
+    $mixin = $self->initialize($mixin) unless blessed($mixin);
+    
+    my @attributes = map { $mixin->get_attribute($_)->clone() } 
+                     $mixin->get_attribute_list;
+    my %methods    = map  { 
+                         my $method = $mixin->get_method($_);
+                         if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor')) {
+                             ();
+                         }
+                         else {
+                             ($_ => $method)
+                         }
+                     } $mixin->get_method_list;    
+
+    # test the superclass thing detailed in the test
+    
+    foreach my $attr (@attributes) {
+        $self->add_attribute($attr) 
+            unless $self->has_attribute($attr->name);
+    }
+    
+    foreach my $method_name (keys %methods) {
+        $self->alias_method($method_name => $methods{$method_name}) 
+            unless $self->has_method($method_name);
+    }    
 }
 
 1;
@@ -709,6 +754,16 @@ This does absolutely nothing special to C<$method>
 other than use B<Sub::Name> to make sure it is tagged with the 
 correct name, and therefore show up correctly in stack traces and 
 such.
+
+=item B<alias_method ($method_name, $method)>
+
+This will take a C<$method_name> and CODE reference to that 
+C<$method> and alias the method into the class's package. 
+
+B<NOTE>: 
+Unlike C<add_method>, this will B<not> try to name the 
+C<$method> using B<Sub::Name>, it only aliases the method in 
+the class's package. 
 
 =item B<has_method ($method_name)>
 

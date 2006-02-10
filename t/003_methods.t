@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 38;
+use Test::More tests => 40;
 use Test::Exception;
 
 BEGIN {
@@ -70,6 +70,17 @@ ok($Foo->has_method('blah'), '... Foo->has_method(blah) (defined in main:: using
 ok($Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
 ok($Foo->has_method('bang'), '... Foo->has_method(bang) (defined in main:: using symbol tables and Sub::Name)');
 ok($Foo->has_method('evaled_foo'), '... Foo->has_method(evaled_foo) (evaled in main::)');
+
+{
+    package Foo::Aliasing;
+    use metaclass;
+    sub alias_me { '...' }
+}
+
+$Foo->alias_method('alias_me' => Foo::Aliasing->meta->get_method('alias_me'));
+
+ok(!$Foo->has_method('alias_me'), '... !Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
+ok(defined &Foo::alias_me, '... Foo does have a symbol table slow for alias_me though');
 
 ok(!$Foo->has_method('blessed'), '... !Foo->has_method(blessed) (imported into Foo)');
 ok(!$Foo->has_method('boom'), '... !Foo->has_method(boom) (defined in main:: using symbol tables and Sub::Name w/out package name)');

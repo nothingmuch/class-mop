@@ -6,12 +6,13 @@ use warnings;
 
 use Scalar::Util 'blessed';
 use Carp         'confess';
+use SUPER         ();
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 sub import {
     shift;
