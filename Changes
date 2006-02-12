@@ -13,6 +13,9 @@ Revision history for Perl extension Class-MOP.
       
     * Class::MOP::Class
       - adding in &mixin method to do Scala style mixins
+      
+    * examples/
+      - fixing the AttributesWithHistory example, it was broken
 
 0.06 Thurs Feb. 9, 2006
     * metaclass

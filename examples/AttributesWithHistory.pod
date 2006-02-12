@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Class::MOP::Attribute';
 
@@ -25,7 +25,7 @@ __PACKAGE__->meta->add_attribute(
 __PACKAGE__->meta->add_attribute(
     Class::MOP::Attribute->new('_history' => (
         accessor => '_history',
-        default  => sub { [] },
+        default  => sub { {} },
     ))
 );
 
@@ -34,7 +34,10 @@ __PACKAGE__->meta->add_attribute(
 sub generate_history_accessor_method {
     my ($self, $attr_name) = @_; 
     eval qq{sub {
-        \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()\};        
+        unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
+            \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\} = [];    
+        \}
+        \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}\};        
     }};    
 }
 
@@ -42,7 +45,10 @@ sub generate_accessor_method {
     my ($self, $attr_name) = @_;
     eval qq{sub {
         if (scalar(\@_) == 2) {
-            push \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()\} => \$_[1];
+            unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
+                \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\} = [];    
+            \}            
+            push \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}\} => \$_[1];
             \$_[0]->{'$attr_name'} = \$_[1];
         }
         \$_[0]->{'$attr_name'};
@@ -52,7 +58,10 @@ sub generate_accessor_method {
 sub generate_writer_method {
     my ($self, $attr_name) = @_; 
     eval qq{sub {
-        push \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()\} => \$_[1];        
+        unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
+            \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\} = [];    
+        \}        
+        push \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}\} => \$_[1];        
         \$_[0]->{'$attr_name'} = \$_[1];
     }};
 }

@@ -10,7 +10,7 @@ use Sub::Name    'subname';
 use B            'svref_2object';
 use Clone         ();
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # Self-introspection 
 
@@ -81,7 +81,6 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         shift @class_list; # shift off $self->name
 
         foreach my $class_name (@class_list) { 
-            next unless $METAS{$class_name};
             my $meta = $METAS{$class_name};
             ($self->isa(blessed($meta)))
                 || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
