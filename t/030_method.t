@@ -3,12 +3,17 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');    
     use_ok('Class::MOP::Method');
+}
+
+{
+    my $method = Class::MOP::Method->wrap(sub { 1 });
+    is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to the same meta');
 }
 
 my $meta = Class::MOP::Method->meta;

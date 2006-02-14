@@ -36,7 +36,6 @@ A more real-world example would be a nice addition :)
     package Baz;
     our @ISA = ('Bar');
     
-    sub BUILD { 'Baz::BUILD' }    
     sub baz { 'Baz::baz' }
     sub foo { 'Baz::foo' }           
     
@@ -94,11 +93,11 @@ is_deeply(
 
 is_deeply(
     [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Baz')->compute_all_applicable_methods() ],
-    [
+    [   
         {
             name  => 'BUILD',
-            class => 'Baz',
-            code  => \&Baz::BUILD 
+            class => 'Bar',
+            code  => \&Bar::BUILD 
         },    
         {
             name  => 'bar',
@@ -215,11 +214,6 @@ is_deeply(
             name  => 'BUILD',
             class => 'Bar',
             code  => \&Bar::BUILD 
-        },    
-        {
-            name  => 'BUILD',
-            class => 'Baz',
-            code  => \&Baz::BUILD 
-        },        
+        },            
     ],
     '... got the right list of BUILD methods for Foo::Bar::Baz');

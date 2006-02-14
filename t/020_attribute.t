@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 52;
+use Test::More tests => 58;
 use Test::Exception;
 
 BEGIN {
@@ -113,3 +113,18 @@ BEGIN {
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');       
 }
+
+{
+    my $attr = Class::MOP::Attribute->new('$foo');
+    isa_ok($attr, 'Class::MOP::Attribute');
+    
+    my $attr_clone = $attr->clone('name' => '$bar');
+    isa_ok($attr_clone, 'Class::MOP::Attribute');
+    isnt($attr, $attr_clone, '... but they are different instances');
+    
+    isnt($attr->name, $attr_clone->name, '... we changes the name parameter');
+    
+    is($attr->name, '$foo', '... $attr->name == $foo');
+    is($attr_clone->name, '$bar', '... $attr_clone->name == $bar');    
+}
+

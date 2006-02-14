@@ -28,10 +28,8 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
     sub initialize {
         my $class        = shift;
         my $package_name = shift;
-        (defined $package_name && $package_name)
-            || confess "You must pass a package name";    
-        # make sure the package name is not blessed
-        $package_name = blessed($package_name) || $package_name;
+        (defined $package_name && $package_name && !blessed($package_name))
+            || confess "You must pass a package name and it cannot be blessed";    
         $class->construct_class_instance(':package' => $package_name, @_);
     }
     
@@ -252,8 +250,7 @@ sub add_method {
         
     no strict 'refs';
     no warnings 'redefine';
-#    *{$full_method_name} = subname $full_method_name => $method;
-    *{$full_method_name} = $method;
+    *{$full_method_name} = subname $full_method_name => $method;
 }
 
 sub alias_method {
@@ -401,7 +398,8 @@ sub get_attribute {
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
     return $self->get_attribute_map->{$attribute_name} 
-        if $self->has_attribute($attribute_name);    
+        if $self->has_attribute($attribute_name);   
+    return; 
 } 
 
 sub remove_attribute {
@@ -409,8 +407,8 @@ sub remove_attribute {
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
     my $removed_attribute = $self->get_attribute_map->{$attribute_name};    
-    delete $self->get_attribute_map->{$attribute_name} 
-        if defined $removed_attribute;        
+    return unless defined $removed_attribute;
+    delete $self->get_attribute_map->{$attribute_name};        
     $removed_attribute->remove_accessors();        
     $removed_attribute->detach_from_class();    
     return $removed_attribute;

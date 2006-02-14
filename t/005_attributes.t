@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 33;
+use Test::More tests => 40;
 use Test::Exception;
 
 BEGIN { 
@@ -19,6 +19,8 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     writer => 'set_baz',    
 ));
 
+my $BAR_ATTR_2 = Class::MOP::Attribute->new('$bar');
+
 {
     package Foo;
     use metaclass;
@@ -31,6 +33,14 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     ::is($meta->get_attribute('$foo'), $FOO_ATTR, '... got the right attribute back for Foo');
     
     ::ok(!$meta->has_method('foo'), '... no accessor created');
+    
+    ::lives_ok {
+        $meta->add_attribute($BAR_ATTR_2);
+    } '... we added an attribute to Foo successfully';
+    ::ok($meta->has_attribute('$bar'), '... Foo has $bar attribute');
+    ::is($meta->get_attribute('$bar'), $BAR_ATTR_2, '... got the right attribute back for Foo'); 
+
+    ::ok(!$meta->has_method('bar'), '... no accessor created');
 }
 {
     package Bar;
@@ -44,7 +54,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     ::is($meta->get_attribute('$bar'), $BAR_ATTR, '... got the right attribute back for Bar');
 
     ::ok($meta->has_method('bar'), '... an accessor has been created');
-    ::isa_ok($meta->get_method('bar'), 'Class::MOP::Attribute::Accessor');    
+    ::isa_ok($meta->get_method('bar'), 'Class::MOP::Attribute::Accessor');      
 }
 {
     package Baz;
@@ -89,6 +99,7 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
     is($attr, $BAZ_ATTR, '... got the right attribute back for Baz');           
     
     ok(!$meta->has_attribute('$baz'), '... Baz no longer has $baz attribute'); 
+    is($meta->get_attribute('$baz'), undef, '... Baz no longer has $baz attribute');     
 
     ok(!$meta->has_method('get_baz'), '... a reader has been removed');
     ok(!$meta->has_method('set_baz'), '... a writer has been removed');
@@ -121,13 +132,21 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
      is_deeply(
          [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
          [ 
+             $BAR_ATTR_2,
              $FOO_ATTR,                        
          ],
          '... got the right list of applicable attributes for Baz');
 
      is_deeply(
          [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
-         [ Foo->meta ],
+         [ Foo->meta, Foo->meta ],
          '... got the right list of associated classes from the applicable attributes for Baz');
+
+    # remove attribute which is not there
+    my $val;
+    lives_ok {
+        $val = $meta->remove_attribute('$blammo');
+    } '... attempted to remove the non-existent $blammo attribute';
+    is($val, undef, '... got the right value back (undef)');
 
 }

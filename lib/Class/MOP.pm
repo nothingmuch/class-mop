@@ -407,6 +407,23 @@ All complex software has bugs lurking in it, and this module is no
 exception. If you find a bug please either email me, or add the bug
 to cpan-RT.
 
+=head1 CODE COVERAGE
+
+I use L<Devel::Cover> to test the code coverage of my tests, below is the 
+L<Devel::Cover> report on this module's test suite.
+
+ ---------------------------- ------ ------ ------ ------ ------ ------ ------
+ File                           stmt   bran   cond    sub    pod   time  total
+ ---------------------------- ------ ------ ------ ------ ------ ------ ------
+ Class/MOP.pm                  100.0  100.0  100.0  100.0    n/a   21.4  100.0
+ Class/MOP/Attribute.pm        100.0  100.0   88.9  100.0  100.0   27.1   99.3
+ Class/MOP/Class.pm            100.0  100.0   93.7  100.0  100.0   44.8   99.1
+ Class/MOP/Method.pm           100.0  100.0   83.3  100.0  100.0    4.8   97.1
+ metaclass.pm                  100.0  100.0   80.0  100.0    n/a    1.9   97.3
+ ---------------------------- ------ ------ ------ ------ ------ ------ ------
+ Total                         100.0  100.0   92.2  100.0  100.0  100.0   99.0
+ ---------------------------- ------ ------ ------ ------ ------ ------ ------
+
 =head1 ACKNOWLEDGEMENTS
 
 =over 4

@@ -4,9 +4,10 @@ package metaclass;
 use strict;
 use warnings;
 
-use Carp 'confess';
+use Carp         'confess';
+use Scalar::Util 'blessed';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Class::MOP;
 
@@ -27,7 +28,7 @@ sub import {
         # since metaclass instances are 
         # singletons, this is not really a 
         # big deal anyway.
-        $metaclass->initialize($_[0] => %options)
+        $metaclass->initialize((blessed($_[0]) || $_[0]) => %options)
     });
 }
 

@@ -1,13 +1,23 @@
 Revision history for Perl extension Class-MOP.
 
 0.07
-    - adding more tests
+    - adding more tests to get coverage up a little higher,
+      mostly testing errors and edge cases.
+      - test coverage is now at 99%
       
     * Class::MOP
       - no longer optionally exports to UNIVERSAL::meta or
         creates a custom metaclass generator, use the 
         metaclass pragma instead.
-      
+
+    * Class::MOP::Class  
+      - fixed a number of minor issues which came up in the 
+        error/edge-case tests
+        
+    * Class::MOP::Attribute 
+      - fixed a number of minor issues which came up in the 
+        error/edge-case tests        
+     
     * examples/
       - fixing the AttributesWithHistory example, it was broken.
 
