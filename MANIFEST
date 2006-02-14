@@ -33,7 +33,7 @@ t/020_attribute.t
 t/030_method.t
 t/040_metaclass.t
 t/041_metaclass_incompatability.t
-t/050_class_mixin_composition.t
+t/050_scala_style_mixin_composition.t
 t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t
