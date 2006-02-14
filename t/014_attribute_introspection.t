@@ -3,11 +3,16 @@
 use strict;
 use warnings;
 
-use Test::More tests => 38;
+use Test::More tests => 39;
 use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');        
+}
+
+{
+    my $attr = Class::MOP::Attribute->new('$test');
+    is($attr->meta, Class::MOP::Attribute->meta, '... instance and class both lead to the same meta');
 }
 
 {

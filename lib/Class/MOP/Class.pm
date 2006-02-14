@@ -252,7 +252,8 @@ sub add_method {
         
     no strict 'refs';
     no warnings 'redefine';
-    *{$full_method_name} = subname $full_method_name => $method;
+#    *{$full_method_name} = subname $full_method_name => $method;
+    *{$full_method_name} = $method;
 }
 
 sub alias_method {

@@ -1,8 +1,8 @@
 Build.PL
 Changes
+Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-Makefile.PL
 META.yml
 README
 examples/AttributesWithHistory.pod

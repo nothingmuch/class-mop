@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 62;
+use Test::More tests => 52;
 use Test::Exception;
 
 BEGIN {
@@ -113,62 +113,3 @@ BEGIN {
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');       
 }
-
-# NOTE:
-# the next three tests once tested that 
-# the code would fail, but we lifted the 
-# restriction so you can have an accessor 
-# along with a reader/writer pair (I mean 
-# why not really). So now they test that 
-# it works, which is kinda silly, but it 
-# tests the API change, so I keep it.
-
-lives_ok {
-    Class::MOP::Attribute->new('$foo', (
-        accessor => 'foo',
-        reader   => 'get_foo',
-    ));
-} '... can create accessors with reader/writers';
-
-lives_ok {
-    Class::MOP::Attribute->new('$foo', (
-        accessor => 'foo',
-        writer   => 'set_foo',
-    ));
-} '... can create accessors with reader/writers';
-
-lives_ok {
-    Class::MOP::Attribute->new('$foo', (
-        accessor => 'foo',
-        reader   => 'get_foo',        
-        writer   => 'set_foo',
-    ));
-} '... can create accessors with reader/writers';
-
-dies_ok {
-    Class::MOP::Attribute->new();
-} '... no name argument';
-
-dies_ok {
-    Class::MOP::Attribute->new('');
-} '... bad name argument';
-
-dies_ok {
-    Class::MOP::Attribute->new(0);
-} '... bad name argument';
-
-dies_ok {
-    Class::MOP::Attribute->install_accessors();
-} '... bad install_accessors argument';
-
-dies_ok {
-    Class::MOP::Attribute->install_accessors(bless {} => 'Fail');
-} '... bad install_accessors argument';
-
-dies_ok {
-    Class::MOP::Attribute->remove_accessors();
-} '... bad remove_accessors argument';
-
-dies_ok {
-    Class::MOP::Attribute->remove_accessors(bless {} => 'Fail');
-} '... bad remove_accessors argument';

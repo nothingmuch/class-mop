@@ -114,36 +114,32 @@ sub detach_from_class {
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
-    eval qq{sub {
-        \$_[0]->{'$attr_name'} = \$_[1] if scalar(\@_) == 2;
-        \$_[0]->{'$attr_name'};
-    }};
+    sub {
+        $_[0]->{$attr_name} = $_[1] if scalar(@_) == 2;
+        $_[0]->{$attr_name};
+    };
 }
 
 sub generate_reader_method {
     my ($self, $attr_name) = @_; 
-    eval qq{sub {
-        \$_[0]->{'$attr_name'};
-    }};   
+    sub { $_[0]->{$attr_name} };   
 }
 
 sub generate_writer_method {
     my ($self, $attr_name) = @_; 
-    eval qq{sub {
-        \$_[0]->{'$attr_name'} = \$_[1];
-    }};
+    sub { $_[0]->{$attr_name} = $_[1] };
 }
 
 sub generate_predicate_method {
     my ($self, $attr_name) = @_; 
-    eval qq{sub {
-        defined \$_[0]->{'$attr_name'} ? 1 : 0;
-    }};
+    sub { defined $_[0]->{$attr_name} ? 1 : 0 };
 }
 
 sub process_accessors {
     my ($self, $type, $accessor) = @_;
-    if (reftype($accessor) && reftype($accessor) eq 'HASH') {
+    if (reftype($accessor)) {
+        (reftype($accessor) eq 'HASH')
+            || confess "bad accessor/reader/writer/predicate format, must be a HASH ref";
         my ($name, $method) = each %{$accessor};
         return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
