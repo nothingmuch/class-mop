@@ -11,7 +11,7 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-our $VERSION = '0.07';
+our $VERSION = '0.10';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -20,9 +20,7 @@ our $VERSION = '0.07';
 ## that it can operate effectively. Those things are done here.
 ## ----------------------------------------------------------------------------
 
-# so that mixins can have runtime 
-# dispatched SUPER calls
-use SUPER ();
+# ... nothing yet actually ;)
 
 ## ----------------------------------------------------------------------------
 ## Bootstrapping 
