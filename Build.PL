@@ -11,7 +11,6 @@ my $build = Module::Build->new(
         'Carp'         => '0.01',
         'B'            => '1.09',
         'Clone'        => '0.18',
-        'SUPER'        => '1.11',
     },
     optional => {
     },

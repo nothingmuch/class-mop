@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 119;
+use Test::More tests => 117;
 use Test::Exception;
 
 BEGIN {
@@ -36,8 +36,6 @@ my @methods = qw(
     get_attribute_list get_attribute_map compute_all_applicable_attributes
     
     add_package_variable get_package_variable has_package_variable remove_package_variable
-    
-    mixin
     );
     
 is_deeply([ sort @methods ], [ sort $meta->get_method_list ], '... got the correct method list');

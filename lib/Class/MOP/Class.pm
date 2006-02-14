@@ -493,34 +493,6 @@ sub remove_package_variable {
     delete ${$self->name . '::'}{$name};
 }
 
-# class mixins
-
-sub mixin {
-    my ($self, $mixin) = @_;
-    $mixin = $self->initialize($mixin) 
-        unless blessed($mixin);
-    
-    my @attributes = map { 
-        $mixin->get_attribute($_)->clone() 
-    } $mixin->get_attribute_list;                     
-    
-    my %methods = map  { 
-        my $method = $mixin->get_method($_);
-        (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'))
-            ? () : ($_ => $method)
-    } $mixin->get_method_list;    
-
-    foreach my $attr (@attributes) {
-        $self->add_attribute($attr) 
-            unless $self->has_attribute($attr->name);
-    }
-    
-    foreach my $method_name (keys %methods) {
-        $self->alias_method($method_name => $methods{$method_name}) 
-            unless $self->has_method($method_name);
-    }    
-}
-
 1;
 
 __END__
