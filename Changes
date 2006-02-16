@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.11 
+    * examples/
+      - added example of changing method dispatch order to C3
+
 0.10 Tues Feb. 14, 2006
     ** This release was mostly about writing more tests and 
        cleaning out old and dusty code, the MOP should now 

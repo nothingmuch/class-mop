@@ -1,0 +1,124 @@
+
+package # hide from PAUSE 
+    C3MethodDispatchOrder;
+    
+use strict;
+use warnings;
+
+use Carp 'confess';
+use Algorithm::C3;
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Class';
+
+my $_find_method_in_superclass = sub {
+    my ($class, $method) = @_;
+    foreach my $super ($class->class_precedence_list) {
+        return $super->meta->get_method($method)   
+            if $super->meta->has_method($method);
+    }
+};
+
+sub initialize {
+    my $class = shift;
+    my $meta  = $class->SUPER::initialize(@_);
+    $meta->add_method('AUTOLOAD' => sub {
+        my $meta = $_[0]->meta;
+        my $method_name;
+        {
+            no strict 'refs';
+            my $label = ${$meta->name . '::AUTOLOAD'};
+            $method_name = (split /\:\:/ => $label)[-1];
+        }
+        my $method = $_find_method_in_superclass->($meta, $method_name);
+        (defined $method) || confess "Method ($method_name) not found";
+        goto &$method;
+    });
+    $meta->add_method('can' => sub {
+        $_find_method_in_superclass->($_[0]->meta, $_[1]);
+    });
+    return $meta;
+}
+
+sub superclasses {
+    my $self = shift;
+    no strict 'refs';
+    if (@_) {
+        my @supers = @_;
+        @{$self->name . '::SUPERS'} = @supers;
+    }
+    @{$self->name . '::SUPERS'};        
+}
+
+sub class_precedence_list {
+    my $self = shift;
+    return map {
+        $_->name;
+    } Algorithm::C3::merge($self, sub {
+        my $class = shift;
+        map { $_->meta } $class->superclasses;
+    });
+}
+
+1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+C3MethodDispatchOrder - An example attribute metaclass for changing to C3 method dispatch order
+
+=head1 SYNOPSIS
+  
+  # a classic diamond inheritence graph 
+  #
+  #    <A>
+  #   /   \
+  # <B>   <C>
+  #   \   /
+  #    <D>
+  
+  package A;
+  use metaclass 'C3MethodDispatchOrder';
+  
+  sub hello { return "Hello from A" }
+  
+  package B;
+  use metaclass 'C3MethodDispatchOrder';
+  B->meta->superclasses('A');
+  
+  package C;
+  use metaclass 'C3MethodDispatchOrder';
+  C->meta->superclasses('A');
+  
+  sub hello { return "Hello from C" }
+  
+  package D;
+  use metaclass 'C3MethodDispatchOrder';
+  D->meta->superclasses('B', 'C');
+  
+  print join ", " => D->meta->class_precedence_list; # prints C3 order D, B, C, A
+  
+  # later in other code ...
+  
+  print D->hello; # print 'Hello from C' instead of the normal 'Hello from A' 
+  
+=head1 DESCRIPTION
+
+=head1 AUTHOR
+
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
