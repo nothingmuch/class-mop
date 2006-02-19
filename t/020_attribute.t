@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 67;
 use Test::Exception;
 
 BEGIN {
@@ -24,9 +24,22 @@ BEGIN {
     ok(!$attr->has_writer, '... $attr does not have an writer');
     ok(!$attr->has_default, '... $attr does not have an default');  
     
+    my $class = Class::MOP::Class->initialize('Foo');
+    isa_ok($class, 'Class::MOP::Class');
+    
+    lives_ok {
+        $attr->attach_to_class($class);
+    } '... attached a class successfully';
+    
+    is($attr->associated_class, $class, '... the class was associated correctly');
+    
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
     isnt($attr, $attr_clone, '... but they are different instances');
+    
+    is($attr->associated_class, $attr_clone->associated_class, '... the associated classes are the same though');
+    is($attr->associated_class, $class, '... the associated classes are the same though');    
+    is($attr_clone->associated_class, $class, '... the associated classes are the same though');    
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');
 }
@@ -52,6 +65,10 @@ BEGIN {
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
     isnt($attr, $attr_clone, '... but they are different instances');
+    
+    is($attr->associated_class, $attr_clone->associated_class, '... the associated classes are the same though');
+    is($attr->associated_class, undef, '... the associated class is actually undef');    
+    is($attr_clone->associated_class, undef, '... the associated class is actually undef');    
     
     is_deeply($attr, $attr_clone, '... but they are the same inside');                
 }

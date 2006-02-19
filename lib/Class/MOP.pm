@@ -148,14 +148,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
 
 Class::MOP::Attribute->meta->add_method('clone' => sub {
     my $self  = shift;
-    my $class = $self->associated_class;
-    $self->detach_from_class() if defined $class;
-    my $clone = $self->meta->clone_object($self, @_);  
-    if (defined $class) {
-        $self->attach_to_class($class);
-        $clone->attach_to_class($class);
-    }
-    return $clone;  
+    $self->meta->clone_object($self, @_);  
 });
 
 1;

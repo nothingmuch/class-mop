@@ -187,12 +187,35 @@ sub clone_instance {
     # the best thing is to write a more
     # controled &clone method locally 
     # in the class (see Class::MOP)
-    my $clone = Clone::clone($instance); 
+    my $clone = {}; 
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         my $init_arg = $attr->init_arg();
         # try to fetch the init arg from the %params ...        
-        $clone->{$attr->name} = $params{$init_arg} 
-            if exists $params{$init_arg};
+        # (no sense in cloning if we are overriding it)
+        if (exists $params{$init_arg}) {
+            $clone->{$attr->name} = $params{$init_arg} 
+        }
+        else {
+            # if it is an object ... 
+            if (blessed($instance->{$attr->name})) {
+                # see if it has a clone method ...
+                if ($instance->{$attr->name}->can('clone')) {
+                    # if so ,.. call it
+                    $clone->{$attr->name} = $instance->{$attr->name}->clone();                  
+                }
+                # otherwise we assume that it does 
+                # not wish to be cloned, and just 
+                # copy the reference ...
+                else {
+                    $clone->{$attr->name} = $instance->{$attr->name};                                      
+                }
+            }
+            # if it is not an object, then we 
+            # deep clone it ...
+            else {
+                $clone->{$attr->name} = Clone::clone($instance->{$attr->name});  
+            }
+        }
     }
     return $clone;    
 }
@@ -654,13 +677,21 @@ but that is considered bad style, so we do not do that.
 
 This method is a compliment of C<construct_instance> (which means if 
 you override C<construct_instance>, you need to override this one too).
+This method will clone the C<$instance> structure in the following 
+way:
 
-This method will clone the C<$instance> structure created by the 
-C<construct_instance> method, and apply any C<%params> passed to it 
-to change the attribute values. The structure returned is (like with 
-C<construct_instance>) an unC<bless>ed HASH reference, it is your 
-responsibility to then bless this cloned structure into the right 
-class.
+If the attribute name is in C<%params> it will use that, otherwise it 
+will attempt to clone the value in that slot. If the value is C<blessed> 
+then it will look for a C<clone> method. If a C<clone> method is found, 
+then it is called and the return value is added to the clone. If a 
+C<clone> method is B<not> found, then we will respect the object's 
+encapsulation and not clone it, and just copy the object's pointer. If 
+the value is not C<blessed>, then it will be deep-copied using L<Clone>.
+
+The cloned structure returned is (like with C<construct_instance>) an 
+unC<bless>ed HASH reference, it is your responsibility to then bless 
+this cloned structure into the right class (which C<clone_object> will
+do for you).
 
 =back
 
