@@ -10,7 +10,7 @@ use Sub::Name    'subname';
 use B            'svref_2object';
 use Clone         ();
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # Self-introspection 
 
