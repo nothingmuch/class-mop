@@ -5,9 +5,8 @@ Revision history for Perl extension Class-MOP.
       - added example of changing method dispatch order to C3
       
     * Class::MOP::Class
-      - changed how clone_instance behaves, it now goes through
-        each attribute and does what is appropriate (see docs 
-        for a more detailed description)
+      - changed how clone_instance behaves, it now only does a
+        shallow clone (see docs for more details)
         - added docs and tests
 
 0.10 Tues Feb. 14, 2006

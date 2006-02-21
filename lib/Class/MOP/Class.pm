@@ -181,42 +181,7 @@ sub clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
         || confess "You can only clone instances, \$self is not a blessed instance";
-    # NOTE:
-    # This will deep clone, which might
-    # not be what you always want. So 
-    # the best thing is to write a more
-    # controled &clone method locally 
-    # in the class (see Class::MOP)
-    my $clone = {}; 
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
-        my $init_arg = $attr->init_arg();
-        # try to fetch the init arg from the %params ...        
-        # (no sense in cloning if we are overriding it)
-        if (exists $params{$init_arg}) {
-            $clone->{$attr->name} = $params{$init_arg} 
-        }
-        else {
-            # if it is an object ... 
-            if (blessed($instance->{$attr->name})) {
-                # see if it has a clone method ...
-                if ($instance->{$attr->name}->can('clone')) {
-                    # if so ,.. call it
-                    $clone->{$attr->name} = $instance->{$attr->name}->clone();                  
-                }
-                # otherwise we assume that it does 
-                # not wish to be cloned, and just 
-                # copy the reference ...
-                else {
-                    $clone->{$attr->name} = $instance->{$attr->name};                                      
-                }
-            }
-            # if it is not an object, then we 
-            # deep clone it ...
-            else {
-                $clone->{$attr->name} = Clone::clone($instance->{$attr->name});  
-            }
-        }
-    }
+    my $clone = { %$instance, %params }; 
     return $clone;    
 }
 
@@ -662,8 +627,10 @@ attribute meta-object.
 =item B<clone_object ($instance, %params)>
 
 This is a convience method for cloning an object instance, then  
-blessing it into the appropriate package. Ideally your class 
-would call a C<clone> this method like so:
+blessing it into the appropriate package. This method will call 
+C<clone_instance>, which performs a shallow copy of the object, 
+see that methods documentation for more details. Ideally your 
+class would call a C<clone> this method like so:
 
   sub MyClass::clone {
       my ($self, %param) = @_;
@@ -676,22 +643,20 @@ but that is considered bad style, so we do not do that.
 =item B<clone_instance($instance, %params)>
 
 This method is a compliment of C<construct_instance> (which means if 
-you override C<construct_instance>, you need to override this one too).
-This method will clone the C<$instance> structure in the following 
-way:
-
-If the attribute name is in C<%params> it will use that, otherwise it 
-will attempt to clone the value in that slot. If the value is C<blessed> 
-then it will look for a C<clone> method. If a C<clone> method is found, 
-then it is called and the return value is added to the clone. If a 
-C<clone> method is B<not> found, then we will respect the object's 
-encapsulation and not clone it, and just copy the object's pointer. If 
-the value is not C<blessed>, then it will be deep-copied using L<Clone>.
+you override C<construct_instance>, you need to override this one too), 
+and clones the instance shallowly.
 
 The cloned structure returned is (like with C<construct_instance>) an 
 unC<bless>ed HASH reference, it is your responsibility to then bless 
 this cloned structure into the right class (which C<clone_object> will
 do for you).
+
+As of 0.11, this method will clone the C<$instance> structure shallowly, 
+as opposed to the deep cloning implemented in prior versions. After much 
+thought, research and discussion, I have decided that anything but basic 
+shallow cloning is outside the scope of the meta-object protocol. I 
+think Yuval "nothingmuch" Kogman put it best when he said that cloning 
+is too I<context-specific> to be part of the MOP.
 
 =back
 
