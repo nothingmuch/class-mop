@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.12
+    - reduced the dependency on B, no need to always 
+      have the latest
+
 0.11 Mon Feb. 20, 2006
     * examples/
       - added example of changing method dispatch order to C3

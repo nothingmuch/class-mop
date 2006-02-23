@@ -3,10 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More;
 use File::Spec;
 
-BEGIN { 
+BEGIN {
+    eval "use Algorithm::C3";
+    plan skip_all => "Algorithm::C3 required for this test" if $@;
+    plan tests => 5;    
+
     use_ok('Class::MOP');    
     require_ok(File::Spec->catdir('examples', 'C3MethodDispatchOrder.pod'));
 }
