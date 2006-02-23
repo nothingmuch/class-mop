@@ -1,8 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
-0.12
+0.12 Thurs. Feb 23, 2006
     - reduced the dependency on B, no need to always 
       have the latest
+
+    * examples/
+      - added docs to the C3 method dispatch order test
+      - fixed missing Algorithm::C3 dependency by making 
+        the test skip if it is not installed
 
 0.11 Mon Feb. 20, 2006
     * examples/

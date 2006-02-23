@@ -108,6 +108,16 @@ C3MethodDispatchOrder - An example attribute metaclass for changing to C3 method
   
 =head1 DESCRIPTION
 
+This is an example of how you could change the method dispatch order of a 
+class using L<Class::MOP>. Using the L<Algorithm::C3> module, this repleces 
+the normal depth-first left-to-right perl dispatch order with the C3 method 
+dispatch order (see the L<Algorithm::C3> or L<Class::C3> docs for more 
+information about this).
+
+This example could be used as a template for other method dispatch orders 
+as well, all that is required is to write a the C<class_precedence_list> method 
+which will return a linearized list of classes to dispatch along. 
+
 =head1 AUTHOR
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
