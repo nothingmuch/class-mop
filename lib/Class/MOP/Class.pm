@@ -463,12 +463,10 @@ sub get_package_variable {
     my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     no strict 'refs';
     # try to fetch it first,.. see what happens
-    eval '\\' . $sigil . $self->name . '::' . $name;
+    my $ref = eval '\\' . $sigil . $self->name . '::' . $name;
     confess "Could not get the package variable ($variable) because : $@" if $@;    
     # if we didn't die, then we can return it
-    # NOTE:
-    # this is not ideal, better suggestions are welcome
-    eval '\\' . $sigil . $self->name . '::' . $name;   
+	return $ref;
 }
 
 sub remove_package_variable {
