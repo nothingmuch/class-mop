@@ -8,9 +8,8 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
-use Clone         ();
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # Self-introspection 
 

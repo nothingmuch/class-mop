@@ -10,7 +10,6 @@ my $build = Module::Build->new(
         'Sub::Name'    => '0.02',
         'Carp'         => '0.01',
         'B'            => '0',
-        'Clone'        => '0.18',
     },
     optional => {
     },
