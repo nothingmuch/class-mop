@@ -38,7 +38,7 @@ if you so desire.
 
 In order to mix classes together, they must inherit from a common 
 superclass. This assures at least some level of similarity between 
-the classes being mixed together, which should results in a more 
+the classes being mixed together, which should result in a more 
 stable end product.
 
 The only exception to this rule is if the class being mixed in has 
@@ -90,7 +90,7 @@ solution.
 In CLOS, I<before>, I<after> and I<around> methods provide a high 
 degree of flexibility for adding behavior to methods, but do not address 
 any concerns regarding classes since in CLOS, classes and methods are 
-seperate components of the system.
+separate components of the system.
 
 In Scala, mixins are restricted by their ancestral relationships, which 
 results in a need to have seperate "traits" to get around this restriction. 
@@ -108,7 +108,7 @@ fact, this feature (IMO) promotes good useage of roles by keeping them
 both small and simple. But, the same behaviors cannot be applied to 
 class mixins without hitting these barriers all too quickly.
 
-The same too can be said of the original Triats system, with it's 
+The same too can be said of the original Traits system, with its 
 features for aliasing and exclusion of methods. 
 
 So after close study of these systems, and in some cases actually 
