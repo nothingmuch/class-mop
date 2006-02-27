@@ -4,11 +4,60 @@ package Class::MOP::SafeMixin;
 use strict;
 use warnings;
 
+use Scalar::Util 'blessed';
+use Carp         'confess';
+
 our $VERSION = '0.01';
 
-sub meta { 
-    require Class::MOP::Class;
-    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
+use base 'Class::MOP::Class';
+
+sub mixin {
+    # fetch the metaclass for the 
+    # caller and the mixin arg
+    my $metaclass = shift;
+    my $mixin     = (shift)->meta;
+    
+    # according to Scala, the 
+    # the superclass of our class
+    # must be a subclass of the 
+    # superclass of the mixin (see above)
+    my ($super_meta)  = $metaclass->superclasses();
+    my ($super_mixin) = $mixin->superclasses();  
+    ($super_meta->isa($super_mixin))
+        || confess "The superclass must extend a subclass of the superclass of the mixin"
+			if defined $super_mixin && defined $super_meta;
+    
+    # collect all the attributes
+    # and clone them so they can 
+    # associate with the new class
+    my @attributes = map { 
+        $mixin->get_attribute($_)->clone() 
+    } $mixin->get_attribute_list;                     
+    
+    my %methods = map  { 
+        my $method = $mixin->get_method($_);
+        # we want to ignore accessors since
+        # they will be created with the attrs
+        (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'))
+            ? () : ($_ => $method)
+    } $mixin->get_method_list;    
+
+    # NOTE:
+    # I assume that locally defined methods 
+    # and attributes get precedence over those
+    # from the mixin.
+
+    # add all the attributes in ....
+    foreach my $attr (@attributes) {
+        $metaclass->add_attribute($attr) 
+            unless $metaclass->has_attribute($attr->name);
+    }
+
+    # add all the methods in ....    
+    foreach my $method_name (keys %methods) {
+        $metaclass->alias_method($method_name => $methods{$method_name}) 
+            unless $metaclass->has_method($method_name);
+    }    
 }
 
 1;
