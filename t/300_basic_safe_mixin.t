@@ -13,7 +13,6 @@ BEGIN {
 ## Mixin a class without a superclass.
 {
     package FooMixin;   
-	use metaclass;
     sub foo { 'FooMixin::foo' }    
 
     package Foo;
@@ -37,6 +36,21 @@ is($foo->foo, 'FooMixin::foo', '... got the right value from the mixin method');
     package Bar;
     our @ISA = ('Foo');
 
+    package Foo::Baz;
+    our @ISA = ('Foo');    
+	eval { Foo::Baz->meta->mixin('Baz') };
+	::ok(!$@, '... the classes superclass must extend a subclass of the superclass of the mixins');
+
+}
+
+my $foo_baz = Foo::Baz->new();
+isa_ok($foo_baz, 'Foo::Baz');
+isa_ok($foo_baz, 'Foo');
+
+can_ok($foo_baz, 'baz');
+is($foo_baz->baz(), 'Baz::baz', '... got the right value from the mixin method');
+
+{
 	package Foo::Bar;
     our @ISA = ('Foo', 'Bar');	
 

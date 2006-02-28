@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 52;
 use Test::Exception;
 
 BEGIN {
@@ -51,9 +51,16 @@ my $Foo = Class::MOP::Class->initialize('Foo');
 
 my $foo = sub { 'Foo::foo' };
 
+ok(!UNIVERSAL::isa($foo, 'Class::MOP::Method'), '... our method is not yet blessed');
+
 lives_ok {
     $Foo->add_method('foo' => $foo);
 } '... we added the method successfully';
+
+isa_ok($foo, 'Class::MOP::Method');
+
+is($foo->name, 'foo', '... got the right name for the method');
+is($foo->package_name, 'Foo', '... got the right package name for the method');
 
 ok($Foo->has_method('foo'), '... Foo->has_method(foo) (defined with Sub::Name)');
 
@@ -70,6 +77,18 @@ ok($Foo->has_method('blah'), '... Foo->has_method(blah) (defined in main:: using
 ok($Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
 ok($Foo->has_method('bang'), '... Foo->has_method(bang) (defined in main:: using symbol tables and Sub::Name)');
 ok($Foo->has_method('evaled_foo'), '... Foo->has_method(evaled_foo) (evaled in main::)');
+
+# calling get_method blessed them all
+isa_ok($_, 'Class::MOP::Method') for (
+	\&Foo::FOO_CONSTANT,
+	\&Foo::bar,
+	\&Foo::baz,		
+	\&Foo::floob,
+	\&Foo::blah,		
+	\&Foo::bling,	
+	\&Foo::bang,	
+	\&Foo::evaled_foo,	
+	);
 
 {
     package Foo::Aliasing;

@@ -15,7 +15,7 @@ sub mixin {
     # fetch the metaclass for the 
     # caller and the mixin arg
     my $metaclass = shift;
-    my $mixin     = (shift)->meta;
+    my $mixin     = $metaclass->initialize(shift);
     
     # according to Scala, the 
     # the superclass of our class
@@ -164,6 +164,14 @@ So after close study of these systems, and in some cases actually
 implementing said systems, I have come to the see that each on it's 
 own is not robust enough and that combining the best parts of each 
 gives us (what I hope is) a better, safer and saner system.
+
+=head1 METHODS
+
+=over 4
+
+=item B<mixin ($mixin)>
+
+=back
 
 =head1 AUTHOR
 

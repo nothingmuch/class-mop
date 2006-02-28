@@ -7,7 +7,6 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
-use B            'svref_2object';
 
 our $VERSION = '0.06';
 
@@ -234,7 +233,9 @@ sub add_method {
     (reftype($method) && reftype($method) eq 'CODE')
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
-        
+
+	$method = Class::MOP::Method->new($method) unless blessed($method);
+	
     no strict 'refs';
     no warnings 'redefine';
     *{$full_method_name} = subname $full_method_name => $method;
@@ -247,33 +248,31 @@ sub alias_method {
     # use reftype here to allow for blessed subs ...
     (reftype($method) && reftype($method) eq 'CODE')
         || confess "Your code block must be a CODE reference";
-    my $full_method_name = ($self->name . '::' . $method_name);    
+    my $full_method_name = ($self->name . '::' . $method_name);
+
+	$method = Class::MOP::Method->new($method) unless blessed($method);    
         
     no strict 'refs';
     no warnings 'redefine';
     *{$full_method_name} = $method;
 }
 
-{
+sub has_method {
+    my ($self, $method_name) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name";    
 
-    ## private utility functions for has_method
-    my $_find_subroutine_package_name = sub { eval { svref_2object($_[0])->GV->STASH->NAME } || '' };
-    my $_find_subroutine_name         = sub { eval { svref_2object($_[0])->GV->NAME        } || '' };
-
-    sub has_method {
-        my ($self, $method_name) = @_;
-        (defined $method_name && $method_name)
-            || confess "You must define a method name";    
+    my $sub_name = ($self->name . '::' . $method_name);   
     
-        my $sub_name = ($self->name . '::' . $method_name);    
-        
-        no strict 'refs';
-        return 0 if !defined(&{$sub_name});        
-        return 0 if $_find_subroutine_package_name->(\&{$sub_name}) ne $self->name &&
-                    $_find_subroutine_name->(\&{$sub_name})         ne '__ANON__';
-        return 1;
-    }
+    no strict 'refs';
+    return 0 if !defined(&{$sub_name});        
 
+	my $method = \&{$sub_name};
+	$method = Class::MOP::Method->new($method) unless blessed($method);
+	
+    return 0 if $method->package_name ne $self->name &&
+                $method->name         ne '__ANON__';
+    return 1;
 }
 
 sub get_method {
@@ -281,10 +280,10 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
+	return unless $self->has_method($method_name);
+
     no strict 'refs';    
-    return \&{$self->name . '::' . $method_name} 
-        if $self->has_method($method_name);   
-    return; # <- make sure to return undef
+    return \&{$self->name . '::' . $method_name};
 }
 
 sub remove_method {
@@ -355,7 +354,6 @@ sub find_all_methods_by_name {
         } if $meta->has_method($method_name);
     }
     return @methods;
-
 }
 
 ## Attributes
