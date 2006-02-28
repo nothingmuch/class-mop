@@ -34,15 +34,18 @@ sub new {
 		my $code = shift;
 		(blessed($code))
 			|| confess "Can only ask the package name of a blessed CODE";
-		my $modifier_table = { before => [], after => [] };
+		my $modifier_table = { 
+			orig   => $code,
+			before => [],
+			after  => [],		
+			around => {
+				cache   => $code,
+				methods => [],
+			},
+		};
 		my $method = $code->new(sub {
 			$_->(@_) for @{$modifier_table->{before}};
-			# NOTE: 
-			# we actually need to be sure to preserve 
-			# the calling context and call this method
-			# with the same context too. This just 
-			# requires some bookkeeping code, thats all.			
-			my @rval = $code->(@_);
+			my @rval = $modifier_table->{around}->{cache}->(@_);
 			$_->(@_) for @{$modifier_table->{after}};			
 			return wantarray ? @rval : $rval[0];
 		});	
@@ -72,7 +75,33 @@ sub new {
 	    (reftype($modifier) && reftype($modifier) eq 'CODE')
 	        || confess "You must supply a CODE reference for a modifier";			
 		push @{$MODIFIERS{$code}->{after}} => $modifier;
-	}	
+	}
+	
+	{
+		my $compile_around_method = sub {{
+	    	my $f1 = pop;
+	    	return $f1 unless @_;
+	    	my $f2 = pop;
+	    	push @_, sub { $f2->( $f1, @_ ) };
+			redo;
+		}};
+	
+		sub add_around_modifier {
+			my $code     = shift;
+			my $modifier = shift;
+			(exists $MODIFIERS{$code})
+				|| confess "You must first wrap your method before adding a modifier";		
+			(blessed($code))
+				|| confess "Can only ask the package name of a blessed CODE";
+		    (reftype($modifier) && reftype($modifier) eq 'CODE')
+		        || confess "You must supply a CODE reference for a modifier";			
+			unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
+			$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
+				@{$MODIFIERS{$code}->{around}->{methods}},
+				$MODIFIERS{$code}->{orig}
+			);
+		}	
+	}
 }
 
 # informational
