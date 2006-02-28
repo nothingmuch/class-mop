@@ -22,7 +22,7 @@ sub meta {
 sub new { 
     my $class = shift;
     my $code  = shift;
-    (reftype($code) && reftype($code) eq 'CODE')
+    ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless";
     bless $code => blessed($class) || $class;
 }
@@ -72,7 +72,7 @@ sub new {
 			|| confess "You must first wrap your method before adding a modifier";		
 		(blessed($code))
 			|| confess "Can only ask the package name of a blessed CODE";
-	    (reftype($modifier) && reftype($modifier) eq 'CODE')
+    	('CODE' eq (reftype($code) || ''))
 	        || confess "You must supply a CODE reference for a modifier";			
 		unshift @{$MODIFIERS{$code}->{before}} => $modifier;
 	}
@@ -84,7 +84,7 @@ sub new {
 			|| confess "You must first wrap your method before adding a modifier";		
 		(blessed($code))
 			|| confess "Can only ask the package name of a blessed CODE";
-	    (reftype($modifier) && reftype($modifier) eq 'CODE')
+	    ('CODE' eq (reftype($code) || ''))
 	        || confess "You must supply a CODE reference for a modifier";			
 		push @{$MODIFIERS{$code}->{after}} => $modifier;
 	}
@@ -105,7 +105,7 @@ sub new {
 				|| confess "You must first wrap your method before adding a modifier";		
 			(blessed($code))
 				|| confess "Can only ask the package name of a blessed CODE";
-		    (reftype($modifier) && reftype($modifier) eq 'CODE')
+		    ('CODE' eq (reftype($code) || ''))
 		        || confess "You must supply a CODE reference for a modifier";			
 			unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
 			$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
@@ -177,6 +177,10 @@ to this class.
 
 This simply blesses the C<&code> reference passed to it.
 
+=item B<wrap>
+
+This wraps an existing method so that it can handle method modifiers.
+
 =back
 
 =head2 Informational
@@ -189,11 +193,17 @@ This simply blesses the C<&code> reference passed to it.
 
 =back
 
-=head1 SEE ALSO
+=head2 Modifiers
 
-http://dirtsimple.org/2005/01/clos-style-method-combination-for.html
+=over 4
 
-http://www.gigamonkeys.com/book/object-reorientation-generic-functions.html
+=item B<add_before_modifier ($code)>
+
+=item B<add_after_modifier ($code)>
+
+=item B<add_around_modifier ($code)>
+
+=back
 
 =head1 AUTHOR
 

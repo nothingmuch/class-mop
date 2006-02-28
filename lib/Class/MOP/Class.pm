@@ -230,7 +230,7 @@ sub add_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
     # use reftype here to allow for blessed subs ...
-    (reftype($method) && reftype($method) eq 'CODE')
+    ('CODE' eq (reftype($method) || ''))
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
 
@@ -241,12 +241,16 @@ sub add_method {
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
+sub add_method_modifier {
+	
+}
+
 sub alias_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
     # use reftype here to allow for blessed subs ...
-    (reftype($method) && reftype($method) eq 'CODE')
+    ('CODE' eq (reftype($method) || ''))
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);
 
@@ -712,6 +716,8 @@ This does absolutely nothing special to C<$method>
 other than use B<Sub::Name> to make sure it is tagged with the 
 correct name, and therefore show up correctly in stack traces and 
 such.
+
+=item B<add_method_modifier ($modifier_type, $code)>
 
 =item B<alias_method ($method_name, $method)>
 

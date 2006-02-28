@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More no_plan => 18;
+use Test::More tests => 23;
 use Test::Exception;
 
 BEGIN {
@@ -73,7 +73,44 @@ BEGIN {
 	is(scalar $wrapped->(), 4, '... got the right results back from the around methods (in scalar context)');		
 }
 
-
+{
+	my @tracelog;
+	
+	my $method = Class::MOP::Method->new(sub { push @tracelog => 'primary' });
+	isa_ok($method, 'Class::MOP::Method');
+	
+	my $wrapped = $method->wrap();
+	isa_ok($wrapped, 'Class::MOP::Method');	
+	
+	lives_ok {
+		$wrapped->add_before_modifier(sub { push @tracelog => 'before 1' });
+		$wrapped->add_before_modifier(sub { push @tracelog => 'before 2' });		
+		$wrapped->add_before_modifier(sub { push @tracelog => 'before 3' });		
+	} '... added the before modifier okay';
+	
+	lives_ok {
+		$wrapped->add_around_modifier(sub { push @tracelog => 'around 3'; $_[0]->(); });		
+		$wrapped->add_around_modifier(sub { push @tracelog => 'around 2'; $_[0]->(); });
+		$wrapped->add_around_modifier(sub { push @tracelog => 'around 1'; $_[0]->(); });						
+	} '... added the around modifier okay';	
+	
+	lives_ok {
+		$wrapped->add_after_modifier(sub { push @tracelog => 'after 3' });
+		$wrapped->add_after_modifier(sub { push @tracelog => 'after 2' });
+		$wrapped->add_after_modifier(sub { push @tracelog => 'after 1' });				
+	} '... added the after modifier okay';	
+	
+	$wrapped->();
+	is_deeply(
+		\@tracelog,
+		[ 
+		  'before 3', 'before 2', 'before 1',  # last-in-first-out order
+		  'around 1', 'around 2', 'around 3',  # last-in-first-out order
+		  'primary',
+		  'after 3', 'after 2', 'after 1',     # first-in-first-out order
+		],
+		'... got the right tracelog from all our before/around/after methods');
+}
 
 
 
