@@ -45,9 +45,21 @@ sub new {
 		};
 		my $method = $code->new(sub {
 			$_->(@_) for @{$modifier_table->{before}};
-			my @rval = $modifier_table->{around}->{cache}->(@_);
+			my (@rlist, $rval);
+			if (defined wantarray) {
+				if (wantarray) {
+					@rlist = $modifier_table->{around}->{cache}->(@_);
+				}
+				else {
+					$rval = $modifier_table->{around}->{cache}->(@_);
+				}
+			}
+			else {
+				$modifier_table->{around}->{cache}->(@_);
+			}
 			$_->(@_) for @{$modifier_table->{after}};			
-			return wantarray ? @rval : $rval[0];
+			return unless defined wantarray;
+			return wantarray ? @rlist : $rval;
 		});	
 		$MODIFIERS{$method} = $modifier_table;
 		$method;  

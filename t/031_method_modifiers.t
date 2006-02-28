@@ -62,12 +62,15 @@ BEGIN {
 		$wrapped->add_around_modifier(sub { (3, $_[0]->()) });		
 		$wrapped->add_around_modifier(sub { (2, $_[0]->()) });
 		$wrapped->add_around_modifier(sub { (1, $_[0]->()) });		
+		$wrapped->add_around_modifier(sub { (0, $_[0]->()) });				
 	} '... added the around modifier okay';	
 
 	is_deeply(
 		[ $wrapped->() ],
-		[ 1, 2, 3, 4 ],
-		'... got the right results back from the around methods');
+		[ 0, 1, 2, 3, 4 ],
+		'... got the right results back from the around methods (in list context)');
+		
+	is(scalar $wrapped->(), 4, '... got the right results back from the around methods (in scalar context)');		
 }
 
 
