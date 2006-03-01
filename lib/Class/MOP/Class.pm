@@ -235,37 +235,61 @@ sub add_method {
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
 
-	$method = Class::MOP::Method->new($method) unless blessed($method);
+	$method = $self->method_metaclass->wrap($method) unless blessed($method);
 	
     no strict 'refs';
     no warnings 'redefine';
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
-sub add_method_modifier {
-	my ($self, $method_name, $modifier_name, $method_modifier) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must pass in a method name";
+{
+	my $fetch_and_prepare_method = sub {
+		my ($self, $method_name) = @_;
+		# fetch it locally
+		my $method = $self->get_method($method_name);
+		# if we dont have local ...
+		unless ($method) {
+			# create a local which just calls the SUPER method ...
+			$self->add_method($method_name => sub { $_[0]->super($method_name)->(@_) });
+			$method = $self->get_method($method_name);
+		}
+		
+		# now make sure we wrap it properly 
+		# (if it isnt already)
+		unless ($method->isa('Class::MOP::Method::Wrapped')) {
+			$method = Class::MOP::Method::Wrapped->wrap($method);
+			$self->add_method($method_name => $method);	
+		}		
+		return $method;
+	};
 
-    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':' . $modifier_name);
-	
-	my $method = $self->get_method($method_name);
-	unless ($method) {
-		$self->add_method($method_name => sub { $_[0]->super($method_name)->(@_) });
-		$method = $self->get_method($method_name);
+	sub add_before_method_modifier {
+		my ($self, $method_name, $method_modifier) = @_;
+	    (defined $method_name && $method_name)
+	        || confess "You must pass in a method name";
+	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':before');	
+		my $method = $fetch_and_prepare_method->($self, $method_name);
+		$method->add_before_modifier(subname $full_method_modifier_name => $method_modifier);
+	}
+
+	sub add_after_method_modifier {
+		my ($self, $method_name, $method_modifier) = @_;
+	    (defined $method_name && $method_name)
+	        || confess "You must pass in a method name";
+	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':after');	
+		my $method = $fetch_and_prepare_method->($self, $method_name);
+		$method->add_after_modifier(subname $full_method_modifier_name => $method_modifier);
 	}
 	
-	$method = Class::MOP::Method::Wrapped->wrap($method) 
-		unless $method->isa('Class::MOP::Method::Wrapped');
-		
-	$self->add_method($method_name => $method);	
-	
-	my $add_modifier = $method->can('add_' . $modifier_name . '_modifier');
-	
-	(defined $add_modifier)
-		|| confess "Modifier type ($modifier_name) not supported";
-	
-	$add_modifier->($method, subname $full_method_modifier_name => $method_modifier);
+	sub add_around_method_modifier {
+		my ($self, $method_name, $method_modifier) = @_;
+	    (defined $method_name && $method_name)
+	        || confess "You must pass in a method name";
+	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':around');	
+		my $method = $fetch_and_prepare_method->($self, $method_name);
+		$method->add_around_modifier(subname $full_method_modifier_name => $method_modifier);
+	}	
+
 }
 
 sub alias_method {
@@ -277,7 +301,7 @@ sub alias_method {
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);
 
-	$method = Class::MOP::Method->new($method) unless blessed($method);    
+	$method = $self->method_metaclass->wrap($method) unless blessed($method);    
         
     no strict 'refs';
     no warnings 'redefine';
@@ -295,7 +319,7 @@ sub has_method {
     return 0 if !defined(&{$sub_name});        
 
 	my $method = \&{$sub_name};
-	$method = Class::MOP::Method->new($method) unless blessed($method);
+	$method = $self->method_metaclass->wrap($method) unless blessed($method);
 	
     return 0 if $method->package_name ne $self->name &&
                 $method->name         ne '__ANON__';
@@ -740,8 +764,6 @@ other than use B<Sub::Name> to make sure it is tagged with the
 correct name, and therefore show up correctly in stack traces and 
 such.
 
-=item B<add_method_modifier ($method_name, $modifier_type, $code)>
-
 =item B<alias_method ($method_name, $method)>
 
 This will take a C<$method_name> and CODE reference to that 
@@ -815,6 +837,18 @@ The list of methods produced is a distinct list, meaning there are no
 duplicates in it. This is especially useful for things like object 
 initialization and destruction where you only want the method called 
 once, and in the correct order.
+
+=back
+
+=head2 Method Modifiers
+
+=over 4
+
+=item B<add_before_method_modifier ($method_name, $code)>
+
+=item B<add_after_method_modifier ($method_name, $code)>
+
+=item B<add_around_method_modifier ($method_name, $code)>
 
 =back
 

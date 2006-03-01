@@ -11,7 +11,7 @@ BEGIN {
     use_ok('Class::MOP::Method');
 }
 
-my $method = Class::MOP::Method->new(sub { 1 });
+my $method = Class::MOP::Method->wrap(sub { 1 });
 is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to the same meta');
 
 is($method->package_name, 'main', '... our package is main::');
@@ -21,7 +21,7 @@ my $meta = Class::MOP::Method->meta;
 isa_ok($meta, 'Class::MOP::Class');
 
 foreach my $method_name (qw(
-    new
+    wrap
 	package_name
 	name
     )) {
@@ -32,13 +32,13 @@ foreach my $method_name (qw(
 }
 
 dies_ok {
-    Class::MOP::Method->new()
+    Class::MOP::Method->wrap()
 } '... bad args for &wrap';
 
 dies_ok {
-    Class::MOP::Method->new('Fail')
+    Class::MOP::Method->wrap('Fail')
 } '... bad args for &wrap';
 
 dies_ok {
-    Class::MOP::Method->new([])
+    Class::MOP::Method->wrap([])
 } '... bad args for &wrap';

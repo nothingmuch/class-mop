@@ -15,7 +15,7 @@ BEGIN {
 {
 	my $trace = '';
 
-	my $method = Class::MOP::Method->new(sub { $trace .= 'primary' });
+	my $method = Class::MOP::Method->wrap(sub { $trace .= 'primary' });
 	isa_ok($method, 'Class::MOP::Method');
 
 	$method->();
@@ -49,7 +49,7 @@ BEGIN {
 
 # test around method
 {
-	my $method = Class::MOP::Method->new(sub { 4 });
+	my $method = Class::MOP::Method->wrap(sub { 4 });
 	isa_ok($method, 'Class::MOP::Method');
 	
 	is($method->(), 4, '... got the right value from the wrapped method');	
@@ -78,7 +78,7 @@ BEGIN {
 {
 	my @tracelog;
 	
-	my $method = Class::MOP::Method->new(sub { push @tracelog => 'primary' });
+	my $method = Class::MOP::Method->wrap(sub { push @tracelog => 'primary' });
 	isa_ok($method, 'Class::MOP::Method');
 	
 	my $wrapped = Class::MOP::Method::Wrapped->wrap($method);

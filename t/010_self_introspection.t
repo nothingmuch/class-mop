@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 120;
+use Test::More tests => 124;
 use Test::Exception;
 
 BEGIN {
@@ -37,7 +37,7 @@ my @methods = qw(
     has_method get_method add_method remove_method alias_method
     get_method_list compute_all_applicable_methods find_all_methods_by_name
     
-	add_method_modifier
+	add_before_method_modifier add_after_method_modifier add_around_method_modifier
 
     has_attribute get_attribute add_attribute remove_attribute
     get_attribute_list get_attribute_map compute_all_applicable_attributes

@@ -1,11 +1,33 @@
 Revision history for Perl extension Class-MOP.
 
-0.13 
+0.20 
     - removed the dependency for Clone since 
       we no longer to deep-cloning by default.
+    - added dependency for SUPER to support the
+      method modifier code.
+    
+    * Class::MOP::Method
+      - added &package_name and &name methods 
+        which were formerly private subs in 
+        Class::MOP::Class
+      
+    * Class::MOP::Method::Wrapped
+      - allows for a method to be wrapped with 
+        before, after and around modifiers 
+          - added tests and docs for this feature
 
     * Class::MOP::Class
       - improved &get_package_variable
+      - methods are now blessed into Class::MOP::Method
+        whenever possible
+      - &has_method now uses new method introspection 
+        from Class::MOP::Method to determine where the
+        sub comes from
+      - added methods to install CLOS-style method modifiers 
+         - &add_before_method_modifier
+         - &add_after_method_modifier         
+         - &add_around_method_modifier
+             - added tests and docs for these
 
 0.12 Thurs. Feb 23, 2006
     - reduced the dependency on B, no need to always 

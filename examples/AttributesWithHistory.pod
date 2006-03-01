@@ -5,29 +5,25 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use base 'Class::MOP::Attribute';
 
 # this is for an extra attribute constructor 
 # option, which is to be able to create a 
 # way for the class to access the history
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('history_accessor' => (
-        reader    => 'history_accessor',
-        init_arg  => 'history_accessor',
-        predicate => 'has_history_accessor',
-    ))
-);
+AttributesWithHistory->meta->add_attribute('history_accessor' => (
+    reader    => 'history_accessor',
+    init_arg  => 'history_accessor',
+    predicate => 'has_history_accessor',
+));
 
 # this is a place to store the actual 
 # history of the attribute
-__PACKAGE__->meta->add_attribute(
-    Class::MOP::Attribute->new('_history' => (
-        accessor => '_history',
-        default  => sub { {} },
-    ))
-);
+AttributesWithHistory->meta->add_attribute('_history' => (
+    accessor => '_history',
+    default  => sub { {} },
+));
 
 # generate the methods
 
@@ -66,16 +62,13 @@ sub generate_writer_method {
     }};
 }
 
-sub install_accessors {
-    my $self = shift;
-    # do as we normall do ...
-    $self->SUPER::install_accessors();
+AttributesWithHistory->meta->add_after_method_modifier('install_accessors' => sub {
+    my ($self) = @_;
     # and now add the history accessor
     $self->associated_class->add_method(
         $self->process_accessors('history_accessor' => $self->history_accessor())
     ) if $self->has_history_accessor();
-    return;
-}
+});
 
 1;
 

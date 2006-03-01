@@ -5,11 +5,12 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'Class::MOP::Attribute';
 
-sub new {
+Perl6Attribute->meta->add_around_method_modifier('new' => sub {
+	my $cont = shift;
     my ($class, $attribute_name, %options) = @_;
     
     # extract the sigil and accessor name
@@ -22,8 +23,8 @@ sub new {
     $options{default} = sub { [] } if ($sigil eq '@');
     $options{default} = sub { {} } if ($sigil eq '%');        
     
-    $class->SUPER::new($attribute_name, %options);
-}
+    $cont->($class, $attribute_name, %options);
+});
 
 1;
 

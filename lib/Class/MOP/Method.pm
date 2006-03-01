@@ -19,7 +19,7 @@ sub meta {
 
 # construction
 
-sub new { 
+sub wrap { 
     my $class = shift;
     my $code  = shift;
     ('CODE' eq (reftype($code) || ''))
@@ -71,7 +71,7 @@ sub wrap {
 			methods => [],
 		},
 	};
-	my $method = $class->new(sub {
+	my $method = $class->SUPER::wrap(sub {
 		$_->(@_) for @{$modifier_table->{before}};
 		my (@rlist, $rval);
 		if (defined wantarray) {
@@ -184,7 +184,7 @@ to this class.
 
 =over 4
 
-=item B<new (&code)>
+=item B<wrap (&code)>
 
 This simply blesses the C<&code> reference passed to it.
 

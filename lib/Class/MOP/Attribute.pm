@@ -141,14 +141,14 @@ sub process_accessors {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate format, must be a HASH ref";
         my ($name, $method) = each %{$accessor};
-        return ($name, Class::MOP::Attribute::Accessor->new($method));        
+        return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
     else {
         my $generator = $self->can('generate_' . $type . '_method');
         ($generator)
             || confess "There is no method generator for the type='$type'";
         if (my $method = $self->$generator($self->name)) {
-            return ($accessor => Class::MOP::Attribute::Accessor->new($method));            
+            return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));            
         }
         confess "Could not create the '$type' method for " . $self->name . " because : $@";
     }    

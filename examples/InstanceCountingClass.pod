@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Class::MOP::Class';
 
@@ -14,11 +14,10 @@ InstanceCountingClass->meta->add_attribute('$:count' => (
     default => 0
 ));
 
-sub construct_instance {
-    my ($class, %params) = @_;
-    $class->{'$:count'}++;
-    return $class->SUPER::construct_instance(%params);
-}
+InstanceCountingClass->meta->add_before_method_modifier('construct_instance' => sub {
+    my ($class) = @_;
+    $class->{'$:count'}++;	
+});
 
 1;
 

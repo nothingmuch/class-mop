@@ -34,9 +34,9 @@ BEGIN {
     }
     
     sub withdraw {
-       my ($self, $amount) = @_;
-       my $current_balance = $self->balance();
-       ($current_balance >= $amount)
+        my ($self, $amount) = @_;
+        my $current_balance = $self->balance();
+        ($current_balance >= $amount)
             || confess "Account overdrawn";
 		#warn "withdrew $amount from $self";
         $self->balance($current_balance - $amount);
@@ -54,7 +54,7 @@ BEGIN {
 		init_arg => 'overdraft',
     ));	
 
-	CheckingAccount->meta->add_method_modifier('withdraw' => 'before' => sub {
+	CheckingAccount->meta->add_before_method_modifier('withdraw' => sub {
 		my ($self, $amount) = @_;
 		#warn "hello from before";
 		my $overdraft_amount = $amount - $self->balance();
