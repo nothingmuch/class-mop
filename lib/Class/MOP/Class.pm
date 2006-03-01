@@ -7,6 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
+use SUPER        ();
 
 our $VERSION = '0.06';
 
@@ -242,7 +243,29 @@ sub add_method {
 }
 
 sub add_method_modifier {
+	my ($self, $method_name, $modifier_name, $method_modifier) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must pass in a method name";
+
+    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':' . $modifier_name);
 	
+	my $method = $self->get_method($method_name);
+	unless ($method) {
+		$self->add_method($method_name => sub { $_[0]->super($method_name)->(@_) });
+		$method = $self->get_method($method_name);
+	}
+	
+	$method = Class::MOP::Method::Wrapped->wrap($method) 
+		unless $method->isa('Class::MOP::Method::Wrapped');
+		
+	$self->add_method($method_name => $method);	
+	
+	my $add_modifier = $method->can('add_' . $modifier_name . '_modifier');
+	
+	(defined $add_modifier)
+		|| confess "Modifier type ($modifier_name) not supported";
+	
+	$add_modifier->($method, subname $full_method_modifier_name => $method_modifier);
 }
 
 sub alias_method {
@@ -717,7 +740,7 @@ other than use B<Sub::Name> to make sure it is tagged with the
 correct name, and therefore show up correctly in stack traces and 
 such.
 
-=item B<add_method_modifier ($modifier_type, $code)>
+=item B<add_method_modifier ($method_name, $modifier_type, $code)>
 
 =item B<alias_method ($method_name, $method)>
 

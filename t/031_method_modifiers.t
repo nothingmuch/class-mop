@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 26;
 use Test::Exception;
 
 BEGIN {
@@ -22,7 +22,8 @@ BEGIN {
 	is($trace, 'primary', '... got the right return value from method');
 	$trace = '';
 
-	my $wrapped = $method->wrap();
+	my $wrapped = Class::MOP::Method::Wrapped->wrap($method);
+	isa_ok($wrapped, 'Class::MOP::Method::Wrapped');
 	isa_ok($wrapped, 'Class::MOP::Method');
 
 	$wrapped->();
@@ -53,7 +54,8 @@ BEGIN {
 	
 	is($method->(), 4, '... got the right value from the wrapped method');	
 
-	my $wrapped = $method->wrap;
+	my $wrapped = Class::MOP::Method::Wrapped->wrap($method);
+	isa_ok($wrapped, 'Class::MOP::Method::Wrapped');
 	isa_ok($wrapped, 'Class::MOP::Method');
 
 	is($wrapped->(), 4, '... got the right value from the wrapped method');
@@ -79,7 +81,8 @@ BEGIN {
 	my $method = Class::MOP::Method->new(sub { push @tracelog => 'primary' });
 	isa_ok($method, 'Class::MOP::Method');
 	
-	my $wrapped = $method->wrap();
+	my $wrapped = Class::MOP::Method::Wrapped->wrap($method);
+	isa_ok($wrapped, 'Class::MOP::Method::Wrapped');
 	isa_ok($wrapped, 'Class::MOP::Method');	
 	
 	lives_ok {

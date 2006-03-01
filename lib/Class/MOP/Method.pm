@@ -27,95 +27,6 @@ sub new {
     bless $code => blessed($class) || $class;
 }
 
-{
-	my %MODIFIERS;
-	
-	sub wrap {
-		my $code = shift;
-		(blessed($code))
-			|| confess "Can only ask the package name of a blessed CODE";
-		my $modifier_table = { 
-			orig   => $code,
-			before => [],
-			after  => [],		
-			around => {
-				cache   => $code,
-				methods => [],
-			},
-		};
-		my $method = $code->new(sub {
-			$_->(@_) for @{$modifier_table->{before}};
-			my (@rlist, $rval);
-			if (defined wantarray) {
-				if (wantarray) {
-					@rlist = $modifier_table->{around}->{cache}->(@_);
-				}
-				else {
-					$rval = $modifier_table->{around}->{cache}->(@_);
-				}
-			}
-			else {
-				$modifier_table->{around}->{cache}->(@_);
-			}
-			$_->(@_) for @{$modifier_table->{after}};			
-			return unless defined wantarray;
-			return wantarray ? @rlist : $rval;
-		});	
-		$MODIFIERS{$method} = $modifier_table;
-		$method;  
-	}
-	
-	sub add_before_modifier {
-		my $code     = shift;
-		my $modifier = shift;
-		(exists $MODIFIERS{$code})
-			|| confess "You must first wrap your method before adding a modifier";		
-		(blessed($code))
-			|| confess "Can only ask the package name of a blessed CODE";
-    	('CODE' eq (reftype($code) || ''))
-	        || confess "You must supply a CODE reference for a modifier";			
-		unshift @{$MODIFIERS{$code}->{before}} => $modifier;
-	}
-	
-	sub add_after_modifier {
-		my $code     = shift;
-		my $modifier = shift;
-		(exists $MODIFIERS{$code})
-			|| confess "You must first wrap your method before adding a modifier";		
-		(blessed($code))
-			|| confess "Can only ask the package name of a blessed CODE";
-	    ('CODE' eq (reftype($code) || ''))
-	        || confess "You must supply a CODE reference for a modifier";			
-		push @{$MODIFIERS{$code}->{after}} => $modifier;
-	}
-	
-	{
-		my $compile_around_method = sub {{
-	    	my $f1 = pop;
-	    	return $f1 unless @_;
-	    	my $f2 = pop;
-	    	push @_, sub { $f2->( $f1, @_ ) };
-			redo;
-		}};
-	
-		sub add_around_modifier {
-			my $code     = shift;
-			my $modifier = shift;
-			(exists $MODIFIERS{$code})
-				|| confess "You must first wrap your method before adding a modifier";		
-			(blessed($code))
-				|| confess "Can only ask the package name of a blessed CODE";
-		    ('CODE' eq (reftype($code) || ''))
-		        || confess "You must supply a CODE reference for a modifier";			
-			unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
-			$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
-				@{$MODIFIERS{$code}->{around}->{methods}},
-				$MODIFIERS{$code}->{orig}
-			);
-		}	
-	}
-}
-
 # informational
 
 sub package_name { 
@@ -130,6 +41,106 @@ sub name {
 	(blessed($code))
 		|| confess "Can only ask the package name of a blessed CODE";	
 	svref_2object($code)->GV->NAME;
+}
+
+package Class::MOP::Method::Wrapped;
+
+use strict;
+use warnings;
+
+use Carp         'confess';
+use Scalar::Util 'reftype', 'blessed';
+
+our $VERSION = '0.01';
+
+our @ISA = ('Class::MOP::Method');	
+
+my %MODIFIERS;
+
+sub wrap {
+	my $class = shift;
+	my $code  = shift;
+	(blessed($code) && $code->isa('Class::MOP::Method'))
+		|| confess "Can only wrap blessed CODE";
+	my $modifier_table = { 
+		orig   => $code,
+		before => [],
+		after  => [],		
+		around => {
+			cache   => $code,
+			methods => [],
+		},
+	};
+	my $method = $class->new(sub {
+		$_->(@_) for @{$modifier_table->{before}};
+		my (@rlist, $rval);
+		if (defined wantarray) {
+			if (wantarray) {
+				@rlist = $modifier_table->{around}->{cache}->(@_);
+			}
+			else {
+				$rval = $modifier_table->{around}->{cache}->(@_);
+			}
+		}
+		else {
+			$modifier_table->{around}->{cache}->(@_);
+		}
+		$_->(@_) for @{$modifier_table->{after}};			
+		return unless defined wantarray;
+		return wantarray ? @rlist : $rval;
+	});	
+	$MODIFIERS{$method} = $modifier_table;
+	$method;  
+}
+
+sub add_before_modifier {
+	my $code     = shift;
+	my $modifier = shift;
+	(exists $MODIFIERS{$code})
+		|| confess "You must first wrap your method before adding a modifier";		
+	(blessed($code))
+		|| confess "Can only ask the package name of a blessed CODE";
+	('CODE' eq (reftype($code) || ''))
+        || confess "You must supply a CODE reference for a modifier";			
+	unshift @{$MODIFIERS{$code}->{before}} => $modifier;
+}
+
+sub add_after_modifier {
+	my $code     = shift;
+	my $modifier = shift;
+	(exists $MODIFIERS{$code})
+		|| confess "You must first wrap your method before adding a modifier";		
+	(blessed($code))
+		|| confess "Can only ask the package name of a blessed CODE";
+    ('CODE' eq (reftype($code) || ''))
+        || confess "You must supply a CODE reference for a modifier";			
+	push @{$MODIFIERS{$code}->{after}} => $modifier;
+}
+
+{
+	my $compile_around_method = sub {{
+    	my $f1 = pop;
+    	return $f1 unless @_;
+    	my $f2 = pop;
+    	push @_, sub { $f2->( $f1, @_ ) };
+		redo;
+	}};
+
+	sub add_around_modifier {
+		my $code     = shift;
+		my $modifier = shift;
+		(exists $MODIFIERS{$code})
+			|| confess "You must first wrap your method before adding a modifier";		
+		(blessed($code))
+			|| confess "Can only ask the package name of a blessed CODE";
+	    ('CODE' eq (reftype($code) || ''))
+	        || confess "You must supply a CODE reference for a modifier";			
+		unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
+		$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
+			@{$MODIFIERS{$code}->{around}->{methods}},
+			$MODIFIERS{$code}->{orig}
+		);
+	}	
 }
 
 1;
