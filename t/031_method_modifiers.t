@@ -92,15 +92,15 @@ BEGIN {
 	} '... added the before modifier okay';
 	
 	lives_ok {
-		$wrapped->add_around_modifier(sub { push @tracelog => 'around 3'; $_[0]->(); });		
+		$wrapped->add_around_modifier(sub { push @tracelog => 'around 1'; $_[0]->(); });		
 		$wrapped->add_around_modifier(sub { push @tracelog => 'around 2'; $_[0]->(); });
-		$wrapped->add_around_modifier(sub { push @tracelog => 'around 1'; $_[0]->(); });						
+		$wrapped->add_around_modifier(sub { push @tracelog => 'around 3'; $_[0]->(); });						
 	} '... added the around modifier okay';	
 	
 	lives_ok {
-		$wrapped->add_after_modifier(sub { push @tracelog => 'after 3' });
+		$wrapped->add_after_modifier(sub { push @tracelog => 'after 1' });
 		$wrapped->add_after_modifier(sub { push @tracelog => 'after 2' });
-		$wrapped->add_after_modifier(sub { push @tracelog => 'after 1' });				
+		$wrapped->add_after_modifier(sub { push @tracelog => 'after 3' });				
 	} '... added the after modifier okay';	
 	
 	$wrapped->();
@@ -108,9 +108,9 @@ BEGIN {
 		\@tracelog,
 		[ 
 		  'before 3', 'before 2', 'before 1',  # last-in-first-out order
-		  'around 1', 'around 2', 'around 3',  # last-in-first-out order
+		  'around 3', 'around 2', 'around 1',  # last-in-first-out order
 		  'primary',
-		  'after 3', 'after 2', 'after 1',     # first-in-first-out order
+		  'after 1', 'after 2', 'after 3',     # first-in-first-out order
 		],
 		'... got the right tracelog from all our before/around/after methods');
 }

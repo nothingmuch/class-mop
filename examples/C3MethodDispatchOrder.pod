@@ -12,7 +12,7 @@ our $VERSION = '0.02';
 
 use base 'Class::MOP::Class';
 
-my $_find_method_in_superclass = sub {
+my $_find_method = sub {
     my ($class, $method) = @_;
     foreach my $super ($class->class_precedence_list) {
         return $super->meta->get_method($method)   
@@ -31,12 +31,12 @@ C3MethodDispatchOrder->meta->add_around_method_modifier('initialize' => sub {
             my $label = ${$meta->name . '::AUTOLOAD'};
             $method_name = (split /\:\:/ => $label)[-1];
         }
-        my $method = $_find_method_in_superclass->($meta, $method_name);
+        my $method = $_find_method->($meta, $method_name);
         (defined $method) || confess "Method ($method_name) not found";
         goto &$method;
     });
     $meta->add_method('can' => sub {
-        $_find_method_in_superclass->($_[0]->meta, $_[1]);
+        $_find_method->($_[0]->meta, $_[1]);
     });
 	return $meta;
 });

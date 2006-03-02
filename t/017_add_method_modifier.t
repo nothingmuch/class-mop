@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More no_plan => 53;
+use Test::More tests => 17;
 use Test::Exception;
 
 BEGIN {
@@ -26,10 +26,9 @@ BEGIN {
     ));
     
     sub new { (shift)->meta->new_object(@_) }
-    
+
     sub deposit {
         my ($self, $amount) = @_;
-		#warn "deposited $amount in $self";
         $self->balance($self->balance + $amount);
     }
     
@@ -38,7 +37,6 @@ BEGIN {
         my $current_balance = $self->balance();
         ($current_balance >= $amount)
             || confess "Account overdrawn";
-		#warn "withdrew $amount from $self";
         $self->balance($current_balance - $amount);
     }
 
@@ -46,7 +44,8 @@ BEGIN {
 	
 	use strict;
 	use warnings;
-	
+    use metaclass;	
+
 	use base 'BankAccount';
 	
     CheckingAccount->meta->add_attribute('$:overdraft_account' => (
@@ -56,14 +55,11 @@ BEGIN {
 
 	CheckingAccount->meta->add_before_method_modifier('withdraw' => sub {
 		my ($self, $amount) = @_;
-		#warn "hello from before";
 		my $overdraft_amount = $amount - $self->balance();
 		if ($overdraft_amount > 0) {
-			#warn "overdrawn $overdraft_amount";
 			$self->overdraft_account->withdraw($overdraft_amount);
 			$self->deposit($overdraft_amount);
 		}
-		#warn "balance after overdraft : " . $self->balance;		
 	});
 
 	::ok(CheckingAccount->meta->has_method('withdraw'), '... checking account now has a withdraw method');
@@ -94,9 +90,14 @@ is($checking_account->overdraft_account, $savings_account, '... got the right ov
 is($checking_account->balance, 100, '... got the right checkings balance');
 
 lives_ok {
+	$checking_account->withdraw(50);
+} '... withdrew from checking successfully';
+is($checking_account->balance, 50, '... got the right checkings balance after withdrawl');
+is($savings_account->balance, 350, '... got the right savings balance after checking withdrawl (no overdraft)');
+
+lives_ok {
 	$checking_account->withdraw(200);
 } '... withdrew from checking successfully';
-
 is($checking_account->balance, 0, '... got the right checkings balance after withdrawl');
-is($savings_account->balance, 250, '... got the right savings balance after overdraft withdrawl');
+is($savings_account->balance, 200, '... got the right savings balance after overdraft withdrawl');
 

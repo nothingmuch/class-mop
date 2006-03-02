@@ -40,7 +40,7 @@ __END__
 
 =head1 NAME
 
-metaclass - a pragma for installing using Class::MOP metaclasses
+metaclass - a pragma for installing and using Class::MOP metaclasses
 
 =head1 SYNOPSIS
 

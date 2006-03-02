@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
-use SUPER        ();
+use B            'svref_2object';
 
 our $VERSION = '0.06';
 
@@ -78,7 +78,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         shift @class_list; # shift off $self->name
 
         foreach my $class_name (@class_list) { 
-            my $meta = $METAS{$class_name};
+            my $meta = $METAS{$class_name} || next;
             ($self->isa(blessed($meta)))
                 || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
                            " is not compatible with the " . 
@@ -191,20 +191,18 @@ sub clone_instance {
 
 sub version {  
     my $self = shift;
-    no strict 'refs';
-    ${$self->name . '::VERSION'};
+    ${$self->get_package_variable('$VERSION')};
 }
 
 # Inheritance
 
 sub superclasses {
     my $self = shift;
-    no strict 'refs';
     if (@_) {
         my @supers = @_;
-        @{$self->name . '::ISA'} = @supers;
+        @{$self->get_package_variable('@ISA')} = @supers;
     }
-    @{$self->name . '::ISA'};        
+    @{$self->get_package_variable('@ISA')};        
 }
 
 sub class_precedence_list {
@@ -249,8 +247,14 @@ sub add_method {
 		my $method = $self->get_method($method_name);
 		# if we dont have local ...
 		unless ($method) {
-			# create a local which just calls the SUPER method ...
-			$self->add_method($method_name => sub { $_[0]->super($method_name)->(@_) });
+			# make sure this method even exists ...
+			($self->find_next_method_by_name($method_name))
+				|| confess "The method '$method_name' is not found in the inherience hierarchy for this class";
+			# if so, then create a local which just 
+			# calls the next applicable method ...				
+			$self->add_method($method_name => sub {
+				$self->find_next_method_by_name($method_name)->(@_);
+			});
 			$method = $self->get_method($method_name);
 		}
 		
@@ -317,12 +321,13 @@ sub has_method {
     
     no strict 'refs';
     return 0 if !defined(&{$sub_name});        
-
 	my $method = \&{$sub_name};
-	$method = $self->method_metaclass->wrap($method) unless blessed($method);
+    return 0 if (svref_2object($method)->GV->STASH->NAME || '') ne $self->name &&
+                (svref_2object($method)->GV->NAME || '')        ne '__ANON__';		
 	
-    return 0 if $method->package_name ne $self->name &&
-                $method->name         ne '__ANON__';
+	# at this point we are relatively sure 
+	# it is our method, so we bless/wrap it 
+	$self->method_metaclass->wrap($method) unless blessed($method);
     return 1;
 }
 
@@ -397,7 +402,7 @@ sub find_all_methods_by_name {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
-        my $meta = $self->initialize($class);;
+        my $meta = $self->initialize($class);
         push @methods => {
             name  => $method_name, 
             class => $class,
@@ -405,6 +410,28 @@ sub find_all_methods_by_name {
         } if $meta->has_method($method_name);
     }
     return @methods;
+}
+
+sub find_next_method_by_name {
+    my ($self, $method_name) = @_;
+    (defined $method_name && $method_name)
+        || confess "You must define a method name to find";	
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my %seen_class;
+	my @cpl = $self->class_precedence_list();
+	shift @cpl; # discard ourselves
+    foreach my $class (@cpl) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+		return $meta->get_method($method_name) 
+			if $meta->has_method($method_name);
+    }
+	return;
 }
 
 ## Attributes
@@ -838,17 +865,109 @@ duplicates in it. This is especially useful for things like object
 initialization and destruction where you only want the method called 
 once, and in the correct order.
 
+=item B<find_next_method_by_name ($method_name)>
+
+This will return the first method to match a given C<$method_name> in 
+the superclasses, this is basically equivalent to calling 
+C<SUPER::$method_name>, but it can be dispatched at runtime.
+
 =back
 
 =head2 Method Modifiers
+
+Method modifiers are a concept borrowed from CLOS, in which a method 
+can be wrapped with I<before>, I<after> and I<around> method modifiers 
+that will be called everytime the method is called. 
+
+=head3 How method modifiers work?
+
+Method modifiers work by wrapping the original method and then replacing 
+it in the classes symbol table. The wrappers will handle calling all the 
+modifiers in the appropariate orders and preserving the calling context 
+for the original method. 
+
+Each method modifier serves a particular purpose, which may not be 
+obvious to users of other method wrapping modules. To start with, the 
+return values of I<before> and I<after> modifiers are ignored. This is 
+because thier purpose is B<not> to filter the input and output of the 
+primary method (this is done with an I<around> modifier). This may seem 
+like an odd restriction to some, but doing this allows for simple code 
+to be added at the begining or end of a method call without jeapordizing 
+the normal functioning of the primary method or placing any extra 
+responsibility on the code of the modifier. Of course if you have more 
+complex needs, then use the I<around> modifier, which uses a variation 
+of continutation passing style to allow for a high degree of flexibility. 
+
+Before and around modifiers are called in last-defined-first-called order, 
+while after modifiers are called in first-defined-first-called order. So 
+the call tree might looks something like this:
+  
+  before 2
+   before 1
+    around 2
+     around 1
+      primary
+     after 1
+    after 2
+
+To see examples of using method modifiers, see the following examples 
+included in the distribution; F<InstanceCountingClass>, F<Perl6Attribute>, 
+F<AttributesWithHistory> and F<C3MethodDispatchOrder>. There is also a 
+classic CLOS usage example in the test F<017_add_method_modifier.t>.
+
+=head3 What is the performance impact?
+
+Of course there is a performance cost associated with method modifiers, 
+but we have made every effort to make that cost be directly proportional 
+to the amount of modifier features you utilize.
+
+The wrapping method does it's best to B<only> do as much work as it 
+absolutely needs to. In order to do this we have moved some of the 
+performance costs to set-up time, where they are easier to amortize.
+
+All this said, my benchmarks have indicated the following:
+
+  simple wrapper with no modifiers             100% slower
+  simple wrapper with simple before modifier   400% slower
+  simple wrapper with simple after modifier    450% slower
+  simple wrapper with simple around modifier   500-550% slower
+  simple wrapper with all 3 modifiers          1100% slower
+
+These numbers may seem daunting, but you must remember, every feature 
+comes with some cost. To put things in perspective, just doing a simple 
+C<AUTOLOAD> which does nothing but extract the name of the method called
+and return it costs about 400% over a normal method call. 
 
 =over 4
 
 =item B<add_before_method_modifier ($method_name, $code)>
 
+This will wrap the method at C<$method_name> and the supplied C<$code> 
+will be passed the C<@_> arguments, and called before the original 
+method is called. As specified above, the return value of the I<before> 
+method modifiers is ignored, and it's ability to modify C<@_> is 
+fairly limited. If you need to do either of these things, use an 
+C<around> method modifier.
+
 =item B<add_after_method_modifier ($method_name, $code)>
 
+This will wrap the method at C<$method_name> so that the original 
+method will be called, it's return values stashed, and then the 
+supplied C<$code> will be passed the C<@_> arguments, and called.
+As specified above, the return value of the I<after> method 
+modifiers is ignored, and it cannot modify the return values of 
+the original method. If you need to do either of these things, use an 
+C<around> method modifier.
+
 =item B<add_around_method_modifier ($method_name, $code)>
+
+This will wrap the method at C<$method_name> so that C<$code> 
+will be called and passed the original method as an extra argument 
+at the begining of the C<@_> argument list. This is a variation of 
+continuation passing style, where the function prepended to C<@_> 
+can be considered a continuation. It is up to C<$code> if it calls 
+the original method or not, there is no restriction on what the 
+C<$code> can or cannot do.
 
 =back
 
