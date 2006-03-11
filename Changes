@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.21 
+    * Class::MOP::Class
+      - fixed issue where metaclasses are reaped from 
+        our cache in global destruction, and so are not
+        available in DESTORY calls
+
 0.20 Thurs. March 2, 2006
     - removed the dependency for Clone since 
       we no longer to deep-cloning by default.

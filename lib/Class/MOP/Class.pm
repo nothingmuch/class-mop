@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 # Self-introspection 
 
@@ -44,7 +44,13 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         my $package_name = $options{':package'};
         (defined $package_name && $package_name)
             || confess "You must pass a package name";  
-        return $METAS{$package_name} if exists $METAS{$package_name};              
+		# NOTE:
+		# return the metaclass if we have it cached, 
+		# and it is still defined (it has not been 
+		# reaped by DESTROY yet, which can happen 
+		# annoyingly enough during global destruction)
+        return $METAS{$package_name} 
+			if exists $METAS{$package_name} && defined $METAS{$package_name};  
         $class = blessed($class) || $class;
         # now create the metaclass
         my $meta;
