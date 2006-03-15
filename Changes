@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.21 
+0.21 Wed. March 15, 2006
     * Class::MOP::Class
       - fixed issue where metaclasses are reaped from 
         our cache in global destruction, and so are not
