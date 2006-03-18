@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.22
+    * Class::MOP::Class
+      - localized $@ in the *_package_variable functions
+        because otherwise, it does ugly things in Moose.
+          - added test case for this
+
 0.21 Wed. March 15, 2006
     * Class::MOP::Class
       - fixed issue where metaclasses are reaped from 

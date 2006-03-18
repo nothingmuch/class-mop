@@ -11,7 +11,7 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...

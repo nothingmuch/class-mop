@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # Self-introspection 
 
@@ -523,6 +523,11 @@ sub add_package_variable {
         *{$self->name . '::' . $name} = $initial_value;
     }
     else {
+        # NOTE:
+        # We HAVE to localize $@ or all 
+        # hell breaks loose. It is not 
+        # good, believe me, not good.
+        local $@;
         eval $sigil . $self->name . '::' . $name;
         confess "Could not create package variable ($variable) because : $@" if $@;
     }
@@ -543,7 +548,11 @@ sub get_package_variable {
         || confess "variable name does not have a sigil";
     my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     no strict 'refs';
-    # try to fetch it first,.. see what happens
+    # NOTE:
+    # We HAVE to localize $@ or all 
+    # hell breaks loose. It is not 
+    # good, believe me, not good.
+    local $@;        
     my $ref = eval '\\' . $sigil . $self->name . '::' . $name;
     confess "Could not get the package variable ($variable) because : $@" if $@;    
     # if we didn't die, then we can return it

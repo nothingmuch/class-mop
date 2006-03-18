@@ -48,6 +48,7 @@ t/105_ClassEncapsulatedAttributes_test.t
 t/106_LazyClass_test.t
 t/107_C3MethodDispatchOrder_test.t
 t/200_Class_C3_compatibility.t
+t/300_random_eval_bug.t
 t/pod.t
 t/pod_coverage.t
 t/lib/BinaryTree.pm
