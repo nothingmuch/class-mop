@@ -523,13 +523,17 @@ sub add_package_variable {
         *{$self->name . '::' . $name} = $initial_value;
     }
     else {
-        # NOTE:
-        # We HAVE to localize $@ or all 
-        # hell breaks loose. It is not 
-        # good, believe me, not good.
-        local $@;
-        eval $sigil . $self->name . '::' . $name;
-        confess "Could not create package variable ($variable) because : $@" if $@;
+        my $e;
+        {        
+            # NOTE:
+            # We HAVE to localize $@ or all 
+            # hell breaks loose. It is not 
+            # good, believe me, not good.
+            local $@;
+            eval $sigil . $self->name . '::' . $name;
+            $e = $@ if $@;            
+        }
+        confess "Could not create package variable ($variable) because : $e" if $e;
     }
 }
 
@@ -547,14 +551,17 @@ sub get_package_variable {
     (defined $variable && $variable =~ /^[\$\@\%]/)
         || confess "variable name does not have a sigil";
     my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    no strict 'refs';
-    # NOTE:
-    # We HAVE to localize $@ or all 
-    # hell breaks loose. It is not 
-    # good, believe me, not good.
-    local $@;        
-    my $ref = eval '\\' . $sigil . $self->name . '::' . $name;
-    confess "Could not get the package variable ($variable) because : $@" if $@;    
+    my ($ref, $e);
+    {
+        # NOTE:
+        # We HAVE to localize $@ or all 
+        # hell breaks loose. It is not 
+        # good, believe me, not good.
+        local $@;        
+        $ref = eval '\\' . $sigil . $self->name . '::' . $name;
+        $e = $@ if $@;
+    }
+    confess "Could not get the package variable ($variable) because : $e" if $e;    
     # if we didn't die, then we can return it
 	return $ref;
 }
