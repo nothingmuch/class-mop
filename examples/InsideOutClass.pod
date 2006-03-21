@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Scalar::Util 'refaddr';
 
@@ -25,7 +25,9 @@ sub construct_instance {
         $val = $params{$init_arg} if exists $params{$init_arg};
         # if nothing was in the %params, we can use the 
         # attribute's default value (if it has one)
-        $val ||= $attr->default($instance) if $attr->has_default();
+        if (!defined $val && $attr->has_default) {
+            $val = $attr->default($instance); 
+        }
         # now add this to the instance structure
         $class->get_package_variable('%' . $attr->name)->{ refaddr($instance) } = $val;
     }    
