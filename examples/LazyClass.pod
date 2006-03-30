@@ -32,6 +32,8 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
+use Carp 'confess';
+
 our $VERSION = '0.02';
 
 use base 'Class::MOP::Attribute';
@@ -55,6 +57,7 @@ sub generate_accessor_method {
 sub generate_reader_method {
     my ($self, $attr_name) = @_; 
     sub {
+        confess "Cannot assign a value to a read-only accessor" if @_ > 1;        
         if (!exists $_[0]->{$attr_name}) {
             my $attr = $self->associated_class->get_attribute($attr_name);
             $_[0]->{$attr_name} = $attr->has_default ? $attr->default($_[0]) : undef;           

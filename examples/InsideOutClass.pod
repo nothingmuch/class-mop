@@ -42,6 +42,7 @@ use warnings;
 
 our $VERSION = '0.04';
 
+use Carp         'confess';
 use Scalar::Util 'refaddr';
 
 use base 'Class::MOP::Attribute';
@@ -58,6 +59,7 @@ sub generate_accessor_method {
 sub generate_reader_method {
     my ($self, $attr_name) = @_;     
     eval 'sub {
+        confess "Cannot assign a value to a read-only accessor" if @_ > 1;
         $' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) };
     }';   
 }

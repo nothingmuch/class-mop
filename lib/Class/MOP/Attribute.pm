@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub meta { 
     require Class::MOP::Class;
@@ -122,7 +122,10 @@ sub generate_accessor_method {
 
 sub generate_reader_method {
     my ($self, $attr_name) = @_; 
-    sub { $_[0]->{$attr_name} };   
+    sub { 
+        confess "Cannot assign a value to a read-only accessor" if @_ > 1;
+        $_[0]->{$attr_name}; 
+    };   
 }
 
 sub generate_writer_method {
