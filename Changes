@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.24
+    * Class::MOP::Class
+      - cleaned up how the before/after/around method 
+        modifiers get named with Sub::Name
+
 0.23 Thurs. March 30, 2006
 	* Class::MOP::Class
 	  - fixed the way attribute defaults are handled 

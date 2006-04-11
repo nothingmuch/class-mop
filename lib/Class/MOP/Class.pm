@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 # Self-introspection 
 
@@ -221,7 +221,7 @@ sub class_precedence_list {
     # up otherwise. Yes, it's an ugly hack, better 
     # suggestions are welcome.
     { $self->name->isa('This is a test for circular inheritance') }
-    # ... and no back to our regularly scheduled program
+    # ... and now back to our regularly scheduled program
     (
         $self->name, 
         map { 
@@ -278,30 +278,39 @@ sub add_method {
 	sub add_before_method_modifier {
 		my ($self, $method_name, $method_modifier) = @_;
 	    (defined $method_name && $method_name)
-	        || confess "You must pass in a method name";
-	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':before');	
+	        || confess "You must pass in a method name";	
 		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_before_modifier(subname $full_method_modifier_name => $method_modifier);
+		$method->add_before_modifier(subname ':before' => $method_modifier);
 	}
 
 	sub add_after_method_modifier {
 		my ($self, $method_name, $method_modifier) = @_;
 	    (defined $method_name && $method_name)
-	        || confess "You must pass in a method name";
-	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':after');	
+	        || confess "You must pass in a method name";	
 		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_after_modifier(subname $full_method_modifier_name => $method_modifier);
+		$method->add_after_modifier(subname ':after' => $method_modifier);
 	}
 	
 	sub add_around_method_modifier {
 		my ($self, $method_name, $method_modifier) = @_;
 	    (defined $method_name && $method_name)
 	        || confess "You must pass in a method name";
-	    my $full_method_modifier_name = ($self->name . '::' . $method_name . ':around');	
 		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_around_modifier(subname $full_method_modifier_name => $method_modifier);
+		$method->add_around_modifier(subname ':around' => $method_modifier);
 	}	
 
+    # NOTE: 
+    # the methods above used to be named like this:
+    #    ${pkg}::${method}:(before|after|around)
+    # but this proved problematic when using one modifier
+    # to wrap multiple methods (something which is likely
+    # to happen pretty regularly IMO). So instead of naming
+    # it like this, I have chosen to just name them purely 
+    # with their modifier names, like so:
+    #    :(before|after|around)
+    # The fact is that in a stack trace, it will be fairly 
+    # evident from the context what method they are attached
+    # to, and so don't need the fully qualified name.
 }
 
 sub alias_method {
@@ -589,6 +598,9 @@ Class::MOP::Class - Class Meta Object
 
 =head1 SYNOPSIS
 
+  # assuming that class Foo 
+  # has been defined, you can
+  
   # use this for introspection ...
   
   # add a method to Foo ...
