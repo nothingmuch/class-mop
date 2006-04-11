@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.24
+0.24 Tues. April 11, 2006
     * Class::MOP::Class
       - cleaned up how the before/after/around method 
         modifiers get named with Sub::Name
