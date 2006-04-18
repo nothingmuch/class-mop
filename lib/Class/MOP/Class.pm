@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 # Self-introspection 
 
@@ -22,7 +22,13 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
     # there is no need to worry about destruction though
     # because they should die only when the program dies.
     # After all, do package definitions even get reaped?
-    my %METAS;    
+    my %METAS;  
+    
+    # means of accessing all the metaclasses that have 
+    # been initialized thus far (for mugwumps obj browser)
+    sub get_all_metaclasses         {        %METAS }            
+    sub get_all_metaclass_instances { values %METAS } 
+    sub get_all_metaclass_names     { keys   %METAS }     
     
     sub initialize {
         my $class        = shift;
@@ -126,6 +132,13 @@ sub create {
         }
     }  
     return $meta;
+}
+
+sub create_anon_class {
+    my ($class, %options) = @_;   
+    require Digest::MD5;
+    my $package_name = 'Class::MOP::Class::__ANON__::' . Digest::MD5::md5_hex({} . time() . $$ . rand());
+    return $class->create($package_name, '0.00', %options);
 }
 
 ## Attribute readers
@@ -652,6 +665,21 @@ bootstrap this module by installing a number of attribute meta-objects
 into it's metaclass. This will allow this class to reap all the benifits 
 of the MOP when subclassing it. 
 
+=item B<get_all_metaclasses>
+
+This will return an hash of all the metaclass instances that have 
+been cached by B<Class::MOP::Class> keyed by the package name. 
+
+=item B<get_all_metaclass_instances>
+
+This will return an array of all the metaclass instances that have 
+been cached by B<Class::MOP::Class>.
+
+=item B<get_all_metaclass_names>
+
+This will return an array of all the metaclass names that have 
+been cached by B<Class::MOP::Class>.
+
 =back
 
 =head2 Class construction
@@ -675,6 +703,14 @@ This returns a B<Class::MOP::Class> object, bringing the specified
 C<$package_name> into existence and adding any of the 
 C<$package_version>, C<@superclasses>, C<%methods> and C<%attributes> 
 to it.
+
+=item B<create_anon_class (superclasses =E<gt> ?@superclasses, 
+                           methods      =E<gt> ?%methods, 
+                           attributes   =E<gt> ?%attributes)>
+
+This will create an anonymous class, it works much like C<create> but 
+it does not need a C<$package_name>. Instead it will create a suitably 
+unique package name for you to stash things into.
 
 =item B<initialize ($package_name)>
 

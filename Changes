@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.25
+    * Class::MOP::Class
+      - added create_anon_class for creating anonymous classes
+        - added tests for this
+      - added get_all_metaclasses, get_all_metaclass_names
+        and get_all_metaclass_instances method to allow
+        access to all the cached metaclass objects.
+
 0.24 Tues. April 11, 2006
     * Class::MOP::Class
       - cleaned up how the before/after/around method 
@@ -16,7 +24,6 @@ Revision history for Perl extension Class-MOP.
 	    to them basically)
 	      - added tests for this
 	      - adjusted all /example files to comply 
-	    
 
 0.22 Mon. March 20, 2006
     * Class::MOP::Class

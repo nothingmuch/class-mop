@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 126;
+use Test::More tests => 134;
 use Test::Exception;
 
 BEGIN {
@@ -22,7 +22,9 @@ isa_ok($meta, 'Class::MOP::Class');
 my @methods = qw(
     meta
     
-    initialize create
+    get_all_metaclasses get_all_metaclass_names get_all_metaclass_instances 
+    
+    initialize create create_anon_class
     
     new_object clone_object
     construct_instance construct_class_instance clone_instance
