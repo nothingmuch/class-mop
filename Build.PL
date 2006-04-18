@@ -12,6 +12,7 @@ my $build = Module::Build->new(
         'B'            => '0',
     },
     optional => {
+        'Digest::MD5'  => '0'
     },
     build_requires => {
         'Test::More'      => '0.47',
