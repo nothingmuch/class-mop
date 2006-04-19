@@ -135,7 +135,12 @@ sub create {
 }
 
 {
+    # NOTE:
+    # this should be sufficient, if you have a 
+    # use case where it is not, write a test and 
+    # I will change it.
     my $ANON_CLASS_SERIAL = 0;
+    
     sub create_anon_class {
         my ($class, %options) = @_;   
         my $package_name = 'Class::MOP::Class::__ANON__::SERIAL::' . ++$ANON_CLASS_SERIAL;
