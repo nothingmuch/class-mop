@@ -13,7 +13,7 @@ BEGIN {
 my $anon_class = Class::MOP::Class->create_anon_class();
 isa_ok($anon_class, 'Class::MOP::Class');
 
-like($anon_class->name, qr/Class::MOP::Class::__ANON__::[0-9a-f]/, '... got an anon class package name');
+like($anon_class->name, qr/Class::MOP::Class::__ANON__::SERIAL::[0-9]+/, '... got an anon class package name');
 
 lives_ok {
     $anon_class->add_method('foo' => sub { "__ANON__::foo" });

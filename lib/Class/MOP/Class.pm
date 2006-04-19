@@ -134,11 +134,13 @@ sub create {
     return $meta;
 }
 
-sub create_anon_class {
-    my ($class, %options) = @_;   
-    require Digest::MD5;
-    my $package_name = 'Class::MOP::Class::__ANON__::' . Digest::MD5::md5_hex({} . time() . $$ . rand());
-    return $class->create($package_name, '0.00', %options);
+{
+    my $ANON_CLASS_SERIAL = 0;
+    sub create_anon_class {
+        my ($class, %options) = @_;   
+        my $package_name = 'Class::MOP::Class::__ANON__::SERIAL::' . ++$ANON_CLASS_SERIAL;
+        return $class->create($package_name, '0.00', %options);
+    }
 }
 
 ## Attribute readers
