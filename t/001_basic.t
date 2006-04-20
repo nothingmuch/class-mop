@@ -67,3 +67,4 @@ is_deeply(
     [ $Baz->class_precedence_list ], 
     [ 'Baz', 'Bar', 'Foo', 'UNIVERSAL' ], 
     '... Baz->class_precedence_list == (Baz, Bar, Foo, UNIVERSAL)');
+

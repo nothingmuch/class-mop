@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use Test::Exception;
 
 BEGIN {
@@ -16,6 +16,7 @@ is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to
 
 is($method->package_name, 'main', '... our package is main::');
 is($method->name, '__ANON__', '... our sub name is __ANON__');
+is($method->fully_qualified_name, 'main::__ANON__', '... our subs full name is main::__ANON__');
 
 my $meta = Class::MOP::Method->meta;
 isa_ok($meta, 'Class::MOP::Class');
