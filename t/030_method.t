@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 25;
 use Test::Exception;
 
 BEGIN {
@@ -17,6 +17,14 @@ is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to
 is($method->package_name, 'main', '... our package is main::');
 is($method->name, '__ANON__', '... our sub name is __ANON__');
 is($method->fully_qualified_name, 'main::__ANON__', '... our subs full name is main::__ANON__');
+
+dies_ok { Class::MOP::Method->wrap } '... cant call this method without some code';
+dies_ok { Class::MOP::Method->wrap([]) } '... cant call this method without some code';
+dies_ok { Class::MOP::Method->wrap(bless {} => 'Fail') } '... cant call this method without some code';
+
+dies_ok { Class::MOP::Method->name } '... cant call this method with a class';
+dies_ok { Class::MOP::Method->package_name } '... cant call this method with a class';
+dies_ok { Class::MOP::Method->fully_qualified_name } '... cant call this method with a class';
 
 my $meta = Class::MOP::Method->meta;
 isa_ok($meta, 'Class::MOP::Class');

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 14;
 use Test::Exception;
 
 BEGIN {
@@ -52,6 +52,25 @@ A more real-world example would be a nice addition :)
     sub bar { 'Foo::Bar::Baz::bar' }    
     sub foobarbaz { 'Foo::Bar::Baz::foobarbaz' }    
 }
+
+ok(!defined(Class::MOP::Class->initialize('Foo')->find_next_method_by_name('BUILD')), 
+   '... Foo::BUILD has not next method');
+
+is(Class::MOP::Class->initialize('Bar')->find_next_method_by_name('BUILD'), 
+   Class::MOP::Class->initialize('Foo')->get_method('BUILD'),     
+   '... Bar::BUILD does have a next method');
+   
+is(Class::MOP::Class->initialize('Baz')->find_next_method_by_name('BUILD'), 
+   Class::MOP::Class->initialize('Bar')->get_method('BUILD'),     
+   '... Baz->BUILD does have a next method');   
+   
+is(Class::MOP::Class->initialize('Foo::Bar')->find_next_method_by_name('BUILD'), 
+   Class::MOP::Class->initialize('Foo')->get_method('BUILD'),     
+   '... Foo::Bar->BUILD does have a next method');   
+   
+is(Class::MOP::Class->initialize('Foo::Bar::Baz')->find_next_method_by_name('BUILD'), 
+   Class::MOP::Class->initialize('Foo')->get_method('BUILD'),     
+   '... Foo::Bar::Baz->BUILD does have a next method');   
 
 is_deeply(
     [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo')->compute_all_applicable_methods() ],
