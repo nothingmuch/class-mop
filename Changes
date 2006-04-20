@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.25
+0.25 Thurs. April 20, 2006
     * Class::MOP::Class
       - added create_anon_class for creating anonymous classes
         - added tests for this

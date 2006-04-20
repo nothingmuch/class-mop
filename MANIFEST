@@ -32,7 +32,7 @@ t/014_attribute_introspection.t
 t/015_metaclass_inheritance.t
 t/016_class_errors_and_edge_cases.t
 t/017_add_method_modifier.t
-t/018_anon_class.t 
+t/018_anon_class.t
 t/020_attribute.t
 t/021_attribute_errors_and_edge_cases.t
 t/030_method.t
