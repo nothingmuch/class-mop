@@ -1,38 +1,4 @@
 
-package # hide the package from PAUSE
-    InsideOutClass;
-
-use strict;
-use warnings;
-
-our $VERSION = '0.04';
-
-use Scalar::Util 'refaddr';
-
-use base 'Class::MOP::Class';
-
-sub construct_instance {
-    my ($class, %params) = @_;
-    # create a scalar ref to use as 
-    # the inside-out instance
-    my $instance = \(my $var);
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
-        # if the attr has an init_arg, use that, otherwise,
-        # use the attributes name itself as the init_arg
-        my $init_arg = $attr->init_arg();
-        # try to fetch the init arg from the %params ...
-        my $val;        
-        $val = $params{$init_arg} if exists $params{$init_arg};
-        # if nothing was in the %params, we can use the 
-        # attribute's default value (if it has one)
-        if (!defined $val && $attr->has_default) {
-            $val = $attr->default($instance); 
-        }
-        # now add this to the instance structure
-        $class->get_package_variable('%' . $attr->name)->{ refaddr($instance) } = $val;
-    }    
-    return $instance;
-}
 
 package # hide the package from PAUSE
     InsideOutClass::Attribute;
@@ -40,12 +6,29 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp         'confess';
 use Scalar::Util 'refaddr';
 
 use base 'Class::MOP::Attribute';
+
+sub initialize_instance_slot {
+    my ($self, $class, $instance, $params) = @_;
+    # if the attr has an init_arg, use that, otherwise,
+    # use the attributes name itself as the init_arg
+    my $init_arg = $self->init_arg();
+    # try to fetch the init arg from the %params ...
+    my $val;        
+    $val = $params->{$init_arg} if exists $params->{$init_arg};
+    # if nothing was in the %params, we can use the 
+    # attribute's default value (if it has one)
+    if (!defined $val && $self->has_default) {
+        $val = $self->default($instance); 
+    }
+    # now add this to the instance structure
+    $class->get_package_variable('%' . $self->name)->{ refaddr($instance) } = $val;    
+}
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
@@ -94,7 +77,7 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
 
   package Foo;
   
-  use metaclass 'InsideOutClass' => (
+  use metaclass 'Class::MOP::Class' => (
      # tell our metaclass to use the 
      # InsideOut attribute metclass 
      # to construct all it's attributes
@@ -119,19 +102,12 @@ This is a set of example metaclasses which implement the Inside-Out
 class technique. What follows is a brief explaination of the code 
 found in this module.
 
-First step is to subclass B<Class::MOP::Class> and override the 
-C<construct_instance> method. The default C<construct_instance> 
-will create a HASH reference using the parameters and attribute 
-default values. Since inside-out objects don't use HASH refs, and 
-use package variables instead, we need to write code to handle 
-this difference. 
-
-The next step is to create the subclass of B<Class::MOP::Attribute> 
-and override the method generation code. This requires overloading 
-C<generate_accessor_method>, C<generate_reader_method>, 
-C<generate_writer_method> and C<generate_predicate_method>. All 
-other aspects are taken care of with the existing B<Class::MOP::Attribute> 
-infastructure.
+We must create a subclass of B<Class::MOP::Attribute> and override 
+the instance initialization and method generation code. This requires 
+overloading C<initialize_instance_slot>, C<generate_accessor_method>, 
+C<generate_reader_method>, C<generate_writer_method> and 
+C<generate_predicate_method>. All other aspects are taken care of with 
+the existing B<Class::MOP::Attribute> infastructure.
 
 And that is pretty much all. Of course I am ignoring need for 
 inside-out objects to be C<DESTROY>-ed, and some other details as 

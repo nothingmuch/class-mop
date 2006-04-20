@@ -61,7 +61,7 @@ sub clone {
 }
 
 sub initialize_instance_slot {
-    my ($self, $instance, $params) = @_;
+    my ($self, $class, $instance, $params) = @_;
     my $init_arg = $self->init_arg();
     # try to fetch the init arg from the %params ...
     my $val;        

@@ -15,6 +15,10 @@ Revision history for Perl extension Class-MOP.
       - attribute slot initialization is now the responsibility
         of the attribute itself, so we added a method for it
         called initialize_instance_slot
+    
+    * examples/
+      - adjusted all the examples to use the new attribute 
+        initialize_instance_slot method 
 
 0.24 Tues. April 11, 2006
     * Class::MOP::Class

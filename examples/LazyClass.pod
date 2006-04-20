@@ -1,32 +1,5 @@
 
 package # hide the package from PAUSE
-    LazyClass;
-
-use strict;
-use warnings;
-
-our $VERSION = '0.02';
-
-use base 'Class::MOP::Class';
-
-sub construct_instance {
-    my ($class, %params) = @_;
-    my $instance = {};
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
-        # if the attr has an init_arg, use that, otherwise,
-        # use the attributes name itself as the init_arg
-        my $init_arg = $attr->init_arg();
-        # try to fetch the init arg from the %params ...
-        my $val;        
-        $val = $params{$init_arg} if exists $params{$init_arg};
-        # now add this to the instance structure
-        # only if we have found a value at all
-        $instance->{$attr->name} = $val if defined $val;
-    }
-    return $instance;    
-}
-
-package # hide the package from PAUSE
     LazyClass::Attribute;
 
 use strict;
@@ -34,9 +7,23 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Class::MOP::Attribute';
+
+sub initialize_instance_slot {
+    my ($self, $class, $instance, $params) = @_;
+    # if the attr has an init_arg, use that, otherwise,
+    # use the attributes name itself as the init_arg
+    my $init_arg = $self->init_arg();
+    # try to fetch the init arg from the %params ...
+    my $val;        
+    $val = $params->{$init_arg} if exists $params->{$init_arg};
+    # now add this to the instance structure
+    # only if we have found a value at all
+    $instance->{$self->name} = $val if defined $val;    
+}
+
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
@@ -80,7 +67,7 @@ LazyClass - An example metaclass with lazy initialization
 
   package BinaryTree;
   
-  use metaclass 'LazyClass' => (
+  use metaclass 'Class::MOP::Class' => (
       ':attribute_metaclass' => 'LazyClass::Attribute'
   );
   

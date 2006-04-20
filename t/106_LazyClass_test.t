@@ -14,7 +14,7 @@ BEGIN {
 {
     package BinaryTree;
     
-    use metaclass 'LazyClass' => (
+    use metaclass 'Class::MOP::Class' => (
         ':attribute_metaclass' => 'LazyClass::Attribute'
     );
 

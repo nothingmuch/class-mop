@@ -14,7 +14,7 @@ BEGIN {
 {
     package Foo;
     
-    use metaclass 'InsideOutClass' => (
+    use metaclass 'Class::MOP::Class' => (
         ':attribute_metaclass' => 'InsideOutClass::Attribute'
     );
     

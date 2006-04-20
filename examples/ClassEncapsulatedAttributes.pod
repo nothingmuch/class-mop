@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base 'Class::MOP::Class';
 
@@ -25,21 +25,7 @@ sub construct_instance {
         my $meta = $current_class->meta;
         foreach my $attr_name ($meta->get_attribute_list()) {
             my $attr = $meta->get_attribute($attr_name);
-            # if the attr has an init_arg, use that, otherwise,
-            # use the attributes name itself as the init_arg
-            my $init_arg = $attr->init_arg();
-            # try to fetch the init arg from the %params ...
-            my $val;        
-            $val = $params{$current_class}->{$init_arg} 
-                if exists $params{$current_class} && 
-                   exists ${$params{$current_class}}{$init_arg};
-            # if nothing was in the %params, we can use the 
-            # attribute's default value (if it has one)
-            if (!defined $val && $attr->has_default) {
-                $val = $attr->default($instance); 
-            }
-            # now add this to the instance structure
-            $instance->{$current_class}->{$attr_name} = $val;
+            $attr->initialize_instance_slot($meta, $instance, \%params);
         }
     }  
     return $instance;
@@ -51,9 +37,28 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use base 'Class::MOP::Attribute';
+
+sub initialize_instance_slot {
+    my ($self, $class, $instance, $params) = @_;
+    # if the attr has an init_arg, use that, otherwise,
+    # use the attributes name itself as the init_arg
+    my $init_arg = $self->init_arg();
+    # try to fetch the init arg from the %params ...
+    my $val;        
+    $val = $params->{$class->name}->{$init_arg} 
+        if exists $params->{$class->name} && 
+           exists ${$params->{$class->name}}{$init_arg};
+    # if nothing was in the %params, we can use the 
+    # attribute's default value (if it has one)
+    if (!defined $val && $self->has_default) {
+        $val = $self->default($instance); 
+    }
+    # now add this to the instance structure
+    $instance->{$class->name}->{$self->name} = $val;   
+}
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
