@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 39;
+use Test::More tests => 40;
 use Test::Exception;
 
 BEGIN {
@@ -22,6 +22,9 @@ BEGIN {
     my @methods = qw(
         meta
         new clone
+        
+        initialize_instance_slot
+        
         name
         has_accessor  accessor
         has_writer    writer

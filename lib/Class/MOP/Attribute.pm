@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 sub meta { 
     require Class::MOP::Class;
@@ -58,6 +58,20 @@ sub clone {
     (blessed($self))
         || confess "Can only clone an instance";
     return bless { %{$self}, %options } => blessed($self);
+}
+
+sub initialize_instance_slot {
+    my ($self, $instance, $params) = @_;
+    my $init_arg = $self->init_arg();
+    # try to fetch the init arg from the %params ...
+    my $val;        
+    $val = $params->{$init_arg} if exists $params->{$init_arg};
+    # if nothing was in the %params, we can use the 
+    # attribute's default value (if it has one)
+    if (!defined $val && $self->has_default) {
+        $val = $self->default($instance); 
+    }            
+    $instance->{$self->name} = $val;    
 }
 
 # NOTE:
@@ -263,8 +277,6 @@ An attribute must (at the very least), have a C<$name>. All other
 C<%options> are contained added as key-value pairs. Acceptable keys
 are as follows:
 
-=item B<clone (%options)>
-
 =over 4
 
 =item I<init_arg>
@@ -374,6 +386,10 @@ C<undef>. It will return true (C<1>) if the attribute's value is
 defined, and false (C<0>) otherwise.
 
 =back
+
+=item B<clone (%options)>
+
+=item B<initialize_instance_slot ($instance, $params)>
 
 =back 
 

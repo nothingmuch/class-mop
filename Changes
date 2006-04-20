@@ -7,6 +7,14 @@ Revision history for Perl extension Class-MOP.
       - added get_all_metaclasses, get_all_metaclass_names
         and get_all_metaclass_instances method to allow
         access to all the cached metaclass objects.
+      - attribute slot initialization is now the responsibility
+        of the attribute itself, and construct_instance now 
+        delegates appropriately
+        
+    * Class::MOP::Attribute
+      - attribute slot initialization is now the responsibility
+        of the attribute itself, so we added a method for it
+        called initialize_instance_slot
 
 0.24 Tues. April 11, 2006
     * Class::MOP::Class

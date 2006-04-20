@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 # Self-introspection 
 
@@ -177,16 +177,7 @@ sub construct_instance {
     my ($class, %params) = @_;
     my $instance = {};
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        my $init_arg = $attr->init_arg();
-        # try to fetch the init arg from the %params ...
-        my $val;        
-        $val = $params{$init_arg} if exists $params{$init_arg};
-        # if nothing was in the %params, we can use the 
-        # attribute's default value (if it has one)
-        if (!defined $val && $attr->has_default) {
-            $val = $attr->default($instance); 
-        }            
-        $instance->{$attr->name} = $val;
+        $attr->initialize_instance_slot($instance, \%params);
     }
     return $instance;
 }
