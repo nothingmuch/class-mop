@@ -475,21 +475,21 @@ sub add_attribute {
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
     $attribute->attach_to_class($self);
     $attribute->install_accessors();        
-    $self->get_attribute_map->{$attribute->name} = $attribute;
+    $self->{'%:attributes'}->{$attribute->name} = $attribute;
 }
 
 sub has_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    exists $self->get_attribute_map->{$attribute_name} ? 1 : 0;    
+    exists $self->{'%:attributes'}->{$attribute_name} ? 1 : 0;    
 } 
 
 sub get_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    return $self->get_attribute_map->{$attribute_name} 
+    return $self->{'%:attributes'}->{$attribute_name} 
         if $self->has_attribute($attribute_name);   
     return; 
 } 
@@ -508,7 +508,7 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    keys %{$self->get_attribute_map};
+    keys %{$self->{'%:attributes'}};
 } 
 
 sub compute_all_applicable_attributes {

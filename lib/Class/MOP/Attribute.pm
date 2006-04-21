@@ -68,9 +68,8 @@ sub initialize_instance_slot {
     $val = $params->{$init_arg} if exists $params->{$init_arg};
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
-    if (!defined $val && $self->has_default) {
-        $val = $self->default($instance); 
-    }            
+    $val = $self->default($instance) 
+        if !defined $val && $self->has_default; 
     $instance->{$self->name} = $val;    
 }
 
