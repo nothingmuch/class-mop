@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.26
+    * Class::MOP::Class
+      - added find_attribute_by_name method
+        - added tests and docs for this
+
 0.25 Thurs. April 20, 2006
     * Class::MOP::Class
       - added create_anon_class for creating anonymous classes

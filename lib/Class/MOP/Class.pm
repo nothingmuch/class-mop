@@ -217,11 +217,12 @@ sub version {
 
 sub superclasses {
     my $self = shift;
+    no strict 'refs';
     if (@_) {
         my @supers = @_;
-        @{$self->get_package_variable('@ISA')} = @supers;
+        @{$self->name . '::ISA'} = @supers;
     }
-    @{$self->get_package_variable('@ISA')};        
+    @{$self->name . '::ISA'};
 }
 
 sub class_precedence_list {
