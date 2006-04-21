@@ -532,6 +532,24 @@ sub compute_all_applicable_attributes {
     return @attrs;    
 }
 
+sub find_attribute_by_name {
+    my ($self, $attr_name) = @_;
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my %seen_class;
+    foreach my $class ($self->class_precedence_list()) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        return $meta->get_attribute($attr_name)
+            if $meta->has_attribute($attr_name);
+    }
+    return;
+}
+
 # Class attributes
 
 sub add_package_variable {
@@ -1109,6 +1127,12 @@ the applicable attributes for this class. It does not construct a
 HASH reference like C<compute_all_applicable_methods> because all 
 that same information is discoverable through the attribute 
 meta-object itself.
+
+=item B<find_attribute_by_name ($attr_name)>
+
+This method will traverse the inheritance heirachy and find the 
+first attribute whose name matches C<$attr_name>, then return it. 
+It will return undef if nothing is found.
 
 =back
 

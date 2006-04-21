@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 43;
 use Test::Exception;
 
 BEGIN { 
@@ -77,6 +77,10 @@ my $BAR_ATTR_2 = Class::MOP::Attribute->new('$bar');
 {
     my $meta = Baz->meta;
     isa_ok($meta, 'Class::MOP::Class');
+    
+    is($meta->find_attribute_by_name('$bar'), $BAR_ATTR, '... got the right attribute for "bar"');
+    is($meta->find_attribute_by_name('$baz'), $BAZ_ATTR, '... got the right attribute for "baz"');    
+    is($meta->find_attribute_by_name('$foo'), $FOO_ATTR, '... got the right attribute for "foo"');    
     
     is_deeply(
         [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
