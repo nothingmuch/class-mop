@@ -62,20 +62,16 @@ sub clone {
 
 sub initialize_instance_slot {
     my ($self, $class, $instance, $params) = @_;
-    # OPTIMIZATION NOTE:
-    # We break the attribute encapsulation here 
-    # in order to save a number of method calls
-    # to $self and speed things up a bit
     my $init_arg = $self->{init_arg};
     # try to fetch the init arg from the %params ...
     my $val;        
     $val = $params->{$init_arg} if exists $params->{$init_arg};
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
-    if (!defined $val && $self->{default}) {
+    if (!defined $val && defined $self->{default}) {
         $val = $self->default($instance); 
     }            
-    $instance->{$self->{name}} = $val;    
+    $instance->{$self->name} = $val;    
 }
 
 # NOTE:

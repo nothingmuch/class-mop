@@ -17,7 +17,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 
 # Creation
 
-{
+#{
     # Metaclasses are singletons, so we cache them here.
     # there is no need to worry about destruction though
     # because they should die only when the program dies.
@@ -97,7 +97,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
                            $class_name . "->meta => (" . (blessed($meta)) . ")";
         }        
     }
-}
+#}
 
 sub create {
     my ($class, $package_name, $package_version, %options) = @_;
@@ -237,7 +237,7 @@ sub class_precedence_list {
     (
         $self->name, 
         map { 
-            $self->initialize($_)->class_precedence_list()
+            ($METAS{$_} || $self->initialize($_))->class_precedence_list()
         } $self->superclasses()
     );   
 }
@@ -489,8 +489,12 @@ sub get_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    return $self->get_attribute_map->{$attribute_name} 
-        if $self->has_attribute($attribute_name);   
+    # OPTIMIZATION NOTE:
+    # we used to say `if $self->has_attribute($attribute_name)` 
+    # here, but since get_attribute is called so often, we 
+    # eliminate the function call here
+    return $self->{'%:attributes'}->{$attribute_name} 
+        if exists $self->{'%:attributes'}->{$attribute_name};   
     return; 
 } 
 
@@ -508,7 +512,12 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    keys %{$self->get_attribute_map};
+    # OPTIMIZATION NOTE:
+    # We don't use get_attribute_map here because 
+    # we ask for the attribute list quite often 
+    # in compute_all_applicable_attributes, so 
+    # eliminating the function call helps 
+    keys %{$self->{'%:attributes'}};
 } 
 
 sub compute_all_applicable_attributes {
@@ -523,7 +532,7 @@ sub compute_all_applicable_attributes {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
-        my $meta = $self->initialize($class);
+        my $meta = ($METAS{$class} || $self->initialize($class));
         foreach my $attr_name ($meta->get_attribute_list()) { 
             next if exists $seen_attr{$attr_name};
             $seen_attr{$attr_name}++;
