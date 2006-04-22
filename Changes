@@ -4,6 +4,10 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - added find_attribute_by_name method
         - added tests and docs for this
+      - some small optimizations
+
+    * Class::MOP::Attribute
+      - some small optimizations
 
 0.25 Thurs. April 20, 2006
     * Class::MOP::Class
