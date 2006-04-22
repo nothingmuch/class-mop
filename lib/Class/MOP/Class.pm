@@ -237,6 +237,10 @@ sub class_precedence_list {
     (
         $self->name, 
         map { 
+            # OPTIMIZATION NOTE:
+            # we grab the metaclass from the %METAS 
+            # hash here to save the initialize() call
+            # if we can, but it is not always possible            
             ($METAS{$_} || $self->initialize($_))->class_precedence_list()
         } $self->superclasses()
     );   
@@ -532,7 +536,10 @@ sub compute_all_applicable_attributes {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
-        my $meta = ($METAS{$class} || $self->initialize($class));
+        # OPTIMIZATION NOTE:
+        # we grab the metaclass from the %METAS 
+        # hash here to save the initialize() call
+        my $meta = $METAS{$class};
         foreach my $attr_name ($meta->get_attribute_list()) { 
             next if exists $seen_attr{$attr_name};
             $seen_attr{$attr_name}++;
