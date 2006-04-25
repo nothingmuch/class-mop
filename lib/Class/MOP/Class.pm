@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 # Self-introspection 
 
@@ -232,7 +232,7 @@ sub class_precedence_list {
     # This will do nothing if all is well, and blow
     # up otherwise. Yes, it's an ugly hack, better 
     # suggestions are welcome.
-    { $self->name->isa('This is a test for circular inheritance') }
+    { ($self->name || return)->isa('This is a test for circular inheritance') }
     # ... and now back to our regularly scheduled program
     (
         $self->name, 
