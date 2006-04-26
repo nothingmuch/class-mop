@@ -61,7 +61,7 @@ sub clone {
 }
 
 sub initialize_instance_slot {
-    my ($self, $class, $instance, $params) = @_;
+    my ($self, $class, $meta_instance, $params) = @_;
     my $init_arg = $self->{init_arg};
     # try to fetch the init arg from the %params ...
     my $val;        
@@ -69,9 +69,9 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
     if (!defined $val && defined $self->{default}) {
-        $val = $self->default($instance); 
+        $val = $self->default($meta_instance->get_instance); 
     }            
-    $instance->{$self->name} = $val;    
+    $meta_instance->add_slot($self->name, $val);    
 }
 
 # NOTE:
