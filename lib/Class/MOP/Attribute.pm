@@ -61,7 +61,7 @@ sub clone {
 }
 
 sub initialize_instance_slot {
-    my ($self, $class, $meta_instance, $params) = @_;
+    my ($self, $instance, $params) = @_;
     my $init_arg = $self->{init_arg};
     # try to fetch the init arg from the %params ...
     my $val;        
@@ -69,9 +69,11 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
     if (!defined $val && defined $self->{default}) {
-        $val = $self->default($meta_instance->get_instance); 
-    }            
-    $meta_instance->add_slot($self->name, $val);    
+        $val = $self->default($instance);
+    }
+
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    $meta_instance->set_slot_value_with_init( $instance, $self->slot_name, $val );
 }
 
 # NOTE:
@@ -124,39 +126,65 @@ sub detach_from_class {
     $self->{associated_class} = undef;        
 }
 
+# slot management
+
+sub slot_name { # when attr <-> slot mapping is 1:1
+    my $self = shift;
+    $self->name;
+}
+
+# slot alocation
+
+sub allocate_slots {
+    my $self = shift;
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    $meta_instance->add_slot( $self->slot_name ); 
+}
+
+sub deallocate_slots {
+    my $self = shift;
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    $meta_instance->remove_slot( $self->slot_name );
+}
+
 ## Method generation helpers
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
-    my $meta_instance = $self->associated_class->instance_metaclass;
+    my $meta_instance = $self->associated_class->get_meta_instance;    
+    my $slot_name = $self->slot_name;
+
     sub {
-        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
-        $meta_instance->get_slot_value($_[0], $attr_name);
+        $meta_instance->set_slot_value($_[0], $slot_name, $_[1]) if scalar(@_) == 2;
+        $meta_instance->get_slot_value($_[0], $slot_name);
     };
 }
 
 sub generate_reader_method {
     my ($self, $attr_name) = @_; 
-    my $meta_instance = $self->associated_class->instance_metaclass;
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    my $slot_name = $self->slot_name;
     sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $meta_instance->get_slot_value($_[0], $attr_name); 
+        $meta_instance->get_slot_value($_[0], $slot_name); 
     };   
 }
 
 sub generate_writer_method {
     my ($self, $attr_name) = @_; 
-    my $meta_instance = $self->associated_class->instance_metaclass;    
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    my $slot_name = $self->slot_name;
     sub { 
-        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]);
+        $meta_instance->set_slot_value($_[0], $slot_name, $_[1]);
     };
 }
 
 sub generate_predicate_method {
     my ($self, $attr_name) = @_; 
-    my $meta_instance = $self->associated_class->instance_metaclass;    
+    my $meta_instance = $self->associated_class->get_meta_instance;
+    my $slot_name = $self->slot_name;
     sub { 
-        $meta_instance->has_slot_value($_[0], $attr_name);
+        defined $meta_instance->get_slot_value($_[0], $slot_name);
     };
 }
 
@@ -457,6 +485,12 @@ These are all basic predicate methods for the values passed into C<new>.
 =item B<attach_to_class ($class)>
 
 =item B<detach_from_class>
+
+=item B<slot_name>
+
+=item B<allocate_slots>
+
+=item B<deallocate_slots>
 
 =back
 

@@ -15,39 +15,127 @@ sub meta {
 }
 
 sub new { 
-    my $class = shift;
-    my $meta  = shift;
+    my ( $class, $meta ) = @_;
     bless {
-        instance => (bless {} => $meta->name)
+        meta            => $meta,
+        instance_layout => {}
     } => $class; 
 }
 
+sub create_instance {
+    my ( $self, $class ) = @_;
+    
+    # rely on autovivification
+    $self->bless_instance_structure( {}, $class );
+}
+
+sub bless_instance_structure {
+    my ( $self, $instance_structure, $class ) = @_;
+    $class ||= $self->{meta}->name;
+    bless $instance_structure, $class;
+}
+
+sub get_all_parents {
+    my $self = shift;
+    my @parents = $self->{meta}->class_precedence_list;
+    shift @parents; # shift off ourselves
+    return map { $_->get_meta_instance } map { $_->meta || () } @parents;
+}
+
+# operations on meta instance
+
 sub add_slot {
-    my ($self, $slot_name, $value) = @_;
-    return $self->{instance}->{$slot_name} = $value;
+    my ($self, $slot_name ) = @_;
+    confess "The slot '$slot_name' already exists"
+        if 0 && $self->has_slot_recursively( $slot_name );
+    $self->{instance_layout}->{$slot_name} = undef;
 }
 
 sub has_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{instance}->{$slot_name} ? 1 : 0;
+    exists $self->{instance_layout}->{$slot_name} ? 1 : 0;
 }
+
+sub has_slot_recursively {
+    my ( $self, $slot_name ) = @_;
+    return 1 if $self->has_slot($slot_name);
+    $_->has_slot_recursively($slot_name) && return 1 for $self->get_all_parents; 
+    return 0;
+}
+
+sub remove_slot {
+    my ( $self, $slot_name ) = @_;
+    # NOTE:
+    # this does not search recursively cause 
+    # that is not the domain of this meta-instance
+    # it is specific to this class ...
+    confess "The slot '$slot_name' does not exist (maybe it's inherited?)"
+        if 0 && $self->has_slot( $slot_name );
+    delete $self->{instance_layout}->{$slot_name};
+}
+
+
+# operations on created instances
 
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
     return $instance->{$slot_name};
 }
 
+# can be called only after initialize_slot_value
 sub set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
+    $slot_name or confess "must provide slot name";
     $instance->{$slot_name} = $value;
 }
 
-sub has_slot_value {
-    my ($self, $instance, $slot_name) = @_;
-    defined $instance->{$slot_name} ? 1 : 0;
+# convenience method
+# non autovivifying stores will have this as { initialize_slot unless slot_initlized; set_slot_value }
+sub set_slot_value_with_init {
+    my ( $self, $instance, $slot_name, $value ) = @_;
+    $self->set_slot_value( $instance, $slot_name, $value );
 }
 
-sub get_instance { (shift)->{instance} }
+sub initialize_slot {
+    my ( $self, $instance, $slot_name ) = @_;
+}
+
+sub slot_initialized {
+    my ($self, $instance, $slot_name) = @_;
+    exists $instance->{$slot_name} ? 1 : 0;
+}
+
+
+# inlinable operation snippets
+
+sub inline_get_slot_value {
+    my ($self, $instance, $slot_name) = @_;
+    sprintf "%s->{%s}", $instance, $slot_name;
+}
+
+sub inline_set_slot_value {
+    my ($self, $instance, $slot_name, $value) = @_;
+    $self->_inline_slot_lvalue . " = $value", 
+}
+
+sub inline_set_slot_value_with_init { 
+    my ( $self, $instance, $slot_name, $value) = @_;
+    $self->inline_set_slot_value( $instance, $slot_name, $value ) . ";";
+}
+
+sub inline_initialize_slot {
+    return "";
+}
+
+sub inline_slot_initialized {
+    my ($self, $instance, $slot_name) = @_;
+    "exists " . $self->inline_get_slot_value;
+}
+
+sub _inline_slot_lvalue {
+    my ($self, $instance, $slot_name) = @_;
+    $self->inline_slot_value;
+}
 
 1;
 
@@ -78,8 +166,6 @@ Class::MOP::Instance - Instance Meta Object
 =item B<set_slot_value>
 
 =item B<has_slot_value>
-
-=item B<get_instance>
 
 =back
 

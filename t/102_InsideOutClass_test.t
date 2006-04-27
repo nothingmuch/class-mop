@@ -15,7 +15,7 @@ BEGIN {
     package Foo;
     
     use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute'
+        ':instance_metaclass' => 'InsideOutClass::Instance'
     );
     
     Foo->meta->add_attribute('foo' => (

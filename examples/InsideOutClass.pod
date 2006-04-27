@@ -1,7 +1,7 @@
 
 
 package # hide the package from PAUSE
-    InsideOutClass::Attribute;
+    InsideOutClass::Instance;
 
 use strict;
 use warnings;
@@ -11,57 +11,43 @@ our $VERSION = '0.06';
 use Carp         'confess';
 use Scalar::Util 'refaddr';
 
-use base 'Class::MOP::Attribute';
+use base 'Class::MOP::Instance';
 
-sub initialize_instance_slot {
-    my ($self, $class, $meta_instance, $params) = @_;
-    # if the attr has an init_arg, use that, otherwise,
-    # use the attributes name itself as the init_arg
-    my $init_arg = $self->init_arg();
-    # try to fetch the init arg from the %params ...
-    my $val;        
-    $val = $params->{$init_arg} if exists $params->{$init_arg};
-    # if nothing was in the %params, we can use the 
-    # attribute's default value (if it has one)
-    if (!defined $val && $self->has_default) {
-        $val = $self->default($meta_instance->get_instance); 
-    }
-    # now add this to the instance structure
-    $class->get_package_variable('%' . $self->name)->{ refaddr($meta_instance->get_instance) } = $val;    
+sub create_instance {
+	my ( $self, $class ) = @_;
+	my $x;
+	bless \$x, $class || $self->{meta}->name;
 }
 
-sub generate_accessor_method {
-    my ($self, $attr_name) = @_;
-    $attr_name = ($self->associated_class->name . '::' . $attr_name);
-    eval 'sub {
-        $' . $attr_name . '{ refaddr($_[0]) } = $_[1] if scalar(@_) == 2;
-        $' . $attr_name . '{ refaddr($_[0]) };
-    }';
+sub add_slot {
+	my ( $self, $slot_name ) = @_;
+	$self->{containers}{$slot_name} = do {
+		my $fqn = $self->{meta}->name . "::" . $slot_name;
+		no strict 'refs';
+		\%$fqn;
+	};
+	$self->SUPER::add_slot( $slot_name );
 }
 
-sub generate_reader_method {
-    my ($self, $attr_name) = @_;     
-    eval 'sub {
-        confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) };
-    }';   
+sub get_slot_value {
+	my ( $self, $instance, $slot_name ) = @_;
+	confess "$self is no instance" unless ref $self;
+	$self->{containers}{$slot_name}{refaddr $instance};
 }
 
-sub generate_writer_method {
-    my ($self, $attr_name) = @_; 
-    eval 'sub {
-        $' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) } = $_[1];
-    }';
+sub set_slot_value {
+	my ( $self, $instance, $slot_name, $value ) = @_;
+	$self->{containers}{$slot_name}{refaddr $instance} = $value;
 }
 
-sub generate_predicate_method {
-    my ($self, $attr_name) = @_; 
-    eval 'sub {
-        defined($' . ($self->associated_class->name . '::' . $attr_name) . '{ refaddr($_[0]) }) ? 1 : 0;
-    }';
+sub initialize_slot { }
+
+sub slot_initialized {
+	my ( $self, $instance, $slot_name ) = @_;
+	exists $self->{containers}{$slot_name}{refaddr $instance};
 }
 
-## &remove_attribute is left as an exercise for the reader :)
+## &remove_slot is left as an exercise for the reader :)
 
 1;
 
@@ -81,7 +67,7 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
      # tell our metaclass to use the 
      # InsideOut attribute metclass 
      # to construct all it's attributes
-    ':attribute_metaclass' => 'InsideOutClass::Attribute'
+    ':instance_metaclass' => 'InsideOutClass::Instance'
   );
   
   __PACKAGE__->meta->add_attribute('foo' => (
@@ -102,21 +88,25 @@ This is a set of example metaclasses which implement the Inside-Out
 class technique. What follows is a brief explaination of the code 
 found in this module.
 
-We must create a subclass of B<Class::MOP::Attribute> and override 
-the instance initialization and method generation code. This requires 
-overloading C<initialize_instance_slot>, C<generate_accessor_method>, 
-C<generate_reader_method>, C<generate_writer_method> and 
-C<generate_predicate_method>. All other aspects are taken care of with 
-the existing B<Class::MOP::Attribute> infastructure.
+We must create a subclass of B<Class::MOP::Instance> and override 
+the slot operations. This requires 
+overloading C<get_slot_value>, C<set_slot_value>, C<slot_initialized>, and
+C<initialize_slot>, as well as their inline counterparts. Additionally we
+overload C<add_slot> in order to initialize the global hash containing the
+actual slot values.
 
 And that is pretty much all. Of course I am ignoring need for 
 inside-out objects to be C<DESTROY>-ed, and some other details as 
-well, but this is an example. A real implementation is left as an 
-exercise to the reader.
+well (threading, etc), but this is an example. A real implementation is left as
+an exercise to the reader.
 
 =head1 AUTHOR
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+=head1 SEE ALSO
+
+L<Tie::RefHash::Weak>
 
 =head1 COPYRIGHT AND LICENSE
 

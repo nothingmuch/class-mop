@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 140;
+use Test::More tests => 142;
 use Test::Exception;
 
 BEGIN {
@@ -26,7 +26,7 @@ my @methods = qw(
     
     initialize create create_anon_class
     
-    instance_metaclass
+    instance_metaclass get_meta_instance
     new_object clone_object
     construct_instance construct_class_instance clone_instance
     check_metaclass_compatability

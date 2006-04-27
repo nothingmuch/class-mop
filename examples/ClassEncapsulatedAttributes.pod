@@ -12,23 +12,25 @@ use base 'Class::MOP::Class';
 sub initialize { 
     (shift)->SUPER::initialize(@_, 
         # use the custom attribute metaclass here 
-        ':attribute_metaclass' => 'ClassEncapsulatedAttributes::Attribute' 
+        ':attribute_metaclass' => 'ClassEncapsulatedAttributes::Attribute',
     );
 }
 
 sub construct_instance {
     my ($class, %params) = @_;
-    my $meta_instance = Class::MOP::Instance->new($class);
+
+	 my $instance = $class->get_meta_instance->create_instance();
+
+	# initialize *ALL* attributes, including masked ones (as opposed to applicable)
     foreach my $current_class ($class->class_precedence_list()) {
-        $meta_instance->add_slot($current_class => {})
-            unless $meta_instance->has_slot($current_class);
         my $meta = $current_class->meta;
         foreach my $attr_name ($meta->get_attribute_list()) {
             my $attr = $meta->get_attribute($attr_name);
-            $attr->initialize_instance_slot($meta, $meta_instance, \%params);
+            $attr->initialize_instance_slot($instance, \%params);
         }
     }  
-    return $meta_instance->get_instance;
+
+	return $instance;
 }
 
 package # hide the package from PAUSE
@@ -41,63 +43,34 @@ our $VERSION = '0.04';
 
 use base 'Class::MOP::Attribute';
 
+# alter the way parameters are specified
 sub initialize_instance_slot {
-    my ($self, $class, $meta_instance, $params) = @_;
+    my ($self, $instance, $params) = @_;
     # if the attr has an init_arg, use that, otherwise,
     # use the attributes name itself as the init_arg
     my $init_arg = $self->init_arg();
     # try to fetch the init arg from the %params ...
-    my $val;        
+	my $class = $self->associated_class;
+    my $val;
     $val = $params->{$class->name}->{$init_arg} 
         if exists $params->{$class->name} && 
            exists ${$params->{$class->name}}{$init_arg};
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
     if (!defined $val && $self->has_default) {
-        $val = $self->default($meta_instance->get_instance); 
+        $val = $self->default($instance); 
     }
+
     # now add this to the instance structure
-    $meta_instance->get_slot_value(
-        $meta_instance->get_instance, 
-        $class->name
-    )->{$self->name} = $val;   
+	my $meta_instance = $self->associated_class->get_meta_instance;
+	$meta_instance->set_slot_value_with_init( $instance, $self->slot_name, $val );
 }
 
-sub generate_accessor_method {
-    my ($self, $attr_name) = @_;
-    my $class_name = $self->associated_class->name;
-    eval qq{sub {
-        \$_[0]->{'$class_name'}->{'$attr_name'} = \$_[1] if scalar(\@_) == 2;
-        \$_[0]->{'$class_name'}->{'$attr_name'};
-    }};
+# mangle the slot name to include the fully qualified attr
+sub slot_name {
+	my $self = shift;
+	$self->associated_class->name . "::" . $self->SUPER::slot_name;
 }
-
-sub generate_reader_method {
-    my ($self, $attr_name) = @_; 
-    my $class_name = $self->associated_class->name;
-    eval qq{sub {
-        Carp::confess "Cannot assign a value to a read-only accessor" if \@_ > 1;
-        \$_[0]->{'$class_name'}->{'$attr_name'};
-    }};   
-}
-
-sub generate_writer_method {
-    my ($self, $attr_name) = @_; 
-    my $class_name = $self->associated_class->name;    
-    eval qq{sub {
-        \$_[0]->{'$class_name'}->{'$attr_name'} = \$_[1];
-    }};
-}
-
-sub generate_predicate_method {
-    my ($self, $attr_name) = @_; 
-    my $class_name = $self->associated_class->name;    
-    eval qq{sub {
-        defined \$_[0]->{'$class_name'}->{'$attr_name'} ? 1 : 0;
-    }};
-}
-
-## &remove_attribute is left as an exercise for the reader :)
 
 1;
 

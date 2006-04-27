@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 43;
 use Test::Exception;
 
 BEGIN {
@@ -44,6 +44,10 @@ BEGIN {
         process_accessors
         install_accessors
         remove_accessors
+
+		slot_name
+		allocate_slots
+		deallocate_slots
         );
         
     is_deeply(

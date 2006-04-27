@@ -52,13 +52,13 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         my $package_name = $options{':package'};
         (defined $package_name && $package_name)
             || confess "You must pass a package name";  
-		# NOTE:
-		# return the metaclass if we have it cached, 
-		# and it is still defined (it has not been 
-		# reaped by DESTROY yet, which can happen 
-		# annoyingly enough during global destruction)
+        # NOTE:
+        # return the metaclass if we have it cached, 
+        # and it is still defined (it has not been 
+        # reaped by DESTROY yet, which can happen 
+        # annoyingly enough during global destruction)
         return $METAS{$package_name} 
-			if exists $METAS{$package_name} && defined $METAS{$package_name};  
+            if exists $METAS{$package_name} && defined $METAS{$package_name};  
         $class = blessed($class) || $class;
         # now create the metaclass
         my $meta;
@@ -179,11 +179,19 @@ sub new_object {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    my $meta_instance = $class->instance_metaclass->new($class);
+    
+    my $instance = $class->get_meta_instance->create_instance();
+    
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        $attr->initialize_instance_slot($class, $meta_instance, \%params);
+        $attr->initialize_instance_slot($instance, \%params);
     }
-    return $meta_instance->get_instance;
+    return $instance;
+}
+
+sub get_meta_instance {
+    my $class = shift;
+    # make it work,.. *then* make it right ... # yeah that was my plan, i just thought we'll make it async
+    $class->{meta_instance} ||= $class->instance_metaclass->new( $class );
 }
 
 sub clone_object {
@@ -261,63 +269,63 @@ sub add_method {
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
 
-	$method = $self->method_metaclass->wrap($method) unless blessed($method);
-	
+    $method = $self->method_metaclass->wrap($method) unless blessed($method);
+    
     no strict 'refs';
     no warnings 'redefine';
     *{$full_method_name} = subname $full_method_name => $method;
 }
 
 {
-	my $fetch_and_prepare_method = sub {
-		my ($self, $method_name) = @_;
-		# fetch it locally
-		my $method = $self->get_method($method_name);
-		# if we dont have local ...
-		unless ($method) {
-			# make sure this method even exists ...
-			($self->find_next_method_by_name($method_name))
-				|| confess "The method '$method_name' is not found in the inherience hierarchy for this class";
-			# if so, then create a local which just 
-			# calls the next applicable method ...				
-			$self->add_method($method_name => sub {
-				$self->find_next_method_by_name($method_name)->(@_);
-			});
-			$method = $self->get_method($method_name);
-		}
-		
-		# now make sure we wrap it properly 
-		# (if it isnt already)
-		unless ($method->isa('Class::MOP::Method::Wrapped')) {
-			$method = Class::MOP::Method::Wrapped->wrap($method);
-			$self->add_method($method_name => $method);	
-		}		
-		return $method;
-	};
+    my $fetch_and_prepare_method = sub {
+        my ($self, $method_name) = @_;
+        # fetch it locally
+        my $method = $self->get_method($method_name);
+        # if we dont have local ...
+        unless ($method) {
+            # make sure this method even exists ...
+            ($self->find_next_method_by_name($method_name))
+                || confess "The method '$method_name' is not found in the inherience hierarchy for this class";
+            # if so, then create a local which just 
+            # calls the next applicable method ...              
+            $self->add_method($method_name => sub {
+                $self->find_next_method_by_name($method_name)->(@_);
+            });
+            $method = $self->get_method($method_name);
+        }
+        
+        # now make sure we wrap it properly 
+        # (if it isnt already)
+        unless ($method->isa('Class::MOP::Method::Wrapped')) {
+            $method = Class::MOP::Method::Wrapped->wrap($method);
+            $self->add_method($method_name => $method); 
+        }       
+        return $method;
+    };
 
-	sub add_before_method_modifier {
-		my ($self, $method_name, $method_modifier) = @_;
-	    (defined $method_name && $method_name)
-	        || confess "You must pass in a method name";	
-		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_before_modifier(subname ':before' => $method_modifier);
-	}
+    sub add_before_method_modifier {
+        my ($self, $method_name, $method_modifier) = @_;
+        (defined $method_name && $method_name)
+            || confess "You must pass in a method name";    
+        my $method = $fetch_and_prepare_method->($self, $method_name);
+        $method->add_before_modifier(subname ':before' => $method_modifier);
+    }
 
-	sub add_after_method_modifier {
-		my ($self, $method_name, $method_modifier) = @_;
-	    (defined $method_name && $method_name)
-	        || confess "You must pass in a method name";	
-		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_after_modifier(subname ':after' => $method_modifier);
-	}
-	
-	sub add_around_method_modifier {
-		my ($self, $method_name, $method_modifier) = @_;
-	    (defined $method_name && $method_name)
-	        || confess "You must pass in a method name";
-		my $method = $fetch_and_prepare_method->($self, $method_name);
-		$method->add_around_modifier(subname ':around' => $method_modifier);
-	}	
+    sub add_after_method_modifier {
+        my ($self, $method_name, $method_modifier) = @_;
+        (defined $method_name && $method_name)
+            || confess "You must pass in a method name";    
+        my $method = $fetch_and_prepare_method->($self, $method_name);
+        $method->add_after_modifier(subname ':after' => $method_modifier);
+    }
+    
+    sub add_around_method_modifier {
+        my ($self, $method_name, $method_modifier) = @_;
+        (defined $method_name && $method_name)
+            || confess "You must pass in a method name";
+        my $method = $fetch_and_prepare_method->($self, $method_name);
+        $method->add_around_modifier(subname ':around' => $method_modifier);
+    }   
 
     # NOTE: 
     # the methods above used to be named like this:
@@ -342,7 +350,7 @@ sub alias_method {
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);
 
-	$method = $self->method_metaclass->wrap($method) unless blessed($method);    
+    $method = $self->method_metaclass->wrap($method) unless blessed($method);    
         
     no strict 'refs';
     no warnings 'redefine';
@@ -358,13 +366,13 @@ sub has_method {
     
     no strict 'refs';
     return 0 if !defined(&{$sub_name});        
-	my $method = \&{$sub_name};
+    my $method = \&{$sub_name};
     return 0 if (svref_2object($method)->GV->STASH->NAME || '') ne $self->name &&
-                (svref_2object($method)->GV->NAME || '')        ne '__ANON__';		
-	
-	# at this point we are relatively sure 
-	# it is our method, so we bless/wrap it 
-	$self->method_metaclass->wrap($method) unless blessed($method);
+                (svref_2object($method)->GV->NAME || '')        ne '__ANON__';      
+    
+    # at this point we are relatively sure 
+    # it is our method, so we bless/wrap it 
+    $self->method_metaclass->wrap($method) unless blessed($method);
     return 1;
 }
 
@@ -373,7 +381,7 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-	return unless $self->has_method($method_name);
+    return unless $self->has_method($method_name);
 
     no strict 'refs';    
     return \&{$self->name . '::' . $method_name};
@@ -452,23 +460,23 @@ sub find_all_methods_by_name {
 sub find_next_method_by_name {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
-        || confess "You must define a method name to find";	
+        || confess "You must define a method name to find"; 
     # keep a record of what we have seen
     # here, this will handle all the 
     # inheritence issues because we are 
     # using the &class_precedence_list
     my %seen_class;
-	my @cpl = $self->class_precedence_list();
-	shift @cpl; # discard ourselves
+    my @cpl = $self->class_precedence_list();
+    shift @cpl; # discard ourselves
     foreach my $class (@cpl) {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
         my $meta = $self->initialize($class);
-		return $meta->get_method($method_name) 
-			if $meta->has_method($method_name);
+        return $meta->get_method($method_name) 
+            if $meta->has_method($method_name);
     }
-	return;
+    return;
 }
 
 ## Attributes
@@ -482,7 +490,9 @@ sub add_attribute {
     ($attribute->isa('Class::MOP::Attribute'))
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
     $attribute->attach_to_class($self);
-    $attribute->install_accessors();        
+    $attribute->install_accessors();
+    $attribute->allocate_slots;
+
     $self->get_attribute_map->{$attribute->name} = $attribute;
 }
 
@@ -513,8 +523,9 @@ sub remove_attribute {
     my $removed_attribute = $self->get_attribute_map->{$attribute_name};    
     return unless defined $removed_attribute;
     delete $self->get_attribute_map->{$attribute_name};        
-    $removed_attribute->remove_accessors();        
-    $removed_attribute->detach_from_class();    
+    $removed_attribute->remove_accessors(); 
+    $removed_attribute->deallocate_slots();
+    $removed_attribute->detach_from_class();
     return $removed_attribute;
 } 
 
@@ -624,7 +635,7 @@ sub get_package_variable {
     }
     confess "Could not get the package variable ($variable) because : $e" if $e;    
     # if we didn't die, then we can return it
-	return $ref;
+    return $ref;
 }
 
 sub remove_package_variable {
@@ -780,6 +791,8 @@ to use them or not.
 =over 4
 
 =item B<instance_metaclass>
+
+=item B<get_meta_instance>
 
 =item B<new_object (%params)>
 
@@ -1205,4 +1218,4 @@ L<http://www.iinteractive.com>
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
-=cut
+=cutchistian
