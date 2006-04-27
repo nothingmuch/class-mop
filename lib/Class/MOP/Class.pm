@@ -11,6 +11,8 @@ use B            'svref_2object';
 
 our $VERSION = '0.13';
 
+use Class::MOP::Instance;
+
 # Self-introspection 
 
 sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
@@ -175,7 +177,6 @@ sub new_object {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    require Class::MOP::Instance;
     my $meta_instance = Class::MOP::Instance->new($class);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         $attr->initialize_instance_slot($class, $meta_instance, \%params);

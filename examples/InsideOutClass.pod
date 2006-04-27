@@ -14,7 +14,7 @@ use Scalar::Util 'refaddr';
 use base 'Class::MOP::Attribute';
 
 sub initialize_instance_slot {
-    my ($self, $class, $instance, $params) = @_;
+    my ($self, $class, $meta_instance, $params) = @_;
     # if the attr has an init_arg, use that, otherwise,
     # use the attributes name itself as the init_arg
     my $init_arg = $self->init_arg();
@@ -24,10 +24,10 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
     if (!defined $val && $self->has_default) {
-        $val = $self->default($instance); 
+        $val = $self->default($meta_instance->get_instance); 
     }
     # now add this to the instance structure
-    $class->get_package_variable('%' . $self->name)->{ refaddr($instance) } = $val;    
+    $class->get_package_variable('%' . $self->name)->{ refaddr($meta_instance->get_instance) } = $val;    
 }
 
 sub generate_accessor_method {

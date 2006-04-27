@@ -18,7 +18,7 @@ sub new {
     my $class = shift;
     my $meta  = shift;
     bless {
-        instance => bless {} => $meta->name
+        instance => (bless {} => $meta->name)
     } => $class; 
 }
 
@@ -26,6 +26,18 @@ sub add_slot {
     my ($self, $slot_name, $value) = @_;
     return $self->{instance}->{$slot_name} = $value;
 }
+
+sub has_slot {
+    my ($self, $slot_name) = @_;
+    exists $self->{instance}->{$slot_name} ? 1 : 0;
+}
+
+sub get_slot_value {
+    my ($self, $slot_name) = @_;
+    return $self->{instance}->{$slot_name};
+}
+
+*set_slot_value = \&add_slot;
 
 sub get_instance { (shift)->{instance} }
 
@@ -50,6 +62,12 @@ Class::MOP::Instance - Instance Meta Object
 =item B<new>
 
 =item B<add_slot>
+
+=item B<has_slot>
+
+=item B<get_slot_value>
+
+=item B<set_slot_value>
 
 =item B<get_instance>
 

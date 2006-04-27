@@ -18,17 +18,17 @@ sub initialize {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    my $instance = {};
+    my $meta_instance = Class::MOP::Instance->new($class);
     foreach my $current_class ($class->class_precedence_list()) {
-        $instance->{$current_class} = {} 
-            unless exists $instance->{$current_class};
+        $meta_instance->add_slot($current_class => {})
+            unless $meta_instance->has_slot($current_class);
         my $meta = $current_class->meta;
         foreach my $attr_name ($meta->get_attribute_list()) {
             my $attr = $meta->get_attribute($attr_name);
-            $attr->initialize_instance_slot($meta, $instance, \%params);
+            $attr->initialize_instance_slot($meta, $meta_instance, \%params);
         }
     }  
-    return $instance;
+    return $meta_instance->get_instance;
 }
 
 package # hide the package from PAUSE
@@ -42,7 +42,7 @@ our $VERSION = '0.03';
 use base 'Class::MOP::Attribute';
 
 sub initialize_instance_slot {
-    my ($self, $class, $instance, $params) = @_;
+    my ($self, $class, $meta_instance, $params) = @_;
     # if the attr has an init_arg, use that, otherwise,
     # use the attributes name itself as the init_arg
     my $init_arg = $self->init_arg();
@@ -54,10 +54,10 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
     if (!defined $val && $self->has_default) {
-        $val = $self->default($instance); 
+        $val = $self->default($meta_instance->get_instance); 
     }
     # now add this to the instance structure
-    $instance->{$class->name}->{$self->name} = $val;   
+    $meta_instance->get_slot_value($class->name)->{$self->name} = $val;   
 }
 
 sub generate_accessor_method {

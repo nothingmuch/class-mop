@@ -12,7 +12,7 @@ our $VERSION = '0.03';
 use base 'Class::MOP::Attribute';
 
 sub initialize_instance_slot {
-    my ($self, $class, $instance, $params) = @_;
+    my ($self, $class, $meta_instance, $params) = @_;
     # if the attr has an init_arg, use that, otherwise,
     # use the attributes name itself as the init_arg
     my $init_arg = $self->init_arg();
@@ -21,7 +21,7 @@ sub initialize_instance_slot {
     $val = $params->{$init_arg} if exists $params->{$init_arg};
     # now add this to the instance structure
     # only if we have found a value at all
-    $instance->{$self->name} = $val if defined $val;    
+    $meta_instance->add_slot($self->name, $val) if defined $val;    
 }
 
 
