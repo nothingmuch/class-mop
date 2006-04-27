@@ -47,8 +47,21 @@ sub get_all_parents {
 sub add_slot {
     my ($self, $slot_name ) = @_;
     confess "The slot '$slot_name' already exists"
-        if 0 && $self->has_slot_recursively( $slot_name );
+        if 0 && $self->has_slot_recursively( $slot_name ); # FIXME
     $self->{instance_layout}->{$slot_name} = undef;
+}
+
+sub get_all_slots {
+    my $self = shift;
+    keys %{ $self->{instance_layout} };
+}
+
+sub get_all_slots_recursively {
+    my $self = shift;
+    return (
+        $self->get_all_slots,
+        map { $_->get_all_slots } $self->get_all_parents,
+    ),
 }
 
 sub has_slot {
@@ -70,7 +83,7 @@ sub remove_slot {
     # that is not the domain of this meta-instance
     # it is specific to this class ...
     confess "The slot '$slot_name' does not exist (maybe it's inherited?)"
-        if 0 && $self->has_slot( $slot_name );
+        if 0 && $self->has_slot( $slot_name ); # FIXME
     delete $self->{instance_layout}->{$slot_name};
 }
 
@@ -85,7 +98,6 @@ sub get_slot_value {
 # can be called only after initialize_slot_value
 sub set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
-    $slot_name or confess "must provide slot name";
     $instance->{$slot_name} = $value;
 }
 
