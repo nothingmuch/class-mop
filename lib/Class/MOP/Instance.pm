@@ -203,6 +203,10 @@ Class::MOP::Instance - Instance Meta Object
 
 =item B<slot_initialized>
 
+=item B<get_all_slots>
+
+=item B<get_all_slots_recursively>
+
 =back
 
 =head2 Introspection
