@@ -159,13 +159,37 @@ Class::MOP::Instance - Instance Meta Object
 
 =item B<add_slot>
 
-=item B<has_slot>
+=item B<bless_instance_structure>
+
+=item B<create_instance>
+
+=item B<get_all_parents>
 
 =item B<get_slot_value>
 
+=item B<has_slot>
+
+=item B<has_slot_recursively>
+
+=item B<initialize_slot>
+
+=item B<inline_get_slot_value>
+
+=item B<inline_initialize_slot>
+
+=item B<inline_set_slot_value>
+
+=item B<inline_set_slot_value_with_init>
+
+=item B<inline_slot_initialized>
+
+=item B<remove_slot>
+
 =item B<set_slot_value>
 
-=item B<has_slot_value>
+=item B<set_slot_value_with_init>
+
+=item B<slot_initialized>
 
 =back
 
