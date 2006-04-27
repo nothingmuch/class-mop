@@ -150,7 +150,7 @@ sub deallocate_slots {
 ## Method generation helpers
 
 sub generate_accessor_method {
-    my ($self, $attr_name) = @_;
+    my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;    
     my $slot_name = $self->slot_name;
 
@@ -161,7 +161,7 @@ sub generate_accessor_method {
 }
 
 sub generate_reader_method {
-    my ($self, $attr_name) = @_; 
+    my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
     my $slot_name = $self->slot_name;
     sub { 
@@ -171,7 +171,7 @@ sub generate_reader_method {
 }
 
 sub generate_writer_method {
-    my ($self, $attr_name) = @_; 
+    my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
     my $slot_name = $self->slot_name;
     sub { 
@@ -180,7 +180,7 @@ sub generate_writer_method {
 }
 
 sub generate_predicate_method {
-    my ($self, $attr_name) = @_; 
+    my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
     my $slot_name = $self->slot_name;
     sub { 
@@ -517,13 +517,13 @@ use the custom method passed through the constructor.
 
 =over 4
 
-=item B<generate_accessor_method ($attr_name)>
+=item B<generate_accessor_method>
 
-=item B<generate_predicate_method ($attr_name)>
+=item B<generate_predicate_method>
 
-=item B<generate_reader_method ($attr_name)>
+=item B<generate_reader_method>
 
-=item B<generate_writer_method ($attr_name)>
+=item B<generate_writer_method>
 
 =back
 
