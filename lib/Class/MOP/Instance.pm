@@ -33,11 +33,19 @@ sub has_slot {
 }
 
 sub get_slot_value {
-    my ($self, $slot_name) = @_;
-    return $self->{instance}->{$slot_name};
+    my ($self, $instance, $slot_name) = @_;
+    return $instance->{$slot_name};
 }
 
-*set_slot_value = \&add_slot;
+sub set_slot_value {
+    my ($self, $instance, $slot_name, $value) = @_;
+    $instance->{$slot_name} = $value;
+}
+
+sub has_slot_value {
+    my ($self, $instance, $slot_name) = @_;
+    defined $instance->{$slot_name} ? 1 : 0;
+}
 
 sub get_instance { (shift)->{instance} }
 
@@ -68,6 +76,8 @@ Class::MOP::Instance - Instance Meta Object
 =item B<get_slot_value>
 
 =item B<set_slot_value>
+
+=item B<has_slot_value>
 
 =item B<get_instance>
 

@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 sub meta { 
     require Class::MOP::Class;
@@ -128,28 +128,36 @@ sub detach_from_class {
 
 sub generate_accessor_method {
     my ($self, $attr_name) = @_;
+    my $meta_instance = $self->associated_class->instance_metaclass;
     sub {
-        $_[0]->{$attr_name} = $_[1] if scalar(@_) == 2;
-        $_[0]->{$attr_name};
+        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
+        $meta_instance->get_slot_value($_[0], $attr_name);
     };
 }
 
 sub generate_reader_method {
     my ($self, $attr_name) = @_; 
+    my $meta_instance = $self->associated_class->instance_metaclass;
     sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $_[0]->{$attr_name}; 
+        $meta_instance->get_slot_value($_[0], $attr_name); 
     };   
 }
 
 sub generate_writer_method {
     my ($self, $attr_name) = @_; 
-    sub { $_[0]->{$attr_name} = $_[1] };
+    my $meta_instance = $self->associated_class->instance_metaclass;    
+    sub { 
+        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]);
+    };
 }
 
 sub generate_predicate_method {
     my ($self, $attr_name) = @_; 
-    sub { defined $_[0]->{$attr_name} ? 1 : 0 };
+    my $meta_instance = $self->associated_class->instance_metaclass;    
+    sub { 
+        $meta_instance->has_slot_value($_[0], $attr_name);
+    };
 }
 
 sub process_accessors {

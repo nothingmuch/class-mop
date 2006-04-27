@@ -11,7 +11,7 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-our $VERSION = '0.26';
+our $VERSION = '0.30';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -67,6 +67,14 @@ Class::MOP::Class->meta->add_attribute(
         reader   => 'method_metaclass',
         init_arg => ':method_metaclass',
         default  => 'Class::MOP::Method',        
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('$:instance_metaclass' => (
+        reader   => 'instance_metaclass',
+        init_arg => ':instance_metaclass',
+        default  => 'Class::MOP::Instance',        
     ))
 );
 

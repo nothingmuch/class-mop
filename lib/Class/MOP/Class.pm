@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 use Class::MOP::Instance;
 
@@ -67,7 +67,8 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
                 '$:package'             => $package_name, 
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
-                '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',                
+                '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
+                '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',    
             } => $class;
         }
         else {
@@ -160,6 +161,7 @@ sub name                { $_[0]->{'$:package'}             }
 sub get_attribute_map   { $_[0]->{'%:attributes'}          }
 sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
+sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
 
 # Instance Construction & Cloning
 
@@ -177,7 +179,7 @@ sub new_object {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    my $meta_instance = Class::MOP::Instance->new($class);
+    my $meta_instance = $class->instance_metaclass->new($class);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         $attr->initialize_instance_slot($class, $meta_instance, \%params);
     }
@@ -776,6 +778,8 @@ These methods are B<entirely optional>, it is up to you whether you want
 to use them or not.
 
 =over 4
+
+=item B<instance_metaclass>
 
 =item B<new_object (%params)>
 

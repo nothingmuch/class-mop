@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use base 'Class::MOP::Class';
 
@@ -37,7 +37,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use base 'Class::MOP::Attribute';
 
@@ -57,7 +57,10 @@ sub initialize_instance_slot {
         $val = $self->default($meta_instance->get_instance); 
     }
     # now add this to the instance structure
-    $meta_instance->get_slot_value($class->name)->{$self->name} = $val;   
+    $meta_instance->get_slot_value(
+        $meta_instance->get_instance, 
+        $class->name
+    )->{$self->name} = $val;   
 }
 
 sub generate_accessor_method {

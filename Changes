@@ -1,5 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
+0.30
+    * Class::MOP::Instance
+      - added new instance construction protocol
+        - added tests for this
+      - changed all relevant modules and examples
+        - Class::MOP::Class
+        - Class::MOP::Attribute
+        - examples/*
+
 0.26 Mon. April 24, 2006
     * Class::MOP::Class
       - added find_attribute_by_name method
