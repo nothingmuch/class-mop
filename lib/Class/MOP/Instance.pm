@@ -18,6 +18,16 @@ sub new {
     my ($class, $meta, @attrs) = @_;
     my @slots = map { $_->name } @attrs;
     bless {
+        # NOTE:
+        # I am not sure that it makes
+        # sense to pass in the meta
+        # The ideal would be to just 
+        # pass in the class name, but 
+        # that is placing too much of 
+        # an assumption on bless(), 
+        # which is *probably* a safe
+        # assumption,.. but you can 
+        # never tell <:)
         meta  => $meta,
         slots => \@slots,
     } => $class; 
