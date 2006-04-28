@@ -15,78 +15,40 @@ sub meta {
 }
 
 sub new { 
-    my ( $class, $meta ) = @_;
+    my ($class, $meta) = @_;
+    my $slots = $class->_compute_slot_list_from_class($meta);
     bless {
-        meta            => $meta,
-        instance_layout => {}
+        meta  => $meta,
+        slots => $slots,
     } => $class; 
 }
 
+# private for now ...
+sub _compute_slot_list_from_class {
+    my ($self, $meta) = @_;
+    return [
+        map { 
+            $_->name
+        } $meta->compute_all_applicable_attributes()
+    ];
+}
+
 sub create_instance {
-    my ( $self, $class ) = @_;
-    
-    # rely on autovivification
-    $self->bless_instance_structure( {}, $class );
+    my $self = shift;
+    $self->bless_instance_structure({});
 }
 
 sub bless_instance_structure {
-    my ( $self, $instance_structure, $class ) = @_;
-    $class ||= $self->{meta}->name;
-    bless $instance_structure, $class;
-}
-
-sub get_all_parents {
-    my $self = shift;
-    my @parents = $self->{meta}->class_precedence_list;
-    shift @parents; # shift off ourselves
-    return map { $_->get_meta_instance } map { $_->meta || () } @parents;
+    my ($self, $instance_structure) = @_;
+    bless $instance_structure, $self->{meta}->name;
 }
 
 # operations on meta instance
 
-sub add_slot {
-    my ($self, $slot_name ) = @_;
-    confess "The slot '$slot_name' already exists"
-        if 0 && $self->has_slot_recursively( $slot_name ); # FIXME
-    $self->{instance_layout}->{$slot_name} = undef;
-}
-
 sub get_all_slots {
     my $self = shift;
-    keys %{ $self->{instance_layout} };
+    return @{$self->{slots}};
 }
-
-sub get_all_slots_recursively {
-    my $self = shift;
-    return (
-        $self->get_all_slots,
-        map { $_->get_all_slots } $self->get_all_parents,
-    ),
-}
-
-sub has_slot {
-    my ($self, $slot_name) = @_;
-    exists $self->{instance_layout}->{$slot_name} ? 1 : 0;
-}
-
-sub has_slot_recursively {
-    my ( $self, $slot_name ) = @_;
-    return 1 if $self->has_slot($slot_name);
-    $_->has_slot_recursively($slot_name) && return 1 for $self->get_all_parents; 
-    return 0;
-}
-
-sub remove_slot {
-    my ( $self, $slot_name ) = @_;
-    # NOTE:
-    # this does not search recursively cause 
-    # that is not the domain of this meta-instance
-    # it is specific to this class ...
-    confess "The slot '$slot_name' does not exist (maybe it's inherited?)"
-        if 0 && $self->has_slot( $slot_name ); # FIXME
-    delete $self->{instance_layout}->{$slot_name};
-}
-
 
 # operations on created instances
 
@@ -95,82 +57,41 @@ sub get_slot_value {
     return $instance->{$slot_name};
 }
 
-# can be called only after initialize_slot_value
 sub set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
     $instance->{$slot_name} = $value;
 }
 
-sub set_weak_slot_value {
-	my ( $self, $instance, $slot_name, $value) = @_;
-	$self->set_slot_value( $instance, $slot_name, $value );
-	$self->weeaken_slot_value( $instance, $slot_name );
-}
-
-sub weaken_slot_value {
-	my ( $self, $instance, $slot_name ) = @_;
-	weaken( $instance->{$slot_name} );
-}
-
-# convenience method
-# non autovivifying stores will have this as { initialize_slot unless slot_initlized; set_slot_value }
-sub set_slot_value_with_init {
-    my ( $self, $instance, $slot_name, $value ) = @_;
-    $self->set_slot_value( $instance, $slot_name, $value );
-}
-
 sub initialize_slot {
-    my ( $self, $instance, $slot_name ) = @_;
+    my ($self, $instance, $slot_name) = @_;
+    $instance->{$slot_name} = undef;
 }
 
-sub slot_initialized {
-    my ($self, $instance, $slot_name) = @_;
+sub is_slot_initialized {
+    my ($self, $instance, $slot_name, $value) = @_;
     exists $instance->{$slot_name} ? 1 : 0;
 }
-
 
 # inlinable operation snippets
 
 sub inline_get_slot_value {
-    my ($self, $instance, $slot_name) = @_;
-    sprintf "%s->{%s}", $instance, $slot_name;
+    my ($self, $instance_var_name, $slot_name) = @_;
+    return ($instance_var_name . '->{\'' . $slot_name . '\'}');
 }
 
 sub inline_set_slot_value {
-    my ($self, $instance, $slot_name, $value) = @_;
-    $self->_inline_slot_lvalue( $instance, $slot_name ) . " = $value", 
-}
-
-sub inline_set_weak_slot_value {
-	my ( $self, $instance, $slot_name, $value ) = @_;
-	return ""
-		. $self->inline_set_slot_value( $instance, $slot_name, $value )
-		. "; "
-		. $self->inline_weaken_slot_value( $instance, $slot_name );
-}
-
-sub inline_weaken_slot_value {
-	my ( $self, $instance, $slot_name ) = @_;
-	return 'Scalar::Util::weaken( ' . $self->_inline_slot_lvalue( $instance, $slot_name ) . ')';
-}
-
-sub inline_set_slot_value_with_init { 
-    my ( $self, $instance, $slot_name, $value) = @_;
-    $self->inline_set_slot_value( $instance, $slot_name, $value ) . ";";
+    my ($self, $instance_var_name, $slot_name, $value_name) = @_;
+    return ($self->inline_get_slot_value($instance_var_name, $slot_name) . ' = ' . $value_name); 
 }
 
 sub inline_initialize_slot {
-    return "";
+    my ($self, $instance_var_name, $slot_name) = @_;
+    $self->inline_set_slot_value($instance_var_name, $slot_name, 'undef');
 }
 
-sub inline_slot_initialized {
-    my ($self, $instance, $slot_name) = @_;
-    "exists " . $self->inline_get_slot_value;
-}
-
-sub _inline_slot_lvalue {
-    my ($self, $instance, $slot_name) = @_;
-    $self->inline_get_slot_value( $instance, $slot_name );
+sub inline_is_slot_initialized {
+    my ($self, $instance_var_name, $slot_name) = @_;
+    return ('exists ' . $self->inline_get_slot_value($instance_var_name, $slot_name) . ' ? 1 : 0'); 
 }
 
 1;
@@ -193,43 +114,29 @@ Class::MOP::Instance - Instance Meta Object
 
 =item B<new>
 
-=item B<add_slot>
-
 =item B<bless_instance_structure>
+
+=item B<compute_layout_from_class>
 
 =item B<create_instance>
 
-=item B<get_all_parents>
+=item B<get_all_slots>
 
 =item B<get_slot_value>
 
-=item B<has_slot>
-
-=item B<has_slot_recursively>
+=item B<set_slot_value>
 
 =item B<initialize_slot>
 
-=item B<inline_get_slot_value>
+=item B<is_slot_initialized>
 
-=item B<inline_initialize_slot>
+=item B<inline_get_slot_value>
 
 =item B<inline_set_slot_value>
 
-=item B<inline_set_slot_value_with_init>
+=item B<inline_initialize_slot>
 
-=item B<inline_slot_initialized>
-
-=item B<remove_slot>
-
-=item B<set_slot_value>
-
-=item B<set_slot_value_with_init>
-
-=item B<slot_initialized>
-
-=item B<get_all_slots>
-
-=item B<get_all_slots_recursively>
+=item B<inline_is_slot_initialized>
 
 =back
 

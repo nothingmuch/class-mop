@@ -71,9 +71,9 @@ sub initialize_instance_slot {
     if (!defined $val && defined $self->{default}) {
         $val = $self->default($instance);
     }
-
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    $meta_instance->set_slot_value_with_init( $instance, $self->slot_name, $val );
+    $self->associated_class
+         ->get_meta_instance
+         ->set_slot_value($instance, $self->name, $val);
 }
 
 # NOTE:
@@ -126,65 +126,43 @@ sub detach_from_class {
     $self->{associated_class} = undef;        
 }
 
-# slot management
-
-sub slot_name { # when attr <-> slot mapping is 1:1
-    my $self = shift;
-    $self->name;
-}
-
-# slot alocation
-
-sub allocate_slots {
-    my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    $meta_instance->add_slot( $self->slot_name ); 
-}
-
-sub deallocate_slots {
-    my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    $meta_instance->remove_slot( $self->slot_name );
-}
-
 ## Method generation helpers
 
 sub generate_accessor_method {
     my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;    
-    my $slot_name = $self->slot_name;
-
-    sub {
-        $meta_instance->set_slot_value($_[0], $slot_name, $_[1]) if scalar(@_) == 2;
-        $meta_instance->get_slot_value($_[0], $slot_name);
+    my $attr_name = $self->name;
+    return sub {
+        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
+        $meta_instance->get_slot_value($_[0], $attr_name);
     };
 }
 
 sub generate_reader_method {
     my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
-    my $slot_name = $self->slot_name;
-    sub { 
+    my $attr_name = $self->name;
+    return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $meta_instance->get_slot_value($_[0], $slot_name); 
+        $meta_instance->get_slot_value($_[0], $attr_name); 
     };   
 }
 
 sub generate_writer_method {
     my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
-    my $slot_name = $self->slot_name;
-    sub { 
-        $meta_instance->set_slot_value($_[0], $slot_name, $_[1]);
+    my $attr_name = $self->name;
+    return sub { 
+        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]);
     };
 }
 
 sub generate_predicate_method {
     my $self = shift;
     my $meta_instance = $self->associated_class->get_meta_instance;
-    my $slot_name = $self->slot_name;
-    sub { 
-        defined $meta_instance->get_slot_value($_[0], $slot_name);
+    my $attr_name = $self->name;
+    return sub { 
+        defined $meta_instance->get_slot_value($_[0], $attr_name) ? 1 : 0;
     };
 }
 

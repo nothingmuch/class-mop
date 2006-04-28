@@ -14,37 +14,30 @@ use Scalar::Util 'refaddr';
 use base 'Class::MOP::Instance';
 
 sub create_instance {
-	my ( $self, $class ) = @_;
-	my $x;
-	bless \$x, $class || $self->{meta}->name;
-}
-
-sub add_slot {
-	my ( $self, $slot_name ) = @_;
-	$self->{containers}{$slot_name} = do {
-		my $fqn = $self->{meta}->name . "::" . $slot_name;
-		no strict 'refs';
-		\%$fqn;
-	};
-	$self->SUPER::add_slot( $slot_name );
+	my ($self, $class) = @_;
+    $self->bless_instance_structure(\(my $instance));
 }
 
 sub get_slot_value {
-	my ( $self, $instance, $slot_name ) = @_;
-	confess "$self is no instance" unless ref $self;
-	$self->{containers}{$slot_name}{refaddr $instance};
+	my ($self, $instance, $slot_name) = @_;
+	$self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance};
 }
 
 sub set_slot_value {
-	my ( $self, $instance, $slot_name, $value ) = @_;
-	$self->{containers}{$slot_name}{refaddr $instance} = $value;
+	my ($self, $instance, $slot_name, $value) = @_;
+	$self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} = $value;
 }
 
-sub initialize_slot { }
+sub initialize_slot {
+    my ($self, $instance, $slot_name) = @_;
+    $self->{meta}->add_package_variable('%' . $slot_name); 
+    $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} = undef;
+}
 
-sub slot_initialized {
-	my ( $self, $instance, $slot_name ) = @_;
-	exists $self->{containers}{$slot_name}{refaddr $instance};
+sub is_slot_initialized {
+	my ($self, $instance, $slot_name) = @_;
+	return 0 unless $self->{meta}->has_package_variable('%' . $slot_name);
+	return exists $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
 }
 
 ## &remove_slot is left as an exercise for the reader :)

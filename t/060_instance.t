@@ -3,78 +3,84 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 25;
 use Test::Exception;
-
-use Scalar::Util 'reftype', 'isweak';
 
 BEGIN {
     use_ok('Class::MOP::Instance');    
 }
 
 can_ok( "Class::MOP::Instance", $_ ) for qw/
+    new 
+    
 	create_instance
 	bless_instance_structure
 
-	add_slot
-	remove_slot
-	get_all_slots
-	get_all_slots_recursively
-	has_slot
-	has_slot_recursively
-	get_all_parents
+    get_all_slots
 
 	get_slot_value
 	set_slot_value
-	slot_initialized
-	initialize_slot
-	set_slot_value_with_init
 
 	inline_get_slot_value
 	inline_set_slot_value
-	inline_initialize_slot
-	inline_set_slot_value_with_init
 /;
 
 {
 	package Foo;
 	use metaclass;
+	
+	Foo->meta->add_attribute('moosen');
 
 	package Bar;
 	use metaclass;
 	use base qw/Foo/;
+
+	Bar->meta->add_attribute('elken');
 }
 
-isa_ok( my $mi_foo = Foo->meta->get_meta_instance, "Class::MOP::Instance" );
+my $mi_foo = Foo->meta->get_meta_instance;
+isa_ok($mi_foo, "Class::MOP::Instance");
 
-$mi_foo->add_slot("moosen");
-
-is_deeply( [ $mi_foo->get_all_slots ], [ "moosen" ], "get slots" );
-
+is_deeply(
+    [ $mi_foo->get_all_slots ], 
+    [ "moosen" ], 
+    '... get all slots for Foo');
 
 my $mi_bar = Bar->meta->get_meta_instance;
+isa_ok($mi_bar, "Class::MOP::Instance");
 
-is_deeply( [ $mi_bar->get_all_slots ], [], "get slots" );
-is_deeply( [ $mi_bar->get_all_slots_recursively ], ["moosen"], "get slots rec" );
+isnt($mi_foo, $mi_bar, '... they are not the same instance');
 
-$mi_bar->add_slot("elken");
+is_deeply(
+    [ sort $mi_bar->get_all_slots ], 
+    [ "elken", "moosen" ], 
+    '... get all slots for Bar');
 
-is_deeply( [ sort $mi_bar->get_all_slots_recursively ], [qw/elken moosen/], "get slots rec" );
+my $i_foo = $mi_foo->create_instance;
+isa_ok($i_foo, "Foo");
 
-isa_ok( my $i_foo = $mi_foo->create_instance, "Foo" );
+{
+    my $i_foo_2 = $mi_foo->create_instance;
+    isa_ok($i_foo_2, "Foo");    
+    isnt($i_foo_2, $i_foo, '... not the same instance');
+    is_deeply($i_foo, $i_foo_2, '... but the same structure');
+}
 
-ok( !$mi_foo->get_slot_value( $i_foo, "moosen" ), "no value for slot");
+ok(!defined($mi_foo->get_slot_value( $i_foo, "moosen" )), "... no value for slot");
 
-$mi_foo->initialize_slot( $i_foo, "moosen" );
 $mi_foo->set_slot_value( $i_foo, "moosen", "the value" );
 
-is ( $mi_foo->get_slot_value( $i_foo, "moosen" ), "the value", "get slot value" );
+is($mi_foo->get_slot_value( $i_foo, "moosen" ), "the value", "... get slot value");
 
-eval 'sub Foo::moosen { ' . $mi_foo->inline_get_slot_value( '$_[0]', '"moosen"' ) . ' }';
-ok( !$@, "compilation of inline get value had no error" );
+ok(!$i_foo->can('moosen'), '... Foo cant moosen');
 
-is( $i_foo->moosen, "the value", "inline get value" );
+eval 'sub Foo::moosen { ' . $mi_foo->inline_get_slot_value( '$_[0]', 'moosen' ) . ' }';
+ok(!$@, "compilation of inline get value had no error");
+
+can_ok($i_foo, 'moosen');
+
+is($i_foo->moosen, "the value", "... inline get value worked");
 
 $mi_foo->set_slot_value( $i_foo, "moosen", "the other value" );
 
-is( $i_foo->moosen, "the other value", "inline get value");
+is($i_foo->moosen, "the other value", "... inline get value worked (even after value is changed)");

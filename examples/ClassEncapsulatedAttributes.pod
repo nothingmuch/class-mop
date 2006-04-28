@@ -62,14 +62,14 @@ sub initialize_instance_slot {
     }
 
     # now add this to the instance structure
-	my $meta_instance = $self->associated_class->get_meta_instance;
-	$meta_instance->set_slot_value_with_init( $instance, $self->slot_name, $val );
+    $self->associated_class
+	     ->get_meta_instance
+	     ->set_slot_value($instance, $self->name, $val);
 }
 
-# mangle the slot name to include the fully qualified attr
-sub slot_name {
-	my $self = shift;
-	$self->associated_class->name . "::" . $self->SUPER::slot_name;
+sub name {
+    my $self = shift;
+    return ($self->associated_class->name . '::' . $self->SUPER::name)    
 }
 
 1;

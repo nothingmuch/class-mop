@@ -15,7 +15,7 @@ BEGIN {
     package BinaryTree;
     
     use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'LazyClass::Attribute'
+        ':attribute_metaclass' => 'LazyClass::Attribute',
     );
 
     BinaryTree->meta->add_attribute('$:node' => (

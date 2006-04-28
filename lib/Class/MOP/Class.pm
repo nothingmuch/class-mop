@@ -179,9 +179,7 @@ sub new_object {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    
     my $instance = $class->get_meta_instance->create_instance();
-    
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         $attr->initialize_instance_slot($instance, \%params);
     }
@@ -190,8 +188,7 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $class = shift;
-    # make it work,.. *then* make it right ... # yeah that was my plan, i just thought we'll make it async
-    $class->{meta_instance} ||= $class->instance_metaclass->new( $class );
+    $class->{':instance_meta_object_cache'} ||= $class->instance_metaclass->new($class);
 }
 
 sub clone_object {
@@ -491,8 +488,6 @@ sub add_attribute {
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
     $attribute->attach_to_class($self);
     $attribute->install_accessors();
-    $attribute->allocate_slots;
-
     $self->get_attribute_map->{$attribute->name} = $attribute;
 }
 
@@ -524,7 +519,6 @@ sub remove_attribute {
     return unless defined $removed_attribute;
     delete $self->get_attribute_map->{$attribute_name};        
     $removed_attribute->remove_accessors(); 
-    $removed_attribute->deallocate_slots();
     $removed_attribute->detach_from_class();
     return $removed_attribute;
 } 
