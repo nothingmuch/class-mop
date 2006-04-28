@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 41;
 use Test::Exception;
 
 BEGIN {
@@ -32,6 +32,8 @@ BEGIN {
         has_predicate predicate
         has_init_arg  init_arg
         has_default   default
+        
+        slots
         
         associated_class
         attach_to_class detach_from_class

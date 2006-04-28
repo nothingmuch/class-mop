@@ -16,7 +16,7 @@ sub meta {
 
 sub new { 
     my ($class, $meta, @attrs) = @_;
-    my @slots = map { $_->name } @attrs;
+    my @slots = map { $_->slots } @attrs;
     bless {
         # NOTE:
         # I am not sure that it makes

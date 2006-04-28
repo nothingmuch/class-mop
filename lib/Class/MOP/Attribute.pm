@@ -112,6 +112,10 @@ sub default {
     $self->{default};
 }
 
+# slots
+
+sub slots { (shift)->name }
+
 # class association 
 
 sub attach_to_class {
@@ -431,6 +435,11 @@ passed into C<new>. I think they are pretty much self-explanitory.
 As noted in the documentation for C<new> above, if the I<default> 
 value is a CODE reference, this accessor will pass a single additional
 argument C<$instance> into it and return the value.
+
+=item B<slots>
+
+Returns a list of slots required by the attribute. This is usually 
+just one, which is the name of the attribute.
 
 =back
 
