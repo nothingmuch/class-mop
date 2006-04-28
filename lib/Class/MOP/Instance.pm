@@ -101,6 +101,17 @@ sub set_slot_value {
     $instance->{$slot_name} = $value;
 }
 
+sub set_weak_slot_value {
+	my ( $self, $instance, $slot_name, $value) = @_;
+	$self->set_slot_value( $instance, $slot_name, $value );
+	$self->weeaken_slot_value( $instance, $slot_name );
+}
+
+sub weaken_slot_value {
+	my ( $self, $instance, $slot_name ) = @_;
+	weaken( $instance->{$slot_name} );
+}
+
 # convenience method
 # non autovivifying stores will have this as { initialize_slot unless slot_initlized; set_slot_value }
 sub set_slot_value_with_init {
@@ -127,7 +138,20 @@ sub inline_get_slot_value {
 
 sub inline_set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
-    $self->_inline_slot_lvalue . " = $value", 
+    $self->_inline_slot_lvalue( $instance, $slot_name ) . " = $value", 
+}
+
+sub inline_set_weak_slot_value {
+	my ( $self, $instance, $slot_name, $value ) = @_;
+	return ""
+		. $self->inline_set_slot_value( $instance, $slot_name, $value )
+		. "; "
+		. $self->inline_weaken_slot_value( $instance, $slot_name );
+}
+
+sub inline_weaken_slot_value {
+	my ( $self, $instance, $slot_name ) = @_;
+	return 'Scalar::Util::weaken( ' . $self->_inline_slot_lvalue( $instance, $slot_name ) . ')';
 }
 
 sub inline_set_slot_value_with_init { 
@@ -146,7 +170,7 @@ sub inline_slot_initialized {
 
 sub _inline_slot_lvalue {
     my ($self, $instance, $slot_name) = @_;
-    $self->inline_slot_value;
+    $self->inline_get_slot_value( $instance, $slot_name );
 }
 
 1;
