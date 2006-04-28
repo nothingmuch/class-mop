@@ -30,7 +30,7 @@ sub set_slot_value {
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
-    $self->{meta}->add_package_variable('%' . $slot_name); 
+    $self->{meta}->add_package_variable(('%' . $slot_name) => {}); 
     $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} = undef;
 }
 
