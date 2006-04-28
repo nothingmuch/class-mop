@@ -188,7 +188,10 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $class = shift;
-    $class->{':instance_meta_object_cache'} ||= $class->instance_metaclass->new($class);
+    return $class->instance_metaclass->new(
+        $class, 
+        $class->compute_all_applicable_attributes()
+    );
 }
 
 sub clone_object {

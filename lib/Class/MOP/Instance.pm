@@ -15,22 +15,12 @@ sub meta {
 }
 
 sub new { 
-    my ($class, $meta) = @_;
-    my $slots = $class->_compute_slot_list_from_class($meta);
+    my ($class, $meta, @attrs) = @_;
+    my @slots = map { $_->name } @attrs;
     bless {
         meta  => $meta,
-        slots => $slots,
+        slots => \@slots,
     } => $class; 
-}
-
-# private for now ...
-sub _compute_slot_list_from_class {
-    my ($self, $meta) = @_;
-    return [
-        map { 
-            $_->name
-        } $meta->compute_all_applicable_attributes()
-    ];
 }
 
 sub create_instance {
