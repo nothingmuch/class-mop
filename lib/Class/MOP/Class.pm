@@ -492,6 +492,9 @@ sub add_attribute {
     $attribute->attach_to_class($self);
     $attribute->install_accessors();
     $self->get_attribute_map->{$attribute->name} = $attribute;
+
+	# FIXME
+	# in theory we have to tell everyone the slot structure may have changed
 }
 
 sub has_attribute {
