@@ -4,8 +4,7 @@ package Class::MOP::Instance;
 use strict;
 use warnings;
 
-use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken';
+use Scalar::Util 'weaken';
 
 our $VERSION = '0.01';
 
@@ -91,35 +90,41 @@ Class::MOP::Instance - Instance Meta Object
 
 =head1 SYNOPSIS
 
+  # for the most part, this protocol is internal 
+  # and not for public usage, but this how one 
+  # might use it
+  
+  package Foo;
+  
+  use strict;
+  use warnings;
+  use metaclass 'Class::MOP::Class' => (
+      ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
+  );
+  
+  # now Foo->new produces blessed ARRAY ref based objects
+
 =head1 DESCRIPTION
+
+This is a sub-protocol which governs instance creation 
+and access to the slots of the instance structure.
+
+This may seem like over-abstraction, but by abstracting 
+this process into a sub-protocol we make it possible to 
+easily switch the details of how an object's instance is 
+stored with minimal impact. In most cases just subclassing 
+this class will be all you need to do (occasionally it  
+requires that you also subclass Class::MOP::Attribute if 
+you require some kind of specific attribute initializations).
 
 =head1 METHODS
 
 =over 4
 
-=item B<new>
+=item B<new ($meta, @attrs)>
 
-=item B<create_instance>
-
-=item B<bless_instance_structure>
-
-=item B<get_all_slots>
-
-=item B<initialize_all_slots>
-
-=item B<get_slot_value>
-
-=item B<set_slot_value>
-
-=item B<initialize_slot>
-
-=item B<is_slot_initialized>
-
-=back
-
-=head2 Introspection
-
-=over 4
+Creates a new instance meta-object and gathers all the slots from 
+the list of C<@attrs> given.
 
 =item B<meta>
 
@@ -128,7 +133,59 @@ to this class.
 
 =back
 
+=head2 Creation of Instances
+
+=over 4
+
+=item B<create_instance>
+
+This creates the appropriate structure needed for the instance and 
+then calls C<bless_instance_structure> to bless it into the class.
+
+=item B<bless_instance_structure ($instance_structure)>
+
+This does just exactly what it says it does.
+
+=back
+
+=head2 Instrospection
+
+NOTE: There might be more methods added to this part of the API, 
+we will add then when we need them basically.
+
+=over 4
+
+=item B<get_all_slots>
+
+This will return the current list of slots based on what was 
+given to this object in C<new>.
+
+=back
+
+=head2 Operations on Instance Structures
+
+An important distinction of this sub-protocol is that the 
+instance meta-object is a different entity from the actual 
+instance it creates. For this reason, any actions on slots 
+require that the C<$instance_structure> is passed into them.
+
+=over 4
+
+=item B<get_slot_value ($instance_structure, $slot_name)>
+
+=item B<set_slot_value ($instance_structure, $slot_name, $value)>
+
+=item B<initialize_slot ($instance_structure, $slot_name)>
+
+=item B<initialize_all_slots ($instance_structure)>
+
+=item B<is_slot_initialized ($instance_structure, $slot_name)>
+
+=back
+
 =head1 AUTHOR
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
