@@ -8,7 +8,7 @@ use File::Spec;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    require_ok(File::Spec->catdir('examples', 'InsideOutClass.pod'));
+    require_ok(File::Spec->catdir('examples', 'ArrayBasedStorage.pod'));
 }
 
 {
@@ -16,10 +16,9 @@ BEGIN {
     
     use strict;
     use warnings;    
-    
     use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',
-        ':instance_metaclass'  => 'InsideOutClass::Instance'
+        ':attribute_metaclass' => 'ArrayBasedStorage::Attribute',
+        ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     
     Foo->meta->add_attribute('foo' => (
@@ -55,8 +54,8 @@ BEGIN {
     use strict;
     use warnings;
     use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',        
-        ':instance_metaclass' => 'InsideOutClass::Instance'
+        ':attribute_metaclass' => 'ArrayBasedStorage::Attribute',
+        ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     
     Baz->meta->add_attribute('bling' => (
@@ -69,7 +68,7 @@ BEGIN {
     use strict;
     use warnings;
     
-    use base 'Bar', 'Baz';    
+    use base 'Bar', 'Baz'; 
 }
 
 my $foo = Foo->new();
@@ -174,4 +173,5 @@ is($baz->baz(), 'This is Bar::Baz::baz', '... Bar::Baz::foo == "This is Bar"');
 is($baz->foo(), 'This is Bar::Baz::foo', '... Bar::Baz::foo == "This is Bar"');
 is($baz->get_bar(), 'FOO is BAR', '... Bar::Baz::bar has been initialized');
 is($baz->bling(), 'Baz::bling', '... Bar::Baz::bling has been initialized');
+
 

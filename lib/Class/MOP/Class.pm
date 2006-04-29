@@ -183,7 +183,7 @@ sub construct_instance {
     my $instance = $meta_instance->create_instance();
     $meta_instance->initialize_all_slots($instance);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        $attr->initialize_instance_slot($instance, \%params);
+        $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
     return $instance;
 }

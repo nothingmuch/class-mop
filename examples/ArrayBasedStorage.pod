@@ -1,6 +1,6 @@
 
 package # hide the package from PAUSE
-    ArrayBasedInstance::Attribute;
+    ArrayBasedStorage::Attribute;
 
 use strict;
 use warnings;
@@ -15,7 +15,7 @@ sub generate_accessor_method {
     my $self = shift;
     my $attr_name = $self->name;
     return sub {
-        my $meta_instance = $self->associated_class->get_meta_instance;            
+        my $meta_instance = $_[0]->meta->get_meta_instance;            
         $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
         $meta_instance->get_slot_value($_[0], $attr_name);
     };
@@ -26,8 +26,9 @@ sub generate_reader_method {
     my $attr_name = $self->name;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        my $meta_instance = $self->associated_class->get_meta_instance;        
-        $meta_instance->get_slot_value($_[0], $attr_name); 
+        $_[0]->meta
+             ->get_meta_instance
+             ->get_slot_value($_[0], $attr_name); 
     };   
 }
 
@@ -35,22 +36,24 @@ sub generate_writer_method {
     my $self = shift;
     my $attr_name = $self->name;
     return sub { 
-        my $meta_instance = $self->associated_class->get_meta_instance;        
-        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]);
+        $_[0]->meta
+             ->get_meta_instance
+             ->set_slot_value($_[0], $attr_name, $_[1]);
     };
 }
 
 sub generate_predicate_method {
     my $self = shift;
     my $attr_name = $self->name;
-    return sub { 
-        my $meta_instance = $self->associated_class->get_meta_instance;        
-        defined $meta_instance->get_slot_value($_[0], $attr_name) ? 1 : 0;
+    return sub {        
+        defined $_[0]->meta
+                     ->get_meta_instance
+                     ->get_slot_value($_[0], $attr_name) ? 1 : 0;
     };
 }    
 
 package # hide the package from PAUSE
-    ArrayBasedInstance::Instance;
+    ArrayBasedStorage::Instance;
 
 use strict;
 use warnings;
@@ -111,11 +114,33 @@ __END__
 
 =head1 NAME
 
-ArrayBasedInstance - An example of an Array based instance 
+ArrayBasedStorage - An example of an Array based instance storage 
 
 =head1 SYNOPSIS
 
+  package Foo;
+  
+  use metaclass 'Class::MOP::Class' => (
+    ':attribute_metaclass' => 'ArrayBasedStorage::Attribute'
+    ':instance_metaclass'  => 'ArrayBasedStorage::Instance'
+  );
+  
+  __PACKAGE__->meta->add_attribute('foo' => (
+      reader => 'get_foo',
+      writer => 'set_foo'
+  ));    
+  
+  sub new  {
+      my $class = shift;
+      $class->meta->new_object(@_);
+  } 
+  
+  # now you can just use the class as normal
+
 =head1 DESCRIPTION
+
+This is a proof of concept using the Instance sub-protocol 
+which uses ARRAY refs to store the instance data. 
 
 =head1 AUTHOR
 

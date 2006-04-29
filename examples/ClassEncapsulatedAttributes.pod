@@ -19,14 +19,15 @@ sub initialize {
 sub construct_instance {
     my ($class, %params) = @_;
 
-	 my $instance = $class->get_meta_instance->create_instance();
+    my $meta_instance = $class->get_meta_instance;
+	my $instance = $meta_instance->create_instance();
 
 	# initialize *ALL* attributes, including masked ones (as opposed to applicable)
     foreach my $current_class ($class->class_precedence_list()) {
         my $meta = $current_class->meta;
         foreach my $attr_name ($meta->get_attribute_list()) {
             my $attr = $meta->get_attribute($attr_name);
-            $attr->initialize_instance_slot($instance, \%params);
+            $attr->initialize_instance_slot($meta_instance, $instance, \%params);
         }
     }  
 
@@ -45,7 +46,7 @@ use base 'Class::MOP::Attribute';
 
 # alter the way parameters are specified
 sub initialize_instance_slot {
-    my ($self, $instance, $params) = @_;
+    my ($self, $meta_instance, $instance, $params) = @_;
     # if the attr has an init_arg, use that, otherwise,
     # use the attributes name itself as the init_arg
     my $init_arg = $self->init_arg();
@@ -62,9 +63,7 @@ sub initialize_instance_slot {
     }
 
     # now add this to the instance structure
-    $self->associated_class
-	     ->get_meta_instance
-	     ->set_slot_value($instance, $self->name, $val);
+    $meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
 sub name {
