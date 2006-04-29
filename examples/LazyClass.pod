@@ -65,6 +65,20 @@ sub generate_reader_method {
     };   
 }
 
+
+
+package # hide the package from PAUSE
+    LazyClass::Instance;
+
+use strict;
+use warnings;
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Instance';
+
+sub initialize_all_slots {}
+
 1;
 
 __END__

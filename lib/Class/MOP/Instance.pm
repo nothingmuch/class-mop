@@ -52,6 +52,13 @@ sub get_all_slots {
 
 # operations on created instances
 
+sub initialize_all_slots {
+    my ($self, $instance) = @_;
+    foreach my $slot_name ($self->get_all_slots) {
+        $self->initialize_slot($instance, $slot_name);
+    }
+}
+
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
     return $instance->{$slot_name};
@@ -114,13 +121,13 @@ Class::MOP::Instance - Instance Meta Object
 
 =item B<new>
 
-=item B<bless_instance_structure>
-
-=item B<compute_layout_from_class>
-
 =item B<create_instance>
 
+=item B<bless_instance_structure>
+
 =item B<get_all_slots>
+
+=item B<initialize_all_slots>
 
 =item B<get_slot_value>
 

@@ -179,7 +179,9 @@ sub new_object {
 
 sub construct_instance {
     my ($class, %params) = @_;
-    my $instance = $class->get_meta_instance->create_instance();
+    my $meta_instance = $class->get_meta_instance();
+    my $instance = $meta_instance->create_instance();
+    $meta_instance->initialize_all_slots($instance);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         $attr->initialize_instance_slot($instance, \%params);
     }
