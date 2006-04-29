@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 22;
 use Test::Exception;
 
 BEGIN {
@@ -20,9 +20,9 @@ can_ok( "Class::MOP::Instance", $_ ) for qw/
 
 	get_slot_value
 	set_slot_value
-
-	inline_get_slot_value
-	inline_set_slot_value
+	initialize_slot
+	initialize_all_slots
+	is_slot_initialized	
 /;
 
 {
@@ -73,14 +73,3 @@ $mi_foo->set_slot_value( $i_foo, "moosen", "the value" );
 is($mi_foo->get_slot_value( $i_foo, "moosen" ), "the value", "... get slot value");
 
 ok(!$i_foo->can('moosen'), '... Foo cant moosen');
-
-eval 'sub Foo::moosen { ' . $mi_foo->inline_get_slot_value( '$_[0]', 'moosen' ) . ' }';
-ok(!$@, "compilation of inline get value had no error");
-
-can_ok($i_foo, 'moosen');
-
-is($i_foo->moosen, "the value", "... inline get value worked");
-
-$mi_foo->set_slot_value( $i_foo, "moosen", "the other value" );
-
-is($i_foo->moosen, "the other value", "... inline get value worked (even after value is changed)");

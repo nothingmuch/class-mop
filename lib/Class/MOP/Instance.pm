@@ -52,13 +52,6 @@ sub get_all_slots {
 
 # operations on created instances
 
-sub initialize_all_slots {
-    my ($self, $instance) = @_;
-    foreach my $slot_name ($self->get_all_slots) {
-        $self->initialize_slot($instance, $slot_name);
-    }
-}
-
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
     return $instance->{$slot_name};
@@ -74,31 +67,16 @@ sub initialize_slot {
     $instance->{$slot_name} = undef;
 }
 
+sub initialize_all_slots {
+    my ($self, $instance) = @_;
+    foreach my $slot_name ($self->get_all_slots) {
+        $self->initialize_slot($instance, $slot_name);
+    }
+}
+
 sub is_slot_initialized {
     my ($self, $instance, $slot_name, $value) = @_;
     exists $instance->{$slot_name} ? 1 : 0;
-}
-
-# inlinable operation snippets
-
-sub inline_get_slot_value {
-    my ($self, $instance_var_name, $slot_name) = @_;
-    return ($instance_var_name . '->{\'' . $slot_name . '\'}');
-}
-
-sub inline_set_slot_value {
-    my ($self, $instance_var_name, $slot_name, $value_name) = @_;
-    return ($self->inline_get_slot_value($instance_var_name, $slot_name) . ' = ' . $value_name); 
-}
-
-sub inline_initialize_slot {
-    my ($self, $instance_var_name, $slot_name) = @_;
-    $self->inline_set_slot_value($instance_var_name, $slot_name, 'undef');
-}
-
-sub inline_is_slot_initialized {
-    my ($self, $instance_var_name, $slot_name) = @_;
-    return ('exists ' . $self->inline_get_slot_value($instance_var_name, $slot_name) . ' ? 1 : 0'); 
 }
 
 1;
@@ -136,14 +114,6 @@ Class::MOP::Instance - Instance Meta Object
 =item B<initialize_slot>
 
 =item B<is_slot_initialized>
-
-=item B<inline_get_slot_value>
-
-=item B<inline_set_slot_value>
-
-=item B<inline_initialize_slot>
-
-=item B<inline_is_slot_initialized>
 
 =back
 
