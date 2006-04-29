@@ -78,6 +78,22 @@ sub is_slot_initialized {
     exists $instance->{$slot_name} ? 1 : 0;
 }
 
+sub set_slot_value_weak {
+    my ($self, $instance, $slot_name, $value) = @_;
+	$self->set_slot_value($instance, $slot_name, $value);
+	$self->weaken_slot_value($instance, $slot_name);
+}
+
+sub weaken_slot_value {
+	my ($self, $instance, $slot_name) = @_;
+	weaken $instance->{$slot_name};
+}
+
+sub strengthen_slot_value {
+	my ($self, $instance, $slot_name) = @_;
+	$self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
+}
+
 1;
 
 __END__
@@ -181,6 +197,12 @@ require that the C<$instance_structure> is passed into them.
 
 =item B<is_slot_initialized ($instance_structure, $slot_name)>
 
+=item B<set_slot_value_weak ($instance_structure, $slot_name, $ref_value)>
+
+=item B<weaken_slot_value>
+
+=item B<strengthen_slot_value>
+
 =back
 
 =head1 AUTHOR
@@ -199,3 +221,4 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
 =cut
+

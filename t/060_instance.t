@@ -3,8 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More 'no_plan';
 use Test::Exception;
+
+use Scalar::Util qw/isweak reftype/;
 
 BEGIN {
     use_ok('Class::MOP::Instance');    
@@ -73,3 +75,44 @@ $mi_foo->set_slot_value( $i_foo, "moosen", "the value" );
 is($mi_foo->get_slot_value( $i_foo, "moosen" ), "the value", "... get slot value");
 
 ok(!$i_foo->can('moosen'), '... Foo cant moosen');
+
+can_ok( $mi_foo, "set_slot_value_weak" );
+
+my $ref = [];
+$mi_foo->set_slot_value_weak( $i_foo, "moosen", $ref );
+
+is( $mi_foo->get_slot_value( $i_foo, "moosen" ), $ref, "weak value is fetchable" );
+
+ok( !isweak($mi_foo->get_slot_value( $i_foo, "moosen" )), "return value not weak" );
+
+undef $ref;
+
+is( $mi_foo->get_slot_value( $i_foo, "moosen" ), undef, "weak value destroyed" );
+
+$ref = [];
+
+$mi_foo->set_slot_value( $i_foo, "moosen", $ref );
+
+undef $ref;
+
+is( reftype( $mi_foo->get_slot_value( $i_foo, "moosen" ) ), "ARRAY", "value not weak yet" );
+
+$mi_foo->weaken_slot_value( $i_foo, "moosen" );
+
+is( $mi_foo->get_slot_value( $i_foo, "moosen" ), undef, "weak value destroyed" );
+
+
+$ref = [];
+
+$mi_foo->set_slot_value( $i_foo, "moosen", $ref );
+
+
+$mi_foo->weaken_slot_value( $i_foo, "moosen" );
+
+$mi_foo->strengthen_slot_value( $i_foo, "moosen" );
+
+undef $ref;
+
+is( reftype( $mi_foo->get_slot_value( $i_foo, "moosen" ) ), "ARRAY", "weak value can be strengthened" );
+
+
