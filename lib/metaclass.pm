@@ -7,18 +7,23 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Class::MOP;
 
 sub import {
     shift;
-    my $metaclass = shift || 'Class::MOP::Class';
+    my $metaclass;
+    if (!defined($_[0]) || $_[0] =~ /^\:(attribute|method|instance)_metaclass/) {
+        $metaclass = 'Class::MOP::Class';
+    }
+    else {
+        $metaclass = shift;
+        ($metaclass->isa('Class::MOP::Class'))
+            || confess 'The metaclass must be derived from Class::MOP::Class';        
+    }
     my %options   = @_;
     my $package   = caller();
-    
-    ($metaclass->isa('Class::MOP::Class'))
-        || confess 'The metaclass must be derived from Class::MOP::Class';
     
     # create a meta object so we can install &meta
     my $meta = $metaclass->initialize($package => %options);
@@ -56,6 +61,14 @@ metaclass - a pragma for installing and using Class::MOP metaclasses
   # and custom attribute and method
   # metaclasses
   use metaclass 'MyMetaClass' => (
+      ':attribute_metaclass' => 'MyAttributeMetaClass',
+      ':method_metaclass'    => 'MyMethodMetaClass',    
+  );
+
+  # ... or just specify custom attribute
+  # and method classes, and Class::MOP::Class
+  # is the assumed metaclass
+  use metaclass (
       ':attribute_metaclass' => 'MyAttributeMetaClass',
       ':method_metaclass'    => 'MyMethodMetaClass',    
   );

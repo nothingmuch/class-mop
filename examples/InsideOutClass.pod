@@ -54,7 +54,7 @@ InsideOutClass - A set of example metaclasses which implement the Inside-Out tec
 
   package Foo;
   
-  use metaclass 'Class::MOP::Class' => (
+  use metaclass (
     ':instance_metaclass' => 'InsideOutClass::Instance'
   );
   

@@ -114,7 +114,7 @@ Class::MOP::Instance - Instance Meta Object
   
   use strict;
   use warnings;
-  use metaclass 'Class::MOP::Class' => (
+  use metaclass (
       ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
   );
   
@@ -129,9 +129,9 @@ This may seem like over-abstraction, but by abstracting
 this process into a sub-protocol we make it possible to 
 easily switch the details of how an object's instance is 
 stored with minimal impact. In most cases just subclassing 
-this class will be all you need to do (occasionally it  
-requires that you also subclass Class::MOP::Attribute if 
-you require some kind of specific attribute initializations).
+this class will be all you need to do (see the examples; 
+F<examples/ArrayBasedStorage.pod> and 
+F<examples/InsideOutClass.pod> for details).
 
 =head1 METHODS
 

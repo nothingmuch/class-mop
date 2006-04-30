@@ -67,7 +67,7 @@ ArrayBasedStorage - An example of an Array based instance storage
 
   package Foo;
   
-  use metaclass 'Class::MOP::Class' => (
+  use metaclass (
     ':instance_metaclass'  => 'ArrayBasedStorage::Instance'
   );
   
@@ -87,6 +87,10 @@ ArrayBasedStorage - An example of an Array based instance storage
 
 This is a proof of concept using the Instance sub-protocol 
 which uses ARRAY refs to store the instance data. 
+
+This is very similar now to the InsideOutClass example, and 
+in fact, they both share the exact same test suite, with 
+the only difference being the Instance metaclass they use.
 
 =head1 AUTHOR
 

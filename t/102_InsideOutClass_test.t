@@ -17,7 +17,7 @@ BEGIN {
     use strict;
     use warnings;    
     
-    use metaclass 'Class::MOP::Class' => (
+    use metaclass (
         ':instance_metaclass'  => 'InsideOutClass::Instance'
     );
     
@@ -53,7 +53,7 @@ BEGIN {
     
     use strict;
     use warnings;
-    use metaclass 'Class::MOP::Class' => (     
+    use metaclass (     
         ':instance_metaclass' => 'InsideOutClass::Instance'
     );
     

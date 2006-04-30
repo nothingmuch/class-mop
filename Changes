@@ -2,12 +2,27 @@ Revision history for Perl extension Class-MOP.
 
 0.30
     * Class::MOP::Instance
-      - added new instance construction protocol
+      - added new instance protocol
         - added tests for this
       - changed all relevant modules and examples
         - Class::MOP::Class
         - Class::MOP::Attribute
         - examples/*
+
+    * metaclass
+      - you no longer need to specify the metaclass
+        itself, if it is not there, Class::MOP::Class
+        is just assumed
+        - updated tests for this
+
+    * examples/
+      - added ArrayBasedStorage example to show 
+        instance storage using ARRAY refs instead of
+        HASH refs. 
+        - added tests for this
+      - InsideOutClass is totally revised using the 
+        new instance protocol
+        - added more tests for this
 
 0.26 Mon. April 24, 2006
     * Class::MOP::Class
