@@ -1,0 +1,49 @@
+---------------------------------------------------------------------
+TODO
+---------------------------------------------------------------------
+
+- switch to Context::Handle for method modifiers
+
+Should probably write some more tests to verify this works correctly
+when we add it in, to make sure we don't break weird stuff.
+
+- add ::Attribute::Collection types
+
+mugwump was working on this ...
+
+---------------------------------------------------------------------
+EXAMPLES TO WRITE
+---------------------------------------------------------------------
+
+- Prototype-style example
+
+Make a C::MOP::Class subclass which has an AUTOLOAD method, the 
+method will DWIM depending up on the value it is passed.
+
+  Foo->prototype->say_hello(sub { print "Hello" });
+
+This will turn into this:
+
+  Foo->prototype->add_method('say_hello' => sub { print "Hello" });
+
+I am not sure how we should handle non-method arguments, mostly 
+because those would be static prototype variables, which would 
+translate to class package variables. 
+
+---------------------------------------------------------------------
+TO PONDER
+---------------------------------------------------------------------
+
+- Make a Class::MOP::Package 
+
+Class::MOP::Class would be a subclass of this, but I am not sure 
+this is worth the time. 
+
+
+
+
+
+
+
+
+
