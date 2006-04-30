@@ -78,12 +78,6 @@ sub is_slot_initialized {
     exists $instance->{$slot_name} ? 1 : 0;
 }
 
-sub set_slot_value_weak {
-    my ($self, $instance, $slot_name, $value) = @_;
-	$self->set_slot_value($instance, $slot_name, $value);
-	$self->weaken_slot_value($instance, $slot_name);
-}
-
 sub weaken_slot_value {
 	my ($self, $instance, $slot_name) = @_;
 	weaken $instance->{$slot_name};
@@ -92,6 +86,43 @@ sub weaken_slot_value {
 sub strengthen_slot_value {
 	my ($self, $instance, $slot_name) = @_;
 	$self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
+}
+
+# inlinable operation snippets
+
+sub inline_slot_access {
+    my ($self, $instance, $slot_name) = @_;
+    sprintf "%s->{%s}", $instance, $slot_name;
+}
+
+sub inline_get_slot_value {
+    my ($self, $instance, $slot_name) = @_;
+    $self->inline_slot_access($instance, $slot_name);
+}
+
+sub inline_set_slot_value {
+    my ($self, $instance, $slot_name, $value) = @_;
+    $self->inline_slot_access($instance, $slot_name) . " = $value", 
+}
+
+sub inline_initialize_slot {
+    my ($self, $instance, $slot_name) = @_;
+    $self->inline_set_slot_value($instance, $slot_name, 'undef'),
+}
+
+sub inline_is_slot_initialized {
+    my ($self, $instance, $slot_name) = @_;
+    "exists " . $self->inline_slot_access($instance, $slot_name) . " ? 1 : 0";
+}
+
+sub inline_weaken_slot_value {
+    my ($self, $instance, $slot_name) = @_;
+    sprintf "Scalar::Util::weaken( %s )", $self->inline_slot_access($instance, $slot_name);
+}
+
+sub inline_strengthen_slot_value {
+    my ($self, $instance, $slot_name) = @_;
+    $self->inline_set_slot_value($instance, $slot_name, $self->inline_slot_access($instance, $slot_name));
 }
 
 1;
@@ -197,11 +228,29 @@ require that the C<$instance_structure> is passed into them.
 
 =item B<is_slot_initialized ($instance_structure, $slot_name)>
 
-=item B<set_slot_value_weak ($instance_structure, $slot_name, $ref_value)>
+=item B<weaken_slot_value ($instance_structure, $slot_name)>
 
-=item B<weaken_slot_value>
+=item B<strengthen_slot_value ($instance_structure, $slot_name)>
 
-=item B<strengthen_slot_value>
+=back
+
+=head2 Inlineable Instance Operations
+
+=over 4
+
+=item B<inline_slot_access ($instance_structure, $slot_name)>
+
+=item B<inline_get_slot_value ($instance_structure, $slot_name)>
+
+=item B<inline_set_slot_value ($instance_structure, $slot_name, $value)>
+
+=item B<inline_initialize_slot ($instance_structure, $slot_name)>
+
+=item B<inline_is_slot_initialized ($instance_structure, $slot_name)>
+
+=item B<inline_weaken_slot_value ($instance_structure, $slot_name)>
+
+=item B<inline_strengthen_slot_value ($instance_structure, $slot_name)>
 
 =back
 
