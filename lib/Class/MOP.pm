@@ -41,7 +41,12 @@ our $VERSION = '0.30';
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:package' => (
-        reader   => 'name',
+        reader   => {
+            # NOTE: we need to do this in order 
+            # for the instance meta-object to 
+            # not fall into meta-circular death
+            'name' => sub { (shift)->{'$:package'} }
+        },
         init_arg => ':package',
     ))
 );
@@ -72,7 +77,12 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:instance_metaclass' => (
-        reader   => 'instance_metaclass',
+        reader   => {
+            # NOTE: we need to do this in order 
+            # for the instance meta-object to 
+            # not fall into meta-circular death            
+            'instance_metaclass' => sub { (shift)->{'$:instance_metaclass'} }
+        },
         init_arg => ':instance_metaclass',
         default  => 'Class::MOP::Instance',        
     ))
@@ -82,13 +92,23 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('name' => (
-        reader => 'name'
+        reader => {
+            # NOTE: we need to do this in order 
+            # for the instance meta-object to 
+            # not fall into meta-circular death            
+            'name' => sub { (shift)->{name} }
+        }
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('associated_class' => (
-        reader => 'associated_class'
+        reader => {
+            # NOTE: we need to do this in order 
+            # for the instance meta-object to 
+            # not fall into meta-circular death            
+            'associated_class' => sub { (shift)->{associated_class} }
+        }
     ))
 );
 

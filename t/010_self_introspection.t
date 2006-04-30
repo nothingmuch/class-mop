@@ -100,7 +100,7 @@ foreach my $attribute_name (@attributes) {
 ## check the attributes themselves
 
 ok($meta->get_attribute('$:package')->has_reader, '... Class::MOP::Class $:package has a reader');
-is($meta->get_attribute('$:package')->reader, 'name', '... Class::MOP::Class $:package\'s a reader is &name');
+is(ref($meta->get_attribute('$:package')->reader), 'HASH', '... Class::MOP::Class $:package\'s a reader is { name => sub { ... } }');
 
 ok($meta->get_attribute('$:package')->has_init_arg, '... Class::MOP::Class $:package has a init_arg');
 is($meta->get_attribute('$:package')->init_arg, ':package', '... Class::MOP::Class $:package\'s a init_arg is :package');

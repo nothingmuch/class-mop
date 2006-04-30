@@ -132,9 +132,10 @@ sub detach_from_class {
 
 sub generate_accessor_method {
     my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;    
-    my $attr_name = $self->name;
+    my $meta_class = $self->associated_class;    
+    my $attr_name  = $self->name;
     return sub {
+        my $meta_instance = $meta_class->initialize(Scalar::Util::blessed($_[0]))->get_meta_instance;
         $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
         $meta_instance->get_slot_value($_[0], $attr_name);
     };
@@ -142,29 +143,35 @@ sub generate_accessor_method {
 
 sub generate_reader_method {
     my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    my $attr_name = $self->name;
+    my $meta_class = $self->associated_class;    
+    my $attr_name  = $self->name;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $meta_instance->get_slot_value($_[0], $attr_name); 
+        $meta_class->initialize(Scalar::Util::blessed($_[0]))
+                   ->get_meta_instance
+                   ->get_slot_value($_[0], $attr_name); 
     };   
 }
 
 sub generate_writer_method {
     my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    my $attr_name = $self->name;
+    my $meta_class = $self->associated_class;    
+    my $attr_name  = $self->name;
     return sub { 
-        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]);
+        $meta_class->initialize(Scalar::Util::blessed($_[0]))
+                   ->get_meta_instance
+                   ->set_slot_value($_[0], $attr_name, $_[1]);
     };
 }
 
 sub generate_predicate_method {
     my $self = shift;
-    my $meta_instance = $self->associated_class->get_meta_instance;
-    my $attr_name = $self->name;
+    my $meta_class = $self->associated_class;    
+    my $attr_name  = $self->name;
     return sub { 
-        defined $meta_instance->get_slot_value($_[0], $attr_name) ? 1 : 0;
+        defined $meta_class->initialize(Scalar::Util::blessed($_[0]))
+                           ->get_meta_instance
+                           ->get_slot_value($_[0], $attr_name) ? 1 : 0;
     };
 }
 

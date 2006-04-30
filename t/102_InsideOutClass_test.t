@@ -18,7 +18,6 @@ BEGIN {
     use warnings;    
     
     use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',
         ':instance_metaclass'  => 'InsideOutClass::Instance'
     );
     
@@ -54,8 +53,7 @@ BEGIN {
     
     use strict;
     use warnings;
-    use metaclass 'Class::MOP::Class' => (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',        
+    use metaclass 'Class::MOP::Class' => (     
         ':instance_metaclass' => 'InsideOutClass::Instance'
     );
     
