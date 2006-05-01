@@ -40,6 +40,12 @@ sub is_slot_initialized {
 	return exists $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
 }
 
+sub inline_slot_access {
+    my ($self, $instance, $slot_name) = @_;
+    $slot_name =~ s/\'//g;
+    ('$' . $self->{meta}->name . '::' . $slot_name . '{Scalar::Util::refaddr(' . $instance . ')}');
+}
+
 1;
 
 __END__
@@ -92,9 +98,7 @@ an exercise to the reader.
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
-=head1 SEE ALSO
-
-L<Tie::RefHash::Weak>
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
