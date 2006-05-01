@@ -17,6 +17,7 @@ BEGIN {
     use strict;
     use warnings;    
     use metaclass (
+        ':attribute_metaclass' => 'ArrayBasedStorage::Attribute',
         ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     
@@ -53,6 +54,7 @@ BEGIN {
     use strict;
     use warnings;
     use metaclass (
+        ':attribute_metaclass' => 'ArrayBasedStorage::Attribute',        
         ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     

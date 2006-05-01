@@ -11,6 +11,11 @@ when we add it in, to make sure we don't break weird stuff.
 
 mugwump was working on this ...
 
+- do not bless methods unless asked
+
+We should turn off automagic method blessing for classes which are 
+not explictly asking for a metaclass.
+
 ---------------------------------------------------------------------
 EXAMPLES TO WRITE
 ---------------------------------------------------------------------
