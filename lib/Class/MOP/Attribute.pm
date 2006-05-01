@@ -71,7 +71,9 @@ sub initialize_instance_slot {
     if (!defined $val && defined $self->{default}) {
         $val = $self->default($instance);
     }
-    $meta_instance->set_slot_value($instance, $self->name, $val);
+    $self->associated_class
+         ->get_meta_instance
+         ->set_slot_value($instance, $self->name, $val);
 }
 
 # NOTE:
@@ -135,7 +137,7 @@ sub generate_accessor_method {
     my $meta_class = $self->associated_class;    
     my $attr_name  = $self->name;
     return sub {
-        my $meta_instance = $meta_class->initialize(Scalar::Util::blessed($_[0]))->get_meta_instance;
+        my $meta_instance = $meta_class->get_meta_instance;
         $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
         $meta_instance->get_slot_value($_[0], $attr_name);
     };
@@ -147,8 +149,7 @@ sub generate_reader_method {
     my $attr_name  = $self->name;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $meta_class->initialize(Scalar::Util::blessed($_[0]))
-                   ->get_meta_instance
+        $meta_class->get_meta_instance
                    ->get_slot_value($_[0], $attr_name); 
     };   
 }
@@ -158,8 +159,7 @@ sub generate_writer_method {
     my $meta_class = $self->associated_class;    
     my $attr_name  = $self->name;
     return sub { 
-        $meta_class->initialize(Scalar::Util::blessed($_[0]))
-                   ->get_meta_instance
+        $meta_class->get_meta_instance
                    ->set_slot_value($_[0], $attr_name, $_[1]);
     };
 }
@@ -169,8 +169,7 @@ sub generate_predicate_method {
     my $meta_class = $self->associated_class;    
     my $attr_name  = $self->name;
     return sub { 
-        defined $meta_class->initialize(Scalar::Util::blessed($_[0]))
-                           ->get_meta_instance
+        defined $meta_class->get_meta_instance
                            ->get_slot_value($_[0], $attr_name) ? 1 : 0;
     };
 }
