@@ -413,7 +413,7 @@ sub remove_method {
 sub get_method_list {
     my $self = shift;
     no strict 'refs';
-    grep { $self->has_method($_) } %{$self->name . '::'};
+    grep { $self->has_method($_) } keys %{$self->name . '::'};
 }
 
 sub compute_all_applicable_methods {
