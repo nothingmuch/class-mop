@@ -53,7 +53,12 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('%:attributes' => (
-        reader   => 'get_attribute_map',
+        reader   => {
+            # NOTE: we need to do this in order 
+            # for the instance meta-object to 
+            # not fall into meta-circular death            
+            'get_attribute_map' => sub { (shift)->{'%:attributes'} }
+        },
         init_arg => ':attributes',
         default  => sub { {} }
     ))

@@ -106,8 +106,8 @@ ok($meta->get_attribute('$:package')->has_init_arg, '... Class::MOP::Class $:pac
 is($meta->get_attribute('$:package')->init_arg, ':package', '... Class::MOP::Class $:package\'s a init_arg is :package');
 
 ok($meta->get_attribute('%:attributes')->has_reader, '... Class::MOP::Class %:attributes has a reader');
-is($meta->get_attribute('%:attributes')->reader, 
-   'get_attribute_map', 
+is(ref($meta->get_attribute('%:attributes')->reader), 
+   'HASH', 
    '... Class::MOP::Class %:attributes\'s a reader is &get_attribute_map');
    
 ok($meta->get_attribute('%:attributes')->has_init_arg, '... Class::MOP::Class %:attributes has a init_arg');

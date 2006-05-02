@@ -28,7 +28,7 @@ sub new {
         # assumption,.. but you can 
         # never tell <:)
         meta  => $meta,
-        slots => \@slots,
+        slots => { map { $_ => undef } @slots },
     } => $class; 
 }
 
@@ -42,11 +42,21 @@ sub bless_instance_structure {
     bless $instance_structure, $self->{meta}->name;
 }
 
+sub clone_instance {
+    my ($self, $instance) = @_;
+    $self->bless_instance_structure({ %$instance });
+}
+
 # operations on meta instance
 
 sub get_all_slots {
     my $self = shift;
-    return @{$self->{slots}};
+    return keys %{$self->{slots}};
+}
+
+sub is_valid_slot {
+    my ($self, $slot_name) = @_;
+    exists $self->{slots}->{$slot_name} ? 1 : 0;
 }
 
 # operations on created instances
@@ -193,6 +203,8 @@ then calls C<bless_instance_structure> to bless it into the class.
 
 This does just exactly what it says it does.
 
+=item B<clone_instance ($instance_structure)>
+
 =back
 
 =head2 Instrospection
@@ -206,6 +218,8 @@ we will add then when we need them basically.
 
 This will return the current list of slots based on what was 
 given to this object in C<new>.
+
+=item B<is_valid_slot ($slot_name)>
 
 =back
 
@@ -235,6 +249,10 @@ require that the C<$instance_structure> is passed into them.
 =back
 
 =head2 Inlineable Instance Operations
+
+This part of the API is currently un-used. It is there for use 
+in future experiments in class finailization mostly. Best to 
+ignore this for now.
 
 =over 4
 

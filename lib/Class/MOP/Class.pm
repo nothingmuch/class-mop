@@ -19,7 +19,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 
 # Creation
 
-#{
+{
     # Metaclasses are singletons, so we cache them here.
     # there is no need to worry about destruction though
     # because they should die only when the program dies.
@@ -98,9 +98,16 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
                 || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
                            " is not compatible with the " . 
                            $class_name . "->meta => (" . (blessed($meta)) . ")";
+            # NOTE:
+            # we also need to check that instance metaclasses
+            # are compatabile in the same the class.
+            ($self->instance_metaclass->isa($meta->instance_metaclass))
+                || confess $self->name . "->meta => (" . ($self->instance_metaclass) . ")" . 
+                           " is not compatible with the " . 
+                           $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";                           
         }        
     }
-#}
+}
 
 sub create {
     my ($class, $package_name, $package_version, %options) = @_;
@@ -205,14 +212,19 @@ sub clone_object {
     # Class::MOP::Class singletons here, they 
     # should not be cloned.
     return $instance if $instance->isa('Class::MOP::Class');   
-    bless $class->clone_instance($instance, @_) => blessed($instance);
+    $class->clone_instance($instance, @_);
 }
 
 sub clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
         || confess "You can only clone instances, \$self is not a blessed instance";
-    my $clone = { %$instance, %params }; 
+    my $meta_instance = $class->get_meta_instance();
+    my $clone = $meta_instance->clone_instance($instance);        
+    foreach my $key (%params) {
+        next unless $meta_instance->is_valid_slot($key);
+        $meta_instance->set_slot_value($clone, $key, $params{$key});
+    }
     return $clone;    
 }
 
@@ -250,11 +262,7 @@ sub class_precedence_list {
     (
         $self->name, 
         map { 
-            # OPTIMIZATION NOTE:
-            # we grab the metaclass from the %METAS 
-            # hash here to save the initialize() call
-            # if we can, but it is not always possible            
-            ($METAS{$_} || $self->initialize($_))->class_precedence_list()
+            $self->initialize($_)->class_precedence_list()
         } $self->superclasses()
     );   
 }
@@ -509,12 +517,8 @@ sub get_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    # OPTIMIZATION NOTE:
-    # we used to say `if $self->has_attribute($attribute_name)` 
-    # here, but since get_attribute is called so often, we 
-    # eliminate the function call here
-    return $self->{'%:attributes'}->{$attribute_name} 
-        if exists $self->{'%:attributes'}->{$attribute_name};   
+    return $self->get_attribute_map->{$attribute_name} 
+        if $self->has_attribute($attribute_name);   
     return; 
 } 
 
@@ -532,12 +536,7 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    # OPTIMIZATION NOTE:
-    # We don't use get_attribute_map here because 
-    # we ask for the attribute list quite often 
-    # in compute_all_applicable_attributes, so 
-    # eliminating the function call helps 
-    keys %{$self->{'%:attributes'}};
+    keys %{$self->get_attribute_map};
 } 
 
 sub compute_all_applicable_attributes {
@@ -552,10 +551,7 @@ sub compute_all_applicable_attributes {
         next if $seen_class{$class};
         $seen_class{$class}++;
         # fetch the meta-class ...
-        # OPTIMIZATION NOTE:
-        # we grab the metaclass from the %METAS 
-        # hash here to save the initialize() call
-        my $meta = $METAS{$class};
+        my $meta = $self->initialize($class);
         foreach my $attr_name ($meta->get_attribute_list()) { 
             next if exists $seen_attr{$attr_name};
             $seen_attr{$attr_name}++;
