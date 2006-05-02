@@ -71,9 +71,7 @@ sub initialize_instance_slot {
     if (!defined $val && defined $self->{default}) {
         $val = $self->default($instance);
     }
-    $self->associated_class
-         ->get_meta_instance
-         ->set_slot_value($instance, $self->name, $val);
+    $meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
 # NOTE:
@@ -133,82 +131,44 @@ sub detach_from_class {
 ## Method generation helpers
 
 sub generate_accessor_method {
-    my $self = shift;
-    #my $meta_class = $self->associated_class;  
-    my $meta_instance = $self->associated_class->get_meta_instance;  
+    my $self = shift; 
     my $attr_name  = $self->name;
-    #return sub {
-    #    my $meta_instance = $meta_class->get_meta_instance;
-    #    $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
-    #    $meta_instance->get_slot_value($_[0], $attr_name);
-    #};
-    
-    my $code = "sub {\n"
-    . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]') 
-    . " if scalar(\@_) == 2;\n"
-    . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'", '$_[1]') 
-    . "\n}";
-    my $sub = eval $code;
-    confess "Could not eval code:\n$code\nbecause: $@" if $@;
-    return $sub;
+    return sub {
+        my $meta_instance = Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))->get_meta_instance;
+        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
+        $meta_instance->get_slot_value($_[0], $attr_name);
+    };
 }
 
 sub generate_reader_method {
     my $self = shift;
-    #my $meta_class = $self->associated_class;    
-    my $meta_instance = $self->associated_class->get_meta_instance;
     my $attr_name  = $self->name;
-    #return sub { 
-    #    confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-    #    $meta_class->get_meta_instance
-    #               ->get_slot_value($_[0], $attr_name); 
-    #}; 
-    
-    my $code = "sub {\n"
-    . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;' . "\n"
-    . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'", '$_[1]') 
-    . "\n}";
-    my $sub = eval $code;
-    confess "Could not eval code:\n$code\nbecause: $@" if $@;
-    return $sub;      
+    return sub { 
+        confess "Cannot assign a value to a read-only accessor" if @_ > 1;
+        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
+                         ->get_meta_instance
+                         ->get_slot_value($_[0], $attr_name); 
+    };   
 }
 
 sub generate_writer_method {
     my $self = shift;
-    #my $meta_class = $self->associated_class;    
-    my $meta_instance = $self->associated_class->get_meta_instance;
     my $attr_name  = $self->name;
-    #return sub { 
-    #    $meta_class->get_meta_instance
-    #               ->set_slot_value($_[0], $attr_name, $_[1]);
-    #};
-    
-    my $code = "sub {\n"
-    . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]') 
-    . "\n}";
-    my $sub = eval $code;
-    confess "Could not eval code:\n$code\nbecause: $@" if $@;
-    return $sub;    
+    return sub { 
+        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
+                         ->get_meta_instance
+                         ->set_slot_value($_[0], $attr_name, $_[1]);
+    };
 }
 
 sub generate_predicate_method {
     my $self = shift;
-    #my $meta_class = $self->associated_class;   
-    my $meta_instance = $self->associated_class->get_meta_instance; 
     my $attr_name  = $self->name;
-    #return sub { 
-    #    defined $meta_class->get_meta_instance
-    #                       ->get_slot_value($_[0], $attr_name) ? 1 : 0;
-    #};
-    
-    my $code = "sub {\n"
-    . 'defined '
-    . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'", '$_[1]') 
-    . ' ? 1 : 0;'
-    . "\n}";
-    my $sub = eval $code;
-    confess "Could not eval code:\n$code\nbecause: $@" if $@;
-    return $sub;    
+    return sub { 
+        defined Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
+                                 ->get_meta_instance
+                                 ->get_slot_value($_[0], $attr_name) ? 1 : 0;
+    };
 }
 
 sub process_accessors {
