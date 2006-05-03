@@ -22,8 +22,8 @@ sub import {
         ($metaclass->isa('Class::MOP::Class'))
             || confess 'The metaclass must be derived from Class::MOP::Class';        
     }
-    my %options   = @_;
-    my $package   = caller();
+    my %options = @_;
+    my $package = caller();
     
     # create a meta object so we can install &meta
     my $meta = $metaclass->initialize($package => %options);

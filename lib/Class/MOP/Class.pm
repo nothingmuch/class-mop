@@ -87,7 +87,8 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         my $self = shift;
 
         # this is always okay ...
-        return if blessed($self) eq 'Class::MOP::Class';
+        return if blessed($self)            eq 'Class::MOP::Class'   && 
+                  $self->instance_metaclass eq 'Class::MOP::Instance';
 
         my @class_list = $self->class_precedence_list;
         shift @class_list; # shift off $self->name
@@ -246,6 +247,13 @@ sub superclasses {
     if (@_) {
         my @supers = @_;
         @{$self->name . '::ISA'} = @supers;
+        # NOTE:
+        # we need to check the metaclass 
+        # compatability here so that we can 
+        # be sure that the superclass is 
+        # not potentially creating an issues 
+        # we don't know about
+        $self->check_metaclass_compatability();
     }
     @{$self->name . '::ISA'};
 }

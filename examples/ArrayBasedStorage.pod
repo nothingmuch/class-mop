@@ -48,11 +48,6 @@ sub set_slot_value {
     $instance->[ $self->{slot_index_map}->{$slot_name} ] = $value;
 }
 
-sub initialize_slot {
-    my ($self, $instance, $slot_name) = @_;
-    $instance->[ $self->{slot_index_map}->{$slot_name} ] = undef;
-}
-
 sub is_slot_initialized {
     # NOTE:
     # maybe use CLOS's *special-unbound-value*

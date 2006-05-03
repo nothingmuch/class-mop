@@ -73,7 +73,7 @@ sub set_slot_value {
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
-    $instance->{$slot_name} = undef;
+    $self->set_slot_value($instance, $slot_name, undef);
 }
 
 sub initialize_all_slots {
