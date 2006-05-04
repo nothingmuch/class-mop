@@ -40,6 +40,15 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         $class->construct_class_instance(':package' => $package_name, @_);
     }
     
+    sub reinitialize {
+        my $class        = shift;
+        my $package_name = shift;
+        (defined $package_name && $package_name && !blessed($package_name))
+            || confess "You must pass a package name and it cannot be blessed";    
+        $METAS{$package_name} = undef;
+        $class->construct_class_instance(':package' => $package_name, @_);
+    }    
+    
     # NOTE: (meta-circularity) 
     # this is a special form of &construct_instance 
     # (see below), which is used to construct class
