@@ -107,7 +107,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
                            " is not compatible with the " . 
                            $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";                           
         }        
-    }
+    } 
 }
 
 sub create {

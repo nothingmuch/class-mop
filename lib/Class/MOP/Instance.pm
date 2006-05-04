@@ -4,7 +4,7 @@ package Class::MOP::Instance;
 use strict;
 use warnings;
 
-use Scalar::Util 'weaken';
+use Scalar::Util 'weaken', 'blessed';
 
 our $VERSION = '0.01';
 
