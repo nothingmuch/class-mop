@@ -774,10 +774,16 @@ This will create an anonymous class, it works much like C<create> but
 it does not need a C<$package_name>. Instead it will create a suitably 
 unique package name for you to stash things into.
 
-=item B<initialize ($package_name)>
+=item B<initialize ($package_name, %options)>
 
 This initializes and returns returns a B<Class::MOP::Class> object 
 for a given a C<$package_name>.
+
+=item B<reinitialize ($package_name, %options)>
+
+This removes the old metaclass, and creates a new one in it's place.
+Do B<not> use this unless you really know what you are doing, it could 
+very easily make a very large mess of your program. 
 
 =item B<construct_class_instance (%options)>
 
