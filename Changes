@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.30
+0.30 Sat. May 6, 2006
     * Class::MOP::Instance
       - added new instance protocol
         - added tests for this

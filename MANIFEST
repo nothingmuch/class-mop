@@ -5,7 +5,6 @@ META.yml
 MANIFEST
 MANIFEST.SKIP
 README
-TODO
 examples/ArrayBasedStorage.pod
 examples/AttributesWithHistory.pod
 examples/C3MethodDispatchOrder.pod
