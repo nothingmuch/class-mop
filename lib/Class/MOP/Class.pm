@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
@@ -47,7 +47,26 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
             || confess "You must pass a package name and it cannot be blessed";    
         $METAS{$package_name} = undef;
         $class->construct_class_instance(':package' => $package_name, @_);
-    }    
+    }   
+    
+    # NOTE:
+    # we need a sufficiently annoying prefix
+    # this should suffice for now
+    my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
+    
+    {
+        # NOTE:
+        # this should be sufficient, if you have a 
+        # use case where it is not, write a test and 
+        # I will change it.
+        my $ANON_CLASS_SERIAL = 0;
+
+        sub create_anon_class {
+            my ($class, %options) = @_;   
+            my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
+            return $class->create($package_name, '0.00', %options);
+        }
+    }     
     
     # NOTE: (meta-circularity) 
     # this is a special form of &construct_instance 
@@ -90,6 +109,29 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         # and check the metaclass compatibility
         $meta->check_metaclass_compatability();
         $METAS{$package_name} = $meta;
+        # NOTE:
+        # we need to weaken any anon classes
+        # so that they can call DESTROY properly
+        weaken($METAS{$package_name})
+            if $package_name =~ /^$ANON_CLASS_PREFIX/;
+        $meta;        
+    } 
+    
+    # NOTE:
+    # this will only get called for 
+    # anon-classes, all other calls 
+    # are assumed to occur during 
+    # global destruction and so don't
+    # really need to be handled explicitly
+    sub DESTROY {
+        my $self = shift;
+        return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        no strict 'refs';
+        foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
+            delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
+        }
+        delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};        
     }
     
     sub check_metaclass_compatability {
@@ -152,12 +194,6 @@ sub create {
         }
     }  
     return $meta;
-}
-
-    
-sub create_anon_class {
-    my ($class, %options) = @_;   
-    return Class::MOP::Class::__ANON__->create(%options);
 }
 
 ## Attribute readers
@@ -651,76 +687,6 @@ sub remove_package_variable {
     my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     no strict 'refs';
     delete ${$self->name . '::'}{$name};
-}
-
-package Class::MOP::Class::__ANON__;
-
-use strict;
-use warnings;
-
-use Scalar::Util 'weaken';
-
-our $VERSION = '0.01';
-
-use base 'Class::MOP::Class';
-    
-# we hold a weakened cache here
-my %ANON_METAS;    
-
-# NOTE:
-# this should be sufficient, if you have a 
-# use case where it is not, write a test and 
-# I will change it.
-my $ANON_CLASS_SERIAL = 0;
-
-# prefix for all anon-class names
-my $ANON_CLASS_PREFIX = __PACKAGE__ . '::SERIAL::';
-
-sub initialize {
-    my $class = shift;
-    if ($_[0] =~ /^$ANON_CLASS_PREFIX/) {
-        $class->SUPER::initialize(@_);            
-    }
-    else {
-        # NOTE:
-        # we need to do this or weird
-        # things happen 
-        Class::MOP::Class->initialize(@_);
-    }
-}
-
-sub create {
-    my ($class, %options) = @_;   
-    my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
-    return $class->SUPER::create($package_name, '0.00', %options);
-}
-
-sub construct_class_instance {
-    my ($class, %options) = @_;
-    my $package_name = $options{':package'};
-    # NOTE:
-    # we cache the anon metaclasses as well
-    # but we weaken them (see below)
-    return $ANON_METAS{$package_name} 
-        if exists  $ANON_METAS{$package_name} && 
-           defined $ANON_METAS{$package_name};            
-    my $meta = $class->meta->construct_instance(%options);
-    $meta->check_metaclass_compatability();
-    # weaken the metaclass cache so that 
-    # DESTROY gets called as expected
-    weaken($ANON_METAS{$package_name} = $meta);
-    return $meta;
-}
-
-sub DESTROY {
-    my $self = shift;
-    my ($serial_id) = ($self->name =~ /$ANON_CLASS_PREFIX(\d+)/);
-    #warn "destroying $prefix => $serial_id\n$self => ". $self->name;    
-    no strict 'refs';
-    foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
-        delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
-    }
-    delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};
 }
 
 1;
