@@ -211,6 +211,12 @@ set of extensions to the Perl 5 object system. Every attempt has been
 made for these tools to keep to the spirit of the Perl 5 object 
 system that we all know and love.
 
+This documentation is admittedly sparse on details, as time permits 
+I will try to improve them. For now, I suggest looking at the items 
+listed in the L<SEE ALSO> section for more information. In particular 
+the book "The Art of the Meta Object Protocol" was very influential 
+in the development of this system.
+
 =head2 What is a Meta Object Protocol?
 
 A meta object protocol is an API to an object system. 
@@ -439,13 +445,14 @@ L<Devel::Cover> report on this module's test suite.
  ---------------------------- ------ ------ ------ ------ ------ ------ ------
  File                           stmt   bran   cond    sub    pod   time  total
  ---------------------------- ------ ------ ------ ------ ------ ------ ------
- Class/MOP.pm                  100.0  100.0  100.0  100.0    n/a    9.6  100.0
- Class/MOP/Attribute.pm        100.0  100.0   91.7   73.8  100.0   28.4   92.1
- Class/MOP/Class.pm            100.0   93.5   82.3   98.2  100.0   56.6   95.7
- Class/MOP/Method.pm           100.0   64.3   52.9   80.0  100.0    3.5   85.3
- metaclass.pm                  100.0  100.0   80.0  100.0    n/a    1.9   97.4
+ Class/MOP.pm                  100.0  100.0  100.0  100.0    n/a   24.3  100.0
+ Class/MOP/Attribute.pm        100.0  100.0   91.7   63.6  100.0    9.2   88.8
+ Class/MOP/Class.pm             98.1   91.8   77.3   96.8  100.0   58.3   93.3
+ Class/MOP/Instance.pm          87.5  100.0    0.0   87.5  100.0    5.9   88.0
+ Class/MOP/Method.pm           100.0   64.3   52.9   80.0  100.0    1.4   85.3
+ metaclass.pm                  100.0  100.0   83.3  100.0    n/a    0.9   97.7
  ---------------------------- ------ ------ ------ ------ ------ ------ ------
- Total                         100.0   90.8   79.7   86.2  100.0  100.0   93.6
+ Total                          97.8   90.1   74.8   82.9  100.0  100.0   91.5
  ---------------------------- ------ ------ ------ ------ ------ ------ ------
 
 =head1 ACKNOWLEDGEMENTS
