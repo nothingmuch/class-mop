@@ -127,7 +127,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         my $self = shift;
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
         my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
-        no strict 'refs';
+        no strict 'refs';     
         foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
             delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
         }
