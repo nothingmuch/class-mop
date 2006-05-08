@@ -664,50 +664,63 @@ our $VERSION = '0.01';
 
 use base 'Class::MOP::Class';
     
-{
-    # NOTE:
-    # we hold a weakened cache here
-    my %ANON_METAS;    
-    
-    # NOTE:
-    # this should be sufficient, if you have a 
-    # use case where it is not, write a test and 
-    # I will change it.
-    my $ANON_CLASS_SERIAL = 0;
+# we hold a weakened cache here
+my %ANON_METAS;    
 
-    sub create {
-        my ($class, %options) = @_;   
-        my $package_name = __PACKAGE__ . '::SERIAL::' . ++$ANON_CLASS_SERIAL;
-        return $class->SUPER::create($package_name, '0.00', %options);
+# NOTE:
+# this should be sufficient, if you have a 
+# use case where it is not, write a test and 
+# I will change it.
+my $ANON_CLASS_SERIAL = 0;
+
+# prefix for all anon-class names
+my $ANON_CLASS_PREFIX = __PACKAGE__ . '::SERIAL::';
+
+sub initialize {
+    my $class = shift;
+    if ($_[0] =~ /^$ANON_CLASS_PREFIX/) {
+        $class->SUPER::initialize(@_);            
     }
-
-    sub construct_class_instance {
-        my ($class, %options) = @_;
-        my $package_name = $options{':package'};
+    else {
         # NOTE:
-        # we cache the anon metaclasses as well
-        # but we weaken them (see below)
-        return $ANON_METAS{$package_name} 
-            if exists  $ANON_METAS{$package_name} && 
-               defined $ANON_METAS{$package_name};            
-        my $meta = $class->meta->construct_instance(%options);
-        $meta->check_metaclass_compatability();
-        # weaken the metaclass cache so that 
-        # DESTROY gets called as expected
-        weaken($ANON_METAS{$package_name} = $meta);
-        return $meta;
+        # we need to do this or weird
+        # things happen 
+        Class::MOP::Class->initialize(@_);
     }
+}
+
+sub create {
+    my ($class, %options) = @_;   
+    my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
+    return $class->SUPER::create($package_name, '0.00', %options);
+}
+
+sub construct_class_instance {
+    my ($class, %options) = @_;
+    my $package_name = $options{':package'};
+    # NOTE:
+    # we cache the anon metaclasses as well
+    # but we weaken them (see below)
+    return $ANON_METAS{$package_name} 
+        if exists  $ANON_METAS{$package_name} && 
+           defined $ANON_METAS{$package_name};            
+    my $meta = $class->meta->construct_instance(%options);
+    $meta->check_metaclass_compatability();
+    # weaken the metaclass cache so that 
+    # DESTROY gets called as expected
+    weaken($ANON_METAS{$package_name} = $meta);
+    return $meta;
 }
 
 sub DESTROY {
     my $self = shift;
-    my $prefix = __PACKAGE__ . '::SERIAL::';
-    my ($serial_id) = ($self->name =~ /$prefix(\d+)/);
+    my ($serial_id) = ($self->name =~ /$ANON_CLASS_PREFIX(\d+)/);
+    #warn "destroying $prefix => $serial_id\n$self => ". $self->name;    
     no strict 'refs';
-    foreach my $key (keys %{$prefix . $serial_id}) {
-        delete ${$prefix . $serial_id}{$key};
+    foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
+        delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
     }
-    delete ${'main::' . $prefix}{$serial_id . '::'};
+    delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};
 }
 
 1;

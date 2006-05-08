@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.30 Sat. May 6, 2006
+0.30 Mon. May 8, 2006
     * Class::MOP::Class
       - anon-classes are now properly garbage collected
         - added tests for this 
