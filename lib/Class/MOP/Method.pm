@@ -141,6 +141,12 @@ sub wrap {
 	$method;  
 }
 
+sub get_original_method {
+	my $code = shift; 
+    $MODIFIERS{$code}->{orig} 
+        if exists $MODIFIERS{$code};
+}
+
 sub add_before_modifier {
 	my $code     = shift;
 	my $modifier = shift;
@@ -268,6 +274,8 @@ This simply blesses the C<&code> reference passed to it.
 =item B<wrap (&code)>
 
 This simply blesses the C<&code> reference passed to it.
+
+=item B<get_original_method>
 
 =back
 

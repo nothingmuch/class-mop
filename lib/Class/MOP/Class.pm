@@ -337,23 +337,22 @@ sub add_method {
         my $method = $self->get_method($method_name);
         # if we dont have local ...
         unless ($method) {
-            # make sure this method even exists ...
-            ($self->find_next_method_by_name($method_name))
+            # try to find the next method
+            $method = $self->find_next_method_by_name($method_name);
+            # die if it does not exist
+            (defined $method)
                 || confess "The method '$method_name' is not found in the inherience hierarchy for this class";
-            # if so, then create a local which just 
-            # calls the next applicable method ...              
-            $self->add_method($method_name => sub {
-                $self->find_next_method_by_name($method_name)->(@_);
-            });
-            $method = $self->get_method($method_name);
-        }
-        
-        # now make sure we wrap it properly 
-        # (if it isnt already)
-        unless ($method->isa('Class::MOP::Method::Wrapped')) {
+            # and now make sure to wrap it 
+            # even if it is already wrapped
+            # because we need a new sub ref
             $method = Class::MOP::Method::Wrapped->wrap($method);
-            $self->add_method($method_name => $method); 
-        }       
+        }
+        else {
+            # now make sure we wrap it properly 
+            $method = Class::MOP::Method::Wrapped->wrap($method)
+                unless $method->isa('Class::MOP::Method::Wrapped');  
+        }    
+        $self->add_method($method_name => $method);        
         return $method;
     };
 

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 20;
 use Test::Exception;
 
 BEGIN {
@@ -63,6 +63,8 @@ BEGIN {
 	});
 
 	::ok(CheckingAccount->meta->has_method('withdraw'), '... checking account now has a withdraw method');
+	::isa_ok(CheckingAccount->meta->get_method('withdraw'), 'Class::MOP::Method::Wrapped');
+	::isa_ok(BankAccount->meta->get_method('withdraw'), 'Class::MOP::Method');		
 }
 
 
@@ -74,6 +76,10 @@ lives_ok {
 	$savings_account->withdraw(50);
 } '... withdrew from savings successfully';
 is($savings_account->balance, 200, '... got the right savings balance after withdrawl');
+dies_ok {
+	$savings_account->withdraw(250);
+} '... could not withdraw from savings successfully';
+
 
 $savings_account->deposit(150);
 is($savings_account->balance, 350, '... got the right savings balance after deposit');

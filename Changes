@@ -4,6 +4,7 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - anon-classes are now properly garbage collected
         - added tests for this 
+      - improved method modifier wrapping 
 
     * Class::MOP::Instance
       - added new instance protocol
