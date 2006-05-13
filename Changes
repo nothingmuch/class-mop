@@ -1,6 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
-0.30 Mon. May 8, 2006
+0.29_01 Fri. May 12, 2006
+    ++ DEVELOPER RELEASE ++
+      - This release works in combination with 
+        Moose 0.09_01, it is a developer release
+        because it introduces a new instance 
+        sub-protocol and has not yet been 
+        optimized.  
+
     * Class::MOP::Class
       - anon-classes are now properly garbage collected
         - added tests for this 
