@@ -13,7 +13,7 @@ my $build = Module::Build->new(
     },
     optional => {},
     build_requires => {
-        'Test::More'      => '0.47',
+        'Test::More'      => '0.62',
         'Test::Exception' => '0.21',
         'File::Spec'      => '0',
     },
