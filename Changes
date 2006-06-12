@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.29_02
+    * Class::MOP::Class
+      - small change in &create so that it behaves 
+        properly when inherited
+
 0.29_01 Fri. May 12, 2006
     ++ DEVELOPER RELEASE ++
       - This release works in combination with 

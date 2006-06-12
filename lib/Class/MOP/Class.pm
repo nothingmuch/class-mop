@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 use Class::MOP::Instance;
 
@@ -173,7 +173,7 @@ sub create {
     my $meta = $class->initialize($package_name);
     
     $meta->add_method('meta' => sub { 
-        Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
+        $class->initialize(blessed($_[0]) || $_[0]);
     });
     
     $meta->superclasses(@{$options{superclasses}})
