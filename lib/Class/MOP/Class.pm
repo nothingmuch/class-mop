@@ -259,7 +259,7 @@ sub clone_instance {
         || confess "You can only clone instances, \$self is not a blessed instance";
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);        
-    foreach my $key (%params) {
+    foreach my $key (keys %params) {
         next unless $meta_instance->is_valid_slot($key);
         $meta_instance->set_slot_value($clone, $key, $params{$key});
     }
