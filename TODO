@@ -2,6 +2,10 @@
 TODO
 ---------------------------------------------------------------------
 
+- check out what chromatic said:
+
+I think you can check the class key <_ISA to see if it has expired. 
+
 - switch to Context::Handle for method modifiers
 
 Should probably write some more tests to verify this works correctly
