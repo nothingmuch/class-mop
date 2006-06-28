@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-package Bench::Point;
+package Plain::Point;
 
 use strict;
 use warnings;
