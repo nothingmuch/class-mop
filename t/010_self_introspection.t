@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 146;
+use Test::More tests => 152;
 use Test::Exception;
 
 BEGIN {
@@ -47,6 +47,8 @@ my @methods = qw(
     get_attribute_list get_attribute_map compute_all_applicable_attributes find_attribute_by_name
     
     add_package_variable get_package_variable has_package_variable remove_package_variable
+    
+    is_mutable is_immutable make_immutable
     
     DESTROY
     );

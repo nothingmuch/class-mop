@@ -96,7 +96,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
                 '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
-                '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',    
+                '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',
             } => $class;
         }
         else {
@@ -688,6 +688,16 @@ sub remove_package_variable {
     delete ${$self->name . '::'}{$name};
 }
 
+## Class closing
+
+sub is_mutable   { 1 }
+sub is_immutable { 0 }
+
+sub make_immutable {
+    my ($class) = @_;
+    return Class::MOP::Class::Immutable->make_metaclass_immutable($class);
+}
+
 1;
 
 __END__
@@ -1249,6 +1259,18 @@ C<$variable_name>, and false (C<0>) otherwise.
 =item B<remove_package_variable ($variable_name)>
 
 This will attempt to remove the package variable at C<$variable_name>.
+
+=back
+
+=head2 Class closing
+
+=over 4
+
+=item B<is_mutable>
+
+=item B<is_immutable>
+
+=item B<make_immutable>
 
 =back
 

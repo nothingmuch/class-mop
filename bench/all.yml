@@ -2,6 +2,7 @@
 - name: Point classes
   classes:
   - 'MOP::Point'
+  - 'MOP::Immutable::Point'  
   - 'Plain::Point'
   benchmarks:
     - class: 'Bench::Construct'
