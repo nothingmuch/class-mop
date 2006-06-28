@@ -27,13 +27,18 @@ sub run {
     my $self = shift;
 
     foreach my $bench ( $self->benchmarks ) {
-        my ( $bench_class, @bench_args ) = @$bench;
+        my $bench_class = $bench->{class};
+        my @bench_args  = ( (ref($bench->{args}) eq "ARRAY") ? @{ $bench->{args} } : %{ $bench->{args} } );
+
         eval "require $bench_class";
         die $@ if $@;
+
         my %res;
+
         foreach my $class ( $self->classes ) {
             eval "require $class";
             die $@ if $@;
+
             my $b = $bench_class->new( @bench_args, class => $class );
             $res{$class} = countit( $self->min_time, $b->code );
         }

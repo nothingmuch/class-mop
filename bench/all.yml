@@ -1,0 +1,11 @@
+---
+- name: Construction of Point classes
+  classes:
+  - 'MOP::Point'
+  - 'Plain::Point'
+  benchmarks:
+    - class: 'Bench::Construct'
+      args:
+        x: 7
+        y: 137
+
