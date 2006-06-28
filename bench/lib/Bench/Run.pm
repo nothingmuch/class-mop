@@ -27,8 +27,9 @@ sub run {
     my $self = shift;
 
     foreach my $bench ( $self->benchmarks ) {
-        my $bench_class = $bench->{class};
-        my @bench_args  = ( (ref($bench->{args}) eq "ARRAY") ? @{ $bench->{args} } : %{ $bench->{args} } );
+        my $bench_class = delete $bench->{class};
+        my $name        = delete $bench->{name} || $bench_class;
+        my @bench_args  = %$bench;
 
         eval "require $bench_class";
         die $@ if $@;
@@ -43,7 +44,7 @@ sub run {
             $res{$class} = countit( $self->min_time, $b->code );
         }
 
-        print "$bench_class:\n";
+        print "- $name:\n";
         cmpthese( \%res );
         print "\n";
     }

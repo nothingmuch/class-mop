@@ -1,11 +1,25 @@
 ---
-- name: Construction of Point classes
+- name: Point classes
   classes:
   - 'MOP::Point'
   - 'Plain::Point'
   benchmarks:
     - class: 'Bench::Construct'
+      name: object construction
       args:
         x: 7
         y: 137
+    - class: 'Bench::Accessor'
+      name: accessor get
+      construct:
+        x: 4
+        y: 6
+      accessor: x
+    - class: 'Bench::Accessor'
+      name: accessor set
+      construct:
+        x: 4
+        y: 6
+      accessor: x
+      accessor_args: [ 5 ]
 

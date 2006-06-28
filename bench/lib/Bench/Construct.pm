@@ -2,16 +2,24 @@
 
 package Bench::Construct;
 use Moose;
+use Moose::Util::TypeConstraints;
 
 has class => (
     isa => "Str",
     is  => "ro",
 );
 
+eval {
+coerce ArrayRef
+    => from HashRef
+        => via { [ %$_ ] };
+};
+
 has args => (
     isa => "ArrayRef",
     is  => "ro",
     auto_deref => 1,
+    coerce     => 1,
 );
 
 sub code {
