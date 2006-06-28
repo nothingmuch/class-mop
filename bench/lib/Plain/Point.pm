@@ -36,7 +36,7 @@ sub y {
 
 sub clear {
     my $self = shift;
-    @{ $self-> }{qw/x y/} = (0, 0);
+    @{$self}{qw/x y/} = (0, 0);
 }
 
 __PACKAGE__;
