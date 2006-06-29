@@ -19,6 +19,15 @@ use Class::MOP::Instance;
 
 sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 
+# Class globals ...
+
+# NOTE:
+# we need a sufficiently annoying prefix
+# this should suffice for now, this is 
+# used in a couple of places below, so 
+# need to put it up here for now.
+my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
+
 # Creation
 
 {
@@ -49,26 +58,7 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
             || confess "You must pass a package name and it cannot be blessed";    
         $METAS{$package_name} = undef;
         $class->construct_class_instance(':package' => $package_name, @_);
-    }   
-    
-    # NOTE:
-    # we need a sufficiently annoying prefix
-    # this should suffice for now
-    my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
-    
-    {
-        # NOTE:
-        # this should be sufficient, if you have a 
-        # use case where it is not, write a test and 
-        # I will change it.
-        my $ANON_CLASS_SERIAL = 0;
-
-        sub create_anon_class {
-            my ($class, %options) = @_;   
-            my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
-            return $class->create($package_name, '0.00', %options);
-        }
-    }     
+    }       
     
     # NOTE: (meta-circularity) 
     # this is a special form of &construct_instance 
@@ -119,23 +109,6 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         $meta;        
     } 
     
-    # NOTE:
-    # this will only get called for 
-    # anon-classes, all other calls 
-    # are assumed to occur during 
-    # global destruction and so don't
-    # really need to be handled explicitly
-    sub DESTROY {
-        my $self = shift;
-        return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
-        my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
-        no strict 'refs';     
-        foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
-            delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
-        }
-        delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};        
-    }
-    
     sub check_metaclass_compatability {
         my $self = shift;
 
@@ -162,6 +135,41 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
         }        
     } 
 }
+
+## ANON classes
+
+{
+    # NOTE:
+    # this should be sufficient, if you have a 
+    # use case where it is not, write a test and 
+    # I will change it.
+    my $ANON_CLASS_SERIAL = 0;
+
+    sub create_anon_class {
+        my ($class, %options) = @_;   
+        my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
+        return $class->create($package_name, '0.00', %options);
+    }
+}    
+
+# NOTE:
+# this will only get called for 
+# anon-classes, all other calls 
+# are assumed to occur during 
+# global destruction and so don't
+# really need to be handled explicitly
+sub DESTROY {
+    my $self = shift;
+    return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+    my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+    no strict 'refs';     
+    foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
+        delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
+    }
+    delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};        
+}
+
+# creating classes with MOP ...
 
 sub create {
     my ($class, $package_name, $package_version, %options) = @_;
@@ -204,7 +212,6 @@ sub create {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name                { $_[0]->{'$:package'}             }
 sub get_attribute_map   { $_[0]->{'%:attributes'}          }
 sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
@@ -623,71 +630,6 @@ sub find_attribute_by_name {
             if $meta->has_attribute($attr_name);
     }
     return;
-}
-
-# Class attributes
-
-sub add_package_variable {
-    my ($self, $variable, $initial_value) = @_;
-    (defined $variable && $variable =~ /^[\$\@\%]/)
-        || confess "variable name does not have a sigil";
-    
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    if (defined $initial_value) {
-        no strict 'refs';
-        *{$self->name . '::' . $name} = $initial_value;
-    }
-    else {
-        my $e;
-        {        
-            # NOTE:
-            # We HAVE to localize $@ or all 
-            # hell breaks loose. It is not 
-            # good, believe me, not good.
-            local $@;
-            eval $sigil . $self->name . '::' . $name;
-            $e = $@ if $@;            
-        }
-        confess "Could not create package variable ($variable) because : $e" if $e;
-    }
-}
-
-sub has_package_variable {
-    my ($self, $variable) = @_;
-    (defined $variable && $variable =~ /^[\$\@\%]/)
-        || confess "variable name does not have a sigil";
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    no strict 'refs';
-    defined ${$self->name . '::'}{$name} ? 1 : 0;
-}
-
-sub get_package_variable {
-    my ($self, $variable) = @_;
-    (defined $variable && $variable =~ /^[\$\@\%]/)
-        || confess "variable name does not have a sigil";
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    my ($ref, $e);
-    {
-        # NOTE:
-        # We HAVE to localize $@ or all 
-        # hell breaks loose. It is not 
-        # good, believe me, not good.
-        local $@;        
-        $ref = eval '\\' . $sigil . $self->name . '::' . $name;
-        $e = $@ if $@;
-    }
-    confess "Could not get the package variable ($variable) because : $e" if $e;    
-    # if we didn't die, then we can return it
-    return $ref;
-}
-
-sub remove_package_variable {
-    my ($self, $variable) = @_;
-    (defined $variable && $variable =~ /^[\$\@\%]/)
-        || confess "variable name does not have a sigil";
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    no strict 'refs';
-    delete ${$self->name . '::'}{$name};
 }
 
 ## Class closing

@@ -3,16 +3,18 @@
 use strict;
 use warnings;
 
-use Test::More tests => 33;
+use Test::More tests => 34;
 use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');        
+    use_ok('Class::MOP::Package');            
 }
 
 {
     package Foo;
-    use metaclass;
+    
+    sub meta { Class::MOP::Package->initialize('Foo') }
 }
 
 ok(!defined($Foo::{foo}), '... the %foo slot has not been created yet');

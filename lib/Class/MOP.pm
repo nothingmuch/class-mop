@@ -39,9 +39,9 @@ our $VERSION = '0.29_02';
 # any subclass of Class::MOP::* will be able to 
 # inherit them using &construct_instance
 
-## Class::MOP::Class
+## Class::MOP::Package
 
-Class::MOP::Class->meta->add_attribute(
+Class::MOP::Package->meta->add_attribute(
     Class::MOP::Attribute->new('$:package' => (
         reader   => {
             # NOTE: we need to do this in order 
@@ -52,6 +52,8 @@ Class::MOP::Class->meta->add_attribute(
         init_arg => ':package',
     ))
 );
+
+## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('%:attributes' => (

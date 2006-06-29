@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use Scalar::Util 'blessed';
+use Carp         'confess';
 
 our $VERSION = '0.01';
 
@@ -14,6 +15,118 @@ sub meta {
     require Class::MOP::Class;
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
+
+# creation ...
+
+sub initialize {
+    my ($class, $package) = @_;
+    bless { '$:package' => $package } => $class;
+}
+
+# Attributes
+
+# NOTE:
+# all these attribute readers will be bootstrapped 
+# away in the Class::MOP bootstrap section
+
+sub name { $_[0]->{'$:package'} }
+
+# Class attributes
+
+my %SIGIL_MAP = (
+    '$' => 'SCALAR',
+    '@' => 'ARRAY',
+    '%' => 'HASH',
+    '&' => 'CODE',
+);
+
+sub add_package_variable {
+    my ($self, $variable, $initial_value) = @_;
+    
+    (defined $variable)
+        || confess "You must pass a variable name";    
+    
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    
+    (defined $sigil)
+        || confess "The variable name must include a sigil";    
+    
+    (exists $SIGIL_MAP{$sigil})
+        || confess "I do not recognize that sigil '$sigil'";
+    
+    no strict 'refs';
+    no warnings 'misc';
+    *{$self->name . '::' . $name} = $initial_value;    
+}
+
+sub has_package_variable {
+    my ($self, $variable) = @_;
+    (defined $variable)
+        || confess "You must pass a variable name";
+
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    
+    (defined $sigil)
+        || confess "The variable name must include a sigil";    
+    
+    (exists $SIGIL_MAP{$sigil})
+        || confess "I do not recognize that sigil '$sigil'";
+    
+    no strict 'refs';
+    defined *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}} ? 1 : 0;
+    
+}
+
+sub get_package_variable {
+    my ($self, $variable) = @_;    
+    (defined $variable)
+        || confess "You must pass a variable name";
+    
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    
+    (defined $sigil)
+        || confess "The variable name must include a sigil";    
+    
+    (exists $SIGIL_MAP{$sigil})
+        || confess "I do not recognize that sigil '$sigil'";
+    
+    no strict 'refs';
+    return *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}};
+
+}
+
+sub remove_package_variable {
+    my ($self, $variable) = @_;
+    
+    (defined $variable)
+        || confess "You must pass a variable name";
+        
+    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+    
+    (defined $sigil)
+        || confess "The variable name must include a sigil";    
+    
+    (exists $SIGIL_MAP{$sigil})
+        || confess "I do not recognize that sigil '$sigil'"; 
+    
+     no strict 'refs';
+     if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
+         undef ${$self->name . '::' . $name};    
+     }
+     elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
+         undef @{$self->name . '::' . $name};    
+     }
+     elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
+         undef %{$self->name . '::' . $name};    
+     }
+     elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
+         undef &{$self->name . '::' . $name};    
+     }    
+     else {
+         confess "This should never ever ever happen";
+     }
+}
+
 
 1;
 
@@ -34,6 +147,18 @@ Class::MOP::Package - Package Meta Object
 =over 4
 
 =item B<meta>
+
+=item B<initialize>
+
+=item B<name>
+
+=item B<add_package_variable>
+
+=item B<get_package_variable>
+
+=item B<has_package_variable>
+
+=item B<remove_package_variable>
 
 =back
 

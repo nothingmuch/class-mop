@@ -37,13 +37,16 @@ C3MethodDispatchOrder->meta->add_around_method_modifier('initialize' => sub {
     }) unless $meta->has_method('AUTOLOAD');
     $meta->add_method('can' => sub {
         $_find_method->($_[0]->meta, $_[1]);
-    }) unless $meta->has_method('can');
+    }) unless $meta->has_method('can');   
 	return $meta;
 });
 
 sub superclasses {
     my $self = shift;
-    no strict 'refs';
+    
+    $self->add_package_variable('@SUPERS' => [])    
+        unless $self->has_package_variable('@SUPERS');
+            
     if (@_) {
         my @supers = @_;
         @{$self->get_package_variable('@SUPERS')} = @supers;

@@ -23,9 +23,9 @@ sub initialize_instance_slot {
     if (!defined $val && defined $self->{default}) {
         $val = $self->default($instance);
     }
-    $self->associated_class
-         ->get_meta_instance
-         ->set_slot_value($instance, $self->name, $val);
+    my $_meta_instance = $self->associated_class->get_meta_instance;
+    $_meta_instance->initialize_slot($instance, $self->name);
+    $_meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
 ## Method generation helpers
