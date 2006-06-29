@@ -17,9 +17,11 @@ BEGIN {
 
 my %METAS = (
     'Class::MOP::Attribute' => Class::MOP::Attribute->meta, 
+    'Class::MOP::Package'   => Class::MOP::Package->meta, 
+    'Class::MOP::Module'    => Class::MOP::Module->meta,     
     'Class::MOP::Class'     => Class::MOP::Class->meta, 
     'Class::MOP::Method'    => Class::MOP::Method->meta,  
-    'Class::MOP::Instance'  => Class::MOP::Instance->meta      
+    'Class::MOP::Instance'  => Class::MOP::Instance->meta,      
 );
 
 is_deeply(
@@ -29,10 +31,24 @@ is_deeply(
 
 is_deeply(
     [ sort { $a->name cmp $b->name } Class::MOP::Class->get_all_metaclass_instances ],
-    [ Class::MOP::Attribute->meta, Class::MOP::Class->meta, Class::MOP::Instance->meta, Class::MOP::Method->meta ],
+    [ 
+        Class::MOP::Attribute->meta, 
+        Class::MOP::Class->meta, 
+        Class::MOP::Instance->meta,         
+        Class::MOP::Method->meta,
+        Class::MOP::Module->meta,   
+        Class::MOP::Package->meta,              
+    ],
     '... got all the metaclass instances');
 
 is_deeply(
     [ sort Class::MOP::Class->get_all_metaclass_names ],
-    [ 'Class::MOP::Attribute', 'Class::MOP::Class', 'Class::MOP::Instance', 'Class::MOP::Method' ],
+    [ qw/
+        Class::MOP::Attribute       
+        Class::MOP::Class
+        Class::MOP::Instance
+        Class::MOP::Method
+        Class::MOP::Module  
+        Class::MOP::Package                      
+    / ],
     '... got all the metaclass names');

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 152;
+use Test::More tests => 153;
 use Test::Exception;
 
 BEGIN {
@@ -166,14 +166,19 @@ is(${$meta->get_package_variable('$VERSION')},
 
 is_deeply(
     [ $meta->superclasses ], 
-    [], 
-    '... Class::MOP::Class->superclasses == []');
+    [ qw/Class::MOP::Module/ ], 
+    '... Class::MOP::Class->superclasses == [ Class::MOP::Module ]');
     
 is_deeply(
     [ $meta->class_precedence_list ], 
-    [ 'Class::MOP::Class' ], 
-    '... Class::MOP::Class->class_precedence_list == []');
+    [ qw/
+        Class::MOP::Class
+        Class::MOP::Module
+        Class::MOP::Package                
+    / ], 
+    '... Class::MOP::Class->class_precedence_list == [ Class::MOP::Class Class::MOP::Module Class::MOP::Package ]');
 
 is($meta->attribute_metaclass, 'Class::MOP::Attribute', '... got the right value for attribute_metaclass');
 is($meta->method_metaclass, 'Class::MOP::Method', '... got the right value for method_metaclass');
+is($meta->instance_metaclass, 'Class::MOP::Instance', '... got the right value for instance_metaclass');
 

@@ -11,6 +11,8 @@ use B            'svref_2object';
 
 our $VERSION = '0.15';
 
+use base 'Class::MOP::Module';
+
 use Class::MOP::Instance;
 
 # Self-introspection 

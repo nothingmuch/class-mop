@@ -88,8 +88,53 @@ to this class.
 
 =back
 
+=head2 Methods which will die if you touch them.
+
 =over 4
 
+=item B<add_attribute>
+
+=item B<add_method>
+
+=item B<add_package_variable>
+
+=item B<alias_method>
+
+=item B<reinitialize>
+
+=item B<remove_attribute>
+
+=item B<remove_method>
+
+=item B<remove_package_variable>
+
+=item B<superclasses>
+
+=back
+
+=head2 Cached methods
+
+=over 4
+
+=item B<class_precedence_list>
+
+=item B<compute_all_applicable_attributes>
+
+=item B<get_meta_instance>
+
+=back
+
+=head2 Introspection and Construction
+
+=over 4
+
+=item B<is_immutable>
+
+=item B<is_mutable>
+
+=item B<make_immutable>
+
+=item B<make_metaclass_immutable>
 
 =back
 
