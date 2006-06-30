@@ -17,6 +17,11 @@ sub meta {
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
+sub version {  
+    my $self = shift;
+    ${$self->get_package_variable('$VERSION')};
+}
+
 1;
 
 __END__
@@ -36,6 +41,8 @@ Class::MOP::Module - Module Meta Object
 =over 4
 
 =item B<meta>
+
+=item B<version>
 
 =back
 

@@ -275,16 +275,6 @@ sub clone_instance {
     return $clone;    
 }
 
-# Informational 
-
-# &name should be here too, but it is above
-# because it gets bootstrapped away
-
-sub version {  
-    my $self = shift;
-    ${$self->get_package_variable('$VERSION')};
-}
-
 # Inheritance
 
 sub superclasses {

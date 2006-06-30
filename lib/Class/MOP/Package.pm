@@ -109,22 +109,22 @@ sub remove_package_variable {
     (exists $SIGIL_MAP{$sigil})
         || confess "I do not recognize that sigil '$sigil'"; 
     
-     no strict 'refs';
-     if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
-         undef ${$self->name . '::' . $name};    
-     }
-     elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
-         undef @{$self->name . '::' . $name};    
-     }
-     elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
-         undef %{$self->name . '::' . $name};    
-     }
-     elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
-         undef &{$self->name . '::' . $name};    
-     }    
-     else {
-         confess "This should never ever ever happen";
-     }
+    no strict 'refs';
+    if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
+        undef ${$self->name . '::' . $name};    
+    }
+    elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
+        undef @{$self->name . '::' . $name};    
+    }
+    elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
+        undef %{$self->name . '::' . $name};    
+    }
+    elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
+        undef &{$self->name . '::' . $name};    
+    }    
+    else {
+        confess "This should never ever ever happen";
+    }
 }
 
 

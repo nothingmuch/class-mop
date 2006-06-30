@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 164;
+use Test::More tests => 169;
 use Test::Exception;
 
 BEGIN {
@@ -38,6 +38,9 @@ my @class_mop_package_methods = qw(
 );
 
 my @class_mop_module_methods = qw(
+    meta 
+
+    version
 );
 
 my @class_mop_class_methods = qw(
@@ -51,8 +54,6 @@ my @class_mop_class_methods = qw(
     new_object clone_object
     construct_instance construct_class_instance clone_instance
     check_metaclass_compatability
-    
-    version
     
     attribute_metaclass method_metaclass
     
@@ -70,7 +71,7 @@ my @class_mop_class_methods = qw(
     is_mutable is_immutable make_immutable
     
     DESTROY
-    );
+);
     
 # check the class ...    
     
@@ -99,6 +100,21 @@ foreach my $method_name (@class_mop_package_methods) {
            '... Class::MOP::Package->get_method(' . $method_name . ') == &Class::MOP::Package::' . $method_name);        
     }
 }
+
+## check the module ....
+
+is_deeply([ sort @class_mop_module_methods ], [ sort $class_mop_module_meta->get_method_list ], '... got the correct method list for module');
+
+foreach my $method_name (@class_mop_module_methods) {
+    ok($class_mop_module_meta->has_method($method_name), '... Class::MOP::Module->has_method(' . $method_name . ')');
+    {
+        no strict 'refs';
+        is($class_mop_module_meta->get_method($method_name), 
+           \&{'Class::MOP::Module::' . $method_name},
+           '... Class::MOP::Module->get_method(' . $method_name . ') == &Class::MOP::Module::' . $method_name);        
+    }
+}
+
 
 # check for imported functions which are not methods
 
@@ -144,7 +160,7 @@ foreach my $attribute_name (@class_mop_class_attributes) {
     isa_ok($class_mop_class_meta->get_attribute($attribute_name), 'Class::MOP::Attribute');            
 }
 
-# check package 
+# check module
 
 is_deeply(
     [ sort @class_mop_package_attributes ],
@@ -159,6 +175,23 @@ is_deeply(
 foreach my $attribute_name (@class_mop_package_attributes) {
     ok($class_mop_package_meta->has_attribute($attribute_name), '... Class::MOP::Package->has_attribute(' . $attribute_name . ')');        
     isa_ok($class_mop_package_meta->get_attribute($attribute_name), 'Class::MOP::Attribute');            
+}
+
+# check package 
+
+is_deeply(
+    [ sort @class_mop_module_attributes ],
+    [ sort $class_mop_module_meta->get_attribute_list ],
+    '... got the right list of attributes');
+    
+is_deeply(
+    [ sort @class_mop_module_attributes ],
+    [ sort keys %{$class_mop_module_meta->get_attribute_map} ],
+    '... got the right list of attributes');    
+
+foreach my $attribute_name (@class_mop_module_attributes) {
+    ok($class_mop_module_meta->has_attribute($attribute_name), '... Class::MOP::Module->has_attribute(' . $attribute_name . ')');        
+    isa_ok($class_mop_module_meta->get_attribute($attribute_name), 'Class::MOP::Attribute');            
 }
 
 ## check the attributes themselves
