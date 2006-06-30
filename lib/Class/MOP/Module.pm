@@ -19,7 +19,7 @@ sub meta {
 
 sub version {  
     my $self = shift;
-    ${$self->get_package_variable('$VERSION')};
+    ${$self->get_package_symbol('$VERSION')};
 }
 
 1;

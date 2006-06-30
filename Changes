@@ -117,7 +117,7 @@ Revision history for Perl extension Class-MOP.
           - added tests and docs for this feature
 
     * Class::MOP::Class
-      - improved &get_package_variable
+      - improved &get_package_symbol
           - &version and &superclasses now use it
       - methods are now blessed into Class::MOP::Method
         whenever possible

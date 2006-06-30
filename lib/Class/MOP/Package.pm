@@ -40,7 +40,7 @@ my %SIGIL_MAP = (
     '&' => 'CODE',
 );
 
-sub add_package_variable {
+sub add_package_symbol {
     my ($self, $variable, $initial_value) = @_;
     
     (defined $variable)
@@ -59,7 +59,7 @@ sub add_package_variable {
     *{$self->name . '::' . $name} = $initial_value;    
 }
 
-sub has_package_variable {
+sub has_package_symbol {
     my ($self, $variable) = @_;
     (defined $variable)
         || confess "You must pass a variable name";
@@ -77,7 +77,7 @@ sub has_package_variable {
     
 }
 
-sub get_package_variable {
+sub get_package_symbol {
     my ($self, $variable) = @_;    
     (defined $variable)
         || confess "You must pass a variable name";
@@ -95,7 +95,7 @@ sub get_package_variable {
 
 }
 
-sub remove_package_variable {
+sub remove_package_symbol {
     my ($self, $variable) = @_;
     
     (defined $variable)
@@ -127,7 +127,6 @@ sub remove_package_variable {
     }
 }
 
-
 1;
 
 __END__
@@ -152,13 +151,13 @@ Class::MOP::Package - Package Meta Object
 
 =item B<name>
 
-=item B<add_package_variable>
+=item B<add_package_symbol>
 
-=item B<get_package_variable>
+=item B<get_package_symbol>
 
-=item B<has_package_variable>
+=item B<has_package_symbol>
 
-=item B<remove_package_variable>
+=item B<remove_package_symbol>
 
 =back
 

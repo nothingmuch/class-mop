@@ -44,14 +44,14 @@ C3MethodDispatchOrder->meta->add_around_method_modifier('initialize' => sub {
 sub superclasses {
     my $self = shift;
     
-    $self->add_package_variable('@SUPERS' => [])    
-        unless $self->has_package_variable('@SUPERS');
+    $self->add_package_symbol('@SUPERS' => [])    
+        unless $self->has_package_symbol('@SUPERS');
             
     if (@_) {
         my @supers = @_;
-        @{$self->get_package_variable('@SUPERS')} = @supers;
+        @{$self->get_package_symbol('@SUPERS')} = @supers;
     }
-    @{$self->get_package_variable('@SUPERS')};        
+    @{$self->get_package_symbol('@SUPERS')};        
 }
 
 sub class_precedence_list {

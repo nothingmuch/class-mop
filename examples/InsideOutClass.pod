@@ -92,25 +92,25 @@ sub create_instance {
 
 sub get_slot_value {
 	my ($self, $instance, $slot_name) = @_;
-	$self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance};
+	$self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance};
 }
 
 sub set_slot_value {
 	my ($self, $instance, $slot_name, $value) = @_;
-	$self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} = $value;
+	$self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} = $value;
 }
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
-    $self->{meta}->add_package_variable(('%' . $slot_name) => {})
-        unless $self->{meta}->has_package_variable('%' . $slot_name); 
-    $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} = undef;
+    $self->{meta}->add_package_symbol(('%' . $slot_name) => {})
+        unless $self->{meta}->has_package_symbol('%' . $slot_name); 
+    $self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} = undef;
 }
 
 sub is_slot_initialized {
 	my ($self, $instance, $slot_name) = @_;
-	return 0 unless $self->{meta}->has_package_variable('%' . $slot_name);
-	return exists $self->{meta}->get_package_variable('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
+	return 0 unless $self->{meta}->has_package_symbol('%' . $slot_name);
+	return exists $self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
 }
 
 1;

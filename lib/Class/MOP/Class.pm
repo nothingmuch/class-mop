@@ -1172,7 +1172,7 @@ the creation and inspection of package scoped variables.
 
 =over 4
 
-=item B<add_package_variable ($variable_name, ?$initial_value)>
+=item B<add_package_symbol ($variable_name, ?$initial_value)>
 
 Given a C<$variable_name>, which must contain a leading sigil, this 
 method will create that variable within the package which houses the 
@@ -1180,17 +1180,17 @@ class. It also takes an optional C<$initial_value>, which must be a
 reference of the same type as the sigil of the C<$variable_name> 
 implies.
 
-=item B<get_package_variable ($variable_name)>
+=item B<get_package_symbol ($variable_name)>
 
 This will return a reference to the package variable in 
 C<$variable_name>. 
 
-=item B<has_package_variable ($variable_name)>
+=item B<has_package_symbol ($variable_name)>
 
 Returns true (C<1>) if there is a package variable defined for 
 C<$variable_name>, and false (C<0>) otherwise.
 
-=item B<remove_package_variable ($variable_name)>
+=item B<remove_package_symbol ($variable_name)>
 
 This will attempt to remove the package variable at C<$variable_name>.
 

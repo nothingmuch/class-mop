@@ -69,8 +69,8 @@ BEGIN {
     dies_ok { $meta->add_attribute()    } '... exception thrown as expected';
     dies_ok { $meta->remove_attribute() } '... exception thrown as expected';
                         
-    dies_ok { $meta->add_package_variable()    } '... exception thrown as expected';
-    dies_ok { $meta->remove_package_variable() } '... exception thrown as expected';
+    dies_ok { $meta->add_package_symbol()    } '... exception thrown as expected';
+    dies_ok { $meta->remove_package_symbol() } '... exception thrown as expected';
 
     my @supers;
     lives_ok {
@@ -133,8 +133,8 @@ BEGIN {
     dies_ok { $meta->add_attribute()    } '... exception thrown as expected';
     dies_ok { $meta->remove_attribute() } '... exception thrown as expected';
                         
-    dies_ok { $meta->add_package_variable()    } '... exception thrown as expected';
-    dies_ok { $meta->remove_package_variable() } '... exception thrown as expected';
+    dies_ok { $meta->add_package_symbol()    } '... exception thrown as expected';
+    dies_ok { $meta->remove_package_symbol() } '... exception thrown as expected';
 
     my @supers;
     lives_ok {
@@ -197,8 +197,8 @@ BEGIN {
     dies_ok { $meta->add_attribute()    } '... exception thrown as expected';
     dies_ok { $meta->remove_attribute() } '... exception thrown as expected';
                         
-    dies_ok { $meta->add_package_variable()    } '... exception thrown as expected';
-    dies_ok { $meta->remove_package_variable() } '... exception thrown as expected';
+    dies_ok { $meta->add_package_symbol()    } '... exception thrown as expected';
+    dies_ok { $meta->remove_package_symbol() } '... exception thrown as expected';
 
     my @supers;
     lives_ok {

@@ -34,7 +34,7 @@ my @class_mop_package_methods = qw(
 
     name
     
-    add_package_variable get_package_variable has_package_variable remove_package_variable    
+    add_package_symbol get_package_symbol has_package_symbol remove_package_symbol    
 );
 
 my @class_mop_module_methods = qw(
@@ -256,10 +256,10 @@ is($class_mop_class_meta->get_attribute('$:method_metaclass')->default,
 is($class_mop_class_meta->name, 'Class::MOP::Class', '... Class::MOP::Class->name');
 is($class_mop_class_meta->version, $Class::MOP::Class::VERSION, '... Class::MOP::Class->version');
 
-ok($class_mop_class_meta->has_package_variable('$VERSION'), '... Class::MOP::Class->has_package_variable($VERSION)');
-is(${$class_mop_class_meta->get_package_variable('$VERSION')}, 
+ok($class_mop_class_meta->has_package_symbol('$VERSION'), '... Class::MOP::Class->has_package_symbol($VERSION)');
+is(${$class_mop_class_meta->get_package_symbol('$VERSION')}, 
    $Class::MOP::Class::VERSION, 
-   '... Class::MOP::Class->get_package_variable($VERSION)');
+   '... Class::MOP::Class->get_package_symbol($VERSION)');
 
 is_deeply(
     [ $class_mop_class_meta->superclasses ], 

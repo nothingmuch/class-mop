@@ -22,8 +22,8 @@ sub remove_method { confess 'Cannot call method "remove_method" on an immutable 
 sub add_attribute    { confess 'Cannot call method "add_attribute" on an immutable instance'    }
 sub remove_attribute { confess 'Cannot call method "remove_attribute" on an immutable instance' }
 
-sub add_package_variable    { confess 'Cannot call method "add_package_variable" on an immutable instance'    }
-sub remove_package_variable { confess 'Cannot call method "remove_package_variable" on an immutable instance' }
+sub add_package_symbol    { confess 'Cannot call method "add_package_symbol" on an immutable instance'    }
+sub remove_package_symbol { confess 'Cannot call method "remove_package_symbol" on an immutable instance' }
 
 # NOTE:
 # superclasses is an accessor, so 
@@ -96,7 +96,7 @@ to this class.
 
 =item B<add_method>
 
-=item B<add_package_variable>
+=item B<add_package_symbol>
 
 =item B<alias_method>
 
@@ -106,7 +106,7 @@ to this class.
 
 =item B<remove_method>
 
-=item B<remove_package_variable>
+=item B<remove_package_symbol>
 
 =item B<superclasses>
 

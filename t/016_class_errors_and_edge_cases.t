@@ -183,78 +183,78 @@ BEGIN {
 
 {
     dies_ok {
-        Class::MOP::Class->add_package_variable();
-    } '... add_package_variable dies as expected';
+        Class::MOP::Class->add_package_symbol();
+    } '... add_package_symbol dies as expected';
     
     dies_ok {
-        Class::MOP::Class->add_package_variable('');
-    } '... add_package_variable dies as expected';
+        Class::MOP::Class->add_package_symbol('');
+    } '... add_package_symbol dies as expected';
     
     dies_ok {
-        Class::MOP::Class->add_package_variable('foo');
-    } '... add_package_variable dies as expected';  
+        Class::MOP::Class->add_package_symbol('foo');
+    } '... add_package_symbol dies as expected';  
     
     dies_ok {
-        Class::MOP::Class->add_package_variable('&foo');
-    } '... add_package_variable dies as expected';      
+        Class::MOP::Class->add_package_symbol('&foo');
+    } '... add_package_symbol dies as expected';      
     
 #    throws_ok {
-#        Class::MOP::Class->meta->add_package_variable('@-');
+#        Class::MOP::Class->meta->add_package_symbol('@-');
 #    } qr/^Could not create package variable \(\@\-\) because/, 
-#      '... add_package_variable dies as expected';    
+#      '... add_package_symbol dies as expected';    
 }
 
 {
     dies_ok {
-        Class::MOP::Class->has_package_variable();
-    } '... has_package_variable dies as expected';
+        Class::MOP::Class->has_package_symbol();
+    } '... has_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->has_package_variable('');
-    } '... has_package_variable dies as expected';
+        Class::MOP::Class->has_package_symbol('');
+    } '... has_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->has_package_variable('foo');
-    } '... has_package_variable dies as expected';  
+        Class::MOP::Class->has_package_symbol('foo');
+    } '... has_package_symbol dies as expected';  
 
     dies_ok {
-        Class::MOP::Class->has_package_variable('&foo');
-    } '... has_package_variable dies as expected';    
+        Class::MOP::Class->has_package_symbol('&foo');
+    } '... has_package_symbol dies as expected';    
 }
 
 {
     dies_ok {
-        Class::MOP::Class->get_package_variable();
-    } '... get_package_variable dies as expected';
+        Class::MOP::Class->get_package_symbol();
+    } '... get_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->get_package_variable('');
-    } '... get_package_variable dies as expected';
+        Class::MOP::Class->get_package_symbol('');
+    } '... get_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->get_package_variable('foo');
-    } '... get_package_variable dies as expected';  
+        Class::MOP::Class->get_package_symbol('foo');
+    } '... get_package_symbol dies as expected';  
 
     dies_ok {
-        Class::MOP::Class->get_package_variable('&foo');
-    } '... get_package_variable dies as expected';    
+        Class::MOP::Class->get_package_symbol('&foo');
+    } '... get_package_symbol dies as expected';    
 }
 
 {
     dies_ok {
-        Class::MOP::Class->remove_package_variable();
-    } '... remove_package_variable dies as expected';
+        Class::MOP::Class->remove_package_symbol();
+    } '... remove_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->remove_package_variable('');
-    } '... remove_package_variable dies as expected';
+        Class::MOP::Class->remove_package_symbol('');
+    } '... remove_package_symbol dies as expected';
 
     dies_ok {
-        Class::MOP::Class->remove_package_variable('foo');
-    } '... remove_package_variable dies as expected';  
+        Class::MOP::Class->remove_package_symbol('foo');
+    } '... remove_package_symbol dies as expected';  
 
     dies_ok {
-        Class::MOP::Class->remove_package_variable('&foo');
-    } '... remove_package_variable dies as expected';    
+        Class::MOP::Class->remove_package_symbol('&foo');
+    } '... remove_package_symbol dies as expected';    
 }
 
