@@ -1,5 +1,25 @@
 Revision history for Perl extension Class-MOP.
 
+0.29_03
+    ++ DEVELOPER RELEASE ++
+    
+    created the Class::MOP::Package and 
+    Class::MOP::Module classes to more 
+    closely conform to Perl 6's meta model
+
+    * Class::MOP::Class
+      - now inherits from Class::MOP::Module
+      - several methods moved to ::Module and 
+        ::Package and now inherited
+        - added tests for this
+    
+    ** API CHANGE **
+    - the Class::MOP::Class::*_package_variable 
+      methods are all now methods of Class::MOP::Package
+      and called *_package_symbol instead. This is 
+      because they are now more general purpose symbol 
+      table manipulation methods.
+
 0.29_02 Thurs. June 22, 2006
     ++ DEVELOPER RELEASE ++
     * Class::MOP::Class
