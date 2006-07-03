@@ -100,6 +100,13 @@ sub strengthen_slot_value {
 
 # inlinable operation snippets
 
+sub is_inlinable { 1 }
+
+sub inline_create_instance {
+    my ($self, $class_variable) = @_;
+    'bless {} => ' . $class_variable;
+}
+
 sub inline_slot_access {
     my ($self, $instance, $slot_name) = @_;
     sprintf "%s->{%s}", $instance, $slot_name;
@@ -255,6 +262,14 @@ in future experiments in class finailization mostly. Best to
 ignore this for now.
 
 =over 4
+
+=item B<is_inlinable>
+
+Each meta-instance should override this method to tell Class::MOP if it's 
+possible to inline the slot access. 
+
+This is currently only used by Class::MOP::Class::Immutable when performing 
+optimizations.
 
 =item B<inline_slot_access ($instance_structure, $slot_name)>
 

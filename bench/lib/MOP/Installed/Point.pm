@@ -1,11 +1,13 @@
 
-package MOP::Point;
+use lib reverse @INC;
+
+package MOP::Installed::Point;
 
 use strict;
 use warnings;
 use metaclass;
 
-__PACKAGE__->meta->add_attribute('x' => (accessor => 'x'));
+__PACKAGE__->meta->add_attribute('x' => (accessor => 'x', default => 10));
 __PACKAGE__->meta->add_attribute('y' => (accessor => 'y'));
 
 sub new {

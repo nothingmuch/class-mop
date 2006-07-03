@@ -98,14 +98,18 @@ sub init_arg  { $_[0]->{init_arg}  }
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
+sub is_default_a_coderef { 
+    (reftype($_[0]->{default}) && reftype($_[0]->{default}) eq 'CODE')
+}
+
 sub default { 
-    my $self = shift;
-    if (reftype($self->{default}) && reftype($self->{default}) eq 'CODE') {
+    my ($self, $instance) = @_;
+    if ($instance && $self->is_default_a_coderef) {
         # if the default is a CODE ref, then 
         # we pass in the instance and default
         # can return a value based on that 
         # instance. Somewhat crude, but works.
-        return $self->{default}->(shift);
+        return $self->{default}->($instance);
     }           
     $self->{default};
 }
@@ -140,6 +144,20 @@ sub generate_accessor_method {
     };
 }
 
+sub generate_accessor_method_inline {
+    my $self          = shift; 
+    my $attr_name     = $self->name;
+    my $meta_instance = $self->associated_class->instance_metaclass;
+
+    my $code = eval 'sub {'
+        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')  . ' if scalar(@_) == 2; '
+        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
+    . '}';
+    confess "Could not generate inline accessor because : $@" if $@;
+
+    return $code;
+}
+
 sub generate_reader_method {
     my $self = shift;
     my $attr_name  = $self->name;
@@ -149,6 +167,20 @@ sub generate_reader_method {
                          ->get_meta_instance
                          ->get_slot_value($_[0], $attr_name); 
     };   
+}
+
+sub generate_reader_method_inline {
+    my $self          = shift; 
+    my $attr_name     = $self->name;
+    my $meta_instance = $self->associated_class->instance_metaclass;
+
+    my $code = eval 'sub {'
+        . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
+        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
+    . '}';
+    confess "Could not generate inline accessor because : $@" if $@;
+
+    return $code;
 }
 
 sub generate_writer_method {
@@ -161,6 +193,19 @@ sub generate_writer_method {
     };
 }
 
+sub generate_writer_method_inline {
+    my $self          = shift; 
+    my $attr_name     = $self->name;
+    my $meta_instance = $self->associated_class->instance_metaclass;
+
+    my $code = eval 'sub {'
+        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
+    . '}';
+    confess "Could not generate inline accessor because : $@" if $@;
+
+    return $code;
+}
+
 sub generate_predicate_method {
     my $self = shift;
     my $attr_name  = $self->name;
@@ -171,8 +216,21 @@ sub generate_predicate_method {
     };
 }
 
+sub generate_predicate_method_inline {
+    my $self          = shift; 
+    my $attr_name     = $self->name;
+    my $meta_instance = $self->associated_class->instance_metaclass;
+
+    my $code = eval 'sub {'
+        . 'defined ' . $meta_instance->inline_get_slot_value('$_[0]', $attr_name) . ' ? 1 : 0'
+    . '}';
+    confess "Could not generate inline accessor because : $@" if $@;
+
+    return $code;
+}
+
 sub process_accessors {
-    my ($self, $type, $accessor) = @_;
+    my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
     if (reftype($accessor)) {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate format, must be a HASH ref";
@@ -180,7 +238,8 @@ sub process_accessors {
         return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
     else {
-        my $generator = $self->can('generate_' . $type . '_method');
+        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable); 
+        my $generator = $self->can('generate_' . $type . '_method' . ($inline_me ? '_inline' : ''));
         ($generator)
             || confess "There is no method generator for the type='$type'";
         if (my $method = $self->$generator($self->name)) {
@@ -191,24 +250,26 @@ sub process_accessors {
 }
 
 sub install_accessors {
-    my $self  = shift;
-    my $class = $self->associated_class;
+    my $self   = shift;
+    my $inline = shift;
+    my $class  = $self->associated_class;
     
     $class->add_method(
-        $self->process_accessors('accessor' => $self->accessor())
+        $self->process_accessors('accessor' => $self->accessor(), $inline)
     ) if $self->has_accessor();
 
     $class->add_method(            
-        $self->process_accessors('reader' => $self->reader())
+        $self->process_accessors('reader' => $self->reader(), $inline)
     ) if $self->has_reader();
 
     $class->add_method(
-        $self->process_accessors('writer' => $self->writer())
+        $self->process_accessors('writer' => $self->writer(), $inline)
     ) if $self->has_writer();
 
     $class->add_method(
-        $self->process_accessors('predicate' => $self->predicate())
+        $self->process_accessors('predicate' => $self->predicate(), $inline)
     ) if $self->has_predicate();
+    
     return;
 }
 

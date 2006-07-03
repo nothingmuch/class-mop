@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'looks_like_number';
 
 our $VERSION = '0.01';
 
@@ -43,25 +43,95 @@ sub is_immutable { 1 }
 sub make_immutable { () }
 
 sub make_metaclass_immutable {
-    my ($class, $metaclass) = @_;
-    $metaclass->{'___class_precedence_list'} = [ $metaclass->class_precedence_list ];
-    $metaclass->{'___get_meta_instance'} = $metaclass->get_meta_instance;    
-    $metaclass->{'___compute_all_applicable_attributes'} = [ $metaclass->compute_all_applicable_attributes ];       
-    $metaclass->{'___original_class'} = blessed($metaclass);           
+    my ($class, $metaclass, %options) = @_;
+    
+    $options{inline_accessors}   ||= 1;
+    $options{inline_constructor} ||= 1;
+    $options{constructor_name}   ||= 'new';
+    
+    my $meta_instance = $metaclass->get_meta_instance;
+    $metaclass->{'___class_precedence_list'}             = [ $metaclass->class_precedence_list ];
+    $metaclass->{'___compute_all_applicable_attributes'} = [ $metaclass->compute_all_applicable_attributes ];           
+    $metaclass->{'___get_meta_instance'}                 = $meta_instance;    
+    $metaclass->{'___original_class'}                    = blessed($metaclass);     
+          
+    if ($options{inline_accessors}) {
+        foreach my $attr_name ($metaclass->get_attribute_list) {
+            my $attr = $metaclass->get_attribute($attr_name);
+            $attr->install_accessors(1); # inline the accessors
+        }      
+    }
+
+    if ($options{inline_constructor}) {       
+        $metaclass->add_method(
+            $options{constructor_name},
+            $class->_generate_inline_constructor(
+                \%options, 
+                $meta_instance, 
+                $metaclass->{'___compute_all_applicable_attributes'}
+            )            
+        );
+    }
+          
     bless $metaclass => $class;
+}
+
+sub _generate_inline_constructor {
+    my ($class, $options, $meta_instance, $attrs) = @_;
+    # TODO:
+    # the %options should also include a both 
+    # a call 'initializer' and call 'SUPER::' 
+    # options, which should cover approx 90% 
+    # of the possible use cases (even if it 
+    # requires some adaption on the part of 
+    # the author, after all, nothing is free)
+    my $source = 'sub {';
+    $source .= "\n" . 'my ($class, %params) = @_;';
+    $source .= "\n" . 'my $instance = ' . $meta_instance->inline_create_instance('$class');
+    $source .= ";\n" . (join ";\n" => map { 
+        $class->_generate_slot_initializer($meta_instance, $attrs, $_) 
+    } 0 .. (@$attrs - 1));
+    $source .= ";\n" . 'return $instance';
+    $source .= ";\n" . '}'; 
+    warn $source;   
+    my $code = eval $source;
+    confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
+    return $code;
+}
+
+sub _generate_slot_initializer {
+    my ($class, $meta_instance, $attrs, $index) = @_;
+    my $attr = $attrs->[$index];
+    my $default;
+    if ($attr->has_default) {
+        if ($attr->is_default_a_coderef) {
+            $default = '$attrs->[' . $index . ']->default($instance)';
+        }
+        else {
+            $default = $attrs->[$index]->default;
+            unless (looks_like_number($default)) {
+                $default = "'$default'";
+            }
+            # TODO:
+            # we should use Data::Dumper to 
+            # output any ref's here, obviously 
+            # we cannot handle Scalar refs, but
+            # it should work for Array and Hash 
+            # refs pretty well.
+        }
+    }
+    $meta_instance->inline_set_slot_value(
+        '$instance', 
+        $attr->name, 
+        ('$params{\'' . $attr->init_arg . '\'}' . (defined $default ? (' || ' . $default) : ''))
+    )    
 }
 
 # cached methods
 
-sub get_meta_instance { (shift)->{'___get_meta_instance'} }
-
-sub class_precedence_list { 
-    @{ (shift)->{'___class_precedence_list'} } 
-}
-
-sub compute_all_applicable_attributes {
-    @{ (shift)->{'___compute_all_applicable_attributes'} }
-}
+sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}                  }
+sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
+sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
 
 1;
 
@@ -76,6 +146,22 @@ Class::MOP::Class::Immutable - An immutable version of Class::MOP::Class
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
+
+Class::MOP offers many benefits to object oriented development but it 
+comes at a cost. Pure Class::MOP classes can be quite a bit slower than 
+the typical hand coded Perl classes. This is because just about 
+I<everything> is recalculated on the fly, and nothing is cached. The 
+reason this is so, is because Perl itself allows you to modify virtually
+everything at runtime. Class::MOP::Class::Immutable offers an alternative 
+to this.
+
+By making your class immutable, you are promising that you will not 
+modify your inheritence tree or the attributes of any classes in 
+that tree. Since runtime modifications like this are fairly atypical
+(and usually recomended against), this is not usally a very hard promise 
+to make. For making this promise you are given a wide range of 
+optimization options which bring speed close to (and sometimes above) 
+those of typical hand coded Perl. 
 
 =head1 METHODS
 

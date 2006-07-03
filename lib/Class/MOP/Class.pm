@@ -628,8 +628,7 @@ sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
 sub make_immutable {
-    my ($class) = @_;
-    return Class::MOP::Class::Immutable->make_metaclass_immutable($class);
+    return Class::MOP::Class::Immutable->make_metaclass_immutable(@_);
 }
 
 1;

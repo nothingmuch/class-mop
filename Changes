@@ -19,6 +19,10 @@ Revision history for Perl extension Class-MOP.
       and called *_package_symbol instead. This is 
       because they are now more general purpose symbol 
       table manipulation methods.
+      
+    * Class::MOP::Instance
+      - added an is_inlinable method to allow other 
+        classes to check before they attempt to optimize.
 
 0.29_02 Thurs. June 22, 2006
     ++ DEVELOPER RELEASE ++

@@ -1,5 +1,7 @@
 
-package MOP::Point3D;
+use lib reverse @INC;
+
+package MOP::Installed::Point3D;
 
 use strict;
 use warnings;

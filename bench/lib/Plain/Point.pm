@@ -9,7 +9,7 @@ sub new {
     my ( $class, %params ) = @_;
     
     return bless {
-        x => $params{x},
+        x => $params{x} || 10,
         y => $params{y},
     }, $class;
 }

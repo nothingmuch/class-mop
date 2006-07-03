@@ -33,98 +33,101 @@ sub name { $_[0]->{'$:package'} }
 
 # Class attributes
 
-my %SIGIL_MAP = (
-    '$' => 'SCALAR',
-    '@' => 'ARRAY',
-    '%' => 'HASH',
-    '&' => 'CODE',
-);
+{
+    my %SIGIL_MAP = (
+        '$' => 'SCALAR',
+        '@' => 'ARRAY',
+        '%' => 'HASH',
+        '&' => 'CODE',
+    );
 
-sub add_package_symbol {
-    my ($self, $variable, $initial_value) = @_;
+    sub add_package_symbol {
+        my ($self, $variable, $initial_value) = @_;
     
-    (defined $variable)
-        || confess "You must pass a variable name";    
+        (defined $variable)
+            || confess "You must pass a variable name";    
     
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     
-    (defined $sigil)
-        || confess "The variable name must include a sigil";    
+        (defined $sigil)
+            || confess "The variable name must include a sigil";    
     
-    (exists $SIGIL_MAP{$sigil})
-        || confess "I do not recognize that sigil '$sigil'";
+        (exists $SIGIL_MAP{$sigil})
+            || confess "I do not recognize that sigil '$sigil'";
     
-    no strict 'refs';
-    no warnings 'misc';
-    *{$self->name . '::' . $name} = $initial_value;    
-}
+        no strict 'refs';
+        no warnings 'misc';
+        *{$self->name . '::' . $name} = $initial_value;    
+    }
 
-sub has_package_symbol {
-    my ($self, $variable) = @_;
-    (defined $variable)
-        || confess "You must pass a variable name";
+    sub has_package_symbol {
+        my ($self, $variable) = @_;
+        (defined $variable)
+            || confess "You must pass a variable name";
 
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     
-    (defined $sigil)
-        || confess "The variable name must include a sigil";    
+        (defined $sigil)
+            || confess "The variable name must include a sigil";    
     
-    (exists $SIGIL_MAP{$sigil})
-        || confess "I do not recognize that sigil '$sigil'";
+        (exists $SIGIL_MAP{$sigil})
+            || confess "I do not recognize that sigil '$sigil'";
     
-    no strict 'refs';
-    defined *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}} ? 1 : 0;
+        no strict 'refs';
+        defined *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}} ? 1 : 0;
     
-}
+    }
 
-sub get_package_symbol {
-    my ($self, $variable) = @_;    
-    (defined $variable)
-        || confess "You must pass a variable name";
+    sub get_package_symbol {
+        my ($self, $variable) = @_;    
+        (defined $variable)
+            || confess "You must pass a variable name";
     
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     
-    (defined $sigil)
-        || confess "The variable name must include a sigil";    
+        (defined $sigil)
+            || confess "The variable name must include a sigil";    
     
-    (exists $SIGIL_MAP{$sigil})
-        || confess "I do not recognize that sigil '$sigil'";
+        (exists $SIGIL_MAP{$sigil})
+            || confess "I do not recognize that sigil '$sigil'";
     
-    no strict 'refs';
-    return *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}};
+        no strict 'refs';
+        return *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}};
 
-}
+    }
 
-sub remove_package_symbol {
-    my ($self, $variable) = @_;
+    sub remove_package_symbol {
+        my ($self, $variable) = @_;
     
-    (defined $variable)
-        || confess "You must pass a variable name";
+        (defined $variable)
+            || confess "You must pass a variable name";
         
-    my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
     
-    (defined $sigil)
-        || confess "The variable name must include a sigil";    
+        (defined $sigil)
+            || confess "The variable name must include a sigil";    
     
-    (exists $SIGIL_MAP{$sigil})
-        || confess "I do not recognize that sigil '$sigil'"; 
+        (exists $SIGIL_MAP{$sigil})
+            || confess "I do not recognize that sigil '$sigil'"; 
     
-    no strict 'refs';
-    if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
-        undef ${$self->name . '::' . $name};    
+        no strict 'refs';
+        if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
+            undef ${$self->name . '::' . $name};    
+        }
+        elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
+            undef @{$self->name . '::' . $name};    
+        }
+        elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
+            undef %{$self->name . '::' . $name};    
+        }
+        elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
+            undef &{$self->name . '::' . $name};    
+        }    
+        else {
+            confess "This should never ever ever happen";
+        }
     }
-    elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
-        undef @{$self->name . '::' . $name};    
-    }
-    elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
-        undef %{$self->name . '::' . $name};    
-    }
-    elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
-        undef &{$self->name . '::' . $name};    
-    }    
-    else {
-        confess "This should never ever ever happen";
-    }
+
 }
 
 1;
