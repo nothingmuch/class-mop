@@ -93,7 +93,7 @@ sub _generate_inline_constructor {
     } 0 .. (@$attrs - 1));
     $source .= ";\n" . 'return $instance';
     $source .= ";\n" . '}'; 
-    warn $source;   
+    warn $source if $options->{debug};   
     my $code = eval $source;
     confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
     return $code;

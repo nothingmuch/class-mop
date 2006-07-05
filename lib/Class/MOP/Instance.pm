@@ -271,6 +271,8 @@ possible to inline the slot access.
 This is currently only used by Class::MOP::Class::Immutable when performing 
 optimizations.
 
+=item B<inline_create_instance>
+
 =item B<inline_slot_access ($instance_structure, $slot_name)>
 
 =item B<inline_get_slot_value ($instance_structure, $slot_name)>

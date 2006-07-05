@@ -492,6 +492,8 @@ passed into C<new>. I think they are pretty much self-explanitory.
 
 =item B<init_arg>
 
+=item B<is_default_a_coderef>
+
 =item B<default (?$instance)>
 
 As noted in the documentation for C<new> above, if the I<default> 
@@ -573,6 +575,18 @@ use the custom method passed through the constructor.
 =item B<generate_reader_method>
 
 =item B<generate_writer_method>
+
+=back
+
+=over 4
+
+=item B<generate_accessor_method_inline>
+
+=item B<generate_predicate_method_inline>
+
+=item B<generate_reader_method_inline>
+
+=item B<generate_writer_method_inline>
 
 =back
 

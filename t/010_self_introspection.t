@@ -217,7 +217,7 @@ is($class_mop_class_meta->get_attribute('%:attributes')->init_arg,
   '... Class::MOP::Class %:attributes\'s a init_arg is :attributes');   
   
 ok($class_mop_class_meta->get_attribute('%:attributes')->has_default, '... Class::MOP::Class %:attributes has a default');
-is_deeply($class_mop_class_meta->get_attribute('%:attributes')->default, 
+is_deeply($class_mop_class_meta->get_attribute('%:attributes')->default('Foo'), 
          {}, 
          '... Class::MOP::Class %:attributes\'s a default of {}');  
 

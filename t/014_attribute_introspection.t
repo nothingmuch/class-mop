@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 41;
+use Test::More tests => 46;
 use Test::Exception;
 
 BEGIN {
@@ -31,7 +31,7 @@ BEGIN {
         has_reader    reader
         has_predicate predicate
         has_init_arg  init_arg
-        has_default   default
+        has_default   default    is_default_a_coderef
         
         slots
         
@@ -42,6 +42,11 @@ BEGIN {
         generate_reader_method
         generate_writer_method
         generate_predicate_method
+        
+        generate_accessor_method_inline
+        generate_reader_method_inline
+        generate_writer_method_inline
+        generate_predicate_method_inline    
         
         process_accessors
         install_accessors
