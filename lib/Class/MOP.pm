@@ -188,6 +188,16 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
     $self->meta->clone_object($self, @_);  
 });
 
+## Try and close Class::MOP::*
+
+Class::MOP::Package  ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Module   ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Class    ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
+
+
 1;
 
 __END__

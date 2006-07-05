@@ -150,8 +150,8 @@ sub generate_accessor_method_inline {
     my $meta_instance = $self->associated_class->instance_metaclass;
 
     my $code = eval 'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')  . ' if scalar(@_) == 2; '
-        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
+        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')  . ' if scalar(@_) == 2; '
+        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
     . '}';
     confess "Could not generate inline accessor because : $@" if $@;
 
@@ -176,7 +176,7 @@ sub generate_reader_method_inline {
 
     my $code = eval 'sub {'
         . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
-        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
+        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
     . '}';
     confess "Could not generate inline accessor because : $@" if $@;
 
@@ -199,7 +199,7 @@ sub generate_writer_method_inline {
     my $meta_instance = $self->associated_class->instance_metaclass;
 
     my $code = eval 'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
+        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
     . '}';
     confess "Could not generate inline accessor because : $@" if $@;
 
@@ -222,7 +222,7 @@ sub generate_predicate_method_inline {
     my $meta_instance = $self->associated_class->instance_metaclass;
 
     my $code = eval 'sub {'
-        . 'defined ' . $meta_instance->inline_get_slot_value('$_[0]', $attr_name) . ' ? 1 : 0'
+        . 'defined ' . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'") . ' ? 1 : 0'
     . '}';
     confess "Could not generate inline accessor because : $@" if $@;
 
@@ -234,7 +234,7 @@ sub process_accessors {
     if (reftype($accessor)) {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate format, must be a HASH ref";
-        my ($name, $method) = each %{$accessor};
+        my ($name, $method) = %{$accessor};
         return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
     else {

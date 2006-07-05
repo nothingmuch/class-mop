@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 14;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -23,6 +23,8 @@ my %METAS = (
     'Class::MOP::Method'    => Class::MOP::Method->meta,  
     'Class::MOP::Instance'  => Class::MOP::Instance->meta,      
 );
+
+ok($_->is_immutable(), '... ' . $_->name . ' is immutable') for values %METAS;
 
 is_deeply(
     { Class::MOP::Class->get_all_metaclasses },

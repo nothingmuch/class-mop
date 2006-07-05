@@ -45,9 +45,12 @@ sub make_immutable { () }
 sub make_metaclass_immutable {
     my ($class, $metaclass, %options) = @_;
     
-    $options{inline_accessors}   ||= 1;
-    $options{inline_constructor} ||= 1;
-    $options{constructor_name}   ||= 'new';
+    # NOTE:
+    # i really need the // (defined-or) operator here
+    $options{inline_accessors}   = 1     unless exists $options{inline_accessors};
+    $options{inline_constructor} = 1     unless exists $options{inline_constructor};
+    $options{constructor_name}   = 'new' unless exists $options{constructor_name};
+    $options{debug}              = 0     unless exists $options{debug};
     
     my $meta_instance = $metaclass->get_meta_instance;
     $metaclass->{'___class_precedence_list'}             = [ $metaclass->class_precedence_list ];
@@ -174,6 +177,32 @@ to this class.
 
 =back
 
+=head2 Introspection and Construction
+
+=over 4
+
+=item B<make_metaclass_immutable>
+
+=over 4
+
+=item I<inline_accessors (Bool)>
+
+=item I<inline_constructor (Bool)>
+
+=item I<debug (Bool)>
+
+=item I<constructor_name (Str)>
+
+=back
+
+=item B<is_immutable>
+
+=item B<is_mutable>
+
+=item B<make_immutable>
+
+=back
+
 =head2 Methods which will die if you touch them.
 
 =over 4
@@ -207,20 +236,6 @@ to this class.
 =item B<compute_all_applicable_attributes>
 
 =item B<get_meta_instance>
-
-=back
-
-=head2 Introspection and Construction
-
-=over 4
-
-=item B<is_immutable>
-
-=item B<is_mutable>
-
-=item B<make_immutable>
-
-=item B<make_metaclass_immutable>
 
 =back
 

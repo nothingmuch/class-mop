@@ -23,7 +23,7 @@ sub wrap {
     my $class = shift;
     my $code  = shift;
     ('CODE' eq (reftype($code) || ''))
-        || confess "You must supply a CODE reference to bless";
+        || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
     bless $code => blessed($class) || $class;
 }
 
