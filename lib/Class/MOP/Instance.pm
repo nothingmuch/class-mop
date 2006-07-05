@@ -6,7 +6,7 @@ use warnings;
 
 use Scalar::Util 'weaken', 'blessed';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 sub meta { 
     require Class::MOP::Class;

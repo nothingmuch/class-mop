@@ -6,6 +6,10 @@ Revision history for Perl extension Class-MOP.
     created the Class::MOP::Package and 
     Class::MOP::Module classes to more 
     closely conform to Perl 6's meta model
+    
+    created Class::MOP::Class::Immutable 
+    which can be used to "close" a class 
+    and then apply some optimizations
 
     * Class::MOP::Class
       - now inherits from Class::MOP::Module
@@ -23,6 +27,9 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Instance
       - added an is_inlinable method to allow other 
         classes to check before they attempt to optimize.
+      - added an inline_create_instance to inline 
+        instance creation (of course) 
+        
 
 0.29_02 Thurs. June 22, 2006
     ++ DEVELOPER RELEASE ++

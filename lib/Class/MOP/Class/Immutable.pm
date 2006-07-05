@@ -148,6 +148,25 @@ Class::MOP::Class::Immutable - An immutable version of Class::MOP::Class
 
 =head1 SYNOPSIS
 
+  package Point;
+  use metaclass;
+  
+  __PACKAGE__->meta->add_attribute('x' => (accessor => 'x', default => 10));
+  __PACKAGE__->meta->add_attribute('y' => (accessor => 'y'));
+  
+  sub new {
+      my $class = shift;
+      $class->meta->new_object(@_);
+  }
+  
+  sub clear {
+      my $self = shift;
+      $self->x(0);
+      $self->y(0);    
+  }
+  
+  __PACKAGE__->meta->make_immutable();  # close the class
+
 =head1 DESCRIPTION
 
 Class::MOP offers many benefits to object oriented development but it 
@@ -182,6 +201,9 @@ to this class.
 =over 4
 
 =item B<make_metaclass_immutable>
+
+The arguments to C<Class::MOP::Class::make_immutable> are passed 
+to this method, which 
 
 =over 4
 
