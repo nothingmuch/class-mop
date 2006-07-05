@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.29_03
+0.29_03 Wed. July 5, 2006
     ++ DEVELOPER RELEASE ++
     
     created the Class::MOP::Package and 
@@ -16,13 +16,6 @@ Revision history for Perl extension Class-MOP.
       - several methods moved to ::Module and 
         ::Package and now inherited
         - added tests for this
-    
-    ** API CHANGE **
-    - the Class::MOP::Class::*_package_variable 
-      methods are all now methods of Class::MOP::Package
-      and called *_package_symbol instead. This is 
-      because they are now more general purpose symbol 
-      table manipulation methods.
       
     * Class::MOP::Instance
       - added an is_inlinable method to allow other 
@@ -30,6 +23,12 @@ Revision history for Perl extension Class-MOP.
       - added an inline_create_instance to inline 
         instance creation (of course) 
         
+    ** API CHANGE **
+      - the Class::MOP::Class::*_package_variable 
+        methods are all now methods of Class::MOP::Package
+        and called *_package_symbol instead. This is 
+        because they are now more general purpose symbol 
+        table manipulation methods.        
 
 0.29_02 Thurs. June 22, 2006
     ++ DEVELOPER RELEASE ++

@@ -3,7 +3,6 @@ Changes
 Makefile.PL
 META.yml
 MANIFEST
-MANIFEST.SKIP
 README
 examples/ArrayBasedStorage.pod
 examples/AttributesWithHistory.pod
@@ -19,6 +18,9 @@ lib/Class/MOP/Attribute.pm
 lib/Class/MOP/Class.pm
 lib/Class/MOP/Instance.pm
 lib/Class/MOP/Method.pm
+lib/Class/MOP/Module.pm
+lib/Class/MOP/Package.pm
+lib/Class/MOP/Class/Immutable.pm
 t/000_load.t
 t/001_basic.t
 t/002_class_precedence_list.t
@@ -47,6 +49,8 @@ t/044_instance_metaclass_incompatibility_dynamic.t
 t/050_scala_style_mixin_composition.t
 t/060_instance.t
 t/061_instance_inline.t
+t/070_immutable_metaclass.t
+t/080_meta_package.t
 t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t
