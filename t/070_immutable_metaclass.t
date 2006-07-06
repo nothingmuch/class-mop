@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 80;
+use Test::More tests => 77;
 use Test::Exception;
 
 BEGIN {
@@ -59,8 +59,6 @@ BEGIN {
 
     isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');
-
-    dies_ok { $meta->reinitialize() } '... exception thrown as expected';
     
     dies_ok { $meta->add_method()    } '... exception thrown as expected';
     dies_ok { $meta->alias_method()  } '... exception thrown as expected';
@@ -123,8 +121,6 @@ BEGIN {
 
     isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');
-
-    dies_ok { $meta->reinitialize() } '... exception thrown as expected';
     
     dies_ok { $meta->add_method()    } '... exception thrown as expected';
     dies_ok { $meta->alias_method()  } '... exception thrown as expected';
@@ -187,8 +183,6 @@ BEGIN {
 
     isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');
-
-    dies_ok { $meta->reinitialize() } '... exception thrown as expected';
     
     dies_ok { $meta->add_method()    } '... exception thrown as expected';
     dies_ok { $meta->alias_method()  } '... exception thrown as expected';

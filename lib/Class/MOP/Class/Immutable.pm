@@ -13,8 +13,6 @@ use base 'Class::MOP::Class';
 
 # methods which can *not* be called
 
-sub reinitialize { confess 'Cannot call method "reinitialize" on an immutable instance' }
-
 sub add_method    { confess 'Cannot call method "add_method" on an immutable instance'    }
 sub alias_method  { confess 'Cannot call method "alias_method" on an immutable instance'  }
 sub remove_method { confess 'Cannot call method "remove_method" on an immutable instance' }
@@ -125,7 +123,7 @@ sub _generate_slot_initializer {
     }
     $meta_instance->inline_set_slot_value(
         '$instance', 
-        $attr->name, 
+        ("'" . $attr->name . "'"), 
         ('$params{\'' . $attr->init_arg . '\'}' . (defined $default ? (' || ' . $default) : ''))
     )    
 }
@@ -135,6 +133,7 @@ sub _generate_slot_initializer {
 sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}                  }
 sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
 sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
+sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
 
 1;
 
@@ -223,6 +222,8 @@ to this method, which
 
 =item B<make_immutable>
 
+=item B<get_mutable_metaclass_name>
+
 =back
 
 =head2 Methods which will die if you touch them.
@@ -236,8 +237,6 @@ to this method, which
 =item B<add_package_symbol>
 
 =item B<alias_method>
-
-=item B<reinitialize>
 
 =item B<remove_attribute>
 

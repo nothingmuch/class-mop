@@ -79,6 +79,17 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
         # annoyingly enough during global destruction)
         return $METAS{$package_name} 
             if exists $METAS{$package_name} && defined $METAS{$package_name};  
+
+        # NOTE:
+        # we need to deal with the possibility 
+        # of class immutability here, and then 
+        # get the name of the class appropriately
+        $class = (blessed($class)
+                        ? ($class->is_immutable
+                            ? $class->get_mutable_metaclass_name()
+                            : blessed($class))
+                        : $class);
+
         $class = blessed($class) || $class;
         # now create the metaclass
         my $meta;
@@ -121,10 +132,19 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
 
         foreach my $class_name (@class_list) { 
             my $meta = $METAS{$class_name} || next;
-            ($self->isa(blessed($meta)))
+            
+            # NOTE:
+            # we need to deal with the possibility 
+            # of class immutability here, and then 
+            # get the name of the class appropriately            
+            my $meta_type = ($meta->is_immutable
+                                ? $meta->get_mutable_metaclass_name()
+                                : blessed($meta));                
+                                
+            ($self->isa($meta_type))
                 || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
                            " is not compatible with the " . 
-                           $class_name . "->meta => (" . (blessed($meta)) . ")";
+                           $class_name . "->meta => (" . ($meta_type)     . ")";
             # NOTE:
             # we also need to check that instance metaclasses
             # are compatabile in the same the class.

@@ -50,6 +50,7 @@ t/050_scala_style_mixin_composition.t
 t/060_instance.t
 t/061_instance_inline.t
 t/070_immutable_metaclass.t
+t/071_immutable_w_custom_metaclass.t
 t/080_meta_package.t
 t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t

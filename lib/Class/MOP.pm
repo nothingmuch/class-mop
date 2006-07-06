@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION = '0.29_03';
+our $VERSION = '0.30';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...

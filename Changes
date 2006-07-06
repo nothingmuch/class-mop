@@ -1,15 +1,19 @@
 Revision history for Perl extension Class-MOP.
 
-0.29_03 Wed. July 5, 2006
-    ++ DEVELOPER RELEASE ++
+0.30 Wed. July 5, 2006
+    ---------------------------------------
+    This is the first version of Class::MOP 
+    to introduce the immutable features which
+    will be used for optimizating the MOP. 
+    This support should still be considered
+    experimental, but moving towards stability.
+    ---------------------------------------
     
-    created the Class::MOP::Package and 
-    Class::MOP::Module classes to more 
-    closely conform to Perl 6's meta model
+    * Created Class::MOP::Class::Immutable  
     
-    created Class::MOP::Class::Immutable 
-    which can be used to "close" a class 
-    and then apply some optimizations
+    * Created the Class::MOP::Package and 
+      Class::MOP::Module classes to more 
+      closely conform to Perl 6's meta-model
 
     * Class::MOP::Class
       - now inherits from Class::MOP::Module
