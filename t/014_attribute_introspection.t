@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 46;
+use Test::More tests => 48;
 use Test::Exception;
 
 BEGIN {
@@ -34,6 +34,8 @@ BEGIN {
         has_default   default    is_default_a_coderef
         
         slots
+        get_value
+        set_value
         
         associated_class
         attach_to_class detach_from_class

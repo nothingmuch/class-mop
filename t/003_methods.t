@@ -3,8 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 52;
+use Test::More tests => 56;
 use Test::Exception;
+
+use Scalar::Util qw/reftype/;
 
 BEGIN {
     use_ok('Class::MOP');   
@@ -32,6 +34,11 @@ BEGIN {
 
     # We hateses the "used only once" warnings
     { my $temp = \&Foo::baz }
+    
+    package OinkyBoinky;
+    our @ISA = "Foo";
+    
+    sub elk { 'OinkyBoinky::elk' }
 
     package main;
     
@@ -77,6 +84,17 @@ ok($Foo->has_method('blah'), '... Foo->has_method(blah) (defined in main:: using
 ok($Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
 ok($Foo->has_method('bang'), '... Foo->has_method(bang) (defined in main:: using symbol tables and Sub::Name)');
 ok($Foo->has_method('evaled_foo'), '... Foo->has_method(evaled_foo) (evaled in main::)');
+
+my $OinkyBoinky = Class::MOP::Class->initialize('OinkyBoinky');
+
+ok($OinkyBoinky->has_method('elk'), "the method 'elk' is defined in OinkyBoinky");
+
+ok(!$OinkyBoinky->has_method('bar'), "the method 'bar' is not defined in OinkyBoinky");
+
+ok(my $bar = $OinkyBoinky->find_method_by_name('bar'), "but if you look in the inheritence chain then 'bar' does exist");
+
+is( reftype($bar), "CODE", "the returned value is a code ref" );
+
 
 # calling get_method blessed them all
 isa_ok($_, 'Class::MOP::Method') for (

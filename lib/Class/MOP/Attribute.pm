@@ -15,7 +15,7 @@ sub meta {
 }
 
 # NOTE: (meta-circularity)
-# This method will be replaces in the 
+# This method will be replaced in the 
 # boostrap section of Class::MOP, by 
 # a new version which uses the 
 # &Class::MOP::Class::construct_instance
@@ -49,7 +49,7 @@ sub new {
 
 # NOTE:
 # this is a primative (and kludgy) clone operation 
-# for now, it will be repleace in the Class::MOP
+# for now, it will be replaced in the Class::MOP
 # bootstrap with a proper one, however we know 
 # that this one will work fine for now.
 sub clone {
@@ -132,15 +132,31 @@ sub detach_from_class {
     $self->{associated_class} = undef;        
 }
 
+## Slot management
+
+sub set_value {
+    my ( $self, $instance, $value ) = @_;
+
+    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+                     ->get_meta_instance
+                     ->set_slot_value( $instance, $self->name, $value );
+}
+
+sub get_value {
+    my ( $self, $instance ) = @_;
+
+    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+                     ->get_meta_instance
+                     ->get_slot_value( $instance, $self->name );
+}
+
 ## Method generation helpers
 
 sub generate_accessor_method {
-    my $self = shift; 
-    my $attr_name  = $self->name;
+    my $attr = shift; 
     return sub {
-        my $meta_instance = Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))->get_meta_instance;
-        $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
-        $meta_instance->get_slot_value($_[0], $attr_name);
+        $attr->set_value( $_[0], $_[1] ) if scalar(@_) == 2;
+        $attr->get_value( $_[0] );
     };
 }
 
@@ -159,13 +175,10 @@ sub generate_accessor_method_inline {
 }
 
 sub generate_reader_method {
-    my $self = shift;
-    my $attr_name  = $self->name;
+    my $attr = shift;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                         ->get_meta_instance
-                         ->get_slot_value($_[0], $attr_name); 
+        $attr->get_value( $_[0] );
     };   
 }
 
@@ -184,12 +197,9 @@ sub generate_reader_method_inline {
 }
 
 sub generate_writer_method {
-    my $self = shift;
-    my $attr_name  = $self->name;
-    return sub { 
-        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                         ->get_meta_instance
-                         ->set_slot_value($_[0], $attr_name, $_[1]);
+    my $attr = shift;
+    return sub {
+        $attr->set_value( $_[0], $_[1] );
     };
 }
 
@@ -473,6 +483,22 @@ defined, and false (C<0>) otherwise.
 
 =back 
 
+=head2 Value management
+
+=over 4
+
+=item set_value $instance, $value
+
+Set the value without going through the accessor. Note that this may be done to
+even attributes with just read only accessors.
+
+=item get_value $instance
+
+Return the value without going through the accessor. Note that this may be done
+even to attributes with just write only accessors.
+
+=back
+
 =head2 Informational
 
 These are all basic read-only value accessors for the values 
@@ -628,3 +654,4 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
 =cut
+

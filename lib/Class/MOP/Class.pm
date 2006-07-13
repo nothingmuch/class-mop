@@ -429,6 +429,12 @@ sub alias_method {
     *{$full_method_name} = $method;
 }
 
+sub find_method_by_name {
+    my ( $self, $method_name ) = @_;
+
+    return $self->name->can( $method_name );
+}
+
 sub has_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
@@ -441,10 +447,14 @@ sub has_method {
     my $method = \&{$sub_name};
     return 0 if (svref_2object($method)->GV->STASH->NAME || '') ne $self->name &&
                 (svref_2object($method)->GV->NAME || '')        ne '__ANON__';      
-    
-    # at this point we are relatively sure 
-    # it is our method, so we bless/wrap it 
-    $self->method_metaclass->wrap($method) unless blessed($method);
+
+    #if ( $self->name->can("meta") ) {
+        # don't bless (destructive operation) classes that didn't ask for it
+
+        # at this point we are relatively sure 
+        # it is our method, so we bless/wrap it 
+        $self->method_metaclass->wrap($method) unless blessed($method);
+    #}
     return 1;
 }
 
@@ -963,6 +973,13 @@ C<$method_name> is actually a method. However, it will DWIM about
 
 This will return a CODE reference of the specified C<$method_name>, 
 or return undef if that method does not exist.
+
+=item B<find_method_by_name ($method_name>
+
+This will return a CODE reference of the specified C<$method_name>,
+or return undef if that method does not exist.
+
+Unlike C<get_method> this will also look in the superclasses.
 
 =item B<remove_method ($method_name)>
 

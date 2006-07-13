@@ -20,7 +20,7 @@ sub import {
     else {
         $metaclass = shift;
         ($metaclass->isa('Class::MOP::Class'))
-            || confess 'The metaclass must be derived from Class::MOP::Class';        
+            || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
     }
     my %options = @_;
     my $package = caller();
