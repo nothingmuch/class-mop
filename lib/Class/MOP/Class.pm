@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 use base 'Class::MOP::Module';
 

@@ -1,5 +1,15 @@
 Revision history for Perl extension Class-MOP.
 
+0.31
+    * Class::MOP::Class
+      - added &find_method_by_name to locate a method
+        anywhere within the class hierarchy   
+        
+    * Class::MOP::Attribute
+      - added &set_value and &get_value for getting 
+        the value of the attribute for a particular 
+        instance.
+
 0.30 Wed. July 5, 2006
     ---------------------------------------
     This is the first version of Class::MOP 
