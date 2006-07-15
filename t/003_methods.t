@@ -203,7 +203,7 @@ is_deeply(
     
 is_deeply(
     [ sort { $a->{name} cmp $b->{name} } $Bar->compute_all_applicable_methods() ],
-    [
+    [ sort { $a->{name} cmp $b->{name} }
         {
             name  => 'bang',
             class => 'Foo',

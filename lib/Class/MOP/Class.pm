@@ -14,6 +14,7 @@ our $VERSION = '0.16';
 use base 'Class::MOP::Module';
 
 use Class::MOP::Instance;
+use Class::MOP::Iterator;
 
 # Self-introspection 
 
@@ -311,7 +312,12 @@ sub superclasses {
         # we don't know about
         $self->check_metaclass_compatability();
     }
-    @{$self->name . '::ISA'};
+
+    my @superclasses = @{$self->name . '::ISA'};
+
+    wantarray
+        ? @superclasses
+        : Class::MOP::Iterator->from_list( @superclasses );
 }
 
 sub class_precedence_list {
@@ -323,12 +329,25 @@ sub class_precedence_list {
     # suggestions are welcome.
     { ($self->name || return)->isa('This is a test for circular inheritance') }
     # ... and now back to our regularly scheduled program
-    (
-        $self->name, 
-        map { 
-            $self->initialize($_)->class_precedence_list()
-        } $self->superclasses()
-    );   
+
+    if ( wantarray ) {
+        return (
+            $self->name, 
+            map { 
+                $self->initialize($_)->class_precedence_list()
+            } $self->superclasses()
+        );
+    } else {
+        return Class::MOP::Iterator->cons(
+            $self->name,
+            Class::MOP::Iterator->flatten(
+                Class::MOP::Iterator->map(
+                    sub { scalar($self->initialize($_)->class_precedence_list()) },
+                    scalar($self->superclasses),
+                ),
+            ),
+        );
+    }
 }
 
 ## Methods
@@ -486,7 +505,8 @@ sub remove_method {
 sub get_method_list {
     my $self = shift;
     no strict 'refs';
-    grep { $self->has_method($_) } keys %{$self->name . '::'};
+    my @methods = grep { $self->has_method($_) } keys %{$self->name . '::'};
+    wantarray ? @methods : Class::MOP::Iterator->from_list(@methods);
 }
 
 sub compute_all_applicable_methods {
@@ -497,22 +517,36 @@ sub compute_all_applicable_methods {
     # inheritence issues because we are 
     # using the &class_precedence_list
     my (%seen_class, %seen_method);
-    foreach my $class ($self->class_precedence_list()) {
-        next if $seen_class{$class};
-        $seen_class{$class}++;
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        foreach my $method_name ($meta->get_method_list()) { 
-            next if exists $seen_method{$method_name};
-            $seen_method{$method_name}++;
-            push @methods => {
-                name  => $method_name, 
-                class => $class,
-                code  => $meta->get_method($method_name)
-            };
-        }
-    }
-    return @methods;
+
+    my $i = Class::MOP::Iterator->flatten(
+        Class::MOP::Iterator->map(
+            sub {
+                my $class = shift;
+                my $meta = $self->initialize($class);
+
+                return Class::MOP::Iterator->map(
+                    sub {
+                        my $method_name = shift;
+                        return {
+                            name  => $method_name,
+                            class => $class,
+                            code  => $meta->get_method($method_name)
+                        };
+                    },
+                    Class::MOP::Iterator->grep(
+                        sub { !$seen_method{$_}++ },
+                        scalar($meta->get_method_list),
+                    ),
+                ),
+            },
+            Class::MOP::Iterator->grep(
+               sub { !$seen_class{$_}++ },
+                scalar($self->class_precedence_list()),
+            ),
+        ),
+    );
+
+    wantarray ? $i->all : $i;
 }
 
 sub find_all_methods_by_name {
@@ -609,7 +643,8 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    keys %{$self->get_attribute_map};
+    my @attr_names = keys %{$self->get_attribute_map};
+    wantarray ? @attr_names : Class::MOP::Iterator->from_list(@attr_names);
 } 
 
 sub compute_all_applicable_attributes {
@@ -620,17 +655,32 @@ sub compute_all_applicable_attributes {
     # inheritence issues because we are 
     # using the &class_precedence_list
     my (%seen_class, %seen_attr);
-    foreach my $class ($self->class_precedence_list()) {
-        next if $seen_class{$class};
-        $seen_class{$class}++;
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        foreach my $attr_name ($meta->get_attribute_list()) { 
-            next if exists $seen_attr{$attr_name};
-            $seen_attr{$attr_name}++;
-            push @attrs => $meta->get_attribute($attr_name);
-        }
-    }
+
+    # FIXME
+    # i'm not sure attrs mask out each other even if their
+    # names are diff.
+    # while this is true for construction, it's not true for accessors
+
+    my $i = Class::MOP::Iterator->flatten(
+        Class::MOP::Iterator->map(
+            sub {
+                my $class = shift;
+                my $meta = $self->initialize($class);
+
+                return Class::MOP::Iterator->map(
+                    sub { $meta->get_attribute($_) },
+                    Class::MOP::Iterator->grep(
+                        sub { !$seen_attr{$_}++ },
+                        scalar($meta->get_attribute_list),
+                    ),
+                );
+            },
+            Class::MOP::Iterator->grep(
+                sub { !$seen_class{$_}++ },
+                scalar($self->class_precedence_list()),
+            ),
+        ),
+    );
     return @attrs;    
 }
 

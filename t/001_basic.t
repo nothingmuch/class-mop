@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 30;
 use Test::Exception;
 
 BEGIN {
@@ -35,6 +35,12 @@ is($Bar->version, undef, '... Bar->version == undef');
 is_deeply([$Foo->superclasses], [], '... Foo has no superclasses');
 is_deeply([$Bar->superclasses], ['Foo'], '... Bar->superclasses == (Foo)');
 
+isa_ok( scalar($Foo->superclasses), "Class::MOP::Iterator" );
+is_deeply( [ $Foo->superclasses->all ], [], "no superclasses" );
+
+isa_ok( scalar($Bar->superclasses), "Class::MOP::Iterator" );
+is_deeply( [ $Bar->superclasses->all ], ['Foo'], "Bar superclasses in iter" );
+
 $Foo->superclasses('UNIVERSAL');
 
 is_deeply([$Foo->superclasses], ['UNIVERSAL'], '... Foo->superclasses == (UNIVERSAL) now');
@@ -48,7 +54,17 @@ is_deeply(
     [ $Bar->class_precedence_list ], 
     [ 'Bar', 'Foo', 'UNIVERSAL' ], 
     '... Bar->class_precedence_list == (Bar, Foo, UNIVERSAL)');
-    
+
+my $i = $Bar->class_precedence_list;
+
+ok( !$i->is_done, "iterator not done" );
+is( $i->next, 'Bar', "next class in iterator" );
+ok( !$i->is_done, "iterator not done" );
+is( $i->next, 'Foo', "next class in iterator" );
+ok( !$i->is_done, "iterator not done" );
+is( $i->next, 'UNIVERSAL', "next class in iterator" );
+ok( $i->is_done, "iterator done" );
+
 # create a class using Class::MOP::Class ...
 
 my $Baz = Class::MOP::Class->create(
