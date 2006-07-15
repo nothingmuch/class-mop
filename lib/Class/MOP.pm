@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -479,9 +479,11 @@ Thanks to Rob for actually getting the development of this module kick-started.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

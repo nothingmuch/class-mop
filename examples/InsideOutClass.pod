@@ -162,7 +162,7 @@ inside-out objects to be C<DESTROY>-ed, and some other details as
 well (threading, etc), but this is an example. A real implementation is left as
 an exercise to the reader.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 

@@ -640,9 +640,11 @@ of the MOP when subclassing it.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

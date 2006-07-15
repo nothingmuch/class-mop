@@ -79,9 +79,11 @@ This is a pragma to make it easier to use a specific metaclass
 and a set of custom attribute and method metaclasses. It also 
 installs a C<meta> method to your class as well. 
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

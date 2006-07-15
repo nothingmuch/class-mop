@@ -94,9 +94,11 @@ This is very similar now to the InsideOutClass example, and
 in fact, they both share the exact same test suite, with 
 the only difference being the Instance metaclass they use.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 SEE ALSO
 

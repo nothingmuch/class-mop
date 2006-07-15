@@ -289,7 +289,7 @@ optimizations.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 

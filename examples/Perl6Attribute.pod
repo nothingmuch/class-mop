@@ -65,9 +65,11 @@ same pre-processing approach. This is left as an exercise to
 the reader though (if you do it, please send me a patch 
 though, and will update this).
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

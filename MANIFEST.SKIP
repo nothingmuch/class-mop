@@ -8,6 +8,7 @@ CVS
 \.svn
 \.DS_Store
 cover_db
+bench
 \..*\.sw.?$
 ^Makefile$
 ^pm_to_blib$

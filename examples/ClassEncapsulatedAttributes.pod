@@ -133,9 +133,11 @@ is similar to how C++ handles its data members.
 
 Thanks to Yuval "nothingmuch" Kogman for the idea for this example.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

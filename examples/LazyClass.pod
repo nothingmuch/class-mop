@@ -133,9 +133,11 @@ without complicating the programing of it. This would also be
 ideal for a class which has a large amount of attributes, 
 several of which are optional. 
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
