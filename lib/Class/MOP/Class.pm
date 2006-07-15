@@ -315,9 +315,9 @@ sub superclasses {
 
     my @superclasses = @{$self->name . '::ISA'};
 
-    wantarray
+    return ( wantarray
         ? @superclasses
-        : Class::MOP::Iterator->from_list( @superclasses );
+        : Class::MOP::Iterator->from_list( @superclasses ) );
 }
 
 sub class_precedence_list {
@@ -644,12 +644,12 @@ sub remove_attribute {
 sub get_attribute_list {
     my $self = shift;
     my @attr_names = keys %{$self->get_attribute_map};
-    wantarray ? @attr_names : Class::MOP::Iterator->from_list(@attr_names);
+    return ( wantarray ? @attr_names : Class::MOP::Iterator->from_list(@attr_names) );
 } 
 
 sub compute_all_applicable_attributes {
     my $self = shift;
-    my @attrs;
+
     # keep a record of what we have seen
     # here, this will handle all the 
     # inheritence issues because we are 
@@ -660,6 +660,8 @@ sub compute_all_applicable_attributes {
     # i'm not sure attrs mask out each other even if their
     # names are diff.
     # while this is true for construction, it's not true for accessors
+
+    # perhaps it should be told how to make attrs mask eachother off?
 
     my $i = Class::MOP::Iterator->flatten(
         Class::MOP::Iterator->map(
@@ -681,7 +683,8 @@ sub compute_all_applicable_attributes {
             ),
         ),
     );
-    return @attrs;    
+
+    return ( wantarray ? $i->all : $i );
 }
 
 sub find_attribute_by_name {

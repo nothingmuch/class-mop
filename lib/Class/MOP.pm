@@ -163,6 +163,24 @@ Class::MOP::Attribute->meta->add_attribute(
     ))
 );
 
+## Class::MOP::Iterator
+
+=pod
+
+Class::MOP::Iterator->meta->add_attribute(
+    Class::MOP::Attribute->new('generator' => (
+        accessor => 'generator',
+    )),
+);
+
+Class::MOP::Iterator->meta->add_attribute(
+    Class::MOP::Attribute->new('predicate' => (
+        accessor => 'predicate',
+    )),
+);
+
+=cut
+
 
 # NOTE: (meta-circularity)
 # This should be one of the last things done
@@ -196,6 +214,7 @@ Class::MOP::Class    ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Iterator ->meta->make_immutable(inline_constructor => 0);
 
 
 1;

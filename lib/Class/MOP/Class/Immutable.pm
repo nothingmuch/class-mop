@@ -7,6 +7,8 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'looks_like_number';
 
+use Class::MOP::Iterator;
+
 our $VERSION = '0.01';
 
 use base 'Class::MOP::Class';
@@ -130,10 +132,11 @@ sub _generate_slot_initializer {
 
 # cached methods
 
-sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}                  }
-sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
-sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
-sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
+sub _i { wantarray ? @_ : Class::MOP::Iterator->from_list(@_) }
+sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}                      }
+sub class_precedence_list             { _i(@{(shift)->{'___class_precedence_list'}})             }
+sub compute_all_applicable_attributes { _i(@{(shift)->{'___compute_all_applicable_attributes'}}) }
+sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                         }
 
 1;
 

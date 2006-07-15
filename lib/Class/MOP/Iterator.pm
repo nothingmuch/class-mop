@@ -5,6 +5,11 @@ package Class::MOP::Iterator;
 use strict;
 use warnings;
 
+use Carp         'confess';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
+
+our $VERSION = "0.01";
+
 use base 'Class::MOP::Module';
 
 sub meta {
@@ -29,7 +34,6 @@ sub from_list {
     return $class->new(
         generator => sub { shift @list },
         predicate => sub { scalar(@list) },
-        __list => \@list,
     );
 }
 
@@ -80,13 +84,13 @@ sub map {
     return $class->new(
         predicate => sub { $iter->check_predicate },
         generator => sub {
-            unless ( $iter->is_done ) {
+            if ( $iter->check_predicate ) {
                 my $next = $iter->next;
                 local $_ = $next;
                 return $map->($next);
+            } else {
+                return;
             }
-
-            return
         },
     );
 }
@@ -95,12 +99,6 @@ sub grep {
     my ( $class, $filter, @iters ) = @_;
     
     my $iter = ( ( @iters == 1 ) ? $iters[0] : $class->concat(@iters) );
-
-    use Data::Dumper;
-    $Data::Dumper::Deparse = 1;
-    #warn "got iter to filter: ". Dumper($iter, $filter);
-
-    die Carp::longmess unless $iter->isa(__PACKAGE__);
 
     my $have_next; # always know if there's a next match for predicate
     my $next_value; # if we had to look ahead, this is where we keep it
@@ -140,7 +138,7 @@ sub flatten {
     my ( $class, @iters ) = @_;
 
     my $iter_of_iters = ( ( @iters == 1 ) ? $iters[0] : $class->concat(@iters) );
-    
+
     my $next_iter;
     my $get_next_iter = sub {
         while ( !$next_iter or $next_iter->is_done ) {
@@ -220,6 +218,101 @@ That ought to be fixed, but note that the predicate/generator are invoked as
 methods so that they may replace theselves.
 
 A nice alternative would be for someone to write L<Inline::GHC>.
+
+=head1 METHODS
+
+=head2 Constructors
+
+=over 4
+
+=item new %options
+
+Takes an options hash which must contain the fields C<generator> and
+C<predicate>.
+
+C<generator> must return the next item in the iterator, and C<predicate> must
+return true if there are any items remaining.
+
+Both code refs accept the iterator as the invocant, and may invoke methods on
+it.
+
+=item concat @iters
+
+This is a bit like saying C<< map { @$_ } @array_of_arrays >>. It returns an
+iterator that will return all the values from all it's sub iterators.
+
+=item cons $item, $iter
+
+Creates an iterator that will first return $item, and then every element in
+$iter.
+
+=item grep $filter, @iters
+
+Creates an iterator over all the iterms that for which C<< $filter->($item) >>
+returns true.
+
+The item is both in C<$_> and in C<$_[0]> for C<$filter>.
+
+=item map $sub, @iters
+
+Creates an iterator of consisting of C<< $sub->( $item ) >> for every item in
+C<@iters>.
+
+The item is both in C<$_> and in C<$_[0]> for C<$sub>.
+
+=item from_list @list
+
+Creates an iterator from a list of items.
+
+Every item will be returned, akin to calling C<shift> repeatedly.
+
+=item flatten @iters_of_iters
+
+Accepts iterators whose items are themselves iterators, and flattens the
+output.
+
+=back
+
+=head2 Instance methods
+
+=over 4
+
+=item next
+
+Return the next item in the iterator.
+
+=item all
+
+Deplete the iterator, returning all the items.
+
+=item is_done
+
+Returns whether or not the iterator is depleted.
+
+=item check_predicate
+
+The inverse of is_done.
+
+=item generator
+
+Set or get the generator code ref.
+
+=item predicate
+
+Set or get the predicate code ref.
+
+=back
+
+=head2 Introspection
+
+=over 4
+
+=item meta
+
+Returns the L<Class::MOP::Class> instance which is related with the class of
+the invocant.
+
+=back
 
 =cut
 
