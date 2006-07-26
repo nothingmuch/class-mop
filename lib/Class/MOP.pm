@@ -165,22 +165,33 @@ Class::MOP::Attribute->meta->add_attribute(
 
 ## Class::MOP::Iterator
 
-=pod
-
 Class::MOP::Iterator->meta->add_attribute(
     Class::MOP::Attribute->new('generator' => (
-        accessor => 'generator',
+        accessor => { 
+            # NOTE: we need to do this in order 
+            # not fall into meta-circular death            
+            'generator' => sub {
+                my $self = shift;
+                $self->{generator} = shift if @_;
+                $self->{generator};                
+            }
+        }
     )),
 );
 
 Class::MOP::Iterator->meta->add_attribute(
     Class::MOP::Attribute->new('predicate' => (
-        accessor => 'predicate',
+        accessor => { 
+            # NOTE: we need to do this in order 
+            # not fall into meta-circular death            
+            'predicate' => sub {
+                my $self = shift;
+                $self->{predicate} = shift if @_;
+                $self->{predicate};
+            }
+        }
     )),
 );
-
-=cut
-
 
 # NOTE: (meta-circularity)
 # This should be one of the last things done
