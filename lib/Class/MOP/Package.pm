@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # introspection
 
@@ -19,8 +19,11 @@ sub meta {
 # creation ...
 
 sub initialize {
-    my ($class, $package) = @_;
-    bless { '$:package' => $package } => $class;
+    my $class        = shift;
+    my $package_name = shift;
+    # we hand-construct the class 
+    # until we can bootstrap it
+    return bless { '$:package' => $package_name } => $class;
 }
 
 # Attributes
@@ -56,7 +59,7 @@ sub name { $_[0]->{'$:package'} }
             || confess "I do not recognize that sigil '$sigil'";
     
         no strict 'refs';
-        no warnings 'misc';
+        no warnings 'misc', 'redefine';
         *{$self->name . '::' . $name} = $initial_value;    
     }
 
@@ -121,13 +124,29 @@ sub name { $_[0]->{'$:package'} }
             undef %{$self->name . '::' . $name};    
         }
         elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
-            undef &{$self->name . '::' . $name};    
+            # FIXME:
+            # this is crap, it is probably much 
+            # easier to write this in XS.
+            my ($scalar, @array, %hash);
+            $scalar = ${$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{SCALAR};
+            @array  = @{$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{ARRAY};
+            %hash   = %{$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{HASH};
+            delete ${$self->name . '::'}{$name};
+            ${$self->name . '::' . $name} = $scalar if defined $scalar;
+            @{$self->name . '::' . $name} = @array  if scalar  @array;
+            %{$self->name . '::' . $name} = %hash   if keys    %hash;            
         }    
         else {
             confess "This should never ever ever happen";
         }
     }
+    
+}
 
+sub list_all_package_symbols {
+    my ($self) = @_;
+    no strict 'refs';
+    return keys %{$self->name . '::'};
 }
 
 1;
@@ -161,6 +180,8 @@ Class::MOP::Package - Package Meta Object
 =item B<has_package_symbol>
 
 =item B<remove_package_symbol>
+
+=item B<list_all_package_symbols>
 
 =back
 
