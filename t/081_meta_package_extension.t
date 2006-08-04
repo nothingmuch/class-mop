@@ -39,7 +39,6 @@ BEGIN {
 }
 
 # No actually package Foo exists :)
-
 my $meta = My::Meta::Package->initialize('Foo');
 
 isa_ok($meta, 'My::Meta::Package');
