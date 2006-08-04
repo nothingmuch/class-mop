@@ -76,10 +76,22 @@ sub initialize_slot {
     $self->set_slot_value($instance, $slot_name, undef);
 }
 
+sub deinitialize_slot {
+    my ( $self, $instance, $slot_name ) = @_;
+    delete $instance->{$slot_name};
+}
+
 sub initialize_all_slots {
     my ($self, $instance) = @_;
     foreach my $slot_name ($self->get_all_slots) {
         $self->initialize_slot($instance, $slot_name);
+    }
+}
+
+sub deinitialize_all_slots {
+    my ($self, $instance) = @_;
+    foreach my $slot_name ($self->get_all_slots) {
+        $self->deinitialize_slot($instance, $slot_name);
     }
 }
 
@@ -127,6 +139,10 @@ sub inline_initialize_slot {
     $self->inline_set_slot_value($instance, $slot_name, 'undef'),
 }
 
+sub inline_deinitialize_slot {
+    my ($self, $instance, $slot_name) = @_;
+    "delete " . $self->inline_slot_access($instance, $slot_name);
+}
 sub inline_is_slot_initialized {
     my ($self, $instance, $slot_name) = @_;
     "exists " . $self->inline_slot_access($instance, $slot_name) . " ? 1 : 0";
@@ -245,7 +261,11 @@ require that the C<$instance_structure> is passed into them.
 
 =item B<initialize_slot ($instance_structure, $slot_name)>
 
+=item B<deinitialize_slot ($instance_structure, $slot_name)>
+
 =item B<initialize_all_slots ($instance_structure)>
+
+=item B<deinitialize_all_slots ($instance_structure)>
 
 =item B<is_slot_initialized ($instance_structure, $slot_name)>
 
@@ -280,6 +300,8 @@ optimizations.
 =item B<inline_set_slot_value ($instance_structure, $slot_name, $value)>
 
 =item B<inline_initialize_slot ($instance_structure, $slot_name)>
+
+=item B<inline_deinitialize_slot ($instance_structure, $slot_name)>
 
 =item B<inline_is_slot_initialized ($instance_structure, $slot_name)>
 

@@ -39,6 +39,7 @@ sub new {
         reader    => $options{reader},
         writer    => $options{writer},
         predicate => $options{predicate},
+        clearer   => $options{clearer},
         init_arg  => $options{init_arg},
         default   => $options{default},
         # keep a weakened link to the 
@@ -86,6 +87,7 @@ sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
 sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
 sub has_writer    { defined($_[0]->{writer})    ? 1 : 0 }
 sub has_predicate { defined($_[0]->{predicate}) ? 1 : 0 }
+sub has_clearer   { defined($_[0]->{clearer})   ? 1 : 0 }
 sub has_init_arg  { defined($_[0]->{init_arg})  ? 1 : 0 }
 sub has_default   { defined($_[0]->{default})   ? 1 : 0 }
 
@@ -93,6 +95,7 @@ sub accessor  { $_[0]->{accessor}  }
 sub reader    { $_[0]->{reader}    }
 sub writer    { $_[0]->{writer}    }
 sub predicate { $_[0]->{predicate} }
+sub clearer   { $_[0]->{clearer}   }
 sub init_arg  { $_[0]->{init_arg}  }
 
 # end bootstrapped away method section.
@@ -226,6 +229,16 @@ sub generate_predicate_method {
     };
 }
 
+sub generate_clearer_method {
+    my $self = shift;
+    my $attr_name  = $self->name;
+    return sub { 
+        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
+                         ->get_meta_instance
+                         ->deinitialize_slot($_[0], $attr_name);
+    };
+}
+
 sub generate_predicate_method_inline {
     my $self          = shift; 
     my $attr_name     = $self->name;
@@ -234,7 +247,20 @@ sub generate_predicate_method_inline {
     my $code = eval 'sub {'
         . 'defined ' . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'") . ' ? 1 : 0'
     . '}';
-    confess "Could not generate inline accessor because : $@" if $@;
+    confess "Could not generate inline predicate because : $@" if $@;
+
+    return $code;
+}
+
+sub generate_clearer_method_inline {
+    my $self          = shift; 
+    my $attr_name     = $self->name;
+    my $meta_instance = $self->associated_class->instance_metaclass;
+
+    my $code = eval 'sub {'
+        . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
+    . '}';
+    confess "Could not generate inline clearer because : $@" if $@;
 
     return $code;
 }
@@ -243,7 +269,7 @@ sub process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
     if (reftype($accessor)) {
         (reftype($accessor) eq 'HASH')
-            || confess "bad accessor/reader/writer/predicate format, must be a HASH ref";
+            || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
         return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
     }
@@ -280,6 +306,10 @@ sub install_accessors {
         $self->process_accessors('predicate' => $self->predicate(), $inline)
     ) if $self->has_predicate();
     
+    $class->add_method(
+        $self->process_accessors('clearer' => $self->clearer(), $inline)
+    ) if $self->has_clearer();
+    
     return;
 }
 
@@ -300,6 +330,7 @@ sub install_accessors {
         $_remove_accessor->($self->reader(),    $self->associated_class()) if $self->has_reader();
         $_remove_accessor->($self->writer(),    $self->associated_class()) if $self->has_writer();
         $_remove_accessor->($self->predicate(), $self->associated_class()) if $self->has_predicate();
+        $_remove_accessor->($self->clearer(),   $self->associated_class()) if $self->has_clearer();
         return;                        
     }
 
@@ -429,12 +460,11 @@ an exercise to the reader :).
 
 =back
 
-The I<accessor>, I<reader>, I<writer> and I<predicate> keys can 
-contain either; the name of the method and an appropriate default 
-one will be generated for you, B<or> a HASH ref containing exactly one 
-key (which will be used as the name of the method) and one value, 
-which should contain a CODE reference which will be installed as 
-the method itself.
+The I<accessor>, I<reader>, I<writer>, I<predicate> and I<clearer> keys can
+contain either; the name of the method and an appropriate default one will be
+generated for you, B<or> a HASH ref containing exactly one key (which will be
+used as the name of the method) and one value, which should contain a CODE
+reference which will be installed as the method itself.
 
 =over 4
 
@@ -474,6 +504,11 @@ C<undef> value to the attribute.
 This is a basic test to see if the value of the attribute is not 
 C<undef>. It will return true (C<1>) if the attribute's value is 
 defined, and false (C<0>) otherwise.
+
+=item I<clearer>
+
+This is the a method that will uninitialize the attr, reverting lazy values
+back to their "unfulfilled" state.
 
 =back
 
@@ -516,6 +551,8 @@ passed into C<new>. I think they are pretty much self-explanitory.
 
 =item B<predicate>
 
+=item B<clearer>
+
 =item B<init_arg>
 
 =item B<is_default_a_coderef>
@@ -546,6 +583,8 @@ These are all basic predicate methods for the values passed into C<new>.
 =item B<has_writer>
 
 =item B<has_predicate>
+
+=item B<has_clearer>
 
 =item B<has_init_arg>
 
@@ -598,6 +637,8 @@ use the custom method passed through the constructor.
 
 =item B<generate_predicate_method>
 
+=item B<generate_clearer_method>
+
 =item B<generate_reader_method>
 
 =item B<generate_writer_method>
@@ -610,6 +651,8 @@ use the custom method passed through the constructor.
 
 =item B<generate_predicate_method_inline>
 
+=item B<generate_clearer_method_inline>
+
 =item B<generate_reader_method_inline>
 
 =item B<generate_writer_method_inline>
@@ -619,7 +662,7 @@ use the custom method passed through the constructor.
 =item B<remove_accessors>
 
 This allows the attribute to remove the method for it's own 
-I<accessor/reader/writer/predicate>. This is called by 
+I<accessor/reader/writer/predicate/clearer>. This is called by 
 C<Class::MOP::Class::remove_attribute>.
 
 =back
@@ -656,4 +699,5 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
 =cut
+
 

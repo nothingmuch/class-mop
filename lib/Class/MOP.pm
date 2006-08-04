@@ -150,6 +150,13 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('clearer' => (
+        reader    => 'clearer',
+        predicate => 'has_clearer',
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('init_arg' => (
         reader    => 'init_arg',
         predicate => 'has_init_arg',

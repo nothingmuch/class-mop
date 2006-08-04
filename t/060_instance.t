@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 39;
+use Test::More tests => 47;
 use Test::Exception;
 
 use Scalar::Util qw/isweak reftype/;
@@ -21,10 +21,12 @@ can_ok( "Class::MOP::Instance", $_ ) for qw/
     get_all_slots
     
 	initialize_all_slots    
+	deinitialize_all_slots    
 
 	get_slot_value
 	set_slot_value
 	initialize_slot
+	deinitialize_slot
 	is_slot_initialized	
 	weaken_slot_value
 	strengthen_slot_value	
@@ -32,6 +34,7 @@ can_ok( "Class::MOP::Instance", $_ ) for qw/
 	inline_get_slot_value
 	inline_set_slot_value
 	inline_initialize_slot
+	inline_deinitialize_slot
 	inline_is_slot_initialized	
 	inline_weaken_slot_value
 	inline_strengthen_slot_value	
@@ -78,7 +81,15 @@ isa_ok($i_foo, "Foo");
     is_deeply($i_foo, $i_foo_2, '... but the same structure');
 }
 
+ok(!$mi_foo->is_slot_initialized( $i_foo, "moosen" ), "slot not initialized");
+
 ok(!defined($mi_foo->get_slot_value( $i_foo, "moosen" )), "... no value for slot");
+
+$mi_foo->initialize_slot( $i_foo, "moosen" );
+
+ok($mi_foo->is_slot_initialized( $i_foo, "moosen" ), "slot initialized");
+
+ok(!defined($mi_foo->get_slot_value( $i_foo, "moosen" )), "... but no value for slot");
 
 $mi_foo->set_slot_value( $i_foo, "moosen", "the value" );
 
@@ -121,4 +132,10 @@ ok( !isweak($i_foo->{moosen}), '... white box test of weaken' );
 undef $ref;
 
 is( reftype( $mi_foo->get_slot_value( $i_foo, "moosen" ) ), "ARRAY", "weak value can be strengthened" );
+
+$mi_foo->deinitialize_slot( $i_foo, "moosen" );
+
+ok(!$mi_foo->is_slot_initialized( $i_foo, "moosen" ), "slot deinitialized");
+
+ok(!defined($mi_foo->get_slot_value( $i_foo, "moosen" )), "... no value for slot");
 

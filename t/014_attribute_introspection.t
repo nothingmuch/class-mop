@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 48;
+use Test::More tests => 53;
 use Test::Exception;
 
 BEGIN {
@@ -30,6 +30,7 @@ BEGIN {
         has_writer    writer
         has_reader    reader
         has_predicate predicate
+        has_clearer   clearer
         has_init_arg  init_arg
         has_default   default    is_default_a_coderef
         
@@ -44,11 +45,13 @@ BEGIN {
         generate_reader_method
         generate_writer_method
         generate_predicate_method
+        generate_clearer_method
         
         generate_accessor_method_inline
         generate_reader_method_inline
         generate_writer_method_inline
         generate_predicate_method_inline    
+        generate_clearer_method_inline    
         
         process_accessors
         install_accessors
@@ -56,8 +59,8 @@ BEGIN {
         );
         
     is_deeply(
-        [ sort @methods ],
         [ sort $meta->get_method_list ],
+        [ sort @methods ],
         '... our method list matches');        
     
     foreach my $method_name (@methods) {
@@ -65,13 +68,13 @@ BEGIN {
     }
     
     my @attributes = qw(
-        name accessor reader writer predicate
+        name accessor reader writer predicate clearer
         init_arg default associated_class
         );
 
     is_deeply(
-        [ sort @attributes ],
         [ sort $meta->get_attribute_list ],
+        [ sort @attributes ],
         '... our attribute list matches');
     
     foreach my $attribute_name (@attributes) {
