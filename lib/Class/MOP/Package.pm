@@ -23,7 +23,11 @@ sub initialize {
     my $package_name = shift;
     # we hand-construct the class 
     # until we can bootstrap it
-    return bless { '$:package' => $package_name } => $class;
+    no strict 'refs';
+    return bless { 
+        '$:package'   => $package_name,
+        '%:namespace' => \%{$package_name . '::'},
+    } => $class;
 }
 
 # Attributes
@@ -32,9 +36,10 @@ sub initialize {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name { $_[0]->{'$:package'} }
+sub name      { $_[0]->{'$:package'}   }
+sub namespace { $_[0]->{'%:namespace'} }
 
-# Class attributes
+# utility methods
 
 {
     my %SIGIL_MAP = (
@@ -43,110 +48,94 @@ sub name { $_[0]->{'$:package'} }
         '%' => 'HASH',
         '&' => 'CODE',
     );
-
-    sub add_package_symbol {
-        my ($self, $variable, $initial_value) = @_;
     
+    sub _deconstruct_variable_name {
+        my ($self, $variable) = @_;
+
         (defined $variable)
             || confess "You must pass a variable name";    
-    
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        no warnings 'misc', 'redefine';
-        *{$self->name . '::' . $name} = $initial_value;    
-    }
-
-    sub has_package_symbol {
-        my ($self, $variable) = @_;
-        (defined $variable)
-            || confess "You must pass a variable name";
 
         my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
+
         (defined $sigil)
             || confess "The variable name must include a sigil";    
-    
+
         (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        defined *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}} ? 1 : 0;
-    
-    }
-
-    sub get_package_symbol {
-        my ($self, $variable) = @_;    
-        (defined $variable)
-            || confess "You must pass a variable name";
-    
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        return *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}};
-
-    }
-
-    sub remove_package_symbol {
-        my ($self, $variable) = @_;
-    
-        (defined $variable)
-            || confess "You must pass a variable name";
+            || confess "I do not recognize that sigil '$sigil'";    
         
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'"; 
-    
-        no strict 'refs';
-        if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
-            undef ${$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
-            undef @{$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
-            undef %{$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
-            # FIXME:
-            # this is crap, it is probably much 
-            # easier to write this in XS.
-            my ($scalar, @array, %hash);
-            $scalar = ${$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{SCALAR};
-            @array  = @{$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{ARRAY};
-            %hash   = %{$self->name . '::' . $name} if defined *{$self->name . '::' . $name}{HASH};
-            delete ${$self->name . '::'}{$name};
-            ${$self->name . '::' . $name} = $scalar if defined $scalar;
-            @{$self->name . '::' . $name} = @array  if scalar  @array;
-            %{$self->name . '::' . $name} = %hash   if keys    %hash;            
-        }    
-        else {
-            confess "This should never ever ever happen";
-        }
+        return ($name, $sigil, $SIGIL_MAP{$sigil});
     }
-    
+}
+
+# Class attributes
+
+sub add_package_symbol {
+    my ($self, $variable, $initial_value) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    no strict 'refs';
+    no warnings 'misc', 'redefine';
+    *{$self->name . '::' . $name} = $initial_value;    
+}
+
+sub has_package_symbol {
+    my ($self, $variable) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    return 0 unless exists $self->namespace->{$name};    
+    defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
+}
+
+sub get_package_symbol {
+    my ($self, $variable) = @_;    
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    return *{$self->namespace->{$name}}{$type}
+        if exists $self->namespace->{$name};
+    $self->add_package_symbol($variable);
+}
+
+sub remove_package_symbol {
+    my ($self, $variable) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    if ($type eq 'SCALAR') {
+        undef ${$self->namespace->{$name}};    
+    }
+    elsif ($type eq 'ARRAY') {
+        undef @{$self->namespace->{$name}};    
+    }
+    elsif ($type eq 'HASH') {
+        undef %{$self->namespace->{$name}};    
+    }
+    elsif ($type eq 'CODE') {
+        # FIXME:
+        # this is crap, it is probably much 
+        # easier to write this in XS.
+        my ($scalar, @array, %hash);
+        $scalar = ${$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{SCALAR};
+        @array  = @{$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{ARRAY};
+        %hash   = %{$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{HASH};
+        {
+            no strict 'refs';
+            delete ${$self->name . '::'}{$name};
+        }
+        ${$self->namespace->{$name}} = $scalar if defined $scalar;
+        @{$self->namespace->{$name}} = @array  if scalar  @array;
+        %{$self->namespace->{$name}} = %hash   if keys    %hash;            
+    }    
+    else {
+        confess "This should never ever ever happen";
+    }
 }
 
 sub list_all_package_symbols {
     my ($self) = @_;
-    no strict 'refs';
-    return keys %{$self->name . '::'};
+    return keys %{$self->namespace};
 }
 
 1;
@@ -172,6 +161,8 @@ Class::MOP::Package - Package Meta Object
 =item B<initialize>
 
 =item B<name>
+
+=item B<namespace>
 
 =item B<add_package_symbol>
 

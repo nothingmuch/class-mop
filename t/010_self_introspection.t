@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 173;
+use Test::More tests => 179;
 use Test::Exception;
 
 BEGIN {
@@ -33,8 +33,11 @@ my @class_mop_package_methods = qw(
     initialize
 
     name
+    namespace
     
     add_package_symbol get_package_symbol has_package_symbol remove_package_symbol list_all_package_symbols    
+    
+    _deconstruct_variable_name
 );
 
 my @class_mop_module_methods = qw(
@@ -131,6 +134,7 @@ foreach my $non_method_name (qw(
 
 my @class_mop_package_attributes = (
     '$:package', 
+    '%:namespace',
 );
 
 my @class_mop_module_attributes = (

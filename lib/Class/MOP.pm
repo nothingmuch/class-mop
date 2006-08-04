@@ -53,6 +53,22 @@ Class::MOP::Package->meta->add_attribute(
     ))
 );
 
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('%:namespace' => (
+        reader => {
+            'namespace' => sub { (shift)->{'%:namespace'} }
+        },
+        default => sub {
+            my ($class) = @_;
+            no strict 'refs';
+            return \%{$class->name . '::'};
+        },
+        # NOTE:
+        # protect this from silliness 
+        init_arg => '............something no one will guess ...............',
+    ))
+);
+
 # NOTE:
 # use the metaclass to construct the meta-package
 # which is a superclass of the metaclass itself :P

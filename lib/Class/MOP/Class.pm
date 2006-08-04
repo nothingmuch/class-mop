@@ -93,9 +93,11 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
         $class = blessed($class) || $class;
         # now create the metaclass
         my $meta;
-        if ($class =~ /^Class::MOP::Class$/) {    
+        if ($class =~ /^Class::MOP::Class$/) {
+            no strict 'refs';                
             $meta = bless { 
                 '$:package'             => $package_name, 
+                '%:namespace'           => \%{$package_name . '::'},                
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
                 '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
@@ -109,6 +111,7 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
             # Class::MOP::Class, which defines meta
             $meta = $class->meta->construct_instance(%options)
         }
+        
         # and check the metaclass compatibility
         $meta->check_metaclass_compatability();
         $METAS{$package_name} = $meta;
