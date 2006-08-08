@@ -6,6 +6,7 @@ use warnings;
 
 use Scalar::Util 'blessed';
 use Carp         'confess';
+use Symbol       'gensym';
 
 our $VERSION = '0.02';
 
@@ -74,8 +75,9 @@ sub add_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
+
     no strict 'refs';
-    no warnings 'misc', 'redefine';
+    no warnings 'redefine', 'misc';
     *{$self->name . '::' . $name} = $initial_value;    
 }
 
@@ -84,7 +86,7 @@ sub has_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
-    return 0 unless exists $self->namespace->{$name};    
+    return 0 unless exists $self->namespace->{$name};   
     defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
 }
 
@@ -93,9 +95,9 @@ sub get_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
-    return *{$self->namespace->{$name}}{$type}
-        if exists $self->namespace->{$name};
-    $self->add_package_symbol($variable);
+    $self->add_package_symbol($variable)
+        unless exists $self->namespace->{$name};
+    return *{$self->namespace->{$name}}{$type};
 }
 
 sub remove_package_symbol {
@@ -103,30 +105,30 @@ sub remove_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
+    no strict 'refs';
     if ($type eq 'SCALAR') {
-        undef ${$self->namespace->{$name}};    
+        undef ${$self->name . '::' . $name};    
     }
     elsif ($type eq 'ARRAY') {
-        undef @{$self->namespace->{$name}};    
+        undef @{$self->name . '::' . $name};    
     }
     elsif ($type eq 'HASH') {
-        undef %{$self->namespace->{$name}};    
+        undef %{$self->name . '::' . $name};    
     }
     elsif ($type eq 'CODE') {
         # FIXME:
         # this is crap, it is probably much 
         # easier to write this in XS.
         my ($scalar, @array, %hash);
-        $scalar = ${$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{SCALAR};
-        @array  = @{$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{ARRAY};
-        %hash   = %{$self->namespace->{$name}} if defined *{$self->namespace->{$name}}{HASH};
-        {
-            no strict 'refs';
-            delete ${$self->name . '::'}{$name};
-        }
-        ${$self->namespace->{$name}} = $scalar if defined $scalar;
-        @{$self->namespace->{$name}} = @array  if scalar  @array;
-        %{$self->namespace->{$name}} = %hash   if keys    %hash;            
+        $scalar = ${$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{SCALAR};
+        @array  = @{$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{ARRAY};
+        %hash   = %{$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{HASH};
+        
+        delete ${$self->name . '::'}{$name};
+        
+        ${$self->name . '::' . $name} = $scalar if defined $scalar;
+        @{$self->name . '::' . $name} = @array  if scalar  @array;
+        %{$self->name . '::' . $name} = %hash   if keys    %hash;            
     }    
     else {
         confess "This should never ever ever happen";

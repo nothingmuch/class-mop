@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 34;
+use Test::More tests => 43;
 use Test::Exception;
 
 BEGIN {
@@ -24,8 +24,24 @@ lives_ok {
     Foo->meta->add_package_symbol('%foo' => { one => 1 });
 } '... created %Foo::foo successfully';
 
+ok(!Foo->meta->has_package_symbol('$foo'), '... SCALAR shouldnt have been created too');
+
 ok(defined($Foo::{foo}), '... the %foo slot was created successfully');
 ok(Foo->meta->has_package_symbol('%foo'), '... the meta agrees');
+
+{
+    no strict 'refs';
+    ok(defined(*{"Foo::foo"}{HASH}), '... the %foo (HASH) slot was created successfully');
+
+    ok(!defined(*{"Foo::foo"}{SCALAR}), '... but the $foo slot was not created');
+    ok(!Foo->meta->has_package_symbol('$foo'), '... and the meta agrees');    
+
+    ok(!defined(*{"Foo::foo"}{ARRAY}),  '... but the @foo slot was not created');
+    ok(!Foo->meta->has_package_symbol('@foo'), '... and the meta agrees');    
+
+    ok(!defined(*{"Foo::foo"}{CODE}),   '... but the &foo slot was not created');
+    ok(!Foo->meta->has_package_symbol('&foo'), '... and the meta agrees');    
+}
 
 {
     no strict 'refs';
@@ -99,6 +115,11 @@ lives_ok {
 
 ok(Foo->meta->has_package_symbol('%foo'), '... the %foo slot was removed successfully');
 
+{
+    no strict 'refs';
+    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');
+}
+
 # check some errors
 
 dies_ok {
@@ -116,8 +137,3 @@ dies_ok {
 dies_ok {
     Foo->meta->has_package_symbol('bar');
 } '... no sigil for bar';
-
-
-#dies_ok {
-#    Foo->meta->get_package_symbol('@.....bar');
-#} '... could not fetch variable';
