@@ -39,16 +39,6 @@ I am not sure how we should handle non-method arguments, mostly
 because those would be static prototype variables, which would 
 translate to class package variables. 
 
----------------------------------------------------------------------
-TO PONDER
----------------------------------------------------------------------
-
-- Make a Class::MOP::Package 
-
-Class::MOP::Class would be a subclass of this, but I am not sure 
-this is worth the time. 
-
-
 
 
 

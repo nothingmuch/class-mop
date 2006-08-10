@@ -1,5 +1,26 @@
 Revision history for Perl extension Class-MOP.
 
+0.32
+    * Class::MOP::Package
+      - refactored entire class, this is now 
+        the primary gateway between the metaclass
+        and the Perl 5 symbol table
+        - added many tests for this
+        
+    * Class::MOP::Class
+      - refactored all symbol table access to 
+        use Class::MOP::Package methods instead
+      
+   * Class::MOP::Instance
+     - added &deinitialize_slot for removing slots 
+       from an instance
+       - added tests for this      
+      
+    * Class::MOP::Attribute 
+      - added support for &deinitialize_slot for removing
+        slots from an instance
+        - added tests for this
+
 0.31 Sat. July 15, 2006
 
     * Class::MOP::Class

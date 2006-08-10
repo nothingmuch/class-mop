@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 sub meta { 
     require Class::MOP::Class;
