@@ -65,7 +65,7 @@ Class::MOP::Package->meta->add_attribute(
         },
         # NOTE:
         # protect this from silliness 
-        init_arg => '............something no one will guess ...............',
+        init_arg => '!............( DO NOT DO THIS )............!',
     ))
 );
 
