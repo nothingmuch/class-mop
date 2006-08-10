@@ -53,6 +53,31 @@ Class::MOP::Package->meta->add_attribute(
     ))
 );
 
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('%:namespace' => (
+        reader => {
+            'namespace' => sub { (shift)->{'%:namespace'} }
+        },
+        default => sub {
+            my ($class) = @_;
+            no strict 'refs';
+            return \%{$class->name . '::'};
+        },
+        # NOTE:
+        # protect this from silliness 
+        init_arg => '!............( DO NOT DO THIS )............!',
+    ))
+);
+
+# NOTE:
+# use the metaclass to construct the meta-package
+# which is a superclass of the metaclass itself :P
+Class::MOP::Package->meta->add_method('initialize' => sub {
+    my $class        = shift;
+    my $package_name = shift;
+    $class->meta->new_object(':package' => $package_name, @_);  
+});
+
 ## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
@@ -96,6 +121,12 @@ Class::MOP::Class->meta->add_attribute(
         default  => 'Class::MOP::Instance',        
     ))
 );
+
+# NOTE:
+# we don't actually need to tie the knot with 
+# Class::MOP::Class here, it is actually handled 
+# within Class::MOP::Class itself in the 
+# construct_class_instance method. 
 
 ## Class::MOP::Attribute
 

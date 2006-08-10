@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 use base 'Class::MOP::Module';
 
@@ -93,9 +93,11 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
         $class = blessed($class) || $class;
         # now create the metaclass
         my $meta;
-        if ($class =~ /^Class::MOP::/) {    
+        if ($class =~ /^Class::MOP::Class$/) {
+            no strict 'refs';                
             $meta = bless { 
                 '$:package'             => $package_name, 
+                '%:namespace'           => \%{$package_name . '::'},                
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
                 '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
@@ -109,6 +111,7 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
             # Class::MOP::Class, which defines meta
             $meta = $class->meta->construct_instance(%options)
         }
+        
         # and check the metaclass compatibility
         $meta->check_metaclass_compatability();
         $METAS{$package_name} = $meta;
@@ -299,10 +302,9 @@ sub clone_instance {
 
 sub superclasses {
     my $self = shift;
-    no strict 'refs';
     if (@_) {
         my @supers = @_;
-        @{$self->name . '::ISA'} = @supers;
+        @{$self->get_package_symbol('@ISA')} = @supers;
         # NOTE:
         # we need to check the metaclass 
         # compatability here so that we can 
@@ -311,7 +313,7 @@ sub superclasses {
         # we don't know about
         $self->check_metaclass_compatability();
     }
-    @{$self->name . '::ISA'};
+    @{$self->get_package_symbol('@ISA')};
 }
 
 sub class_precedence_list {
@@ -342,11 +344,11 @@ sub add_method {
         || confess "Your code block must be a CODE reference";
     my $full_method_name = ($self->name . '::' . $method_name);    
 
+    # FIXME:
+    # dont bless subs, its bad mkay
     $method = $self->method_metaclass->wrap($method) unless blessed($method);
     
-    no strict 'refs';
-    no warnings 'redefine';
-    *{$full_method_name} = subname $full_method_name => $method;
+    $self->add_package_symbol("&${method_name}" => subname $full_method_name => $method);
 }
 
 {
@@ -420,41 +422,33 @@ sub alias_method {
     # use reftype here to allow for blessed subs ...
     ('CODE' eq (reftype($method) || ''))
         || confess "Your code block must be a CODE reference";
-    my $full_method_name = ($self->name . '::' . $method_name);
 
+    # FIXME:
+    # dont bless subs, its bad mkay
     $method = $self->method_metaclass->wrap($method) unless blessed($method);    
         
-    no strict 'refs';
-    no warnings 'redefine';
-    *{$full_method_name} = $method;
+    $self->add_package_symbol("&${method_name}" => $method);
 }
 
 sub find_method_by_name {
-    my ( $self, $method_name ) = @_;
-
-    return $self->name->can( $method_name );
+    my ($self, $method_name) = @_;
+    return $self->name->can($method_name);
 }
 
 sub has_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";    
-
-    my $sub_name = ($self->name . '::' . $method_name);   
     
-    no strict 'refs';
-    return 0 if !defined(&{$sub_name});        
-    my $method = \&{$sub_name};
+    return 0 if !$self->has_package_symbol("&${method_name}");        
+    my $method = $self->get_package_symbol("&${method_name}");
     return 0 if (svref_2object($method)->GV->STASH->NAME || '') ne $self->name &&
                 (svref_2object($method)->GV->NAME || '')        ne '__ANON__';      
 
-    #if ( $self->name->can("meta") ) {
-        # don't bless (destructive operation) classes that didn't ask for it
-
-        # at this point we are relatively sure 
-        # it is our method, so we bless/wrap it 
-        $self->method_metaclass->wrap($method) unless blessed($method);
-    #}
+    # FIXME:
+    # dont bless subs, its bad mkay
+    $self->method_metaclass->wrap($method) unless blessed($method);
+    
     return 1;
 }
 
@@ -464,9 +458,8 @@ sub get_method {
         || confess "You must define a method name";
 
     return unless $self->has_method($method_name);
-
-    no strict 'refs';    
-    return \&{$self->name . '::' . $method_name};
+ 
+    return $self->get_package_symbol("&${method_name}");
 }
 
 sub remove_method {
@@ -476,8 +469,7 @@ sub remove_method {
     
     my $removed_method = $self->get_method($method_name);    
     
-    no strict 'refs';
-    delete ${$self->name . '::'}{$method_name}
+    $self->remove_package_symbol("&${method_name}")
         if defined $removed_method;
         
     return $removed_method;
@@ -485,8 +477,7 @@ sub remove_method {
 
 sub get_method_list {
     my $self = shift;
-    no strict 'refs';
-    grep { $self->has_method($_) } keys %{$self->name . '::'};
+    grep { $self->has_method($_) } $self->list_all_package_symbols;
 }
 
 sub compute_all_applicable_methods {
@@ -574,9 +565,6 @@ sub add_attribute {
     $attribute->attach_to_class($self);
     $attribute->install_accessors();
     $self->get_attribute_map->{$attribute->name} = $attribute;
-
-	# FIXME
-	# in theory we have to tell everyone the slot structure may have changed
 }
 
 sub has_attribute {

@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # introspection
 
@@ -19,8 +19,15 @@ sub meta {
 # creation ...
 
 sub initialize {
-    my ($class, $package) = @_;
-    bless { '$:package' => $package } => $class;
+    my $class        = shift;
+    my $package_name = shift;
+    # we hand-construct the class 
+    # until we can bootstrap it
+    no strict 'refs';
+    return bless { 
+        '$:package'   => $package_name,
+        '%:namespace' => \%{$package_name . '::'},
+    } => $class;
 }
 
 # Attributes
@@ -29,9 +36,10 @@ sub initialize {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name { $_[0]->{'$:package'} }
+sub name      { $_[0]->{'$:package'}   }
+sub namespace { $_[0]->{'%:namespace'} }
 
-# Class attributes
+# utility methods
 
 {
     my %SIGIL_MAP = (
@@ -40,94 +48,127 @@ sub name { $_[0]->{'$:package'} }
         '%' => 'HASH',
         '&' => 'CODE',
     );
-
-    sub add_package_symbol {
-        my ($self, $variable, $initial_value) = @_;
     
+    sub _deconstruct_variable_name {
+        my ($self, $variable) = @_;
+
         (defined $variable)
             || confess "You must pass a variable name";    
-    
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        no warnings 'misc';
-        *{$self->name . '::' . $name} = $initial_value;    
-    }
-
-    sub has_package_symbol {
-        my ($self, $variable) = @_;
-        (defined $variable)
-            || confess "You must pass a variable name";
 
         my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
+
         (defined $sigil)
             || confess "The variable name must include a sigil";    
-    
+
         (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        defined *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}} ? 1 : 0;
-    
-    }
-
-    sub get_package_symbol {
-        my ($self, $variable) = @_;    
-        (defined $variable)
-            || confess "You must pass a variable name";
-    
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'";
-    
-        no strict 'refs';
-        return *{$self->name . '::' . $name}{$SIGIL_MAP{$sigil}};
-
-    }
-
-    sub remove_package_symbol {
-        my ($self, $variable) = @_;
-    
-        (defined $variable)
-            || confess "You must pass a variable name";
+            || confess "I do not recognize that sigil '$sigil'";    
         
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
-    
-        (defined $sigil)
-            || confess "The variable name must include a sigil";    
-    
-        (exists $SIGIL_MAP{$sigil})
-            || confess "I do not recognize that sigil '$sigil'"; 
-    
-        no strict 'refs';
-        if ($SIGIL_MAP{$sigil} eq 'SCALAR') {
-            undef ${$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'ARRAY') {
-            undef @{$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'HASH') {
-            undef %{$self->name . '::' . $name};    
-        }
-        elsif ($SIGIL_MAP{$sigil} eq 'CODE') {
-            undef &{$self->name . '::' . $name};    
-        }    
-        else {
-            confess "This should never ever ever happen";
-        }
+        return ($name, $sigil, $SIGIL_MAP{$sigil});
     }
+}
 
+# Class attributes
+
+# ... these functions have to touch the symbol table itself,.. yuk
+
+sub add_package_symbol {
+    my ($self, $variable, $initial_value) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    no strict 'refs';
+    no warnings 'redefine', 'misc';
+    *{$self->name . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;    
+}
+
+sub remove_package_glob {
+    my ($self, $name) = @_;
+    no strict 'refs';        
+    delete ${$self->name . '::'}{$name};     
+}
+
+# ... these functions deal with stuff on the namespace level
+
+sub has_package_symbol {
+    my ($self, $variable) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    return 0 unless exists $self->namespace->{$name};   
+    
+    # FIXME:
+    # For some really stupid reason 
+    # a typeglob will have a default
+    # value of \undef in the SCALAR 
+    # slot, so we need to work around
+    # this. Which of course means that 
+    # if you put \undef in your scalar
+    # then this is broken.
+    
+    if ($type eq 'SCALAR') {    
+        my $val = *{$self->namespace->{$name}}{$type};
+        defined $$val ? 1 : 0;        
+    }
+    else {
+        defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
+    }
+}
+
+sub get_package_symbol {
+    my ($self, $variable) = @_;    
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    $self->add_package_symbol($variable)
+        unless exists $self->namespace->{$name};
+    return *{$self->namespace->{$name}}{$type};
+}
+
+sub remove_package_symbol {
+    my ($self, $variable) = @_;
+
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+
+    # FIXME:
+    # no doubt this is grossly inefficient and 
+    # could be done much easier and faster in XS
+
+    my ($scalar, $array, $hash, $code);
+    if ($type eq 'SCALAR') {
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);     
+    }
+    elsif ($type eq 'ARRAY') {
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);
+    }
+    elsif ($type eq 'HASH') {
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);      
+    }
+    elsif ($type eq 'CODE') {
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);        
+    }    
+    else {
+        confess "This should never ever ever happen";
+    }
+        
+    $self->remove_package_glob($name);
+    
+    $self->add_package_symbol(('$' . $name) => $scalar) if defined $scalar;      
+    $self->add_package_symbol(('@' . $name) => $array)  if defined $array;    
+    $self->add_package_symbol(('%' . $name) => $hash)   if defined $hash;
+    $self->add_package_symbol(('&' . $name) => $code)   if defined $code;            
+}
+
+sub list_all_package_symbols {
+    my ($self) = @_;
+    return keys %{$self->namespace};
 }
 
 1;
@@ -154,6 +195,8 @@ Class::MOP::Package - Package Meta Object
 
 =item B<name>
 
+=item B<namespace>
+
 =item B<add_package_symbol>
 
 =item B<get_package_symbol>
@@ -161,6 +204,10 @@ Class::MOP::Package - Package Meta Object
 =item B<has_package_symbol>
 
 =item B<remove_package_symbol>
+
+=item B<remove_package_glob>
+
+=item B<list_all_package_symbols>
 
 =back
 

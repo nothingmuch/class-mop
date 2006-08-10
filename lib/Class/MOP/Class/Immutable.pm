@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'looks_like_number';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base 'Class::MOP::Class';
 
@@ -29,8 +29,7 @@ sub remove_package_symbol { confess 'Cannot call method "remove_package_symbol" 
 sub superclasses {
     my $class = shift;
     (!@_) || confess 'Cannot change the "superclasses" on an immmutable instance';
-    no strict 'refs';
-    @{$class->name . '::ISA'};    
+    @{$class->get_package_symbol('@ISA')};    
 }
 
 # predicates
