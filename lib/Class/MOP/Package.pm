@@ -6,7 +6,6 @@ use warnings;
 
 use Scalar::Util 'blessed';
 use Carp         'confess';
-use Symbol       'gensym';
 
 our $VERSION = '0.02';
 
@@ -70,16 +69,25 @@ sub namespace { $_[0]->{'%:namespace'} }
 
 # Class attributes
 
+# ... these functions have to touch the symbol table itself,.. yuk
+
 sub add_package_symbol {
     my ($self, $variable, $initial_value) = @_;
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
-
     no strict 'refs';
     no warnings 'redefine', 'misc';
-    *{$self->name . '::' . $name} = $initial_value;    
+    *{$self->name . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;    
 }
+
+sub remove_package_glob {
+    my ($self, $name) = @_;
+    no strict 'refs';        
+    delete ${$self->name . '::'}{$name};     
+}
+
+# ... these functions deal with stuff on the namespace level
 
 sub has_package_symbol {
     my ($self, $variable) = @_;
@@ -105,34 +113,41 @@ sub remove_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
-    no strict 'refs';
+    # FIXME:
+    # no doubt this is grossly inefficient and 
+    # could be done much easier and faster in XS
+
+    my ($scalar, $array, $hash, $code);
     if ($type eq 'SCALAR') {
-        undef ${$self->name . '::' . $name};    
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);     
     }
     elsif ($type eq 'ARRAY') {
-        undef @{$self->name . '::' . $name};    
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);
     }
     elsif ($type eq 'HASH') {
-        undef %{$self->name . '::' . $name};    
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
+        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);      
     }
     elsif ($type eq 'CODE') {
-        # FIXME:
-        # this is crap, it is probably much 
-        # easier to write this in XS.
-        my ($scalar, @array, %hash);
-        $scalar = ${$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{SCALAR};
-        @array  = @{$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{ARRAY};
-        %hash   = %{$self->name . '::' . $name} if defined *{$self->namespace->{$name}}{HASH};
-        
-        delete ${$self->name . '::'}{$name};
-        
-        ${$self->name . '::' . $name} = $scalar if defined $scalar;
-        @{$self->name . '::' . $name} = @array  if scalar  @array;
-        %{$self->name . '::' . $name} = %hash   if keys    %hash;            
+        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
+        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
+        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);        
     }    
     else {
         confess "This should never ever ever happen";
     }
+        
+    $self->remove_package_glob($name);
+    
+    $self->add_package_symbol(('$' . $name) => $scalar) if defined $scalar;      
+    $self->add_package_symbol(('@' . $name) => $array)  if defined $array;    
+    $self->add_package_symbol(('%' . $name) => $hash)   if defined $hash;
+    $self->add_package_symbol(('&' . $name) => $code)   if defined $code;            
 }
 
 sub list_all_package_symbols {
@@ -173,6 +188,8 @@ Class::MOP::Package - Package Meta Object
 =item B<has_package_symbol>
 
 =item B<remove_package_symbol>
+
+=item B<remove_package_glob>
 
 =item B<list_all_package_symbols>
 
