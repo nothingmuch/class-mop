@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 80;
+use Test::More tests => 88;
 use Test::Exception;
 
 BEGIN {
@@ -185,7 +185,7 @@ is(Foo->meta->get_package_symbol('$foo'), $SCALAR, '... got the right value for 
     ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');
     ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');   
     ok(defined(*{"Foo::foo"}{CODE}), '... the &foo slot has NOT been removed');   
-    ok(defined(*{"Foo::foo"}{SCALAR}), '... the $foo slot has NOT been removed');            
+    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');            
 }
 
 lives_ok {
@@ -205,7 +205,25 @@ is(Foo->meta->get_package_symbol('$foo'), $SCALAR, '... got the right value for 
     ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');    
     ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');       
     ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');   
-    ok(defined(*{"Foo::foo"}{SCALAR}), '... the $foo slot has NOT been removed');            
+    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');            
+}
+
+lives_ok {
+    Foo->meta->remove_package_symbol('$foo');
+} '... removed $Foo::foo successfully';
+
+ok(!Foo->meta->has_package_symbol('$foo'), '... the $foo slot no longer exists');
+
+ok(Foo->meta->has_package_symbol('@foo'), '... the @foo slot still exists');
+
+is(Foo->meta->get_package_symbol('@foo'), $ARRAY, '... got the right values for @Foo::foo');
+
+{
+    no strict 'refs';
+    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');    
+    ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');   
+    ok(!defined(${"Foo::foo"}), '... the $foo slot has now been removed');                           
+    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');    
 }
 
 

@@ -95,7 +95,23 @@ sub has_package_symbol {
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
     return 0 unless exists $self->namespace->{$name};   
-    defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
+    
+    # FIXME:
+    # For some really stupid reason 
+    # a typeglob will have a default
+    # value of \undef in the SCALAR 
+    # slot, so we need to work around
+    # this. Which of course means that 
+    # if you put \undef in your scalar
+    # then this is broken.
+    
+    if ($type eq 'SCALAR') {    
+        my $val = *{$self->namespace->{$name}}{$type};
+        defined $$val ? 1 : 0;        
+    }
+    else {
+        defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
+    }
 }
 
 sub get_package_symbol {
