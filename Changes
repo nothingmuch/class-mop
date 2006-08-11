@@ -10,11 +10,19 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - refactored all symbol table access to 
         use Class::MOP::Package methods instead
+        
+    * Class::MOP::Module
+      - adding the $:version attribute in the bootstrap
+        so that Module has a version as an attribute
+        - see comment in Class::MOP for details
+      - added the $:authority attribute to this module 
+        as well as an &identifier method, to bring us 
+        ever closer to Perl 6 goodness 
       
-   * Class::MOP::Instance
-     - added &deinitialize_slot for removing slots 
-       from an instance
-       - added tests for this      
+    * Class::MOP::Instance
+      - added &deinitialize_slot for removing slots 
+        from an instance
+        - added tests for this      
       
     * Class::MOP::Attribute 
       - added support for &deinitialize_slot for removing

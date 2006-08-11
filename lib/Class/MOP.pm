@@ -13,7 +13,8 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION = '0.32';
+our $VERSION   = '0.32';
+our $AUTHORITY = 'cpan:STEVAN';
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -39,6 +40,7 @@ our $VERSION = '0.32';
 # any subclass of Class::MOP::* will be able to 
 # inherit them using &construct_instance
 
+## --------------------------------------------------------
 ## Class::MOP::Package
 
 Class::MOP::Package->meta->add_attribute(
@@ -78,6 +80,54 @@ Class::MOP::Package->meta->add_method('initialize' => sub {
     $class->meta->new_object(':package' => $package_name, @_);  
 });
 
+## --------------------------------------------------------
+## Class::MOP::Module
+
+# NOTE:
+# yeah this is kind of stretching things a bit, 
+# but truthfully the version should be an attribute
+# of the Module, the weirdness comes from having to 
+# stick to Perl 5 convention and store it in the 
+# $VERSION package variable. Basically if you just 
+# squint at it, it will look how you want it to look. 
+# Either as a package variable, or as a attribute of
+# the metaclass, isn't abstraction great :)
+
+Class::MOP::Module->meta->add_attribute(
+    Class::MOP::Attribute->new('$:version' => (
+        reader => {
+            'version' => sub {  
+                my $self = shift;
+                ${$self->get_package_symbol('$VERSION')};
+            }
+        },
+        # NOTE:
+        # protect this from silliness 
+        init_arg => '!............( DO NOT DO THIS )............!',
+    ))
+);
+
+# NOTE:
+# By following the same conventions as version here, 
+# we are opening up the possibility that people can 
+# use the $AUTHORITY in non-Class::MOP modules as 
+# well.  
+
+Class::MOP::Module->meta->add_attribute(
+    Class::MOP::Attribute->new('$:authority' => (
+        reader => {
+            'authority' => sub {  
+                my $self = shift;
+                ${$self->get_package_symbol('$AUTHORITY')};
+            }
+        },       
+        # NOTE:
+        # protect this from silliness 
+        init_arg => '!............( DO NOT DO THIS )............!',
+    ))
+);
+
+## --------------------------------------------------------
 ## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
@@ -128,6 +178,7 @@ Class::MOP::Class->meta->add_attribute(
 # within Class::MOP::Class itself in the 
 # construct_class_instance method. 
 
+## --------------------------------------------------------
 ## Class::MOP::Attribute
 
 Class::MOP::Attribute->meta->add_attribute(
@@ -226,7 +277,8 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
     $self->meta->clone_object($self, @_);  
 });
 
-## Try and close Class::MOP::*
+## --------------------------------------------------------
+## Now close all the Class::MOP::* classes
 
 Class::MOP::Package  ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Module   ->meta->make_immutable(inline_constructor => 0);
@@ -234,7 +286,6 @@ Class::MOP::Class    ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
-
 
 1;
 

@@ -9,7 +9,8 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION = '0.17';
+our $VERSION   = '0.17';
+our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
 
@@ -96,8 +97,13 @@ my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
         if ($class =~ /^Class::MOP::Class$/) {
             no strict 'refs';                
             $meta = bless { 
+                # inherited from Class::MOP::Package
                 '$:package'             => $package_name, 
                 '%:namespace'           => \%{$package_name . '::'},                
+                # inherited from Class::MOP::Module
+                '$:version'             => (exists ${$package_name . '::'}{'VERSION'}   ? ${$package_name . '::VERSION'}   : undef),
+                '$:authority'           => (exists ${$package_name . '::'}{'AUTHORITY'} ? ${$package_name . '::AUTHORITY'} : undef),
+                # defined here ...
                 '%:attributes'          => {},
                 '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
                 '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',

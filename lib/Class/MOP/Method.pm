@@ -8,7 +8,8 @@ use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
 use B            'svref_2object';
 
-our $VERSION = '0.03';
+our $VERSION   = '0.03';
+our $AUTHORITY = 'cpan:STEVAN';
 
 # introspection
 

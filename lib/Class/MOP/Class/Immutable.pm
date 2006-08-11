@@ -7,7 +7,8 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'looks_like_number';
 
-our $VERSION = '0.02';
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Class';
 

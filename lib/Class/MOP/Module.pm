@@ -7,11 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 
 our $VERSION   = '0.02';
-#our $AUTHORITY = {
-#    cpan   => 'STEVAN',
-#    mailto => 'stevan@iinteractive.com',
-#    http   => '//www.iinteractive.com/'
-#};
+our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Package';
 
@@ -22,23 +18,24 @@ sub meta {
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
-# QUESTION:
-# can the version be an attribute of the 
-# module? I think it should be, but we need
-# to somehow assure that it always is stored
-# in the symbol table instead of being stored 
-# into the instance structure itself
-
 sub version {  
     my $self = shift;
     ${$self->get_package_symbol('$VERSION')};
 }
 
-#sub authority {  
-#    my $self = shift;
-#    $self->get_package_symbol('$AUTHORITY');
-#}
+sub authority {  
+    my $self = shift;
+    ${$self->get_package_symbol('$AUTHORITY')};
+}
 
+sub identifier {
+    my $self = shift;
+    join '-' => (
+        $self->name,
+        ($self->version   || ()),
+        ($self->authority || ()),
+    );
+}
 
 1;
 
@@ -61,6 +58,10 @@ Class::MOP::Module - Module Meta Object
 =item B<meta>
 
 =item B<version>
+
+=item B<authority>
+
+=item B<identifier>
 
 =back
 

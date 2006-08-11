@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 181;
+use Test::More tests => 189;
 use Test::Exception;
 
 BEGIN {
@@ -44,7 +44,7 @@ my @class_mop_package_methods = qw(
 my @class_mop_module_methods = qw(
     meta 
 
-    version
+    version authority identifier
 );
 
 my @class_mop_class_methods = qw(
@@ -139,6 +139,7 @@ my @class_mop_package_attributes = (
 );
 
 my @class_mop_module_attributes = (
+    '$:version', '$:authority'
 );
 
 my @class_mop_class_attributes = (
