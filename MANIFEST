@@ -19,6 +19,7 @@ lib/Class/MOP/Class.pm
 lib/Class/MOP/Instance.pm
 lib/Class/MOP/Method.pm
 lib/Class/MOP/Module.pm
+lib/Class/MOP/Object.pm
 lib/Class/MOP/Package.pm
 lib/Class/MOP/Class/Immutable.pm
 t/000_load.t
@@ -52,6 +53,7 @@ t/061_instance_inline.t
 t/070_immutable_metaclass.t
 t/071_immutable_w_custom_metaclass.t
 t/080_meta_package.t
+t/081_meta_package_extension.t
 t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t

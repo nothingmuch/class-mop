@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.32
+0.32 Sat. Aug. 12, 2006
     + added Class::MOP::Object so that the 
       metamodel is more complete (and closer
       to what Perl 6 will probably be).
@@ -12,6 +12,7 @@ Revision history for Perl extension Class-MOP.
         - added many tests for this
       - this class is now a subclass of 
         Class::MOP::Object
+        - added some tests to reflect this
         
     * Class::MOP::Class
       - refactored all symbol table access to 
@@ -24,6 +25,8 @@ Revision history for Perl extension Class-MOP.
       - added the $:authority attribute to this module 
         as well as an &identifier method, to bring us 
         ever closer to Perl 6 goodness 
+        - I have added $AUTHORITY to all the modules 
+        - added tests for this
       
     * Class::MOP::Instance
       - added &deinitialize_slot for removing slots 
