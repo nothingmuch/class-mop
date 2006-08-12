@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 16;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -11,6 +11,7 @@ BEGIN {
     use_ok('Class::MOP::Attribute');
     use_ok('Class::MOP::Method');            
     use_ok('Class::MOP::Instance');            
+    use_ok('Class::MOP::Object');                
 }
 
 # make sure we are tracking metaclasses correctly
@@ -21,7 +22,8 @@ my %METAS = (
     'Class::MOP::Module'    => Class::MOP::Module->meta,     
     'Class::MOP::Class'     => Class::MOP::Class->meta, 
     'Class::MOP::Method'    => Class::MOP::Method->meta,  
-    'Class::MOP::Instance'  => Class::MOP::Instance->meta,      
+    'Class::MOP::Instance'  => Class::MOP::Instance->meta,   
+    'Class::MOP::Object'    => Class::MOP::Object->meta,          
 );
 
 ok($_->is_immutable(), '... ' . $_->name . ' is immutable') for values %METAS;
@@ -38,7 +40,8 @@ is_deeply(
         Class::MOP::Class->meta, 
         Class::MOP::Instance->meta,         
         Class::MOP::Method->meta,
-        Class::MOP::Module->meta,   
+        Class::MOP::Module->meta, 
+        Class::MOP::Object->meta,          
         Class::MOP::Package->meta,              
     ],
     '... got all the metaclass instances');
@@ -51,6 +54,7 @@ is_deeply(
         Class::MOP::Instance
         Class::MOP::Method
         Class::MOP::Module  
+        Class::MOP::Object        
         Class::MOP::Package                      
     / ],
     '... got all the metaclass names');

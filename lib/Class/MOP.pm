@@ -286,6 +286,7 @@ Class::MOP::Class    ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Object   ->meta->make_immutable(inline_constructor => 0);
 
 1;
 

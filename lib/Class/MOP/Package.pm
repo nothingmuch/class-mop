@@ -10,6 +10,8 @@ use Carp         'confess';
 our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use base 'Class::MOP::Object';
+
 # introspection
 
 sub meta { 

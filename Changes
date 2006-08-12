@@ -1,11 +1,17 @@
 Revision history for Perl extension Class-MOP.
 
 0.32
+    + added Class::MOP::Object so that the 
+      metamodel is more complete (and closer
+      to what Perl 6 will probably be).
+
     * Class::MOP::Package
       - refactored entire class, this is now 
         the primary gateway between the metaclass
         and the Perl 5 symbol table
         - added many tests for this
+      - this class is now a subclass of 
+        Class::MOP::Object
         
     * Class::MOP::Class
       - refactored all symbol table access to 

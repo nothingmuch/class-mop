@@ -277,7 +277,8 @@ is_deeply(
     [ qw/
         Class::MOP::Class
         Class::MOP::Module
-        Class::MOP::Package                
+        Class::MOP::Package     
+        Class::MOP::Object           
     / ], 
     '... Class::MOP::Class->class_precedence_list == [ Class::MOP::Class Class::MOP::Module Class::MOP::Package ]');
 
