@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 23;
 use Test::Exception;
 
 BEGIN {
@@ -11,15 +11,40 @@ BEGIN {
     use_ok('Class::MOP::Attribute');
 }
 
+# most values are static
 
 {
-    my $regexp = qr/hello (.*)/;
-    my $attr = Class::MOP::Attribute->new('$test' => (
-        default => $regexp
-    ));    
+    dies_ok {
+        Class::MOP::Attribute->new('$test' => (
+            default => qr/hello (.*)/
+        ));
+    } '... no refs for defaults';
     
-    ok($attr->has_default, '... we have a default value');
-    is($attr->default, $regexp, '... and got the value we expected');
+    dies_ok {
+        Class::MOP::Attribute->new('$test' => (
+            default => []
+        ));
+    } '... no refs for defaults';    
+    
+    dies_ok {
+        Class::MOP::Attribute->new('$test' => (
+            default => {}
+        ));
+    } '... no refs for defaults';    
+    
+    
+    dies_ok {
+        Class::MOP::Attribute->new('$test' => (
+            default => \(my $var)
+        ));
+    } '... no refs for defaults';    
+
+    dies_ok {
+        Class::MOP::Attribute->new('$test' => (
+            default => bless {} => 'Foo'
+        ));
+    } '... no refs for defaults';
+
 }
 
 { # bad construtor args

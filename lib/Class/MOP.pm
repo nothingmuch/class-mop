@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION   = '0.32';
+our $VERSION   = '0.33';
 our $AUTHORITY = 'cpan:STEVAN';
 
 ## ----------------------------------------------------------------------------
@@ -267,6 +267,11 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
         || confess "You must provide a name for the attribute";
     $options{init_arg} = $name 
         if not exists $options{init_arg};
+        
+    (Class::MOP::Attribute::is_default_a_coderef(\%options))
+        || confess("References are not allowed as default values, you must ". 
+                   "wrap then in a CODE reference (ex: sub { [] } and not [])")
+            if exists $options{default} && ref $options{default};        
 
     # return the new object
     $class->meta->new_object(name => $name, %options);

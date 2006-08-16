@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.33
+    * Class::MOP::Attribute
+      - reference values (other than CODE refs) 
+        are no longer allowed for defaults
+        - added tests for this
+
 0.32 Sat. Aug. 12, 2006
     + added Class::MOP::Object so that the 
       metamodel is more complete (and closer

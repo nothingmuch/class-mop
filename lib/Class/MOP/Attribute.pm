@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.11';
+our $VERSION   = '0.12';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub meta { 
@@ -33,6 +33,11 @@ sub new {
         || confess "You must provide a name for the attribute";
     $options{init_arg} = $name 
         if not exists $options{init_arg};
+            
+    (is_default_a_coderef(\%options))
+        || confess("References are not allowed as default values, you must ". 
+                   "wrap then in a CODE reference (ex: sub { [] } and not [])")
+            if exists $options{default} && ref $options{default};      
             
     bless {
         name      => $name,
