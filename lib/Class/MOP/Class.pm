@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.17';
+our $VERSION   = '0.18';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -30,140 +30,127 @@ sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
 
 # Creation
+    
+sub initialize {
+    my $class        = shift;
+    my $package_name = shift;
+    (defined $package_name && $package_name && !blessed($package_name))
+        || confess "You must pass a package name and it cannot be blessed";    
+    $class->construct_class_instance(':package' => $package_name, @_);
+}
 
-{
-    # Metaclasses are singletons, so we cache them here.
-    # there is no need to worry about destruction though
-    # because they should die only when the program dies.
-    # After all, do package definitions even get reaped?
-    my %METAS;  
+sub reinitialize {
+    my $class        = shift;
+    my $package_name = shift;
+    (defined $package_name && $package_name && !blessed($package_name))
+        || confess "You must pass a package name and it cannot be blessed";    
+    Class::MOP::remove_metaclass_by_name($package_name);
+    $class->construct_class_instance(':package' => $package_name, @_);
+}       
     
-    # means of accessing all the metaclasses that have 
-    # been initialized thus far (for mugwumps obj browser)
-    sub get_all_metaclasses         {        %METAS }            
-    sub get_all_metaclass_instances { values %METAS } 
-    sub get_all_metaclass_names     { keys   %METAS }     
-    
-    sub initialize {
-        my $class        = shift;
-        my $package_name = shift;
-        (defined $package_name && $package_name && !blessed($package_name))
-            || confess "You must pass a package name and it cannot be blessed";    
-        $class->construct_class_instance(':package' => $package_name, @_);
+# NOTE: (meta-circularity) 
+# this is a special form of &construct_instance 
+# (see below), which is used to construct class
+# meta-object instances for any Class::MOP::* 
+# class. All other classes will use the more 
+# normal &construct_instance.
+sub construct_class_instance {
+    my $class        = shift;
+    my %options      = @_;
+    my $package_name = $options{':package'};
+    (defined $package_name && $package_name)
+        || confess "You must pass a package name";  
+    # NOTE:
+    # return the metaclass if we have it cached, 
+    # and it is still defined (it has not been 
+    # reaped by DESTROY yet, which can happen 
+    # annoyingly enough during global destruction)
+    return Class::MOP::get_metaclass_by_name($package_name)
+        if Class::MOP::does_metaclass_exist($package_name);  
+
+    # NOTE:
+    # we need to deal with the possibility 
+    # of class immutability here, and then 
+    # get the name of the class appropriately
+    $class = (blessed($class)
+                    ? ($class->is_immutable
+                        ? $class->get_mutable_metaclass_name()
+                        : blessed($class))
+                    : $class);
+
+    $class = blessed($class) || $class;
+    # now create the metaclass
+    my $meta;
+    if ($class =~ /^Class::MOP::Class$/) {
+        no strict 'refs';                
+        $meta = bless { 
+            # inherited from Class::MOP::Package
+            '$:package'             => $package_name, 
+            '%:namespace'           => \%{$package_name . '::'},                
+            # inherited from Class::MOP::Module
+            '$:version'             => (exists ${$package_name . '::'}{'VERSION'}   ? ${$package_name . '::VERSION'}   : undef),
+            '$:authority'           => (exists ${$package_name . '::'}{'AUTHORITY'} ? ${$package_name . '::AUTHORITY'} : undef),
+            # defined here ...
+            '%:attributes'          => {},
+            '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
+            '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
+            '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',
+        } => $class;
+    }
+    else {
+        # NOTE:
+        # it is safe to use meta here because
+        # class will always be a subclass of 
+        # Class::MOP::Class, which defines meta
+        $meta = $class->meta->construct_instance(%options)
     }
     
-    sub reinitialize {
-        my $class        = shift;
-        my $package_name = shift;
-        (defined $package_name && $package_name && !blessed($package_name))
-            || confess "You must pass a package name and it cannot be blessed";    
-        $METAS{$package_name} = undef;
-        $class->construct_class_instance(':package' => $package_name, @_);
-    }       
+    # and check the metaclass compatibility
+    $meta->check_metaclass_compatability();
     
-    # NOTE: (meta-circularity) 
-    # this is a special form of &construct_instance 
-    # (see below), which is used to construct class
-    # meta-object instances for any Class::MOP::* 
-    # class. All other classes will use the more 
-    # normal &construct_instance.
-    sub construct_class_instance {
-        my $class        = shift;
-        my %options      = @_;
-        my $package_name = $options{':package'};
-        (defined $package_name && $package_name)
-            || confess "You must pass a package name";  
-        # NOTE:
-        # return the metaclass if we have it cached, 
-        # and it is still defined (it has not been 
-        # reaped by DESTROY yet, which can happen 
-        # annoyingly enough during global destruction)
-        return $METAS{$package_name} 
-            if exists $METAS{$package_name} && defined $METAS{$package_name};  
+    Class::MOP::store_metaclass_by_name($package_name, $meta);
+    # NOTE:
+    # we need to weaken any anon classes
+    # so that they can call DESTROY properly
+    Class::MOP::weaken_metaclass($package_name)
+        if $package_name =~ /^$ANON_CLASS_PREFIX/;
+    $meta;        
+} 
+    
+sub check_metaclass_compatability {
+    my $self = shift;
 
+    # this is always okay ...
+    return if blessed($self)            eq 'Class::MOP::Class'   && 
+              $self->instance_metaclass eq 'Class::MOP::Instance';
+
+    my @class_list = $self->class_precedence_list;
+    shift @class_list; # shift off $self->name
+
+    foreach my $class_name (@class_list) { 
+        my $meta = Class::MOP::get_metaclass_by_name($class_name) || next;
+        
         # NOTE:
         # we need to deal with the possibility 
         # of class immutability here, and then 
-        # get the name of the class appropriately
-        $class = (blessed($class)
-                        ? ($class->is_immutable
-                            ? $class->get_mutable_metaclass_name()
-                            : blessed($class))
-                        : $class);
-
-        $class = blessed($class) || $class;
-        # now create the metaclass
-        my $meta;
-        if ($class =~ /^Class::MOP::Class$/) {
-            no strict 'refs';                
-            $meta = bless { 
-                # inherited from Class::MOP::Package
-                '$:package'             => $package_name, 
-                '%:namespace'           => \%{$package_name . '::'},                
-                # inherited from Class::MOP::Module
-                '$:version'             => (exists ${$package_name . '::'}{'VERSION'}   ? ${$package_name . '::VERSION'}   : undef),
-                '$:authority'           => (exists ${$package_name . '::'}{'AUTHORITY'} ? ${$package_name . '::AUTHORITY'} : undef),
-                # defined here ...
-                '%:attributes'          => {},
-                '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
-                '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
-                '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',
-            } => $class;
-        }
-        else {
-            # NOTE:
-            # it is safe to use meta here because
-            # class will always be a subclass of 
-            # Class::MOP::Class, which defines meta
-            $meta = $class->meta->construct_instance(%options)
-        }
-        
-        # and check the metaclass compatibility
-        $meta->check_metaclass_compatability();
-        $METAS{$package_name} = $meta;
+        # get the name of the class appropriately            
+        my $meta_type = ($meta->is_immutable
+                            ? $meta->get_mutable_metaclass_name()
+                            : blessed($meta));                
+                            
+        ($self->isa($meta_type))
+            || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
+                       " is not compatible with the " . 
+                       $class_name . "->meta => (" . ($meta_type)     . ")";
         # NOTE:
-        # we need to weaken any anon classes
-        # so that they can call DESTROY properly
-        weaken($METAS{$package_name})
-            if $package_name =~ /^$ANON_CLASS_PREFIX/;
-        $meta;        
-    } 
-    
-    sub check_metaclass_compatability {
-        my $self = shift;
-
-        # this is always okay ...
-        return if blessed($self)            eq 'Class::MOP::Class'   && 
-                  $self->instance_metaclass eq 'Class::MOP::Instance';
-
-        my @class_list = $self->class_precedence_list;
-        shift @class_list; # shift off $self->name
-
-        foreach my $class_name (@class_list) { 
-            my $meta = $METAS{$class_name} || next;
-            
-            # NOTE:
-            # we need to deal with the possibility 
-            # of class immutability here, and then 
-            # get the name of the class appropriately            
-            my $meta_type = ($meta->is_immutable
-                                ? $meta->get_mutable_metaclass_name()
-                                : blessed($meta));                
-                                
-            ($self->isa($meta_type))
-                || confess $self->name . "->meta => (" . (blessed($self)) . ")" . 
-                           " is not compatible with the " . 
-                           $class_name . "->meta => (" . ($meta_type)     . ")";
-            # NOTE:
-            # we also need to check that instance metaclasses
-            # are compatabile in the same the class.
-            ($self->instance_metaclass->isa($meta->instance_metaclass))
-                || confess $self->name . "->meta => (" . ($self->instance_metaclass) . ")" . 
-                           " is not compatible with the " . 
-                           $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";                           
-        }        
-    } 
-}
+        # we also need to check that instance metaclasses
+        # are compatabile in the same the class.
+        ($self->instance_metaclass->isa($meta->instance_metaclass))
+            || confess $self->name . "->meta => (" . ($self->instance_metaclass) . ")" . 
+                       " is not compatible with the " . 
+                       $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";                           
+    }        
+} 
 
 ## ANON classes
 

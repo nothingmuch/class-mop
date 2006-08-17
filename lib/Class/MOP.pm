@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util ();
+use Scalar::Util 'weaken';
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -15,6 +15,31 @@ use Class::MOP::Class::Immutable;
 
 our $VERSION   = '0.33';
 our $AUTHORITY = 'cpan:STEVAN';
+
+{
+    # Metaclasses are singletons, so we cache them here.
+    # there is no need to worry about destruction though
+    # because they should die only when the program dies.
+    # After all, do package definitions even get reaped?
+    my %METAS;  
+    
+    # means of accessing all the metaclasses that have 
+    # been initialized thus far (for mugwumps obj browser)
+    sub get_all_metaclasses         {        %METAS         }            
+    sub get_all_metaclass_instances { values %METAS         } 
+    sub get_all_metaclass_names     { keys   %METAS         }     
+    sub get_metaclass_by_name       { $METAS{$_[0]}         }
+    sub store_metaclass_by_name     { $METAS{$_[0]} = $_[1] }  
+    sub weaken_metaclass            { weaken($METAS{$_[0]}) }            
+    sub does_metaclass_exist        { exists $METAS{$_[0]} && defined $METAS{$_[0]} }
+    sub remove_metaclass_by_name    { $METAS{$_[0]} = undef }     
+    
+    # NOTE:
+    # We only cache metaclasses, meaning instances of 
+    # Class::MOP::Class. We do not cache instance of 
+    # Class::MOP::Package or Class::MOP::Module. Mostly
+    # because I don't yet see a good reason to do so.        
+}
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -468,6 +493,33 @@ approach this topic, so we try to keep it pretty basic, while still
 making it possible to extend the system in many ways.
 
 See L<Class::MOP::Method> for more details.
+
+=back
+
+=head1 FUNCTIONS
+
+Class::MOP holds a cache of metaclasses, the following are functions 
+(B<not methods>) which can be used to access that cache. It is not 
+recommended that you mess with this, bad things could happen. But if 
+you are brave and willing to risk it, go for it.
+
+=over 4
+
+=item B<get_all_metaclasses>
+
+=item B<get_all_metaclass_instances>
+
+=item B<get_all_metaclass_names>
+
+=item B<get_metaclass_by_name ($name)>
+
+=item B<store_metaclass_by_name ($name, $meta)>
+
+=item B<weaken_metaclass ($name)>
+
+=item B<does_metaclass_exist ($name)>
+
+=item B<remove_metaclass_by_name ($name)>
 
 =back
 

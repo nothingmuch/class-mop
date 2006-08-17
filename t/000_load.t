@@ -29,12 +29,12 @@ my %METAS = (
 ok($_->is_immutable(), '... ' . $_->name . ' is immutable') for values %METAS;
 
 is_deeply(
-    { Class::MOP::Class->get_all_metaclasses },
+    { Class::MOP::get_all_metaclasses },
     \%METAS,
     '... got all the metaclasses');
 
 is_deeply(
-    [ sort { $a->name cmp $b->name } Class::MOP::Class->get_all_metaclass_instances ],
+    [ sort { $a->name cmp $b->name } Class::MOP::get_all_metaclass_instances ],
     [ 
         Class::MOP::Attribute->meta, 
         Class::MOP::Class->meta, 
@@ -47,7 +47,7 @@ is_deeply(
     '... got all the metaclass instances');
 
 is_deeply(
-    [ sort Class::MOP::Class->get_all_metaclass_names ],
+    [ sort { $a cmp $b } Class::MOP::get_all_metaclass_names() ],
     [ qw/
         Class::MOP::Attribute       
         Class::MOP::Class

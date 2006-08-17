@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.33
+    * Class::MOP::Class
+      - moved the metaclass cache out of here 
+        and it is now in Class::MOP itself.
+
     * Class::MOP::Attribute
       - reference values (other than CODE refs) 
         are no longer allowed for defaults
