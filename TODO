@@ -1,19 +1,6 @@
 ---------------------------------------------------------------------
 TODO
----------------------------------------------------------------------
-
-- check out what chromatic said:
-
-I think you can check the class key <_ISA to see if it has expired. 
-
-- switch to Context::Handle for method modifiers
-
-Should probably write some more tests to verify this works correctly
-when we add it in, to make sure we don't break weird stuff.
-
-- add ::Attribute::Collection types
-
-mugwump was working on this ...
+--------------------------------------------------------------------- 
 
 - do not bless methods unless asked
 

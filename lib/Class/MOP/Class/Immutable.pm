@@ -14,12 +14,12 @@ use base 'Class::MOP::Class';
 
 # methods which can *not* be called
 
-sub add_method    { confess 'Cannot call method "add_method" on an immutable instance'    }
-sub alias_method  { confess 'Cannot call method "alias_method" on an immutable instance'  }
-sub remove_method { confess 'Cannot call method "remove_method" on an immutable instance' }
-
-sub add_attribute    { confess 'Cannot call method "add_attribute" on an immutable instance'    }
-sub remove_attribute { confess 'Cannot call method "remove_attribute" on an immutable instance' }
+sub add_method            { confess 'Cannot call method "add_method" on an immutable instance'            }
+sub alias_method          { confess 'Cannot call method "alias_method" on an immutable instance'          }
+sub remove_method         { confess 'Cannot call method "remove_method" on an immutable instance'         }
+                                                                                            
+sub add_attribute         { confess 'Cannot call method "add_attribute" on an immutable instance'         }
+sub remove_attribute      { confess 'Cannot call method "remove_attribute" on an immutable instance'      }
 
 sub add_package_symbol    { confess 'Cannot call method "add_package_symbol" on an immutable instance'    }
 sub remove_package_symbol { confess 'Cannot call method "remove_package_symbol" on an immutable instance' }

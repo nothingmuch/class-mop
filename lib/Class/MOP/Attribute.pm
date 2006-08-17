@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub meta { 
@@ -108,7 +108,7 @@ sub init_arg  { $_[0]->{init_arg}  }
 # (all methods below here are kept intact)
 
 sub is_default_a_coderef { 
-    (reftype($_[0]->{default}) && reftype($_[0]->{default}) eq 'CODE')
+    ('CODE' eq (reftype($_[0]->{default}) || ''))    
 }
 
 sub default { 
@@ -144,7 +144,7 @@ sub detach_from_class {
 ## Slot management
 
 sub set_value {
-    my ( $self, $instance, $value ) = @_;
+    my ($self, $instance, $value) = @_;
 
     Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
                      ->get_meta_instance
@@ -152,11 +152,11 @@ sub set_value {
 }
 
 sub get_value {
-    my ( $self, $instance ) = @_;
+    my ($self, $instance) = @_;
 
     Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
                      ->get_meta_instance
-                     ->get_slot_value( $instance, $self->name );
+                     ->get_slot_value($instance, $self->name);
 }
 
 ## Method generation helpers
@@ -164,8 +164,8 @@ sub get_value {
 sub generate_accessor_method {
     my $attr = shift; 
     return sub {
-        $attr->set_value( $_[0], $_[1] ) if scalar(@_) == 2;
-        $attr->get_value( $_[0] );
+        $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
+        $attr->get_value($_[0]);
     };
 }
 
@@ -187,7 +187,7 @@ sub generate_reader_method {
     my $attr = shift;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $attr->get_value( $_[0] );
+        $attr->get_value($_[0]);
     };   
 }
 
@@ -208,7 +208,7 @@ sub generate_reader_method_inline {
 sub generate_writer_method {
     my $attr = shift;
     return sub {
-        $attr->set_value( $_[0], $_[1] );
+        $attr->set_value($_[0], $_[1]);
     };
 }
 
