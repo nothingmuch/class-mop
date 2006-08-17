@@ -20,15 +20,6 @@ use Class::MOP::Instance;
 
 sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
 
-# Class globals ...
-
-# NOTE:
-# we need a sufficiently annoying prefix
-# this should suffice for now, this is 
-# used in a couple of places below, so 
-# need to put it up here for now.
-my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
-
 # Creation
     
 sub initialize {
@@ -109,11 +100,12 @@ sub construct_class_instance {
     $meta->check_metaclass_compatability();
     
     Class::MOP::store_metaclass_by_name($package_name, $meta);
+    
     # NOTE:
     # we need to weaken any anon classes
     # so that they can call DESTROY properly
-    Class::MOP::weaken_metaclass($package_name)
-        if $package_name =~ /^$ANON_CLASS_PREFIX/;
+    Class::MOP::weaken_metaclass($package_name) if $meta->is_anon_class;
+    
     $meta;        
 } 
     
@@ -160,29 +152,42 @@ sub check_metaclass_compatability {
     # use case where it is not, write a test and 
     # I will change it.
     my $ANON_CLASS_SERIAL = 0;
+    
+    # NOTE:
+    # we need a sufficiently annoying prefix
+    # this should suffice for now, this is 
+    # used in a couple of places below, so 
+    # need to put it up here for now.
+    my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';    
+
+    sub is_anon_class {
+        my $self = shift;
+        $self->name =~ /^$ANON_CLASS_PREFIX/ ? 1 : 0;        
+    }
 
     sub create_anon_class {
         my ($class, %options) = @_;   
         my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
         return $class->create($package_name, '0.00', %options);
-    }
-}    
+    } 
 
-# NOTE:
-# this will only get called for 
-# anon-classes, all other calls 
-# are assumed to occur during 
-# global destruction and so don't
-# really need to be handled explicitly
-sub DESTROY {
-    my $self = shift;
-    return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
-    my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
-    no strict 'refs';     
-    foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
-        delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
+    # NOTE:
+    # this will only get called for 
+    # anon-classes, all other calls 
+    # are assumed to occur during 
+    # global destruction and so don't
+    # really need to be handled explicitly
+    sub DESTROY {
+        my $self = shift;
+        return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        no strict 'refs';     
+        foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
+            delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
+        }
+        delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};        
     }
-    delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};        
+
 }
 
 # creating classes with MOP ...
@@ -708,21 +713,6 @@ bootstrap this module by installing a number of attribute meta-objects
 into it's metaclass. This will allow this class to reap all the benifits 
 of the MOP when subclassing it. 
 
-=item B<get_all_metaclasses>
-
-This will return an hash of all the metaclass instances that have 
-been cached by B<Class::MOP::Class> keyed by the package name. 
-
-=item B<get_all_metaclass_instances>
-
-This will return an array of all the metaclass instances that have 
-been cached by B<Class::MOP::Class>.
-
-=item B<get_all_metaclass_names>
-
-This will return an array of all the metaclass names that have 
-been cached by B<Class::MOP::Class>.
-
 =back
 
 =head2 Class construction
@@ -860,17 +850,15 @@ is too I<context-specific> to be part of the MOP.
 
 =head2 Informational 
 
+These are a few predicate methods for asking information about the class.
+
 =over 4
 
-=item B<name>
+=item B<is_anon_class>
 
-This is a read-only attribute which returns the package name for the 
-given B<Class::MOP::Class> instance.
+=item B<is_mutable>
 
-=item B<version>
-
-This is a read-only attribute which returns the C<$VERSION> of the 
-package for the given B<Class::MOP::Class> instance.
+=item B<is_immutable>
 
 =back
 
@@ -1180,46 +1168,9 @@ It will return undef if nothing is found.
 
 =back
 
-=head2 Package Variables
-
-Since Perl's classes are built atop the Perl package system, it is 
-fairly common to use package scoped variables for things like static 
-class variables. The following methods are convience methods for 
-the creation and inspection of package scoped variables.
-
-=over 4
-
-=item B<add_package_symbol ($variable_name, ?$initial_value)>
-
-Given a C<$variable_name>, which must contain a leading sigil, this 
-method will create that variable within the package which houses the 
-class. It also takes an optional C<$initial_value>, which must be a 
-reference of the same type as the sigil of the C<$variable_name> 
-implies.
-
-=item B<get_package_symbol ($variable_name)>
-
-This will return a reference to the package variable in 
-C<$variable_name>. 
-
-=item B<has_package_symbol ($variable_name)>
-
-Returns true (C<1>) if there is a package variable defined for 
-C<$variable_name>, and false (C<0>) otherwise.
-
-=item B<remove_package_symbol ($variable_name)>
-
-This will attempt to remove the package variable at C<$variable_name>.
-
-=back
-
 =head2 Class closing
 
 =over 4
-
-=item B<is_mutable>
-
-=item B<is_immutable>
 
 =item B<make_immutable>
 

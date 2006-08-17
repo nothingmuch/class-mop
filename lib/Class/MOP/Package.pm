@@ -194,23 +194,50 @@ Class::MOP::Package - Package Meta Object
 
 =item B<meta>
 
-=item B<initialize>
+=item B<initialize ($package_name)>
 
 =item B<name>
 
+This is a read-only attribute which returns the package name for the 
+given instance.
+
 =item B<namespace>
 
-=item B<add_package_symbol>
+This returns a HASH reference to the symbol table. The keys of the 
+HASH are the symbol names, and the values are typeglob references.
 
-=item B<get_package_symbol>
+=item B<add_package_symbol ($variable_name, ?$initial_value)>
 
-=item B<has_package_symbol>
+Given a C<$variable_name>, which must contain a leading sigil, this 
+method will create that variable within the package which houses the 
+class. It also takes an optional C<$initial_value>, which must be a 
+reference of the same type as the sigil of the C<$variable_name> 
+implies.
 
-=item B<remove_package_symbol>
+=item B<get_package_symbol ($variable_name)>
 
-=item B<remove_package_glob>
+This will return a reference to the package variable in 
+C<$variable_name>. 
+
+=item B<has_package_symbol ($variable_name)>
+
+Returns true (C<1>) if there is a package variable defined for 
+C<$variable_name>, and false (C<0>) otherwise.
+
+=item B<remove_package_symbol ($variable_name)>
+
+This will attempt to remove the package variable at C<$variable_name>.
+
+=item B<remove_package_glob ($glob_name)>
+
+This will attempt to remove the entire typeglob associated with 
+C<$glob_name> from the package. 
 
 =item B<list_all_package_symbols>
+
+This will list all the glob names associated with the current package. 
+By inspecting the globs returned you can discern all the variables in 
+the package.
 
 =back
 

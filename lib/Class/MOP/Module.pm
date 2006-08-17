@@ -59,9 +59,17 @@ Class::MOP::Module - Module Meta Object
 
 =item B<version>
 
+This is a read-only attribute which returns the C<$VERSION> of the 
+package for the given instance.
+
 =item B<authority>
 
+This is a read-only attribute which returns the C<$AUTHORITY> of the 
+package for the given instance.
+
 =item B<identifier>
+
+This constructs a string of the name, version and authrity.
 
 =back
 
