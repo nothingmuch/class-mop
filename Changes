@@ -11,6 +11,10 @@ Revision history for Perl extension Class-MOP.
         - added tests for this
 
     ~ lots of misc. documentation cleanup 
+    
+    * Class::MOP::Package
+      - fixed an issue with perl 5.8.1 and how it deals 
+        with symbol tables.    
 
 0.32 Sat. Aug. 12, 2006
     + added Class::MOP::Object so that the 

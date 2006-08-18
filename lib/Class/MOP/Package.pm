@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -29,7 +29,14 @@ sub initialize {
     no strict 'refs';
     return bless { 
         '$:package'   => $package_name,
-        '%:namespace' => \%{$package_name . '::'},
+        # NOTE:
+        # because of issues with the Perl API 
+        # to the typeglob in some versions, we 
+        # need to just always grab a new 
+        # reference to the hash in the accessor. 
+        # Ideally we could just store a ref and 
+        # it would Just Work, but oh well :\
+        #'%:namespace' => \%{$package_name . '::'},
     } => $class;
 }
 
@@ -40,7 +47,17 @@ sub initialize {
 # away in the Class::MOP bootstrap section
 
 sub name      { $_[0]->{'$:package'}   }
-sub namespace { $_[0]->{'%:namespace'} }
+sub namespace { 
+    # NOTE:
+    # because of issues with the Perl API 
+    # to the typeglob in some versions, we 
+    # need to just always grab a new 
+    # reference to the hash here. Ideally 
+    # we could just store a ref and it would
+    # Just Work, but oh well :\    
+    no strict 'refs';    
+    \%{$_[0]->name . '::'} 
+}
 
 # utility methods
 
@@ -80,8 +97,8 @@ sub add_package_symbol {
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
     no strict 'refs';
-    no warnings 'redefine', 'misc';
-    *{$self->name . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;    
+    no warnings 'redefine', 'misc';    
+    *{$self->name . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
 }
 
 sub remove_package_glob {
@@ -96,7 +113,7 @@ sub has_package_symbol {
     my ($self, $variable) = @_;
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
-
+    
     return 0 unless exists $self->namespace->{$name};   
     
     # FIXME:
@@ -110,10 +127,10 @@ sub has_package_symbol {
     
     if ($type eq 'SCALAR') {    
         my $val = *{$self->namespace->{$name}}{$type};
-        defined $$val ? 1 : 0;        
+        defined(${$val}) ? 1 : 0;        
     }
     else {
-        defined *{$self->namespace->{$name}}{$type} ? 1 : 0;
+        defined(*{$self->namespace->{$name}}{$type}) ? 1 : 0;
     }
 }
 

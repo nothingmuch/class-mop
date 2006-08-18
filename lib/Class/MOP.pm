@@ -83,12 +83,17 @@ Class::MOP::Package->meta->add_attribute(
 Class::MOP::Package->meta->add_attribute(
     Class::MOP::Attribute->new('%:namespace' => (
         reader => {
-            'namespace' => sub { (shift)->{'%:namespace'} }
-        },
-        default => sub {
-            my ($class) = @_;
-            no strict 'refs';
-            return \%{$class->name . '::'};
+            # NOTE:
+            # because of issues with the Perl API 
+            # to the typeglob in some versions, we 
+            # need to just always grab a new 
+            # reference to the hash here. Ideally 
+            # we could just store a ref and it would
+            # Just Work, but oh well :\
+            'namespace' => sub { 
+                no strict 'refs';
+                \%{$_[0]->name . '::'} 
+            }
         },
         # NOTE:
         # protect this from silliness 

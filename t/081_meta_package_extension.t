@@ -23,6 +23,7 @@ BEGIN {
     
     __PACKAGE__->meta->add_attribute(
         '%:namespace' => (
+            reader  => 'namespace',
             default => sub { {} }
         )
     );    
