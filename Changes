@@ -9,12 +9,13 @@ Revision history for Perl extension Class-MOP.
       - reference values (other than CODE refs) 
         are no longer allowed for defaults
         - added tests for this
-
-    ~ lots of misc. documentation cleanup 
     
     * Class::MOP::Package
       - fixed an issue with perl 5.8.1 and how it deals 
-        with symbol tables.    
+        with symbol tables. The namespace hash is now 
+        always reloaded from the symbol table. 
+
+    ~ lots of misc. documentation cleanup
 
 0.32 Sat. Aug. 12, 2006
     + added Class::MOP::Object so that the 
