@@ -1,9 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
-0.33
+0.33 Sat. Aug. 19, 2006
     * Class::MOP::Class
       - moved the metaclass cache out of here 
         and it is now in Class::MOP itself.
+        
+    * Class::MOP
+      - moved all the metaclass cache stuff here
+        - fixed all tests for this
 
     * Class::MOP::Attribute
       - reference values (other than CODE refs) 
