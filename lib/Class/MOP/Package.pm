@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.03';
+our $VERSION   = '0.04';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -36,7 +36,7 @@ sub initialize {
         # reference to the hash in the accessor. 
         # Ideally we could just store a ref and 
         # it would Just Work, but oh well :\
-        #'%:namespace' => \%{$package_name . '::'},
+        '%:namespace' => \undef,
     } => $class;
 }
 

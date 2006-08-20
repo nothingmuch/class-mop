@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION   = '0.33';
+our $VERSION   = '0.34';
 our $AUTHORITY = 'cpan:STEVAN';
 
 {
@@ -98,6 +98,7 @@ Class::MOP::Package->meta->add_attribute(
         # NOTE:
         # protect this from silliness 
         init_arg => '!............( DO NOT DO THIS )............!',
+        default  => sub { \undef }
     ))
 );
 
@@ -134,6 +135,7 @@ Class::MOP::Module->meta->add_attribute(
         # NOTE:
         # protect this from silliness 
         init_arg => '!............( DO NOT DO THIS )............!',
+        default  => sub { \undef }
     ))
 );
 
@@ -154,6 +156,7 @@ Class::MOP::Module->meta->add_attribute(
         # NOTE:
         # protect this from silliness 
         init_arg => '!............( DO NOT DO THIS )............!',
+        default  => sub { \undef }
     ))
 );
 
@@ -170,6 +173,33 @@ Class::MOP::Class->meta->add_attribute(
         },
         init_arg => ':attributes',
         default  => sub { {} }
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('%:methods' => (
+        reader   => {          
+            # NOTE:
+            # as with the $VERSION and $AUTHORITY above
+            # sometimes we don't/can't store directly 
+            # inside the instance, so we need the accessor
+            # to just DWIM
+            'get_method_map' => sub {
+                my $self = shift;
+                # FIXME:
+                # there is a faster/better way 
+                # to do this, I am sure :)
+                return +{ 
+                    map {
+                        $_ => $self->get_method($_) 
+                    } grep { 
+                        $self->has_method($_) 
+                    } $self->list_all_package_symbols
+                };            
+            }
+        },
+        init_arg => '!............( DO NOT DO THIS )............!',
+        default  => sub { \undef }
     ))
 );
 

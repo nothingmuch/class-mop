@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.18';
+our $VERSION   = '0.19';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -77,12 +77,23 @@ sub construct_class_instance {
         $meta = bless { 
             # inherited from Class::MOP::Package
             '$:package'             => $package_name, 
-            '%:namespace'           => \%{$package_name . '::'},                
+            
+            # NOTE:
+            # since the following attributes will 
+            # actually be loaded from the symbol 
+            # table, and actually bypass the instance
+            # entirely, we can just leave these things
+            # listed here for reference, because they
+            # should not actually have a value associated 
+            # with the slot.
+            '%:namespace'           => \undef,                
             # inherited from Class::MOP::Module
-            '$:version'             => (exists ${$package_name . '::'}{'VERSION'}   ? ${$package_name . '::VERSION'}   : undef),
-            '$:authority'           => (exists ${$package_name . '::'}{'AUTHORITY'} ? ${$package_name . '::AUTHORITY'} : undef),
-            # defined here ...
-            '%:attributes'          => {},
+            '$:version'             => \undef,
+            '$:authority'           => \undef,
+            # defined in Class::MOP::Class
+            '%:methods'             => \undef,
+            
+            '%:attributes'          => {},            
             '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
             '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
             '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',
@@ -237,6 +248,20 @@ sub get_attribute_map   { $_[0]->{'%:attributes'}          }
 sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
 sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
+
+sub get_method_map {
+    my $self = shift;
+    # FIXME:
+    # there is a faster/better way 
+    # to do this, I am sure :)    
+    return +{ 
+        map {
+            $_ => $self->get_method($_) 
+        } grep { 
+            $self->has_method($_) 
+        } $self->list_all_package_symbols
+    };
+}
 
 # Instance Construction & Cloning
 
@@ -890,6 +915,8 @@ what B<Class::ISA::super_path> does, but we don't remove duplicate names.
 =head2 Methods
 
 =over 4
+
+=item B<get_method_map>
 
 =item B<method_metaclass>
 

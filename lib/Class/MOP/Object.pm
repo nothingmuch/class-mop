@@ -6,7 +6,7 @@ use warnings;
 
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
 # introspection
@@ -14,6 +14,22 @@ our $AUTHORITY = 'cpan:STEVAN';
 sub meta { 
     require Class::MOP::Class;
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
+}
+
+# RANT:
+# Cmon, how many times have you written 
+# the following code while debugging:
+# 
+#  use Data::Dumper; 
+#  warn Dumper $obj;
+#
+# It can get seriously annoying, so why 
+# not just do this ...
+sub dump { 
+    my $self = shift;
+    require Data::Dumper;
+    $Data::Dumper::Maxdepth = shift || 1;
+    Data::Dumper::Dumper $self;
 }
 
 1;
@@ -60,6 +76,8 @@ this documenation.
 =over 4
 
 =item B<meta>
+
+=item B<dump (?$max_depth)>
 
 =back
 
