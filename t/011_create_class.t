@@ -10,7 +10,8 @@ BEGIN {
     use_ok('Class::MOP');        
 }
 
-my $Point = Class::MOP::Class->create('Point' => '0.01' => (
+my $Point = Class::MOP::Class->create('Point' => (
+    version    => '0.01',
     attributes => [
         Class::MOP::Attribute->new('$.x' => (
             reader   => 'x',
@@ -35,7 +36,8 @@ my $Point = Class::MOP::Class->create('Point' => '0.01' => (
     }
 ));
 
-my $Point3D = Class::MOP::Class->create('Point3D' => '0.01' => (
+my $Point3D = Class::MOP::Class->create('Point3D' => (
+    version      => '0.01',    
     superclasses => [ 'Point' ],
     attributes => [
         Class::MOP::Attribute->new('$:z' => (

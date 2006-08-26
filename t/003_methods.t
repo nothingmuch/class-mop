@@ -174,7 +174,7 @@ is_deeply(
 # ... test our class creator 
 
 my $Bar = Class::MOP::Class->create(
-            'Bar' => '0.10' => (
+            'Bar' => (
                 superclasses => [ 'Foo' ],
                 methods => {
                     foo => sub { 'Bar::foo' },

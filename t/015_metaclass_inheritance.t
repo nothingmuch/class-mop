@@ -45,3 +45,4 @@ isa_ok($baz_meta, 'Class::MOP::Class');
 is($baz_meta->name, 'Baz', '... baz_meta->name == Baz');
 isnt($baz_meta, $bar_meta, '... Baz->meta != Bar->meta');
 isnt($baz_meta, $foo_meta, '... Baz->meta != Foo->meta');
+

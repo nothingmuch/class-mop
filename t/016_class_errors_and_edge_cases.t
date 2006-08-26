@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 52;
+use Test::More tests => 49;
 use Test::Exception;
 
 BEGIN {
@@ -216,10 +216,6 @@ BEGIN {
     dies_ok {
         Class::MOP::Class->has_package_symbol('foo');
     } '... has_package_symbol dies as expected';  
-
-    dies_ok {
-        Class::MOP::Class->has_package_symbol('&foo');
-    } '... has_package_symbol dies as expected';    
 }
 
 {
@@ -233,11 +229,7 @@ BEGIN {
 
     dies_ok {
         Class::MOP::Class->get_package_symbol('foo');
-    } '... get_package_symbol dies as expected';  
-
-    dies_ok {
-        Class::MOP::Class->get_package_symbol('&foo');
-    } '... get_package_symbol dies as expected';    
+    } '... get_package_symbol dies as expected';   
 }
 
 {
@@ -252,9 +244,5 @@ BEGIN {
     dies_ok {
         Class::MOP::Class->remove_package_symbol('foo');
     } '... remove_package_symbol dies as expected';  
-
-    dies_ok {
-        Class::MOP::Class->remove_package_symbol('&foo');
-    } '... remove_package_symbol dies as expected';    
 }
 

@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 65;
+use Test::More tests => 69;
 use File::Spec;
+use Scalar::Util 'reftype';
 
 BEGIN { 
     use_ok('Class::MOP');    
@@ -72,6 +73,8 @@ BEGIN {
 my $foo = Foo->new();
 isa_ok($foo, 'Foo');
 
+is(reftype($foo), 'ARRAY', '... Foo is made with ARRAY');
+
 can_ok($foo, 'foo');
 can_ok($foo, 'has_foo');
 can_ok($foo, 'get_bar');
@@ -92,6 +95,8 @@ is($foo->get_bar(), 42, '... Foo::bar == 42');
 my $foo2 = Foo->new();
 isa_ok($foo2, 'Foo');
 
+is(reftype($foo2), 'ARRAY', '... Foo is made with ARRAY');
+
 ok(!$foo2->has_foo, '... Foo2::foo is not defined yet');
 is($foo2->foo(), undef, '... Foo2::foo is not defined yet');
 is($foo2->get_bar(), 'FOO is BAR', '... Foo2::bar has been initialized');
@@ -106,6 +111,8 @@ is($foo->get_bar(), 42, '... Foo::bar == 42');
 my $bar = Bar->new();
 isa_ok($bar, 'Bar');
 isa_ok($bar, 'Foo');
+
+is(reftype($bar), 'ARRAY', '... Bar is made with ARRAY');
 
 can_ok($bar, 'foo');
 can_ok($bar, 'has_foo');
@@ -140,6 +147,8 @@ isa_ok($baz, 'Bar::Baz');
 isa_ok($baz, 'Bar');
 isa_ok($baz, 'Foo');
 isa_ok($baz, 'Baz');
+
+is(reftype($baz), 'ARRAY', '... Bar::Baz is made with ARRAY');
 
 can_ok($baz, 'foo');
 can_ok($baz, 'has_foo');

@@ -118,7 +118,7 @@ BEGIN {
         predicate => 'has_test'
     ));
     
-    my $Bar = Class::MOP::Class->create('Bar' => '0.01');
+    my $Bar = Class::MOP::Class->create('Bar');
     isa_ok($Bar, 'Class::MOP::Class');
     
     $Bar->add_attribute($attr);

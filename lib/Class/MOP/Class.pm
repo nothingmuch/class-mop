@@ -179,7 +179,7 @@ sub check_metaclass_compatability {
     sub create_anon_class {
         my ($class, %options) = @_;   
         my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
-        return $class->create($package_name, '0.00', %options);
+        return $class->create($package_name, %options);
     } 
 
     # NOTE:
@@ -204,14 +204,27 @@ sub check_metaclass_compatability {
 # creating classes with MOP ...
 
 sub create {
-    my ($class, $package_name, $package_version, %options) = @_;
+    my $class        = shift;
+    my $package_name = shift;
+    
     (defined $package_name && $package_name)
         || confess "You must pass a package name";
+
+    (scalar @_ % 2 == 0)
+        || confess "You much pass all parameters as name => value pairs " . 
+                   "(I found an uneven number of params in \@_)";
+
+    my (%options) = @_;
+    
     my $code = "package $package_name;";
-    $code .= "\$$package_name\:\:VERSION = '$package_version';" 
-        if defined $package_version;
+    $code .= "\$$package_name\:\:VERSION = '" . $options{version} . "';" 
+        if exists $options{version};
+    $code .= "\$$package_name\:\:AUTHORITY = '" . $options{authority} . "';" 
+        if exists $options{authority};  
+              
     eval $code;
     confess "creation of $package_name failed : $@" if $@;    
+    
     my $meta = $class->initialize($package_name);
     
     $meta->add_method('meta' => sub { 
@@ -701,7 +714,8 @@ Class::MOP::Class - Class Meta Object
   
   # or use this to actually create classes ...
   
-  Class::MOP::Class->create('Bar' => '0.01' => (
+  Class::MOP::Class->create('Bar' => (
+      version      => '0.01',
       superclasses => [ 'Foo' ],
       attributes => [
           Class::MOP:::Attribute->new('$bar'),
@@ -752,15 +766,17 @@ created any more than nessecary. Basically, they are singletons.
 
 =over 4
 
-=item B<create ($package_name, ?$package_version,
+=item B<create ($package_name, 
+                version      =E<gt> ?$version,                 
+                authority    =E<gt> ?$authority,                                 
                 superclasses =E<gt> ?@superclasses, 
                 methods      =E<gt> ?%methods, 
                 attributes   =E<gt> ?%attributes)>
 
 This returns a B<Class::MOP::Class> object, bringing the specified 
-C<$package_name> into existence and adding any of the 
-C<$package_version>, C<@superclasses>, C<%methods> and C<%attributes> 
-to it.
+C<$package_name> into existence and adding any of the C<$version>, 
+C<$authority>, C<@superclasses>, C<%methods> and C<%attributes> to 
+it.
 
 =item B<create_anon_class (superclasses =E<gt> ?@superclasses, 
                            methods      =E<gt> ?%methods, 

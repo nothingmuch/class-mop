@@ -105,20 +105,21 @@ sub _generate_slot_initializer {
     my $attr = $attrs->[$index];
     my $default;
     if ($attr->has_default) {
+        # NOTE:
+        # default values can either be CODE refs
+        # in which case we need to call them. Or 
+        # they can be scalars (strings/numbers)
+        # in which case we can just deal with them
+        # in the code we eval.
         if ($attr->is_default_a_coderef) {
             $default = '$attrs->[' . $index . ']->default($instance)';
         }
         else {
             $default = $attrs->[$index]->default;
+            # make sure to quote strings ...
             unless (looks_like_number($default)) {
                 $default = "'$default'";
             }
-            # TODO:
-            # we should use Data::Dumper to 
-            # output any ref's here, obviously 
-            # we cannot handle Scalar refs, but
-            # it should work for Array and Hash 
-            # refs pretty well.
         }
     }
     $meta_instance->inline_set_slot_value(

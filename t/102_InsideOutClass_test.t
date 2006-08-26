@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 85;
+use Test::More tests => 89;
 use File::Spec;
+use Scalar::Util 'reftype';
 
 BEGIN { 
     use_ok('Class::MOP');    
@@ -75,6 +76,8 @@ BEGIN {
 my $foo = Foo->new();
 isa_ok($foo, 'Foo');
 
+is(reftype($foo), 'SCALAR', '... Foo is made with SCALAR');
+
 can_ok($foo, 'foo');
 can_ok($foo, 'has_foo');
 can_ok($foo, 'get_bar');
@@ -95,6 +98,8 @@ is($foo->get_bar(), 42, '... Foo::bar == 42');
 my $foo2 = Foo->new();
 isa_ok($foo2, 'Foo');
 
+is(reftype($foo2), 'SCALAR', '... Foo is made with SCALAR');
+
 ok(!$foo2->has_foo, '... Foo2::foo is not defined yet');
 is($foo2->foo(), undef, '... Foo2::foo is not defined yet');
 is($foo2->get_bar(), 'FOO is BAR', '... Foo2::bar has been initialized');
@@ -109,6 +114,8 @@ is($foo->get_bar(), 42, '... Foo::bar == 42');
 my $bar = Bar->new();
 isa_ok($bar, 'Bar');
 isa_ok($bar, 'Foo');
+
+is(reftype($bar), 'SCALAR', '... Bar is made with SCALAR');
 
 can_ok($bar, 'foo');
 can_ok($bar, 'has_foo');
@@ -143,6 +150,8 @@ isa_ok($baz, 'Bar::Baz');
 isa_ok($baz, 'Bar');
 isa_ok($baz, 'Foo');
 isa_ok($baz, 'Baz');
+
+is(reftype($baz), 'SCALAR', '... Bar::Baz is made with SCALAR');
 
 can_ok($baz, 'foo');
 can_ok($baz, 'has_foo');

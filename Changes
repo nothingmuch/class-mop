@@ -6,6 +6,11 @@ Revision history for Perl extension Class-MOP.
         the $:version and such just actually goes 
         to the symbol table to get it's stuff. 
         However, it makes the MOP more complete.
+     ** API CHANGE **
+      - The &create method now requires that all 
+        but the package name now is passed in as 
+        named parameters. See docs for more info.
+        - updated docs and tests for this
         
     * Class::MOP::Object
       - added &dump method to easily Data::Dumper 
@@ -16,6 +21,8 @@ Revision history for Perl extension Class-MOP.
         which do not store things in the instance 
       - added the %:methods attribute definition to
         the bootstrap
+        
+    ~ lots of misc. test cleanup
 
 0.33 Sat. Aug. 19, 2006
     * Class::MOP::Class

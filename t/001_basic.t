@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 25;
 use Test::Exception;
 
 BEGIN {
@@ -18,6 +18,8 @@ BEGIN {
     
     package Bar;
     our @ISA = ('Foo');
+    
+    our $AUTHORITY = 'cpan:JRANDOM';
 }
 
 my $Foo = Foo->meta;
@@ -31,6 +33,12 @@ is($Bar->name, 'Bar', '... Bar->name == Bar');
 
 is($Foo->version, '0.01', '... Foo->version == 0.01');
 is($Bar->version, undef, '... Bar->version == undef');
+
+is($Foo->authority, undef, '... Foo->authority == undef');
+is($Bar->authority, 'cpan:JRANDOM', '... Bar->authority == cpan:JRANDOM');
+
+is($Foo->identifier, 'Foo-0.01', '... Foo->identifier == Foo-0.01');
+is($Bar->identifier, 'Bar-cpan:JRANDOM', '... Bar->identifier == Bar-cpan:JRANDOM');
 
 is_deeply([$Foo->superclasses], [], '... Foo has no superclasses');
 is_deeply([$Bar->superclasses], ['Foo'], '... Bar->superclasses == (Foo)');
@@ -52,7 +60,9 @@ is_deeply(
 # create a class using Class::MOP::Class ...
 
 my $Baz = Class::MOP::Class->create(
-            'Baz' => '0.10' => (
+            'Baz' => (
+                version      => '0.10',
+                authority    => 'cpan:YOMAMA',
                 superclasses => [ 'Bar' ]
             ));
 isa_ok($Baz, 'Class::MOP::Class');
@@ -60,6 +70,9 @@ is(Baz->meta, $Baz, '... our metaclasses are singletons');
 
 is($Baz->name, 'Baz', '... Baz->name == Baz');
 is($Baz->version, '0.10', '... Baz->version == 0.10');
+is($Baz->authority, 'cpan:YOMAMA', '... Baz->authority == YOMAMA');
+
+is($Baz->identifier, 'Baz-0.10-cpan:YOMAMA', '... Baz->identifier == Baz-0.10-cpan:YOMAMA');
 
 is_deeply([$Baz->superclasses], ['Bar'], '... Baz->superclasses == (Bar)');
 
