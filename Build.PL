@@ -8,7 +8,7 @@ my $build = Module::Build->new(
     requires => {
         'Scalar::Util' => '1.18',
         'Sub::Name'    => '0.02',
-        'Carp'         => '0.01',
+        'Carp'         => '0',
         'B'            => '0',
     },
     optional => {},

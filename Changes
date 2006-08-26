@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.34
+0.34 Sat. Aug. 26, 2006
     * Class::MOP::Class
       - added the %:methods attribute, which like
         the $:version and such just actually goes 
