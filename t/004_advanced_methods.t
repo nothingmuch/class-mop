@@ -78,13 +78,13 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Foo',
-            code  => \&Foo::BUILD 
+            code  => Class::MOP::Class->initialize('Foo')->get_method('BUILD') 
         },    
         {
             name  => 'foo',
             class => 'Foo',
-            code  => \&Foo::foo 
-        },       
+            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
+        },             
     ],
     '... got the right list of applicable methods for Foo');
     
@@ -94,17 +94,17 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Bar',
-            code  => \&Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD') 
         },    
         {
             name  => 'bar',
             class => 'Bar',
-            code  => \&Bar::bar  
+            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')
         },
         {
             name  => 'foo',
             class => 'Foo',
-            code  => \&Foo::foo  
+            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
         },       
     ],
     '... got the right list of applicable methods for Bar');
@@ -116,22 +116,22 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Bar',
-            code  => \&Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD') 
         },    
         {
             name  => 'bar',
             class => 'Bar',
-            code  => \&Bar::bar  
+            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')   
         },
         {
             name  => 'baz',
             class => 'Baz',
-            code  => \&Baz::baz  
+            code  => Class::MOP::Class->initialize('Baz')->get_method('baz')  
         },        
         {
             name  => 'foo',
             class => 'Baz',
-            code  => \&Baz::foo  
+            code  => Class::MOP::Class->initialize('Baz')->get_method('foo') 
         },       
     ],
     '... got the right list of applicable methods for Baz');
@@ -142,22 +142,22 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Foo::Bar',
-            code  => \&Foo::Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Foo::Bar')->get_method('BUILD')  
         },    
         {
             name  => 'bar',
             class => 'Bar',
-            code  => \&Bar::bar  
+            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')   
         },
         {
             name  => 'foo',
             class => 'Foo',
-            code  => \&Foo::foo  
+            code  => Class::MOP::Class->initialize('Foo')->get_method('foo') 
         },       
         {
             name  => 'foobar',
             class => 'Foo::Bar',
-            code  => \&Foo::Bar::foobar  
+            code  => Class::MOP::Class->initialize('Foo::Bar')->get_method('foobar')   
         },        
     ],
     '... got the right list of applicable methods for Foo::Bar');
@@ -168,27 +168,27 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Foo::Bar::Baz',
-            code  => \&Foo::Bar::Baz::BUILD 
+            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('BUILD')
         },    
         {
             name  => 'bar',
             class => 'Foo::Bar::Baz',
-            code  => \&Foo::Bar::Baz::bar  
+            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('bar')
         },
         {
             name  => 'baz',
             class => 'Baz',
-            code  => \&Baz::baz  
+            code  => Class::MOP::Class->initialize('Baz')->get_method('baz')
         },        
         {
             name  => 'foo',
             class => 'Foo',
-            code  => \&Foo::foo  
+            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
         },   
         {
             name  => 'foobarbaz',
             class => 'Foo::Bar::Baz',
-            code  => \&Foo::Bar::Baz::foobarbaz  
+            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('foobarbaz')
         },            
     ],
     '... got the right list of applicable methods for Foo::Bar::Baz');
@@ -201,17 +201,17 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Foo::Bar',
-            code  => \&Foo::Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Foo::Bar')->get_method('BUILD')
         },    
         {
             name  => 'BUILD',
             class => 'Foo',
-            code  => \&Foo::BUILD 
+            code  => Class::MOP::Class->initialize('Foo')->get_method('BUILD')
         },    
         {
             name  => 'BUILD',
             class => 'Bar',
-            code  => \&Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD')
         }
     ],
     '... got the right list of BUILD methods for Foo::Bar');
@@ -222,17 +222,17 @@ is_deeply(
         {
             name  => 'BUILD',
             class => 'Foo::Bar::Baz',
-            code  => \&Foo::Bar::Baz::BUILD 
+            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('BUILD')
         },    
         {
             name  => 'BUILD',
             class => 'Foo',
-            code  => \&Foo::BUILD 
+            code  => Class::MOP::Class->initialize('Foo')->get_method('BUILD')
         },    
         {
             name  => 'BUILD',
             class => 'Bar',
-            code  => \&Bar::BUILD 
+            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD') 
         },            
     ],
     '... got the right list of BUILD methods for Foo::Bar::Baz');

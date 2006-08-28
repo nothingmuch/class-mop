@@ -91,8 +91,8 @@ sub construct_class_instance {
             '$:version'             => \undef,
             '$:authority'           => \undef,
             # defined in Class::MOP::Class
-            '%:methods'             => \undef,
             
+            '%:methods'             => {},
             '%:attributes'          => {},            
             '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
             '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
@@ -262,18 +262,20 @@ sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
 sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
 
-sub get_method_map {
+sub get_method_map {    
     my $self = shift;
-    # FIXME:
-    # there is a faster/better way 
-    # to do this, I am sure :)    
-    return +{ 
-        map {
-            $_ => $self->get_method($_) 
-        } grep { 
-            $self->has_method($_) 
-        } $self->list_all_package_symbols
-    };
+    my $map  = $self->{'%:methods'}; 
+    
+    foreach my $symbol (grep { $self->has_package_symbol('&' . $_) } $self->list_all_package_symbols) {
+        next if exists $map->{$symbol} && 
+                $map->{$symbol}->body == $self->get_package_symbol('&' . $symbol);
+        
+        $map->{$symbol} = $self->method_metaclass->wrap(
+            $self->get_package_symbol('&' . $symbol)
+        );
+    }
+
+    return $map;
 }
 
 # Instance Construction & Cloning
@@ -376,15 +378,31 @@ sub add_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
     # use reftype here to allow for blessed subs ...
-    ('CODE' eq (reftype($method) || ''))
-        || confess "Your code block must be a CODE reference";
-    my $full_method_name = ($self->name . '::' . $method_name);    
-
-    # FIXME:
-    # dont bless subs, its bad mkay
-    $method = $self->method_metaclass->wrap($method) unless blessed($method);
     
-    $self->add_package_symbol("&${method_name}" => subname $full_method_name => $method);
+    my $body;
+    
+    if (blessed($method)) {
+     
+        $body = $method->body;     
+     
+        ('CODE' eq (reftype($body) || ''))
+            || confess "Your code block must be a CODE reference";        
+        
+        $self->get_method_map->{$method_name} = $method;
+    }
+    else {
+        
+        $body = $method;
+        
+        ('CODE' eq (reftype($body) || ''))
+            || confess "Your code block must be a CODE reference";        
+        
+        $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
+        
+    }
+    
+    my $full_method_name = ($self->name . '::' . $method_name);        
+    $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
 }
 
 {
@@ -455,20 +473,30 @@ sub alias_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
-    # use reftype here to allow for blessed subs ...
-    ('CODE' eq (reftype($method) || ''))
-        || confess "Your code block must be a CODE reference";
 
-    # FIXME:
-    # dont bless subs, its bad mkay
-    $method = $self->method_metaclass->wrap($method) unless blessed($method);    
+    my $body;
+
+    if (blessed($method)) {
+
+        $body = $method->body;     
+
+        ('CODE' eq (reftype($body) || ''))
+            || confess "Your code block must be a CODE reference";        
+
+        $self->get_method_map->{$method_name} = $method;
+    }
+    else {
+
+        $body = $method;
+
+        ('CODE' eq (reftype($body) || ''))
+            || confess "Your code block must be a CODE reference";        
+
+        $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
+
+    }
         
-    $self->add_package_symbol("&${method_name}" => $method);
-}
-
-sub find_method_by_name {
-    my ($self, $method_name) = @_;
-    return $self->name->can($method_name);
+    $self->add_package_symbol("&${method_name}" => $body);
 }
 
 sub has_method {
@@ -476,14 +504,13 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";    
     
-    return 0 if !$self->has_package_symbol("&${method_name}");        
-    my $method = $self->get_package_symbol("&${method_name}");
-    return 0 if (svref_2object($method)->GV->STASH->NAME || '') ne $self->name &&
-                (svref_2object($method)->GV->NAME || '')        ne '__ANON__';      
-
-    # FIXME:
-    # dont bless subs, its bad mkay
-    $self->method_metaclass->wrap($method) unless blessed($method);
+    my $method_map = $self->get_method_map;
+    
+    return 0 unless exists $self->get_method_map->{$method_name};
+        
+    my $method = $method_map->{$method_name};
+    return 0 if ($method->package_name || '') ne $self->name &&
+                ($method->name         || '') ne '__ANON__'; 
     
     return 1;
 }
@@ -492,10 +519,10 @@ sub get_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
-
+     
     return unless $self->has_method($method_name);
  
-    return $self->get_package_symbol("&${method_name}");
+    return $self->get_method_map->{$method_name};
 }
 
 sub remove_method {
@@ -508,12 +535,21 @@ sub remove_method {
     $self->remove_package_symbol("&${method_name}")
         if defined $removed_method;
         
+    delete $self->get_method_map->{$method_name}
+        if exists $self->get_method_map->{$method_name};        
+        
     return $removed_method;
 }
 
 sub get_method_list {
     my $self = shift;
-    grep { $self->has_method($_) } $self->list_all_package_symbols;
+    return grep { $self->has_method($_) } keys %{$self->get_method_map};
+}
+
+sub find_method_by_name {
+    my ($self, $method_name) = @_;
+    # FIXME
+    return $self->name->can($method_name);
 }
 
 sub compute_all_applicable_methods {

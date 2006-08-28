@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 56;
+use Test::More tests => 64;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -64,14 +64,16 @@ lives_ok {
     $Foo->add_method('foo' => $foo);
 } '... we added the method successfully';
 
-isa_ok($foo, 'Class::MOP::Method');
+my $foo_method = $Foo->get_method('foo');
 
-is($foo->name, 'foo', '... got the right name for the method');
-is($foo->package_name, 'Foo', '... got the right package name for the method');
+isa_ok($foo_method, 'Class::MOP::Method');
+
+is($foo_method->name, 'foo', '... got the right name for the method');
+is($foo_method->package_name, 'Foo', '... got the right package name for the method');
 
 ok($Foo->has_method('foo'), '... Foo->has_method(foo) (defined with Sub::Name)');
 
-is($Foo->get_method('foo'), $foo, '... Foo->get_method(foo) == \&foo');
+is($Foo->get_method('foo')->body, $foo, '... Foo->get_method(foo) == \&foo');
 is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
@@ -97,16 +99,20 @@ is( reftype($bar), "CODE", "the returned value is a code ref" );
 
 
 # calling get_method blessed them all
-isa_ok($_, 'Class::MOP::Method') for (
-	\&Foo::FOO_CONSTANT,
-	\&Foo::bar,
-	\&Foo::baz,		
-	\&Foo::floob,
-	\&Foo::blah,		
-	\&Foo::bling,	
-	\&Foo::bang,	
-	\&Foo::evaled_foo,	
-	);
+for my $method_name (qw/FOO_CONSTANT
+                    	bar
+                    	baz
+                    	floob
+                    	blah		
+                    	bling
+                    	bang	
+                    	evaled_foo/) {
+    isa_ok($Foo->get_method($method_name), 'Class::MOP::Method');
+    {
+        no strict 'refs';
+        is($Foo->get_method($method_name)->body, \&{'Foo::' . $method_name}, '... body matches CODE ref in package');
+    }
+}
 
 {
     package Foo::Aliasing;
@@ -137,7 +143,7 @@ is_deeply(
             {
             name  => $_,
             class => 'Foo',
-            code  => $Foo->get_method($_) 
+            code  => $Foo->get_method($_)
             }
         } qw(
             FOO_CONSTANT
@@ -153,7 +159,7 @@ is_deeply(
     ],
     '... got the right list of applicable methods for Foo');
 
-is($Foo->remove_method('foo'), $foo, '... removed the foo method');
+is($Foo->remove_method('foo')->body, $foo, '... removed the foo method');
 ok(!$Foo->has_method('foo'), '... !Foo->has_method(foo) we just removed it');
 dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
@@ -207,18 +213,18 @@ is_deeply(
         {
             name  => 'bang',
             class => 'Foo',
-            code  => $Foo->get_method('bang') 
+            code  => $Foo->get_method('bang')
         },
         {
             name  => 'bar',
             class => 'Bar',
-            code  => $Bar->get_method('bar')            
+            code  => $Bar->get_method('bar') 
         },
         (map {
             {
                 name  => $_,
                 class => 'Foo',
-                code  => $Foo->get_method($_) 
+                code  => $Foo->get_method($_)
             }
         } qw(        
             baz 
@@ -230,12 +236,12 @@ is_deeply(
         {
             name  => 'foo',
             class => 'Bar',
-            code  => $Bar->get_method('foo')            
+            code  => $Bar->get_method('foo')
         },        
         {
             name  => 'meta',
             class => 'Bar',
-            code  => $Bar->get_method('meta')            
+            code  => $Bar->get_method('meta')
         }        
     ],
     '... got the right list of applicable methods for Bar');

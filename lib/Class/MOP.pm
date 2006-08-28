@@ -178,28 +178,30 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('%:methods' => (
-        reader   => {          
-            # NOTE:
-            # as with the $VERSION and $AUTHORITY above
-            # sometimes we don't/can't store directly 
-            # inside the instance, so we need the accessor
-            # to just DWIM
-            'get_method_map' => sub {
-                my $self = shift;
-                # FIXME:
-                # there is a faster/better way 
-                # to do this, I am sure :)
-                return +{ 
-                    map {
-                        $_ => $self->get_method($_) 
-                    } grep { 
-                        $self->has_method($_) 
-                    } $self->list_all_package_symbols
-                };            
-            }
-        },
-        init_arg => '!............( DO NOT DO THIS )............!',
-        default  => sub { \undef }
+        #reader => 'get_method_map',
+        #reader   => {          
+        #    # NOTE:
+        #    # as with the $VERSION and $AUTHORITY above
+        #    # sometimes we don't/can't store directly 
+        #    # inside the instance, so we need the accessor
+        #    # to just DWIM
+        #    'get_method_map' => sub {
+        #        my $self = shift;
+        #        # FIXME:
+        #        # there is a faster/better way 
+        #        # to do this, I am sure :)    
+        #        return +{ 
+        #            map {
+        #                $_ => $self->method_metaclass->wrap($self->get_package_symbol('&' . $_)) 
+        #            } grep { 
+        #                $self->has_package_symbol('&' . $_) 
+        #            } $self->list_all_package_symbols
+        #        };            
+        #    }
+        #},
+        #init_arg => '!............( DO NOT DO THIS )............!',
+        #default  => sub { \undef }
+        default => sub { {} }
     ))
 );
 
