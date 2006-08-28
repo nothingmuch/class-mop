@@ -14,17 +14,17 @@
       name: object construction
       args:
         y: 137
-#   - class: 'Bench::Accessor'
-#     name: accessor get
-#     construct:
-#       x: 4
-#       y: 6
-#     accessor: x
-#   - class: 'Bench::Accessor'
-#     name: accessor set
-#     construct:
-#       x: 4
-#       y: 6
-#     accessor: x
-#     accessor_args: [ 5 ]
+    - class: 'Bench::Accessor'
+      name: accessor get
+      construct:
+        x: 4
+        y: 6
+      accessor: x
+    - class: 'Bench::Accessor'
+      name: accessor set
+      construct:
+        x: 4
+        y: 6
+      accessor: x
+      accessor_args: [ 5 ]
 
