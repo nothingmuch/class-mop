@@ -182,17 +182,12 @@ Class::MOP::Class->meta->add_attribute(
             'get_method_map' => sub {
                 my $self = shift;
                 my $map  = $self->{'%:methods'}; 
-
                 foreach my $symbol ($self->list_all_package_symbols('CODE')) {
                     my $code = $self->get_package_symbol('&' . $symbol);
-                    
-                    next if exists $map->{$symbol} && 
-                            $map->{$symbol}->body == $code;
-
+                    next if exists $map->{$symbol} && $map->{$symbol}->body == $code;
                     $map->{$symbol} = $self->method_metaclass->wrap($code);
                 }
-
-                return $map;           
+                return $map;         
             }
         },
         default => sub { {} }

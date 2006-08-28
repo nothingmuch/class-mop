@@ -189,10 +189,13 @@ sub remove_package_symbol {
 sub list_all_package_symbols {
     my ($self, $type_filter) = @_;
     return keys %{$self->namespace} unless defined $type_filter;
+    # NOTE:
     # or we can filter based on 
     # type (SCALAR|ARRAY|HASH|CODE)
     my $namespace = $self->namespace;
-    return grep { defined(*{$namespace->{$_}}{$type_filter}) } keys %{$namespace};
+    return grep { 
+        defined(*{$namespace->{$_}}{$type_filter}) 
+    } keys %{$namespace};
 }
 
 1;

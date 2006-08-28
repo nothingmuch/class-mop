@@ -265,16 +265,11 @@ sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
 sub get_method_map {    
     my $self = shift;
     my $map  = $self->{'%:methods'}; 
-    
     foreach my $symbol ($self->list_all_package_symbols('CODE')) {
-        next if exists $map->{$symbol} && 
-                $map->{$symbol}->body == $self->get_package_symbol('&' . $symbol);
-        
-        $map->{$symbol} = $self->method_metaclass->wrap(
-            $self->get_package_symbol('&' . $symbol)
-        );
+        my $code = $self->get_package_symbol('&' . $symbol);
+        next if exists $map->{$symbol} && $map->{$symbol}->body == $code;
+        $map->{$symbol} = $self->method_metaclass->wrap($code);
     }
-
     return $map;
 }
 

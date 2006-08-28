@@ -38,23 +38,17 @@ sub body { (shift)->{body} }
 # informational
 
 sub package_name { 
-	my $code = shift->{body};
-#	(blessed($code))
-#		|| confess "Can only ask the package name of a blessed CODE";
+	my $code = (shift)->{body};
 	svref_2object($code)->GV->STASH->NAME;
 }
 
 sub name { 
-	my $code = shift->{body};
-#	(blessed($code))
-#		|| confess "Can only ask the package name of a blessed CODE";	
+	my $code = (shift)->{body};
 	svref_2object($code)->GV->NAME;
 }
 
 sub fully_qualified_name {
 	my $code = shift;
-#	(blessed($code))
-#		|| confess "Can only ask the package name of a blessed CODE";
 	$code->package_name . '::' . $code->name;		
 }
 
@@ -155,12 +149,6 @@ sub get_original_method {
 sub add_before_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	#(exists $MODIFIERS{$code})
-	#	|| confess "You must first wrap your method before adding a modifier";		
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
-	#('CODE' eq (reftype($code) || ''))
-    #    || confess "You must supply a CODE reference for a modifier";			
 	unshift @{$code->{modifier_table}->{before}} => $modifier;
 	$_build_wrapped_method->($code->{modifier_table});
 }
@@ -168,12 +156,6 @@ sub add_before_modifier {
 sub add_after_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	#(exists $MODIFIERS{$code})
-	#	|| confess "You must first wrap your method before adding a modifier";		
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
-    #('CODE' eq (reftype($code) || ''))
-    #    || confess "You must supply a CODE reference for a modifier";			
 	push @{$code->{modifier_table}->{after}} => $modifier;
 	$_build_wrapped_method->($code->{modifier_table});	
 }
@@ -196,12 +178,6 @@ sub add_after_modifier {
 	sub add_around_modifier {
 		my $code     = shift;
 		my $modifier = shift;
-		#(exists $MODIFIERS{$code})
-		#	|| confess "You must first wrap your method before adding a modifier";		
-		(blessed($code))
-			|| confess "Can only ask the package name of a blessed CODE";
-	    #('CODE' eq (reftype($code) || ''))
-	    #    || confess "You must supply a CODE reference for a modifier";			
 		unshift @{$code->{modifier_table}->{around}->{methods}} => $modifier;		
 		$code->{modifier_table}->{around}->{cache} = $compile_around_method->(
 			@{$code->{modifier_table}->{around}->{methods}},
