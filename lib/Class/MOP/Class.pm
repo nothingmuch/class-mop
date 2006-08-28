@@ -266,7 +266,7 @@ sub get_method_map {
     my $self = shift;
     my $map  = $self->{'%:methods'}; 
     
-    foreach my $symbol (grep { $self->has_package_symbol('&' . $_) } $self->list_all_package_symbols) {
+    foreach my $symbol ($self->list_all_package_symbols('CODE')) {
         next if exists $map->{$symbol} && 
                 $map->{$symbol}->body == $self->get_package_symbol('&' . $symbol);
         
@@ -377,28 +377,17 @@ sub add_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
-    # use reftype here to allow for blessed subs ...
     
     my $body;
-    
     if (blessed($method)) {
-     
-        $body = $method->body;     
-     
-        ('CODE' eq (reftype($body) || ''))
-            || confess "Your code block must be a CODE reference";        
-        
+        $body = $method->body;           
         $self->get_method_map->{$method_name} = $method;
     }
-    else {
-        
+    else {        
         $body = $method;
-        
         ('CODE' eq (reftype($body) || ''))
             || confess "Your code block must be a CODE reference";        
-        
         $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
-        
     }
     
     my $full_method_name = ($self->name . '::' . $method_name);        
@@ -475,25 +464,15 @@ sub alias_method {
         || confess "You must define a method name";
 
     my $body;
-
     if (blessed($method)) {
-
         $body = $method->body;     
-
-        ('CODE' eq (reftype($body) || ''))
-            || confess "Your code block must be a CODE reference";        
-
         $self->get_method_map->{$method_name} = $method;
     }
     else {
-
         $body = $method;
-
         ('CODE' eq (reftype($body) || ''))
             || confess "Your code block must be a CODE reference";        
-
         $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
-
     }
         
     $self->add_package_symbol("&${method_name}" => $body);
