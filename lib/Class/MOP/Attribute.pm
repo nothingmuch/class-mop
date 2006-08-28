@@ -351,7 +351,7 @@ use Class::MOP::Method;
 
 our $VERSION = '0.01';
 
-our @ISA = ('Class::MOP::Method');
+use base 'Class::MOP::Method';
 
 1;
 

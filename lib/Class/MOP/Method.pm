@@ -69,7 +69,7 @@ use Sub::Name    'subname';
 
 our $VERSION = '0.01';
 
-our @ISA = ('Class::MOP::Method');	
+use base 'Class::MOP::Method';	
 
 # NOTE:
 # this ugly beast is the result of trying 
@@ -126,8 +126,6 @@ my $_build_wrapped_method = sub {
 	}
 };
 
-my %MODIFIERS;
-
 sub wrap {
 	my $class = shift;
 	my $code  = shift;
@@ -145,40 +143,39 @@ sub wrap {
 	};
 	$_build_wrapped_method->($modifier_table);
 	my $method = $class->SUPER::wrap(sub { $modifier_table->{cache}->(@_) });	
-	$MODIFIERS{$method} = $modifier_table;
+	$method->{modifier_table} = $modifier_table;
 	$method;  
 }
 
 sub get_original_method {
 	my $code = shift; 
-    $MODIFIERS{$code}->{orig} 
-        if exists $MODIFIERS{$code};
+    $code->{modifier_table}->{orig};
 }
 
 sub add_before_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	(exists $MODIFIERS{$code})
-		|| confess "You must first wrap your method before adding a modifier";		
+	#(exists $MODIFIERS{$code})
+	#	|| confess "You must first wrap your method before adding a modifier";		
 	(blessed($code))
 		|| confess "Can only ask the package name of a blessed CODE";
 	#('CODE' eq (reftype($code) || ''))
     #    || confess "You must supply a CODE reference for a modifier";			
-	unshift @{$MODIFIERS{$code}->{before}} => $modifier;
-	$_build_wrapped_method->($MODIFIERS{$code});
+	unshift @{$code->{modifier_table}->{before}} => $modifier;
+	$_build_wrapped_method->($code->{modifier_table});
 }
 
 sub add_after_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	(exists $MODIFIERS{$code})
-		|| confess "You must first wrap your method before adding a modifier";		
+	#(exists $MODIFIERS{$code})
+	#	|| confess "You must first wrap your method before adding a modifier";		
 	(blessed($code))
 		|| confess "Can only ask the package name of a blessed CODE";
     #('CODE' eq (reftype($code) || ''))
     #    || confess "You must supply a CODE reference for a modifier";			
-	push @{$MODIFIERS{$code}->{after}} => $modifier;
-	$_build_wrapped_method->($MODIFIERS{$code});	
+	push @{$code->{modifier_table}->{after}} => $modifier;
+	$_build_wrapped_method->($code->{modifier_table});	
 }
 
 {
@@ -199,18 +196,18 @@ sub add_after_modifier {
 	sub add_around_modifier {
 		my $code     = shift;
 		my $modifier = shift;
-		(exists $MODIFIERS{$code})
-			|| confess "You must first wrap your method before adding a modifier";		
+		#(exists $MODIFIERS{$code})
+		#	|| confess "You must first wrap your method before adding a modifier";		
 		(blessed($code))
 			|| confess "Can only ask the package name of a blessed CODE";
 	    #('CODE' eq (reftype($code) || ''))
 	    #    || confess "You must supply a CODE reference for a modifier";			
-		unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
-		$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
-			@{$MODIFIERS{$code}->{around}->{methods}},
-			$MODIFIERS{$code}->{orig}
+		unshift @{$code->{modifier_table}->{around}->{methods}} => $modifier;		
+		$code->{modifier_table}->{around}->{cache} = $compile_around_method->(
+			@{$code->{modifier_table}->{around}->{methods}},
+			$code->{modifier_table}->{orig}->body
 		);
-		$_build_wrapped_method->($MODIFIERS{$code});		
+		$_build_wrapped_method->($code->{modifier_table});		
 	}	
 }
 
