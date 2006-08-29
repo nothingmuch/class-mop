@@ -85,7 +85,7 @@ foreach my $method_name (@class_mop_class_methods) {
     ok($class_mop_class_meta->has_method($method_name), '... Class::MOP::Class->has_method(' . $method_name . ')');
     {
         no strict 'refs';
-        is($class_mop_class_meta->get_method($method_name), 
+        is($class_mop_class_meta->get_method($method_name)->body, 
            \&{'Class::MOP::Class::' . $method_name},
            '... Class::MOP::Class->get_method(' . $method_name . ') == &Class::MOP::Class::' . $method_name);        
     }
@@ -99,7 +99,7 @@ foreach my $method_name (@class_mop_package_methods) {
     ok($class_mop_package_meta->has_method($method_name), '... Class::MOP::Package->has_method(' . $method_name . ')');
     {
         no strict 'refs';
-        is($class_mop_package_meta->get_method($method_name), 
+        is($class_mop_package_meta->get_method($method_name)->body, 
            \&{'Class::MOP::Package::' . $method_name},
            '... Class::MOP::Package->get_method(' . $method_name . ') == &Class::MOP::Package::' . $method_name);        
     }
@@ -113,7 +113,7 @@ foreach my $method_name (@class_mop_module_methods) {
     ok($class_mop_module_meta->has_method($method_name), '... Class::MOP::Module->has_method(' . $method_name . ')');
     {
         no strict 'refs';
-        is($class_mop_module_meta->get_method($method_name), 
+        is($class_mop_module_meta->get_method($method_name)->body, 
            \&{'Class::MOP::Module::' . $method_name},
            '... Class::MOP::Module->get_method(' . $method_name . ') == &Class::MOP::Module::' . $method_name);        
     }

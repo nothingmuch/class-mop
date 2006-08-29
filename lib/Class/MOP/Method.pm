@@ -11,6 +11,11 @@ use B            'svref_2object';
 our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
+# NOTE:
+# if poked in the right way, 
+# they should act like CODE refs.
+use overload '&{}' => sub { $_[0]->{body} }, fallback => 1;
+
 # introspection
 
 sub meta { 
@@ -25,29 +30,39 @@ sub wrap {
     my $code  = shift;
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
-    bless $code => blessed($class) || $class;
+    bless { 
+        body => $code 
+    } => blessed($class) || $class;
 }
+
+## accessors
+
+sub body { (shift)->{body} }
 
 # informational
 
+# NOTE: 
+# this may not be the same name 
+# as the class you got it from
+# This gets the package stash name 
+# associated with the actual CODE-ref
 sub package_name { 
-	my $code = shift;
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
+	my $code = (shift)->{body};
 	svref_2object($code)->GV->STASH->NAME;
 }
 
+# NOTE: 
+# this may not be the same name 
+# as the method name it is stored
+# with. This gets the name associated
+# with the actual CODE-ref
 sub name { 
-	my $code = shift;
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";	
+	my $code = (shift)->{body};
 	svref_2object($code)->GV->NAME;
 }
 
 sub fully_qualified_name {
 	my $code = shift;
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
 	$code->package_name . '::' . $code->name;		
 }
 
@@ -60,9 +75,10 @@ use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
 use Sub::Name    'subname';
 
-our $VERSION = '0.01';
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:STEVAN';
 
-our @ISA = ('Class::MOP::Method');	
+use base 'Class::MOP::Method';	
 
 # NOTE:
 # this ugly beast is the result of trying 
@@ -119,59 +135,44 @@ my $_build_wrapped_method = sub {
 	}
 };
 
-my %MODIFIERS;
-
 sub wrap {
 	my $class = shift;
 	my $code  = shift;
 	(blessed($code) && $code->isa('Class::MOP::Method'))
-		|| confess "Can only wrap blessed CODE";
+		|| confess "Can only wrap blessed CODE";	
 	my $modifier_table = { 
 		cache  => undef,
 		orig   => $code,
 		before => [],
 		after  => [],		
 		around => {
-			cache   => $code,
+			cache   => $code->body,
 			methods => [],		
 		},
 	};
 	$_build_wrapped_method->($modifier_table);
 	my $method = $class->SUPER::wrap(sub { $modifier_table->{cache}->(@_) });	
-	$MODIFIERS{$method} = $modifier_table;
+	$method->{modifier_table} = $modifier_table;
 	$method;  
 }
 
 sub get_original_method {
 	my $code = shift; 
-    $MODIFIERS{$code}->{orig} 
-        if exists $MODIFIERS{$code};
+    $code->{modifier_table}->{orig};
 }
 
 sub add_before_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	(exists $MODIFIERS{$code})
-		|| confess "You must first wrap your method before adding a modifier";		
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
-	('CODE' eq (reftype($code) || ''))
-        || confess "You must supply a CODE reference for a modifier";			
-	unshift @{$MODIFIERS{$code}->{before}} => $modifier;
-	$_build_wrapped_method->($MODIFIERS{$code});
+	unshift @{$code->{modifier_table}->{before}} => $modifier;
+	$_build_wrapped_method->($code->{modifier_table});
 }
 
 sub add_after_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	(exists $MODIFIERS{$code})
-		|| confess "You must first wrap your method before adding a modifier";		
-	(blessed($code))
-		|| confess "Can only ask the package name of a blessed CODE";
-    ('CODE' eq (reftype($code) || ''))
-        || confess "You must supply a CODE reference for a modifier";			
-	push @{$MODIFIERS{$code}->{after}} => $modifier;
-	$_build_wrapped_method->($MODIFIERS{$code});	
+	push @{$code->{modifier_table}->{after}} => $modifier;
+	$_build_wrapped_method->($code->{modifier_table});	
 }
 
 {
@@ -192,18 +193,12 @@ sub add_after_modifier {
 	sub add_around_modifier {
 		my $code     = shift;
 		my $modifier = shift;
-		(exists $MODIFIERS{$code})
-			|| confess "You must first wrap your method before adding a modifier";		
-		(blessed($code))
-			|| confess "Can only ask the package name of a blessed CODE";
-	    ('CODE' eq (reftype($code) || ''))
-	        || confess "You must supply a CODE reference for a modifier";			
-		unshift @{$MODIFIERS{$code}->{around}->{methods}} => $modifier;		
-		$MODIFIERS{$code}->{around}->{cache} = $compile_around_method->(
-			@{$MODIFIERS{$code}->{around}->{methods}},
-			$MODIFIERS{$code}->{orig}
+		unshift @{$code->{modifier_table}->{around}->{methods}} => $modifier;		
+		$code->{modifier_table}->{around}->{cache} = $compile_around_method->(
+			@{$code->{modifier_table}->{around}->{methods}},
+			$code->{modifier_table}->{orig}->body
 		);
-		$_build_wrapped_method->($MODIFIERS{$code});		
+		$_build_wrapped_method->($code->{modifier_table});		
 	}	
 }
 
@@ -257,6 +252,8 @@ This simply blesses the C<&code> reference passed to it.
 =head2 Informational
 
 =over 4
+
+=item B<body>
 
 =item B<name>
 

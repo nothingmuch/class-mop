@@ -24,6 +24,19 @@ sub remove_attribute      { confess 'Cannot call method "remove_attribute" on an
 sub add_package_symbol    { confess 'Cannot call method "add_package_symbol" on an immutable instance'    }
 sub remove_package_symbol { confess 'Cannot call method "remove_package_symbol" on an immutable instance' }
 
+sub get_package_symbol {
+    my ($self, $variable) = @_;    
+    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+    return *{$self->namespace->{$name}}{$type}
+        if exists $self->namespace->{$name};
+    # NOTE: 
+    # we have to do this here in order to preserve 
+    # perl's autovivification of variables. However 
+    # we do cut off direct access to add_package_symbol
+    # as shown above.
+    $self->Class::MOP::Package::add_package_symbol($variable);
+}
+
 # NOTE:
 # superclasses is an accessor, so 
 # it just cannot be changed
@@ -73,6 +86,9 @@ sub make_metaclass_immutable {
             )            
         );
     }
+    
+    # now cache the method map ...
+    $metaclass->{'___method_map'} = $metaclass->get_method_map;
           
     bless $metaclass => $class;
 }
@@ -135,6 +151,7 @@ sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}     
 sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
 sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
 sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
+sub get_method_map                    {   (shift)->{'___method_map'}                         }
 
 1;
 
@@ -245,7 +262,20 @@ to this method, which
 
 =item B<remove_package_symbol>
 
+=back
+
+=head2 Methods which work slightly differently.
+
+=over 4
+
 =item B<superclasses>
+
+This method becomes read-only in an immutable class.
+
+=item B<get_package_symbol>
+
+This method must handle package variable autovivification 
+correctly, while still disallowing C<add_package_symbol>.
 
 =back
 
@@ -258,6 +288,8 @@ to this method, which
 =item B<compute_all_applicable_attributes>
 
 =item B<get_meta_instance>
+
+=item B<get_method_map>
 
 =back
 

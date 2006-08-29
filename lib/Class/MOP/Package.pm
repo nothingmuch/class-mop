@@ -187,8 +187,15 @@ sub remove_package_symbol {
 }
 
 sub list_all_package_symbols {
-    my ($self) = @_;
-    return keys %{$self->namespace};
+    my ($self, $type_filter) = @_;
+    return keys %{$self->namespace} unless defined $type_filter;
+    # NOTE:
+    # or we can filter based on 
+    # type (SCALAR|ARRAY|HASH|CODE)
+    my $namespace = $self->namespace;
+    return grep { 
+        defined(*{$namespace->{$_}}{$type_filter}) 
+    } keys %{$namespace};
 }
 
 1;
@@ -250,11 +257,14 @@ This will attempt to remove the package variable at C<$variable_name>.
 This will attempt to remove the entire typeglob associated with 
 C<$glob_name> from the package. 
 
-=item B<list_all_package_symbols>
+=item B<list_all_package_symbols (?$type_filter)>
 
 This will list all the glob names associated with the current package. 
 By inspecting the globs returned you can discern all the variables in 
 the package.
+
+By passing a C<$type_filter>, you can limit the list to only those 
+which match the filter (either SCALAR, ARRAY, HASH or CODE).
 
 =back
 

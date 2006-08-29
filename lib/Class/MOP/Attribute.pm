@@ -349,9 +349,10 @@ use warnings;
 
 use Class::MOP::Method;
 
-our $VERSION = '0.01';
+our $VERSION   = '0.02';
+our $AUTHORITY = 'cpan:STEVAN';
 
-our @ISA = ('Class::MOP::Method');
+use base 'Class::MOP::Method';
 
 1;
 

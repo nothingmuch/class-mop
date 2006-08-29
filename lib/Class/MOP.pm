@@ -74,7 +74,10 @@ Class::MOP::Package->meta->add_attribute(
             # NOTE: we need to do this in order 
             # for the instance meta-object to 
             # not fall into meta-circular death
-            'name' => sub { (shift)->{'$:package'} }
+            # 
+            # we just alias the original method
+            # rather than re-produce it here            
+            'name' => \&Class::MOP::Package::name
         },
         init_arg => ':package',
     ))
@@ -84,16 +87,9 @@ Class::MOP::Package->meta->add_attribute(
     Class::MOP::Attribute->new('%:namespace' => (
         reader => {
             # NOTE:
-            # because of issues with the Perl API 
-            # to the typeglob in some versions, we 
-            # need to just always grab a new 
-            # reference to the hash here. Ideally 
-            # we could just store a ref and it would
-            # Just Work, but oh well :\
-            'namespace' => sub { 
-                no strict 'refs';
-                \%{$_[0]->name . '::'} 
-            }
+            # we just alias the original method
+            # rather than re-produce it here
+            'namespace' => \&Class::MOP::Package::namespace
         },
         # NOTE:
         # protect this from silliness 
@@ -127,10 +123,10 @@ Class::MOP::Package->meta->add_method('initialize' => sub {
 Class::MOP::Module->meta->add_attribute(
     Class::MOP::Attribute->new('$:version' => (
         reader => {
-            'version' => sub {  
-                my $self = shift;
-                ${$self->get_package_symbol('$VERSION')};
-            }
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here            
+            'version' => \&Class::MOP::Module::version
         },
         # NOTE:
         # protect this from silliness 
@@ -148,10 +144,10 @@ Class::MOP::Module->meta->add_attribute(
 Class::MOP::Module->meta->add_attribute(
     Class::MOP::Attribute->new('$:authority' => (
         reader => {
-            'authority' => sub {  
-                my $self = shift;
-                ${$self->get_package_symbol('$AUTHORITY')};
-            }
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here            
+            'authority' => \&Class::MOP::Module::authority
         },       
         # NOTE:
         # protect this from silliness 
@@ -168,8 +164,11 @@ Class::MOP::Class->meta->add_attribute(
         reader   => {
             # NOTE: we need to do this in order 
             # for the instance meta-object to 
-            # not fall into meta-circular death            
-            'get_attribute_map' => sub { (shift)->{'%:attributes'} }
+            # not fall into meta-circular death       
+            # 
+            # we just alias the original method
+            # rather than re-produce it here                 
+            'get_attribute_map' => \&Class::MOP::Class::get_attribute_map
         },
         init_arg => ':attributes',
         default  => sub { {} }
@@ -180,26 +179,11 @@ Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('%:methods' => (
         reader   => {          
             # NOTE:
-            # as with the $VERSION and $AUTHORITY above
-            # sometimes we don't/can't store directly 
-            # inside the instance, so we need the accessor
-            # to just DWIM
-            'get_method_map' => sub {
-                my $self = shift;
-                # FIXME:
-                # there is a faster/better way 
-                # to do this, I am sure :)
-                return +{ 
-                    map {
-                        $_ => $self->get_method($_) 
-                    } grep { 
-                        $self->has_method($_) 
-                    } $self->list_all_package_symbols
-                };            
-            }
+            # we just alias the original method
+            # rather than re-produce it here            
+            'get_method_map' => \&Class::MOP::Class::get_method_map
         },
-        init_arg => '!............( DO NOT DO THIS )............!',
-        default  => sub { \undef }
+        default => sub { {} }
     ))
 );
 
@@ -224,8 +208,11 @@ Class::MOP::Class->meta->add_attribute(
         reader   => {
             # NOTE: we need to do this in order 
             # for the instance meta-object to 
-            # not fall into meta-circular death            
-            'instance_metaclass' => sub { (shift)->{'$:instance_metaclass'} }
+            # not fall into meta-circular death      
+            # 
+            # we just alias the original method
+            # rather than re-produce it here                  
+            'instance_metaclass' => \&Class::MOP::Class::instance_metaclass
         },
         init_arg => ':instance_metaclass',
         default  => 'Class::MOP::Instance',        
@@ -246,8 +233,11 @@ Class::MOP::Attribute->meta->add_attribute(
         reader => {
             # NOTE: we need to do this in order 
             # for the instance meta-object to 
-            # not fall into meta-circular death            
-            'name' => sub { (shift)->{name} }
+            # not fall into meta-circular death    
+            # 
+            # we just alias the original method
+            # rather than re-produce it here                    
+            'name' => \&Class::MOP::Attribute::name
         }
     ))
 );
@@ -257,8 +247,11 @@ Class::MOP::Attribute->meta->add_attribute(
         reader => {
             # NOTE: we need to do this in order 
             # for the instance meta-object to 
-            # not fall into meta-circular death            
-            'associated_class' => sub { (shift)->{associated_class} }
+            # not fall into meta-circular death       
+            # 
+            # we just alias the original method
+            # rather than re-produce it here                 
+            'associated_class' => \&Class::MOP::Attribute::associated_class
         }
     ))
 );
@@ -343,6 +336,27 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
 });
 
 ## --------------------------------------------------------
+## Class::MOP::Method
+
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('body' => (
+        reader => 'body'
+    ))
+);
+
+## --------------------------------------------------------
+## Class::MOP::Method::Wrapped
+
+# NOTE:
+# the way this item is initialized, this 
+# really does not follow the standard 
+# practices of attributes, but we put 
+# it here for completeness
+Class::MOP::Method::Wrapped->meta->add_attribute(
+    Class::MOP::Attribute->new('modifier_table')
+);
+
+## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
 
 Class::MOP::Package  ->meta->make_immutable(inline_constructor => 0);
@@ -352,6 +366,10 @@ Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Object   ->meta->make_immutable(inline_constructor => 0);
+
+# Class::MOP::Method subclasses 
+Class::MOP::Attribute::Accessor->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Method::Wrapped    ->meta->make_immutable(inline_constructor => 0);
 
 1;
 
