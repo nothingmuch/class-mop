@@ -336,6 +336,27 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
 });
 
 ## --------------------------------------------------------
+## Class::MOP::Method
+
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('body' => (
+        reader => 'body'
+    ))
+);
+
+## --------------------------------------------------------
+## Class::MOP::Method::Wrapped
+
+# NOTE:
+# the way this item is initialized, this 
+# really does not follow the standard 
+# practices of attributes, but we put 
+# it here for completeness
+Class::MOP::Method::Wrapped->meta->add_attribute(
+    Class::MOP::Attribute->new('modifier_table')
+);
+
+## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
 
 Class::MOP::Package  ->meta->make_immutable(inline_constructor => 0);
@@ -345,6 +366,10 @@ Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
 Class::MOP::Object   ->meta->make_immutable(inline_constructor => 0);
+
+# Class::MOP::Method subclasses 
+Class::MOP::Attribute::Accessor->meta->make_immutable(inline_constructor => 0);
+Class::MOP::Method::Wrapped    ->meta->make_immutable(inline_constructor => 0);
 
 1;
 
