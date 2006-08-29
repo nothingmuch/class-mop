@@ -262,14 +262,27 @@ sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
 sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
 
+# FIXME:
+# this is a prime canidate for conversion to XS
 sub get_method_map {    
     my $self = shift;
     my $map  = $self->{'%:methods'}; 
+    
+    my $class_name       = $self->name;
+    my $method_metaclass = $self->method_metaclass;
+    
     foreach my $symbol ($self->list_all_package_symbols('CODE')) {
         my $code = $self->get_package_symbol('&' . $symbol);
-        next if exists $map->{$symbol} && $map->{$symbol}->body == $code;
-        $map->{$symbol} = $self->method_metaclass->wrap($code);
+        
+        next if exists $map->{$symbol} && $map->{$symbol}->body == $code;        
+        
+        my $gv = svref_2object($code)->GV;
+        next if ($gv->STASH->NAME || '') ne $class_name &&
+                ($gv->NAME        || '') ne '__ANON__';        
+        
+        $map->{$symbol} = $method_metaclass->wrap($code);
     }
+    
     return $map;
 }
 
@@ -376,14 +389,14 @@ sub add_method {
     my $body;
     if (blessed($method)) {
         $body = $method->body;           
-        $self->get_method_map->{$method_name} = $method;
     }
     else {        
         $body = $method;
         ('CODE' eq (reftype($body) || ''))
             || confess "Your code block must be a CODE reference";        
-        $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
+        $method = $self->method_metaclass->wrap($body);        
     }
+    $self->get_method_map->{$method_name} = $method;
     
     my $full_method_name = ($self->name . '::' . $method_name);        
     $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
@@ -458,17 +471,9 @@ sub alias_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    my $body;
-    if (blessed($method)) {
-        $body = $method->body;     
-        $self->get_method_map->{$method_name} = $method;
-    }
-    else {
-        $body = $method;
-        ('CODE' eq (reftype($body) || ''))
-            || confess "Your code block must be a CODE reference";        
-        $self->get_method_map->{$method_name} = $self->method_metaclass->wrap($body);        
-    }
+    my $body = (blessed($method) ? $method->body : $method);
+    ('CODE' eq (reftype($body) || ''))
+        || confess "Your code block must be a CODE reference";        
         
     $self->add_package_symbol("&${method_name}" => $body);
 }
@@ -478,14 +483,7 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";    
     
-    my $method_map = $self->get_method_map;
-    
-    return 0 unless exists $self->get_method_map->{$method_name};
-        
-    my $method = $method_map->{$method_name};
-    return 0 if ($method->package_name || '') ne $self->name &&
-                ($method->name         || '') ne '__ANON__'; 
-    
+    return 0 unless exists $self->get_method_map->{$method_name};    
     return 1;
 }
 
@@ -494,7 +492,11 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
      
-    return unless $self->has_method($method_name);
+    # NOTE:
+    # I don't really need this here, because
+    # if the method_map is missing a key it 
+    # will just return undef for me now
+    # return unless $self->has_method($method_name);
  
     return $self->get_method_map->{$method_name};
 }
@@ -506,18 +508,17 @@ sub remove_method {
     
     my $removed_method = $self->get_method($method_name);    
     
-    $self->remove_package_symbol("&${method_name}")
-        if defined $removed_method;
-        
-    delete $self->get_method_map->{$method_name}
-        if exists $self->get_method_map->{$method_name};        
+    do { 
+        $self->remove_package_symbol("&${method_name}");
+        delete $self->get_method_map->{$method_name};
+    } if defined $removed_method;
         
     return $removed_method;
 }
 
 sub get_method_list {
     my $self = shift;
-    return grep { $self->has_method($_) } keys %{$self->get_method_map};
+    keys %{$self->get_method_map};
 }
 
 sub find_method_by_name {
