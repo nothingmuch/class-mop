@@ -11,8 +11,10 @@ use B            'svref_2object';
 our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use overload '&{}' => sub { $_[0]->{body} },
-             fallback => 1;
+# NOTE:
+# if poked in the right way, 
+# they should act like CODE refs.
+use overload '&{}' => sub { $_[0]->{body} }, fallback => 1;
 
 # introspection
 
@@ -33,15 +35,27 @@ sub wrap {
     } => blessed($class) || $class;
 }
 
+## accessors
+
 sub body { (shift)->{body} }
 
 # informational
 
+# NOTE: 
+# this may not be the same name 
+# as the class you got it from
+# This gets the package stash name 
+# associated with the actual CODE-ref
 sub package_name { 
 	my $code = (shift)->{body};
 	svref_2object($code)->GV->STASH->NAME;
 }
 
+# NOTE: 
+# this may not be the same name 
+# as the method name it is stored
+# with. This gets the name associated
+# with the actual CODE-ref
 sub name { 
 	my $code = (shift)->{body};
 	svref_2object($code)->GV->NAME;

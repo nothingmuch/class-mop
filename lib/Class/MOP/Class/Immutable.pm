@@ -73,6 +73,9 @@ sub make_metaclass_immutable {
             )            
         );
     }
+    
+    # now cache the method map ...
+    $metaclass->{'___method_map'} = $metaclass->get_method_map;
           
     bless $metaclass => $class;
 }
@@ -135,6 +138,7 @@ sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}     
 sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
 sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
 sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
+sub get_method_map                    {   (shift)->{'___method_map'}                         }
 
 1;
 
@@ -258,6 +262,8 @@ to this method, which
 =item B<compute_all_applicable_attributes>
 
 =item B<get_meta_instance>
+
+=item B<get_method_map>
 
 =back
 
