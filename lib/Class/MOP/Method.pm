@@ -8,8 +8,10 @@ use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
 use B            'svref_2object';
 
-our $VERSION   = '0.03';
+our $VERSION   = '0.04';
 our $AUTHORITY = 'cpan:STEVAN';
+
+use base 'Class::MOP::Object';
 
 # NOTE:
 # if poked in the right way, 
@@ -38,6 +40,8 @@ sub wrap {
 ## accessors
 
 sub body { (shift)->{body} }
+
+# TODO - add associated_class
 
 # informational
 

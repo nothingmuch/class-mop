@@ -7,22 +7,26 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'looks_like_number';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Class';
 
 # methods which can *not* be called
-
-sub add_method            { confess 'Cannot call method "add_method" on an immutable instance'            }
-sub alias_method          { confess 'Cannot call method "alias_method" on an immutable instance'          }
-sub remove_method         { confess 'Cannot call method "remove_method" on an immutable instance'         }
-                                                                                            
-sub add_attribute         { confess 'Cannot call method "add_attribute" on an immutable instance'         }
-sub remove_attribute      { confess 'Cannot call method "remove_attribute" on an immutable instance'      }
-
-sub add_package_symbol    { confess 'Cannot call method "add_package_symbol" on an immutable instance'    }
-sub remove_package_symbol { confess 'Cannot call method "remove_package_symbol" on an immutable instance' }
+for my $meth (qw(
+    add_method
+    alias_method
+    remove_method
+    add_attribute
+    remove_attribute
+    add_package_symbol
+    remove_package_symbol
+)) {
+    no strict 'refs';
+    *{$meth} = sub {
+        confess "Cannot call method '$meth' on an immutable instance";
+    };
+}
 
 sub get_package_symbol {
     my ($self, $variable) = @_;    

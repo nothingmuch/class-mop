@@ -63,4 +63,21 @@ is_deeply(
         Class::MOP::Object        
         Class::MOP::Package                      
     / ],
+    '... got all the metaclass names');
+    
+is_deeply(
+    [ map { $_->meta->identifier } sort { $a cmp $b } Class::MOP::get_all_metaclass_names() ],
+    [ 
+       "Class::MOP::Attribute-"           . $Class::MOP::Attribute::VERSION           . "-cpan:STEVAN",  
+       "Class::MOP::Attribute::Accessor-" . $Class::MOP::Attribute::Accessor::VERSION . "-cpan:STEVAN",          
+       "Class::MOP::Class-"               . $Class::MOP::Class::VERSION               . "-cpan:STEVAN",
+       "Class::MOP::Instance-"            . $Class::MOP::Instance::VERSION            . "-cpan:STEVAN",
+       "Class::MOP::Method-"              . $Class::MOP::Method::VERSION              . "-cpan:STEVAN",
+       "Class::MOP::Method::Wrapped-"     . $Class::MOP::Method::Wrapped::VERSION     . "-cpan:STEVAN",       
+       "Class::MOP::Module-"              . $Class::MOP::Module::VERSION              . "-cpan:STEVAN",
+       "Class::MOP::Object-"              . $Class::MOP::Object::VERSION              . "-cpan:STEVAN",
+       "Class::MOP::Package-"             . $Class::MOP::Package::VERSION             . "-cpan:STEVAN",
+    ],
+    '... got all the metaclass identifiers');    
+    
     

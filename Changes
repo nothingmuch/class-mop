@@ -1,5 +1,41 @@
 Revision history for Perl extension Class-MOP.
 
+0.35
+
+    * Class::MOP
+      - non-generated accessors are no longer 
+        copied, but instead are aliased from 
+        the originals
+      - added Class::MOP::Method (and its subclasses) 
+        to the bootstrap
+        - adjusted tests for this
+    
+    * Class::MOP::Method
+      *** API CHANGE ***
+      - methods are no longer blessed CODE refs
+        but are actual objects which can be CODE-ified
+        - adjusted tests to compensate
+
+    * Class::MOP::Class
+      - changed how methods are dealt with to 
+        encapsulate most of the work into the 
+        &get_method_map method
+      - made several adjustments for the change
+        in Class::MOP::Method
+      - &add_attribute now checks if you are adding 
+        a duplicate name, and properly removes the 
+        old one before installing the new one
+        - added tests for this
+    
+    * Class::MOP::Class::Immutable
+      - added caching of &get_method_map
+      - fixed issue with &get_package_symbol
+      - cleaned up the methods that die (patch by David Wheeler)
+    
+    * Class::MOP::Package
+      - added filtering capabilities to 
+        &list_all_package_symbols
+
 0.34 Sat. Aug. 26, 2006
     * Class::MOP::Class
       - added the %:methods attribute, which like

@@ -10,6 +10,8 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 our $VERSION   = '0.12';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use base 'Class::MOP::Object';
+
 sub meta { 
     require Class::MOP::Class;
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);

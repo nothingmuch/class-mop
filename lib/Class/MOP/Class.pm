@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.19';
+our $VERSION   = '0.20';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -609,7 +609,20 @@ sub add_attribute {
     # make sure it is derived from the correct type though
     ($attribute->isa('Class::MOP::Attribute'))
         || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";    
+
+    # first we attach our new attribute
+    # because it might need certain information 
+    # about the class which it is attached to
     $attribute->attach_to_class($self);
+    
+    # then we remove attributes of a conflicting 
+    # name here so that we can properly detach 
+    # the old attr object, and remove any 
+    # accessors it would have generated
+    $self->remove_attribute($attribute->name)
+        if $self->has_attribute($attribute->name);
+        
+    # then onto installing the new accessors
     $attribute->install_accessors();
     $self->get_attribute_map->{$attribute->name} = $attribute;
 }
@@ -626,8 +639,10 @@ sub get_attribute {
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
     return $self->get_attribute_map->{$attribute_name} 
-        if $self->has_attribute($attribute_name);   
-    return; 
+    # NOTE:
+    # this will return undef anyway, so no need ...
+    #    if $self->has_attribute($attribute_name);   
+    #return; 
 } 
 
 sub remove_attribute {
