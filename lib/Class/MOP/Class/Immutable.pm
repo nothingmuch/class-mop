@@ -12,6 +12,19 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Class';
 
+# enforce the meta-circularity here
+# and hide the Immutable part
+
+sub meta { 
+    my $self = shift;
+    # if it is not blessed, then someone is asking 
+    # for the meta of Class::MOP::Class::Immutable
+    return Class::MOP::Class->initialize($self) unless blessed($self);
+    # otherwise, they are asking for the metaclass 
+    # which has been made immutable, which is itself
+    return $self;
+}
+
 # methods which can *not* be called
 for my $meth (qw(
     add_method

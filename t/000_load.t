@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 22;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -79,5 +79,17 @@ is_deeply(
        "Class::MOP::Package-"             . $Class::MOP::Package::VERSION             . "-cpan:STEVAN",
     ],
     '... got all the metaclass identifiers');    
-    
-    
+        
+# testing the meta-circularity of the system
+
+is(Class::MOP::Class->meta, Class::MOP::Class->meta->meta, 
+   '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta');
+   
+is(Class::MOP::Class->meta, Class::MOP::Class->meta->meta->meta, 
+  '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta->meta');   
+
+is(Class::MOP::Class->meta, Class::MOP::Class->meta->meta->meta->meta, 
+   '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta->meta->meta');  
+
+
+
