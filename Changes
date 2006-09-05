@@ -9,6 +9,8 @@ Revision history for Perl extension Class-MOP.
       - added Class::MOP::Method (and its subclasses) 
         to the bootstrap
         - adjusted tests for this
+      - bootstrap no longer re-compiles accessors
+        so as to keep the MOP compile-time fast
     
     * Class::MOP::Method
       *** API CHANGE ***

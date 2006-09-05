@@ -359,17 +359,28 @@ Class::MOP::Method::Wrapped->meta->add_attribute(
 ## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
 
-Class::MOP::Package  ->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Module   ->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Class    ->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Attribute->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Method   ->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Instance ->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Object   ->meta->make_immutable(inline_constructor => 0);
+# NOTE:
+# we don't need to inline the 
+# constructors or the accessors 
+# this only lengthens the compile 
+# time of the MOP, and gives us 
+# no actual benefits.
 
-# Class::MOP::Method subclasses 
-Class::MOP::Attribute::Accessor->meta->make_immutable(inline_constructor => 0);
-Class::MOP::Method::Wrapped    ->meta->make_immutable(inline_constructor => 0);
+$_->meta->make_immutable(
+    inline_constructor => 0,
+    inline_accessors   => 0,
+) for qw/
+    Class::MOP::Package  
+    Class::MOP::Module   
+    Class::MOP::Class    
+    Class::MOP::Attribute
+    Class::MOP::Method   
+    Class::MOP::Instance 
+    Class::MOP::Object   
+
+    Class::MOP::Attribute::Accessor
+    Class::MOP::Method::Wrapped    
+/;
 
 1;
 
