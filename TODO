@@ -2,10 +2,47 @@
 TODO
 --------------------------------------------------------------------- 
 
-- do not bless methods unless asked
-
-We should turn off automagic method blessing for classes which are 
-not explictly asking for a metaclass.
+[23:47] 	Theory	stevan: What do you think of the use of key names as substitutes for class names that Class::Meta uses?
+[23:48] 	stevan	Theory: key names?
+[23:48] 	Theory	stevan: All Class::Meta classes have key names.
+[23:48] 	Theory	They're short aliases, basically
+[23:48] 	stevan	oh
+[23:48] 	Theory	So Foo::Bar::App::Person might be "person".
+[23:48] 	Theory	This is useful for a few things:
+[23:48] 	Theory	1. Database mapping (table/view names)
+[23:48] 	Theory	2. easy type specification
+[23:49] 	Theory	3. Use in other contexts (e.g., URLs)
+[23:49] 	Theory	So in effect, class key names in Class::Meta are also types.
+[23:49] 	Theory	So I can say
+[23:49] 	Theory	has user => ( type => 'person');
+[23:49] 	Theory	instead of
+[23:49] 	Theory	has user => (type => "Foo::Bar::App::Person");
+[23:50] 	Theory	Anyway, the key name stuff is essential for the ORM stuff I do.
+[23:50] 	Theory	Which is why I'm asking you for your thoughts on it.
+[23:50] 	stevan	where is the mapping stored?
+[23:50] 	stevan	and how and when is it computed?
+[23:51] 	Theory	It's just another attribute of the Meta::Class object,
+[23:51] 	Theory	If it's not specified, it just grabs the last part of the package name.
+[23:51] 	Theory	and lowercases it.
+[23:51] 	stevan	but is there any global map anywhere?
+[23:51] 	Theory	But it has to be unique.
+[23:52] 	Theory	yes, Class::Meta stores a hash that maps key names to Meta::Class objects.
+[23:52] 	Theory	So you can say
+[23:52] 	stevan	k
+[23:52] 	stevan	yeah Class::MOP has a similar thing
+[23:52] 	Theory	my $meta = Class::Meta->for_key('person')
+[23:52] 	Theory	Which is great for mapping URLs and database tables.
+[23:52] 	stevan	Class::MOP::get_metaclass_by_name('Foo::Bar::App::Person')
+[23:52] 	Theory	yes, but it's only package names, right?
+[23:52] 	stevan	I could add Class::MOP::get_metaclass_by_key('person')
+[23:52] 	stevan	yeah it is
+[23:53] 	Theory	not a substitute key word.
+[23:53] 	Theory	Yes, that's what I'm thinking, exactly.,
+[23:53] 	stevan	yeah that would be fairly easy actually
+[23:54] 	stevan	I have been pondering (for a very long time actually) a Smalltalk like class browser 
+[23:54] 	stevan	it would be very useful in that context
+[23:54] 	Theory	Glad to hear it. :-)
+[23:54] 	*	stevan jots another note onto the TODO list
 
 ---------------------------------------------------------------------
 EXAMPLES TO WRITE
