@@ -1,6 +1,4 @@
 
-use lib '/Users/stevan/Projects/Moose/Moose/Class-MOP/trunk/lib';
-
 package Class::MOP::Browser;
 
 use strict;
@@ -12,9 +10,7 @@ use Data::Dumper;
 
 use Catalyst::Runtime '5.70';
 use Catalyst qw/
-    -Debug 
-    ConfigLoader 
-    Static::Simple
+    -Debug  
 /;
 
 our $VERSION = '0.01';
