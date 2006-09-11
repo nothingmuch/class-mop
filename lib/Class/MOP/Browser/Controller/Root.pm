@@ -10,11 +10,6 @@ our $VERSION = '0.01';
 
 __PACKAGE__->config->{namespace} = '';
 
-sub default : Private {
-    my ($self, $c) = @_;
-    $c->response->body("Helloooooo World");
-} 
-
 sub index : Public {
     my ( $self, $c ) = @_;
 }
