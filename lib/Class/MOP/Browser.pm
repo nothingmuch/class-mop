@@ -37,7 +37,7 @@ __PACKAGE__->config(
 
 __PACKAGE__->setup;
 
-sub get_all_metaclasses   { sort { $a->name cmp $b->name } Class::MOP::get_all_metaclass_instances }
+sub get_all_metaclasses   { sort { $a->name cmp $b->name } Class::MOP::get_all_metaclass_instances() }
 sub get_metaclass_by_name { 
     shift;
     Class::MOP::get_metaclass_by_name(@_);   

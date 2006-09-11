@@ -13,20 +13,21 @@
         </tr>
     [% END %]
     </table></td>
-
-[% IF c.request.param('class') %]
 <td height='30' width='300'><table cellspacing='3' cellpadding='5' border='0' width='100%'>
-    <tr>
+    <tr>    
     [% FOREACH area IN [ 'attributes', 'methods', 'superclasses' ] %]
-        [% IF c.request.param('area') == area %]            
-            <td bgcolor='#FFDD99'>[% area %]</td>
+        [% IF c.request.param('class') %]
+            [% IF c.request.param('area') == area %]            
+                <td bgcolor='#FFDD99'>[% area %]</td>
+            [% ELSE %]
+                <td bgcolor='#99BBFF'><a href='?class=[% c.request.param('class') %]&area=[% area %]'>[% area %]</a></td>
+            [% END %]
         [% ELSE %]
-            <td bgcolor='#99BBFF'><a href='?class=[% c.request.param('class') %]&area=[% area %]'>[% area %]</a></td>
+            <td bgcolor='#99BBFF' style="color: #336699;">[% area %]</td>
         [% END %]
     [% END %]
     </tr>
     </table></td>
-[% END %]
 
 [% IF c.request.param('class') && c.request.param('area') == 'attributes' && c.request.param('attr') %]
 
@@ -45,16 +46,14 @@
     [% END %]
     </table></td>
 
-[% END %]
-
-[% IF c.request.param('class') && c.request.param('area') == 'methods' && c.request.param('method') %]
+[% ELSIF c.request.param('class') && c.request.param('area') == 'methods' && c.request.param('method') %]
 
 [% 
     meta = c.get_metaclass_by_name(c.request.param('class'))
     method = meta.get_method(c.request.param('method'))
 %]
 
-<td rowspan='2'><table cellspacing='3' cellpadding='5' border='0'>
+<td rowspan='2'><table cellspacing='3' cellpadding='5' border='0' width='300'>
     [% FOREACH aspect IN [ 'name', 'package_name', 'fully_qualified_name' ]%]
         <tr>
         <td bgcolor='#33FF33' align='right' valign='top'>[% aspect %]</td>
@@ -66,6 +65,10 @@
         <td bgcolor='#AAFFAA'><pre>[% c.deparse_method(method) %]</pre></td>
         </tr>    
     </table></td>
+
+[% ELSE %]
+
+<td rowspan='2' width='300'><br/></td>
 
 [% END %]
 
