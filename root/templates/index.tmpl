@@ -1,0 +1,113 @@
+
+<table widht='100%' height='100%' border='1'>
+<tr valign='top'>
+    
+<td rowspan='2'><table cellspacing='3' cellpadding='5' border='0'>
+    [% FOREACH metaclass IN c.get_all_metaclasses %]
+        <tr>
+        [% IF c.request.param('class') == metaclass.name %]
+            <td bgcolor='#99BBFF'>[% metaclass.name %]</td>
+        [% ELSE %]
+            <td bgcolor='#CCCCCC'><a href='?class=[% metaclass.name %]'>[% metaclass.name %]</a></td>
+        [% END %]
+        </tr>
+    [% END %]
+    </table></td>
+
+[% IF c.request.param('class') %]
+<td height='30' width='300'><table cellspacing='3' cellpadding='5' border='0' width='100%'>
+    <tr>
+    [% FOREACH area IN [ 'attributes', 'methods', 'superclasses' ] %]
+        [% IF c.request.param('area') == area %]            
+            <td bgcolor='#FFDD99'>[% area %]</td>
+        [% ELSE %]
+            <td bgcolor='#99BBFF'><a href='?class=[% c.request.param('class') %]&area=[% area %]'>[% area %]</a></td>
+        [% END %]
+    [% END %]
+    </tr>
+    </table></td>
+[% END %]
+
+[% IF c.request.param('class') && c.request.param('area') == 'attributes' && c.request.param('attr') %]
+
+[% 
+    meta = c.get_metaclass_by_name(c.request.param('class'))
+    attr = meta.get_attribute(c.request.param('attr'))
+%]
+
+<td rowspan='2'><table cellspacing='3' cellpadding='5' border='0' width='300'>
+    [% FOREACH aspect IN [ 'name', 'init_arg', 'reader', 'writer', 'accessor', 'predicate', 'default' ]%]
+        [% item = attr.$aspect() %]
+        <tr>
+        <td bgcolor='#33FF33' align='right' valign='top'>[% aspect %]</td>
+        <td bgcolor='#AAFFAA'>[% IF item == undef %]&mdash;[% ELSE %]<pre>[% c.deparse_item(item) %]</pre>[% END %]</td>
+        </tr>
+    [% END %]
+    </table></td>
+
+[% END %]
+
+[% IF c.request.param('class') && c.request.param('area') == 'methods' && c.request.param('method') %]
+
+[% 
+    meta = c.get_metaclass_by_name(c.request.param('class'))
+    method = meta.get_method(c.request.param('method'))
+%]
+
+<td rowspan='2'><table cellspacing='3' cellpadding='5' border='0'>
+    [% FOREACH aspect IN [ 'name', 'package_name', 'fully_qualified_name' ]%]
+        <tr>
+        <td bgcolor='#33FF33' align='right' valign='top'>[% aspect %]</td>
+        <td bgcolor='#AAFFAA'>[% method.$aspect() %]</td>
+        </tr>
+    [% END %]
+        <tr>
+        <td bgcolor='#33FF33' align='right' valign='top'>body</td>
+        <td bgcolor='#AAFFAA'><pre>[% c.deparse_method(method) %]</pre></td>
+        </tr>    
+    </table></td>
+
+[% END %]
+
+</tr>
+<tr>
+
+[% IF c.request.param('class') && c.request.param('area') %]
+
+[% meta = c.get_metaclass_by_name(c.request.param('class')) %]
+
+<td><div style='width: 300px; height: 100%; overflow: auto;'><table cellspacing='3' cellpadding='5' border='0' width='100%'>
+    [% IF c.request.param('area') == 'methods' %]
+        [% FOREACH method IN meta.get_method_list.sort %]
+            <tr>
+                [% IF c.request.param('method') == method %]
+                    <td bgcolor='#AAFFAA'>[% method %]</td>                
+                [% ELSE %]
+                    <td bgcolor='#FFDD99'><a href='?class=[% c.request.param('class') %]&area=[% c.request.param('area') %]&method=[% method %]'>[% method %]</a></td>
+                [% END %]
+            </tr>
+        [% END %]    
+    [% END %]
+    [% IF c.request.param('area') == 'attributes' %]
+        [% FOREACH attr IN meta.get_attribute_list.sort %]
+            <tr>
+                [% IF c.request.param('attr') == attr %]
+                    <td bgcolor='#AAFFAA'>[% attr %]</td>                
+                [% ELSE %]
+                    <td bgcolor='#FFDD99'><a href='?class=[% c.request.param('class') %]&area=[% c.request.param('area') %]&attr=[% attr %]'>[% attr %]</a></td>
+                [% END %]
+            </tr>
+        [% END %]    
+    [% END %] 
+    [% IF c.request.param('area') == 'superclasses' %]
+        [% FOREACH super IN meta.superclasses.sort %]
+            <tr>
+                <td bgcolor='#FFDD99'><a href='?class=[% super %]'>[% super %]</a></td>
+            </tr>
+        [% END %]    
+    [% END %]       
+    </table></div></td>
+[% END %]
+
+</tr>
+</table>
