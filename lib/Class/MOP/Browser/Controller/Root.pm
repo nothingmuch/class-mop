@@ -8,7 +8,7 @@ use base 'Catalyst::Controller';
 
 our $VERSION = '0.01';
 
-__PACKAGE__->config->{namespace} = 'cgi-bin/class_mop_browser.pl';
+__PACKAGE__->config->{namespace} = '';
 
 sub default : Private {
     my ($self, $c) = @_;
