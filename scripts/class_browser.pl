@@ -3,60 +3,47 @@
 use strict;
 use warnings;
 
-use Class::MOP;
 use Data::Dumper;
 use B::Deparse;
 use Template;
 use Getopt::Long;
+use CGI;
 
-my $DATA = join "" => <DATA>;
+use Class::MOP;
 
 my $stand_alone = 0;
-
-GetOptions(
-    "s" => \$stand_alone,
-);
+GetOptions("s" => \$stand_alone);
 
 if ($stand_alone) {
+    require HTTP::Server::Simple::CGI;
     {
-        package Class::MOP::Browser::Server;
-        use strict;
-        use warnings;
-        use base qw(HTTP::Server::Simple::CGI);
-
-        sub handle_request {
-            my ($self, $cgi) = @_;
-            Template->new->process(
-                \$DATA,
-                {
-                    'get_all_metaclasses'   => \&::get_all_metaclasses,
-                    'get_metaclass_by_name' => \&::get_metaclass_by_name,
-                    'deparse_method'        => \&::deparse_method,
-                    'deparse_item'          => \&::deparse_item,
-                }
-            ) or warn Template->error;
-        }
+        package # hide me from PAUSE
+            Class::MOP::Browser::Server;
+        our @ISA = qw(HTTP::Server::Simple::CGI);
+        sub handle_request { ::process_template() }
     }    
-
-    my $server = Class::MOP::Browser::Server->new();
-    $server->run();    
+    Class::MOP::Browser::Server->new()->run();    
 }
 else {
-    
     print CGI::header();
-    
-    Template->new->process(
-        \$DATA,
-        {
-            'get_all_metaclasses'   => \&::get_all_metaclasses,
-            'get_metaclass_by_name' => \&::get_metaclass_by_name,
-            'deparse_method'        => \&::deparse_method,
-            'deparse_item'          => \&::deparse_item,
-        }
-    ) or warn Template->error;    
+    process_template();
 }
 
-
+{
+    my $DATA;
+    sub process_template {
+        $DATA ||= join "" => <DATA>;
+        Template->new->process(
+            \$DATA,
+            {
+                'get_all_metaclasses'   => \&::get_all_metaclasses,
+                'get_metaclass_by_name' => \&::get_metaclass_by_name,
+                'deparse_method'        => \&::deparse_method,
+                'deparse_item'          => \&::deparse_item,
+            }
+        ) or warn Template->error;        
+    }
+}
 
 sub get_all_metaclasses { 
     sort { $a->name cmp $b->name } Class::MOP::get_all_metaclass_instances() 
@@ -68,21 +55,9 @@ sub get_metaclass_by_name {
 
 sub deparse_method {
     my ($method) = @_;
-
     my $deparse = B::Deparse->new("-d");
     my $body = $deparse->coderef2text($method->body());
-
-    my @body = split /\n/ => $body;
-    my @cleaned;
-
-    foreach (@body) {
-        next if /^\s+use/;
-        next if /^\s+BEGIN/;        
-        next if /^\s+package/;        
-        push @cleaned => $_;
-    }
-
-    return "sub " . $method->name . ' ' . (join "\n" => @cleaned);
+    return "sub " . $method->name . ' ' . _clean_deparse_code($body);
 }
 
 sub deparse_item {
@@ -93,18 +68,19 @@ sub deparse_item {
     my $dumped = Dumper $item;    
     $dumped =~ s/^\$VAR1\s=\s//;
     $dumped =~ s/\;$//;    
+    return _clean_deparse_code($dumped);
+}
 
-    my @body = split /\n/ => $dumped;
+sub _clean_deparse_code {
+    my @body = split /\n/ => $_[0];
     my @cleaned;
-
     foreach (@body) {
         next if /^\s+use/;
         next if /^\s+BEGIN/;        
         next if /^\s+package/;        
         push @cleaned => $_;
-    }    
-
-    return (join "\n" => @cleaned);
+    }  
+    return (join "\n" => @cleaned);  
 }
 
 1;
@@ -113,10 +89,12 @@ sub deparse_item {
 
 __DATA__
 [% USE q = CGI %]
+
 [% area = 'attributes' %]
 [% IF q.param('area') %]
     [% area = q.param('area') %]
 [% END %]
+
 <html>
 <head>
 <title>Class::MOP Browser</title>
@@ -197,7 +175,7 @@ td.lightgreen {
     [% FOREACH metaclass IN get_all_metaclasses() %]
         <tr>
         [% IF q.param('class') == metaclass.name %]
-            <td class='lightblue'><b>[% metaclass.name %]</b</td>
+            <td class='lightblue'><b>[% metaclass.name %]</b></td>
         [% ELSE %]
             <td class='grey'><a href='?class=[% metaclass.name %]'>[% metaclass.name %]</a></td>
         [% END %]
