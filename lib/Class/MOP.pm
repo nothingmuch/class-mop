@@ -357,6 +357,21 @@ Class::MOP::Method::Wrapped->meta->add_attribute(
 );
 
 ## --------------------------------------------------------
+## Class::MOP::Instance
+
+# NOTE:
+# these don't yet do much of anything, but are just 
+# included for completeness
+
+Class::MOP::Instance->meta->add_attribute(
+    Class::MOP::Attribute->new('meta')
+);
+
+Class::MOP::Instance->meta->add_attribute(
+    Class::MOP::Attribute->new('slots')
+);
+
+## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
 
 # NOTE:
@@ -373,9 +388,11 @@ $_->meta->make_immutable(
     Class::MOP::Package  
     Class::MOP::Module   
     Class::MOP::Class    
+    
     Class::MOP::Attribute
     Class::MOP::Method   
     Class::MOP::Instance 
+    
     Class::MOP::Object   
 
     Class::MOP::Attribute::Accessor

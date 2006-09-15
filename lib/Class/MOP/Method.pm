@@ -223,12 +223,11 @@ Class::MOP::Method - Method Meta Object
 =head1 DESCRIPTION
 
 The Method Protocol is very small, since methods in Perl 5 are just 
-subroutines within the particular package. Basically all we do is to 
-bless the subroutine. 
+subroutines within the particular package. We provide a very basic 
+introspection interface.
 
-Currently this package is largely unused. Future plans are to provide 
-some very simple introspection methods for the methods themselves. 
-Suggestions for this are welcome. 
+This also contains the Class::MOP::Method::Wrapped subclass, which 
+provides the features for before, after and around method modifiers.
 
 =head1 METHODS
 
@@ -248,8 +247,6 @@ to this class.
 =over 4
 
 =item B<wrap (&code)>
-
-This simply blesses the C<&code> reference passed to it.
 
 =back
 
@@ -274,8 +271,6 @@ This simply blesses the C<&code> reference passed to it.
 =over 4
 
 =item B<wrap (&code)>
-
-This simply blesses the C<&code> reference passed to it.
 
 =item B<get_original_method>
 

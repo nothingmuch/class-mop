@@ -1009,8 +1009,11 @@ C<$method_name> is actually a method. However, it will DWIM about
 
 =item B<get_method ($method_name)>
 
-This will return a CODE reference of the specified C<$method_name>, 
-or return undef if that method does not exist.
+This will return a Class::MOP::Method instance related to the specified 
+C<$method_name>, or return undef if that method does not exist.
+
+The Class::MOP::Method is codifiable, so you can use it like a normal 
+CODE reference, see L<Class::MOP::Method> for more information.
 
 =item B<find_method_by_name ($method_name>
 
@@ -1187,6 +1190,11 @@ section.
 It should be noted that any accessor, reader/writer or predicate 
 methods which the C<$attribute_meta_object> has will be installed 
 into the class at this time.
+
+B<NOTE>
+If an attribute already exists for C<$attribute_name>, the old one 
+will be removed (as well as removing all it's accessors), and then 
+the new one added.
 
 =item B<has_attribute ($attribute_name)>
 

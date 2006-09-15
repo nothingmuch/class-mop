@@ -9,6 +9,8 @@ Revision history for Perl extension Class-MOP.
       - added Class::MOP::Method (and its subclasses) 
         to the bootstrap
         - adjusted tests for this
+      - added the Class::MOP::Instance attributes
+        to the bootstrap
       - bootstrap no longer re-compiles accessors
         so as to keep the MOP compile-time fast
     
@@ -17,6 +19,7 @@ Revision history for Perl extension Class-MOP.
       - methods are no longer blessed CODE refs
         but are actual objects which can be CODE-ified
         - adjusted tests to compensate
+        - adjusted docs for this        
 
     * Class::MOP::Class
       - changed how methods are dealt with to 
@@ -28,6 +31,7 @@ Revision history for Perl extension Class-MOP.
         a duplicate name, and properly removes the 
         old one before installing the new one
         - added tests for this
+        - adjusted docs for this
     
     * Class::MOP::Class::Immutable
       - added caching of &get_method_map
