@@ -95,7 +95,7 @@ ok(!$OinkyBoinky->has_method('bar'), "the method 'bar' is not defined in OinkyBo
 
 ok(my $bar = $OinkyBoinky->find_method_by_name('bar'), "but if you look in the inheritence chain then 'bar' does exist");
 
-is( reftype($bar), "CODE", "the returned value is a code ref" );
+is( reftype($bar->body), "CODE", "the returned value is a code ref" );
 
 
 # calling get_method blessed them all

@@ -274,7 +274,9 @@ sub get_method_map {
     foreach my $symbol ($self->list_all_package_symbols('CODE')) {
         my $code = $self->get_package_symbol('&' . $symbol);
         
-        next if exists $map->{$symbol} && $map->{$symbol}->body == $code;        
+        next if exists  $map->{$symbol} && 
+                defined $map->{$symbol} && 
+                        $map->{$symbol}->body == $code;        
         
         my $gv = svref_2object($code)->GV;
         next if ($gv->STASH->NAME || '') ne $class_name &&
@@ -413,7 +415,7 @@ sub add_method {
             $method = $self->find_next_method_by_name($method_name);
             # die if it does not exist
             (defined $method)
-                || confess "The method '$method_name' is not found in the inherience hierarchy for this class";
+                || confess "The method '$method_name' is not found in the inherience hierarchy for class " . $self->name;
             # and now make sure to wrap it 
             # even if it is already wrapped
             # because we need a new sub ref
@@ -523,8 +525,23 @@ sub get_method_list {
 
 sub find_method_by_name {
     my ($self, $method_name) = @_;
-    # FIXME
-    return $self->name->can($method_name);
+    (defined $method_name && $method_name)
+        || confess "You must define a method name to find"; 
+    # keep a record of what we have seen
+    # here, this will handle all the 
+    # inheritence issues because we are 
+    # using the &class_precedence_list
+    my %seen_class;
+    my @cpl = $self->class_precedence_list();
+    foreach my $class (@cpl) {
+        next if $seen_class{$class};
+        $seen_class{$class}++;
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        return $meta->get_method($method_name) 
+            if $meta->has_method($method_name);
+    }
+    return;
 }
 
 sub compute_all_applicable_methods {
