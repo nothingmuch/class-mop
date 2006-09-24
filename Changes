@@ -3,16 +3,17 @@ Revision history for Perl extension Class-MOP.
 0.35
 
     * Class::MOP
-      - non-generated accessors are no longer 
-        copied, but instead are aliased from 
-        the originals
+      - accessors are no longer generated, instead 
+        they are aliased from the originals
+        - this means that the bootstrap will no longer 
+          re-compiles accessors so as to keep the MOP 
+          compile-time fast        
+        - fixed tests to reflect
       - added Class::MOP::Method (and its subclasses) 
         to the bootstrap
         - adjusted tests for this
       - added the Class::MOP::Instance attributes
         to the bootstrap
-      - bootstrap no longer re-compiles accessors
-        so as to keep the MOP compile-time fast
     
     * Class::MOP::Method
       *** API CHANGE ***

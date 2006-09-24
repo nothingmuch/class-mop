@@ -189,7 +189,12 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:attribute_metaclass' => (
-        reader   => 'attribute_metaclass',
+        reader   => {          
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here            
+            'attribute_metaclass' => \&Class::MOP::Class::attribute_metaclass
+        },        
         init_arg => ':attribute_metaclass',
         default  => 'Class::MOP::Attribute',
     ))
@@ -197,7 +202,12 @@ Class::MOP::Class->meta->add_attribute(
 
 Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('$:method_metaclass' => (
-        reader   => 'method_metaclass',
+        reader   => {          
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here            
+            'method_metaclass' => \&Class::MOP::Class::method_metaclass
+        },
         init_arg => ':method_metaclass',
         default  => 'Class::MOP::Method',        
     ))
@@ -258,50 +268,50 @@ Class::MOP::Attribute->meta->add_attribute(
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('accessor' => (
-        reader    => 'accessor',
-        predicate => 'has_accessor',
+        reader    => { 'accessor'     => \&Class::MOP::Attribute::accessor     },
+        predicate => { 'has_accessor' => \&Class::MOP::Attribute::has_accessor },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('reader' => (
-        reader    => 'reader',
-        predicate => 'has_reader',
+        reader    => { 'reader'     => \&Class::MOP::Attribute::reader     },
+        predicate => { 'has_reader' => \&Class::MOP::Attribute::has_reader },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('writer' => (
-        reader    => 'writer',
-        predicate => 'has_writer',
+        reader    => { 'writer'     => \&Class::MOP::Attribute::writer     },
+        predicate => { 'has_writer' => \&Class::MOP::Attribute::has_writer },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('predicate' => (
-        reader    => 'predicate',
-        predicate => 'has_predicate',
+        reader    => { 'predicate'     => \&Class::MOP::Attribute::predicate     },
+        predicate => { 'has_predicate' => \&Class::MOP::Attribute::has_predicate },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('clearer' => (
-        reader    => 'clearer',
-        predicate => 'has_clearer',
+        reader    => { 'clearer'     => \&Class::MOP::Attribute::clearer     },
+        predicate => { 'has_clearer' => \&Class::MOP::Attribute::has_clearer },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('init_arg' => (
-        reader    => 'init_arg',
-        predicate => 'has_init_arg',
+        reader    => { 'init_arg'     => \&Class::MOP::Attribute::init_arg     },
+        predicate => { 'has_init_arg' => \&Class::MOP::Attribute::has_init_arg },
     ))
 );
 
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('default' => (
         # default has a custom 'reader' method ...
-        predicate => 'has_default',
+        predicate => { 'has_default' => \&Class::MOP::Attribute::has_default },        
     ))
 );
 
@@ -340,7 +350,7 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
 
 Class::MOP::Method->meta->add_attribute(
     Class::MOP::Attribute->new('body' => (
-        reader => 'body'
+        reader => { 'body' => \&Class::MOP::Method::body },
     ))
 );
 
