@@ -33,6 +33,7 @@ sub new {
         
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
+        
     $options{init_arg} = $name 
         if not exists $options{init_arg};
             

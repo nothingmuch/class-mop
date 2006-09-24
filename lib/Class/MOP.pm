@@ -673,6 +673,16 @@ L<http://citeseer.ist.psu.edu/37617.html>
 
 =back
 
+=head2 Article 
+
+=over 4
+
+=item CPAN Module Review of Class::MOP 
+
+L<http://www.oreillynet.com/onlamp/blog/2006/06/cpan_module_review_classmop.html>
+
+=back
+
 =head1 SIMILAR MODULES
 
 As I have said above, this module is a class-builder-builder, so it is 
