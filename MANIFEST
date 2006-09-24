@@ -3,6 +3,7 @@ Changes
 Makefile.PL
 META.yml
 MANIFEST
+MANIFEST.SKIP
 README
 examples/ArrayBasedStorage.pod
 examples/AttributesWithHistory.pod
@@ -22,6 +23,7 @@ lib/Class/MOP/Module.pm
 lib/Class/MOP/Object.pm
 lib/Class/MOP/Package.pm
 lib/Class/MOP/Class/Immutable.pm
+scripts/class_browser.pl
 t/000_load.t
 t/001_basic.t
 t/002_class_precedence_list.t
@@ -40,6 +42,7 @@ t/017_add_method_modifier.t
 t/018_anon_class.t
 t/020_attribute.t
 t/021_attribute_errors_and_edge_cases.t
+t/022_attribute_duplication.t
 t/030_method.t
 t/031_method_modifiers.t
 t/040_metaclass.t
