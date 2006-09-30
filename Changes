@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.35 Sat. Sept. 23, 2006
+0.35 Sat. Sept. 30, 2006
 
     * scripts/class_browser.pl
       - initial prototype of a class browser, more 
