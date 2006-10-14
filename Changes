@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.35 Sat. Sept. 23, 2006
+0.35 Sat. Sept. 30, 2006
 
     * scripts/class_browser.pl
       - initial prototype of a class browser, more 
@@ -8,11 +8,9 @@ Revision history for Perl extension Class-MOP.
         very much welcome.
 
     * Class::MOP
-      - accessors are no longer generated, instead 
+      - All Class::MOP::* accessors are no longer 
+        re-generated in the bootstrap, instead 
         they are aliased from the originals
-        - this means that the bootstrap will no longer 
-          re-compiles accessors so as to keep the MOP 
-          compile-time fast        
         - fixed tests to reflect
       - added Class::MOP::Method (and its subclasses) 
         to the bootstrap
