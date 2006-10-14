@@ -7,8 +7,11 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.05';
+our $VERSION   = '0.35';
 our $AUTHORITY = 'cpan:STEVAN';
+
+use XSLoader;
+XSLoader::load( 'Class::MOP::Package', $VERSION );
 
 use base 'Class::MOP::Object';
 
@@ -142,48 +145,6 @@ sub get_package_symbol {
     $self->add_package_symbol($variable)
         unless exists $self->namespace->{$name};
     return *{$self->namespace->{$name}}{$type};
-}
-
-sub remove_package_symbol {
-    my ($self, $variable) = @_;
-
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
-
-    # FIXME:
-    # no doubt this is grossly inefficient and 
-    # could be done much easier and faster in XS
-
-    my ($scalar, $array, $hash, $code);
-    if ($type eq 'SCALAR') {
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);     
-    }
-    elsif ($type eq 'ARRAY') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);
-    }
-    elsif ($type eq 'HASH') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);      
-    }
-    elsif ($type eq 'CODE') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);        
-    }    
-    else {
-        confess "This should never ever ever happen";
-    }
-        
-    $self->remove_package_glob($name);
-    
-    $self->add_package_symbol(('$' . $name) => $scalar) if defined $scalar;      
-    $self->add_package_symbol(('@' . $name) => $array)  if defined $array;    
-    $self->add_package_symbol(('%' . $name) => $hash)   if defined $hash;
-    $self->add_package_symbol(('&' . $name) => $code)   if defined $code;            
 }
 
 sub list_all_package_symbols {

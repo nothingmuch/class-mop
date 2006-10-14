@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 189;
+use Test::More tests => 191;
 use Test::Exception;
 
 BEGIN {
@@ -35,7 +35,7 @@ my @class_mop_package_methods = qw(
     name
     namespace
     
-    add_package_symbol get_package_symbol has_package_symbol remove_package_symbol 
+    add_package_symbol bootstrap get_package_symbol has_package_symbol remove_package_symbol 
     list_all_package_symbols remove_package_glob
     
     _deconstruct_variable_name

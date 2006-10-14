@@ -22,6 +22,7 @@ lib/Class/MOP/Method.pm
 lib/Class/MOP/Module.pm
 lib/Class/MOP/Object.pm
 lib/Class/MOP/Package.pm
+lib/Class/MOP/Package.xs
 lib/Class/MOP/Class/Immutable.pm
 scripts/class_browser.pl
 t/000_load.t

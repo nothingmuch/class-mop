@@ -4,6 +4,8 @@ package Class::MOP;
 use strict;
 use warnings;
 
+use 5.006; # min. perl version
+
 use Carp         'confess';
 use Scalar::Util 'weaken';
 

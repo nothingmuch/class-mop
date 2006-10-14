@@ -238,16 +238,6 @@ sub generate_predicate_method {
     };
 }
 
-sub generate_clearer_method {
-    my $self = shift;
-    my $attr_name  = $self->name;
-    return sub { 
-        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                         ->get_meta_instance
-                         ->deinitialize_slot($_[0], $attr_name);
-    };
-}
-
 sub generate_predicate_method_inline {
     my $self          = shift; 
     my $attr_name     = $self->name;
@@ -259,6 +249,16 @@ sub generate_predicate_method_inline {
     confess "Could not generate inline predicate because : $@" if $@;
 
     return $code;
+}
+
+sub generate_clearer_method {
+    my $self = shift;
+    my $attr_name  = $self->name;
+    return sub { 
+        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
+                         ->get_meta_instance
+                         ->deinitialize_slot($_[0], $attr_name);
+    };
 }
 
 sub generate_clearer_method_inline {
