@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 53;
+use Test::More tests => 44;
 use Test::Exception;
 
 BEGIN {
@@ -39,19 +39,9 @@ BEGIN {
         set_value
         
         associated_class
-        attach_to_class detach_from_class
+        attach_to_class detach_from_class 
         
-        generate_accessor_method
-        generate_reader_method
-        generate_writer_method
-        generate_predicate_method
-        generate_clearer_method
-        
-        generate_accessor_method_inline
-        generate_reader_method_inline
-        generate_writer_method_inline
-        generate_predicate_method_inline    
-        generate_clearer_method_inline    
+        accessor_metaclass
         
         process_accessors
         install_accessors

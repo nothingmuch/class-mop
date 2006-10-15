@@ -405,7 +405,7 @@ $_->meta->make_immutable(
     
     Class::MOP::Object   
 
-    Class::MOP::Attribute::Accessor
+    Class::MOP::Method::Accessor
     Class::MOP::Method::Wrapped    
 /;
 
