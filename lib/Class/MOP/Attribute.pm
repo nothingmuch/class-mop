@@ -56,6 +56,9 @@ sub new {
         # keep a weakened link to the 
         # class we are associated with
         associated_class => undef,
+        # and a list of the methods 
+        # associated with this attr
+        associated_methods => [],
     } => $class;
 }
 
@@ -92,7 +95,8 @@ sub initialize_instance_slot {
 
 sub name { $_[0]->{name} }
 
-sub associated_class { $_[0]->{associated_class} }
+sub associated_class   { $_[0]->{associated_class}   }
+sub associated_methods { $_[0]->{associated_methods} }
 
 sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
 sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
@@ -146,22 +150,45 @@ sub detach_from_class {
     $self->{associated_class} = undef;        
 }
 
+# method association 
+
+sub associate_method {
+    my ($self, $method) = @_;
+    push @{$self->{associated_methods}} => $method;
+}
+
 ## Slot management
 
 sub set_value {
     my ($self, $instance, $value) = @_;
 
-    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+    Class::MOP::Class->initialize(blessed($instance))
                      ->get_meta_instance
-                     ->set_slot_value( $instance, $self->name, $value );
+                     ->set_slot_value($instance, $self->name, $value);
 }
 
 sub get_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+    Class::MOP::Class->initialize(blessed($instance))
                      ->get_meta_instance
                      ->get_slot_value($instance, $self->name);
+}
+
+sub has_value {
+    my ($self, $instance) = @_;
+    
+    defined Class::MOP::Class->initialize(blessed($instance))
+                             ->get_meta_instance
+                             ->get_slot_value($instance, $self->name) ? 1 : 0;    
+}
+
+sub clear_value {
+    my ($self, $instance) = @_;
+        
+    Class::MOP::Class->initialize(blessed($instance))
+                     ->get_meta_instance
+                     ->deinitialize_slot($instance, $self->name);    
 }
 
 ## load em up ...
@@ -174,7 +201,9 @@ sub process_accessors {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
-        return ($name, $self->accessor_metaclass->wrap($method));        
+        $method = $self->accessor_metaclass->wrap($method);
+        $self->associate_method($method);
+        return ($name, $method);        
     }
     else {
         my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);         
@@ -187,6 +216,7 @@ sub process_accessors {
             );            
         };
         confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;        
+        $self->associate_method($method);
         return ($accessor, $method);
     }    
 }
@@ -417,15 +447,19 @@ back to their "unfulfilled" state.
 
 =over 4
 
-=item set_value $instance, $value
+=item B<set_value ($instance, $value)>
 
 Set the value without going through the accessor. Note that this may be done to
 even attributes with just read only accessors.
 
-=item get_value $instance
+=item B<get_value ($instance)>
 
 Return the value without going through the accessor. Note that this may be done
 even to attributes with just write only accessors.
+
+=item B<has_value ($instance)>
+
+=item B<clear_value ($instance)>
 
 =back
 
@@ -497,12 +531,6 @@ These are all basic predicate methods for the values passed into C<new>.
 
 =item B<detach_from_class>
 
-=item B<slot_name>
-
-=item B<allocate_slots>
-
-=item B<deallocate_slots>
-
 =back
 
 =head2 Attribute Accessor generation
@@ -510,6 +538,10 @@ These are all basic predicate methods for the values passed into C<new>.
 =over 4
 
 =item B<accessor_metaclass>
+
+=item B<associate_method>
+
+=item B<associated_methods>
 
 =item B<install_accessors>
 

@@ -12,19 +12,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
 
-=pod
-
-So, the idea here is that we have an accessor class
-which takes a weak-link to the attribute and can 
-generate the actual code ref needed. This might allow
-for more varied approaches.
-
-And if the attribute type can also declare what 
-kind of accessor method metaclass it uses, then 
-this relationship can be handled by delegation.
-
-=cut
-
 sub new {
     my $class   = shift;
     my %options = @_;
@@ -75,9 +62,7 @@ sub intialize_body {
         ($self->as_inline ? 'inline' : ())
     );
     
-    eval {
-        $self->{body} = $self->$method_name();
-    };
+    eval { $self->{body} = $self->$method_name() };
     die $@ if $@;
 }
 
@@ -107,22 +92,16 @@ sub generate_writer_method {
 }
 
 sub generate_predicate_method {
-    my $attr      = (shift)->associated_attribute; 
-    my $attr_name = $attr->name;
+    my $attr = (shift)->associated_attribute; 
     return sub { 
-        defined Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                                 ->get_meta_instance
-                                 ->get_slot_value($_[0], $attr_name) ? 1 : 0;
+        $attr->has_value($_[0])
     };
 }
 
 sub generate_clearer_method {
-    my $attr      = (shift)->associated_attribute; 
-    my $attr_name = $attr->name;
+    my $attr = (shift)->associated_attribute; 
     return sub { 
-        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                         ->get_meta_instance
-                         ->deinitialize_slot($_[0], $attr_name);
+        $attr->clear_value($_[0])
     };
 }
 

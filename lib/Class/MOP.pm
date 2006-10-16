@@ -315,6 +315,12 @@ Class::MOP::Attribute->meta->add_attribute(
     ))
 );
 
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('associated_methods' => (
+        reader  => { 'associated_methods' => \&Class::MOP::Attribute::associated_methods },
+        default => sub { [] } 
+    ))
+);
 
 # NOTE: (meta-circularity)
 # This should be one of the last things done
