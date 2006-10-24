@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.36
+    * Class::MOP::Class
+      - added a few 'no warnings' lines to keep annoying 
+        (and meaningless) warnings from chirping during 
+        global destruction.
+
 0.35 Sat. Sept. 30, 2006
 
     * scripts/class_browser.pl

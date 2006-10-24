@@ -9,7 +9,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.20';
+our $VERSION   = '0.21';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -173,6 +173,7 @@ sub check_metaclass_compatability {
 
     sub is_anon_class {
         my $self = shift;
+        no warnings 'uninitialized';
         $self->name =~ /^$ANON_CLASS_PREFIX/ ? 1 : 0;        
     }
 
@@ -190,6 +191,7 @@ sub check_metaclass_compatability {
     # really need to be handled explicitly
     sub DESTROY {
         my $self = shift;
+        no warnings 'uninitialized';        
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
         my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';     
