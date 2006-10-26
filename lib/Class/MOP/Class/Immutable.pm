@@ -4,8 +4,10 @@ package Class::MOP::Class::Immutable;
 use strict;
 use warnings;
 
+use Class::MOP::Method::Constructor;
+
 use Carp         'confess';
-use Scalar::Util 'blessed', 'looks_like_number';
+use Scalar::Util 'blessed';
 
 our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -88,19 +90,21 @@ sub make_metaclass_immutable {
           
     if ($options{inline_accessors}) {
         foreach my $attr_name ($metaclass->get_attribute_list) {
-            my $attr = $metaclass->get_attribute($attr_name);
-            $attr->install_accessors(1); # inline the accessors
+            # inline the accessors
+            $metaclass->get_attribute($attr_name)
+                      ->install_accessors(1); 
         }      
     }
 
     if ($options{inline_constructor}) {       
+        my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
         $metaclass->add_method(
             $options{constructor_name},
-            $class->_generate_inline_constructor(
-                \%options, 
-                $meta_instance, 
-                $metaclass->{'___compute_all_applicable_attributes'}
-            )            
+            $constructor_class->new(
+                options       => \%options, 
+                meta_instance => $meta_instance, 
+                attributes    => $metaclass->{'___compute_all_applicable_attributes'}                
+            )
         );
     }
     
@@ -108,58 +112,6 @@ sub make_metaclass_immutable {
     $metaclass->{'___method_map'} = $metaclass->get_method_map;
           
     bless $metaclass => $class;
-}
-
-sub _generate_inline_constructor {
-    my ($class, $options, $meta_instance, $attrs) = @_;
-    # TODO:
-    # the %options should also include a both 
-    # a call 'initializer' and call 'SUPER::' 
-    # options, which should cover approx 90% 
-    # of the possible use cases (even if it 
-    # requires some adaption on the part of 
-    # the author, after all, nothing is free)
-    my $source = 'sub {';
-    $source .= "\n" . 'my ($class, %params) = @_;';
-    $source .= "\n" . 'my $instance = ' . $meta_instance->inline_create_instance('$class');
-    $source .= ";\n" . (join ";\n" => map { 
-        $class->_generate_slot_initializer($meta_instance, $attrs, $_) 
-    } 0 .. (@$attrs - 1));
-    $source .= ";\n" . 'return $instance';
-    $source .= ";\n" . '}'; 
-    warn $source if $options->{debug};   
-    my $code = eval $source;
-    confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
-    return $code;
-}
-
-sub _generate_slot_initializer {
-    my ($class, $meta_instance, $attrs, $index) = @_;
-    my $attr = $attrs->[$index];
-    my $default;
-    if ($attr->has_default) {
-        # NOTE:
-        # default values can either be CODE refs
-        # in which case we need to call them. Or 
-        # they can be scalars (strings/numbers)
-        # in which case we can just deal with them
-        # in the code we eval.
-        if ($attr->is_default_a_coderef) {
-            $default = '$attrs->[' . $index . ']->default($instance)';
-        }
-        else {
-            $default = $attrs->[$index]->default;
-            # make sure to quote strings ...
-            unless (looks_like_number($default)) {
-                $default = "'$default'";
-            }
-        }
-    }
-    $meta_instance->inline_set_slot_value(
-        '$instance', 
-        ("'" . $attr->name . "'"), 
-        ('$params{\'' . $attr->init_arg . '\'}' . (defined $default ? (' || ' . $default) : ''))
-    )    
 }
 
 # cached methods
