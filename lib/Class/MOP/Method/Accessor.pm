@@ -232,8 +232,6 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
-Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
-
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2006 by Infinity Interactive, Inc.

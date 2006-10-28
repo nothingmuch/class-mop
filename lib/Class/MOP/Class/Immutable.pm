@@ -43,19 +43,6 @@ for my $meth (qw(
     };
 }
 
-sub get_package_symbol {
-    my ($self, $variable) = @_;    
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
-    return *{$self->namespace->{$name}}{$type}
-        if exists $self->namespace->{$name};
-    # NOTE: 
-    # we have to do this here in order to preserve 
-    # perl's autovivification of variables. However 
-    # we do cut off direct access to add_package_symbol
-    # as shown above.
-    $self->Class::MOP::Package::add_package_symbol($variable);
-}
-
 # NOTE:
 # superclasses is an accessor, so 
 # it just cannot be changed
@@ -109,7 +96,7 @@ sub make_metaclass_immutable {
     }
     
     # now cache the method map ...
-    $metaclass->{'___method_map'} = $metaclass->get_method_map;
+    $metaclass->{'___get_method_map'} = $metaclass->get_method_map;
           
     bless $metaclass => $class;
 }
@@ -120,7 +107,7 @@ sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}     
 sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
 sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
 sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
-sub get_method_map                    {   (shift)->{'___method_map'}                         }
+sub get_method_map                    {   (shift)->{'___get_method_map'}                     }
 
 1;
 
@@ -240,11 +227,6 @@ to this method, which
 =item B<superclasses>
 
 This method becomes read-only in an immutable class.
-
-=item B<get_package_symbol>
-
-This method must handle package variable autovivification 
-correctly, while still disallowing C<add_package_symbol>.
 
 =back
 

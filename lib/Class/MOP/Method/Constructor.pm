@@ -156,8 +156,6 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
-Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
-
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2006 by Infinity Interactive, Inc.
