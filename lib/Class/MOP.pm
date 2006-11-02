@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Class::Immutable;
 
-our $VERSION   = '0.35';
+our $VERSION   = '0.36';
 our $AUTHORITY = 'cpan:STEVAN';
 
 {

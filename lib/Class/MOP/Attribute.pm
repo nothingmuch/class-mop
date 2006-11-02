@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.13';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
