@@ -4,6 +4,9 @@ package Class::MOP::Class;
 use strict;
 use warnings;
 
+use Class::MOP::Instance;
+use Class::MOP::Method::Wrapped;
+
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
@@ -13,8 +16,6 @@ our $VERSION   = '0.21';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
-
-use Class::MOP::Instance;
 
 # Self-introspection 
 
@@ -69,7 +70,6 @@ sub construct_class_instance {
                         : blessed($class))
                     : $class);
 
-    $class = blessed($class) || $class;
     # now create the metaclass
     my $meta;
     if ($class =~ /^Class::MOP::Class$/) {

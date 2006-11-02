@@ -315,6 +315,12 @@ Class::MOP::Attribute->meta->add_attribute(
     ))
 );
 
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('associated_methods' => (
+        reader  => { 'associated_methods' => \&Class::MOP::Attribute::associated_methods },
+        default => sub { [] } 
+    ))
+);
 
 # NOTE: (meta-circularity)
 # This should be one of the last things done
@@ -367,6 +373,56 @@ Class::MOP::Method::Wrapped->meta->add_attribute(
 );
 
 ## --------------------------------------------------------
+## Class::MOP::Method::Accessor
+
+Class::MOP::Method::Accessor->meta->add_attribute(
+    Class::MOP::Attribute->new('attribute' => (
+        reader => { 
+            'associated_attribute' => \&Class::MOP::Method::Accessor::associated_attribute 
+        },
+    ))    
+);
+
+Class::MOP::Method::Accessor->meta->add_attribute(
+    Class::MOP::Attribute->new('accessor_type' => (
+        reader => { 'accessor_type' => \&Class::MOP::Method::Accessor::accessor_type },
+    ))    
+);
+
+Class::MOP::Method::Accessor->meta->add_attribute(
+    Class::MOP::Attribute->new('is_inline' => (
+        reader => { 'is_inline' => \&Class::MOP::Method::Accessor::is_inline },
+    ))    
+);
+
+## --------------------------------------------------------
+## Class::MOP::Method::Constructor
+
+Class::MOP::Method::Constructor->meta->add_attribute(
+    Class::MOP::Attribute->new('options' => (
+        reader => { 
+            'options' => \&Class::MOP::Method::Constructor::options 
+        },
+    ))    
+);
+
+Class::MOP::Method::Constructor->meta->add_attribute(
+    Class::MOP::Attribute->new('meta_instance' => (
+        reader => { 
+            'meta_instance' => \&Class::MOP::Method::Constructor::meta_instance 
+        },
+    ))    
+);
+
+Class::MOP::Method::Constructor->meta->add_attribute(
+    Class::MOP::Attribute->new('attributes' => (
+        reader => { 
+            'attributes' => \&Class::MOP::Method::Constructor::attributes 
+        },
+    ))    
+);
+
+## --------------------------------------------------------
 ## Class::MOP::Instance
 
 # NOTE:
@@ -405,8 +461,9 @@ $_->meta->make_immutable(
     
     Class::MOP::Object   
 
-    Class::MOP::Attribute::Accessor
-    Class::MOP::Method::Wrapped    
+    Class::MOP::Method::Accessor
+    Class::MOP::Method::Constructor    
+    Class::MOP::Method::Wrapped           
 /;
 
 1;

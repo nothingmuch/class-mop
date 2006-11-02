@@ -86,7 +86,7 @@ sub ::with ($) {
         my $method = $mixin->get_method($_);
         # we want to ignore accessors since
         # they will be created with the attrs
-        (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'))
+        (blessed($method) && $method->isa('Class::MOP::Method::Accessor'))
             ? () : ($_ => $method)
     } $mixin->get_method_list;    
 

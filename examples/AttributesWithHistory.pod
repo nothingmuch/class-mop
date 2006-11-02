@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base 'Class::MOP::Attribute';
 
@@ -25,10 +25,30 @@ AttributesWithHistory->meta->add_attribute('_history' => (
     default  => sub { {} },
 ));
 
+sub accessor_metaclass { 'AttributesWithHistory::Method::Accessor' }
+
+AttributesWithHistory->meta->add_after_method_modifier('install_accessors' => sub {
+    my ($self) = @_;
+    # and now add the history accessor
+    $self->associated_class->add_method(
+        $self->process_accessors('history_accessor' => $self->history_accessor())
+    ) if $self->has_history_accessor();
+});
+
+package # hide the package from PAUSE
+    AttributesWithHistory::Method::Accessor;
+
+use strict;
+use warnings;
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Method::Accessor';
+
 # generate the methods
 
 sub generate_history_accessor_method {
-    my ($self, $attr_name) = @_; 
+    my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
             \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\} = [];    
@@ -38,7 +58,7 @@ sub generate_history_accessor_method {
 }
 
 sub generate_accessor_method {
-    my ($self, $attr_name) = @_;
+    my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         if (scalar(\@_) == 2) {
             unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
@@ -52,7 +72,7 @@ sub generate_accessor_method {
 }
 
 sub generate_writer_method {
-    my ($self, $attr_name) = @_; 
+    my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
             \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\} = [];    
@@ -60,15 +80,7 @@ sub generate_writer_method {
         push \@\{\$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}\} => \$_[1];        
         \$_[0]->{'$attr_name'} = \$_[1];
     }};
-}
-
-AttributesWithHistory->meta->add_after_method_modifier('install_accessors' => sub {
-    my ($self) = @_;
-    # and now add the history accessor
-    $self->associated_class->add_method(
-        $self->process_accessors('history_accessor' => $self->history_accessor())
-    ) if $self->has_history_accessor();
-});
+}    
 
 1;
 

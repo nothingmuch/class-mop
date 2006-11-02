@@ -4,6 +4,8 @@ package Class::MOP::Attribute;
 use strict;
 use warnings;
 
+use Class::MOP::Method::Accessor;
+
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
@@ -54,6 +56,9 @@ sub new {
         # keep a weakened link to the 
         # class we are associated with
         associated_class => undef,
+        # and a list of the methods 
+        # associated with this attr
+        associated_methods => [],
     } => $class;
 }
 
@@ -90,7 +95,8 @@ sub initialize_instance_slot {
 
 sub name { $_[0]->{name} }
 
-sub associated_class { $_[0]->{associated_class} }
+sub associated_class   { $_[0]->{associated_class}   }
+sub associated_methods { $_[0]->{associated_methods} }
 
 sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
 sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
@@ -144,135 +150,50 @@ sub detach_from_class {
     $self->{associated_class} = undef;        
 }
 
+# method association 
+
+sub associate_method {
+    my ($self, $method) = @_;
+    push @{$self->{associated_methods}} => $method;
+}
+
 ## Slot management
 
 sub set_value {
     my ($self, $instance, $value) = @_;
 
-    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+    Class::MOP::Class->initialize(blessed($instance))
                      ->get_meta_instance
-                     ->set_slot_value( $instance, $self->name, $value );
+                     ->set_slot_value($instance, $self->name, $value);
 }
 
 sub get_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(Scalar::Util::blessed($instance))
+    Class::MOP::Class->initialize(blessed($instance))
                      ->get_meta_instance
                      ->get_slot_value($instance, $self->name);
 }
 
-## Method generation helpers
-
-sub generate_accessor_method {
-    my $attr = shift; 
-    return sub {
-        $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
-        $attr->get_value($_[0]);
-    };
+sub has_value {
+    my ($self, $instance) = @_;
+    
+    defined Class::MOP::Class->initialize(blessed($instance))
+                             ->get_meta_instance
+                             ->get_slot_value($instance, $self->name) ? 1 : 0;    
 }
 
-sub generate_accessor_method_inline {
-    my $self          = shift; 
-    my $attr_name     = $self->name;
-    my $meta_instance = $self->associated_class->instance_metaclass;
-
-    my $code = eval 'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')  . ' if scalar(@_) == 2; '
-        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
-    . '}';
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
+sub clear_value {
+    my ($self, $instance) = @_;
+        
+    Class::MOP::Class->initialize(blessed($instance))
+                     ->get_meta_instance
+                     ->deinitialize_slot($instance, $self->name);    
 }
 
-sub generate_reader_method {
-    my $attr = shift;
-    return sub { 
-        confess "Cannot assign a value to a read-only accessor" if @_ > 1;
-        $attr->get_value($_[0]);
-    };   
-}
+## load em up ...
 
-sub generate_reader_method_inline {
-    my $self          = shift; 
-    my $attr_name     = $self->name;
-    my $meta_instance = $self->associated_class->instance_metaclass;
-
-    my $code = eval 'sub {'
-        . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
-        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
-    . '}';
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
-}
-
-sub generate_writer_method {
-    my $attr = shift;
-    return sub {
-        $attr->set_value($_[0], $_[1]);
-    };
-}
-
-sub generate_writer_method_inline {
-    my $self          = shift; 
-    my $attr_name     = $self->name;
-    my $meta_instance = $self->associated_class->instance_metaclass;
-
-    my $code = eval 'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
-    . '}';
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
-}
-
-sub generate_predicate_method {
-    my $self = shift;
-    my $attr_name  = $self->name;
-    return sub { 
-        defined Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                                 ->get_meta_instance
-                                 ->get_slot_value($_[0], $attr_name) ? 1 : 0;
-    };
-}
-
-sub generate_clearer_method {
-    my $self = shift;
-    my $attr_name  = $self->name;
-    return sub { 
-        Class::MOP::Class->initialize(Scalar::Util::blessed($_[0]))
-                         ->get_meta_instance
-                         ->deinitialize_slot($_[0], $attr_name);
-    };
-}
-
-sub generate_predicate_method_inline {
-    my $self          = shift; 
-    my $attr_name     = $self->name;
-    my $meta_instance = $self->associated_class->instance_metaclass;
-
-    my $code = eval 'sub {'
-        . 'defined ' . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'") . ' ? 1 : 0'
-    . '}';
-    confess "Could not generate inline predicate because : $@" if $@;
-
-    return $code;
-}
-
-sub generate_clearer_method_inline {
-    my $self          = shift; 
-    my $attr_name     = $self->name;
-    my $meta_instance = $self->associated_class->instance_metaclass;
-
-    my $code = eval 'sub {'
-        . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
-    . '}';
-    confess "Could not generate inline clearer because : $@" if $@;
-
-    return $code;
-}
+sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 
 sub process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
@@ -280,17 +201,23 @@ sub process_accessors {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
-        return ($name, Class::MOP::Attribute::Accessor->wrap($method));        
+        $method = $self->accessor_metaclass->wrap($method);
+        $self->associate_method($method);
+        return ($name, $method);        
     }
     else {
-        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable); 
-        my $generator = $self->can('generate_' . $type . '_method' . ($inline_me ? '_inline' : ''));
-        ($generator)
-            || confess "There is no method generator for the type='$type'";
-        if (my $method = $self->$generator($self->name)) {
-            return ($accessor => Class::MOP::Attribute::Accessor->wrap($method));            
-        }
-        confess "Could not create the '$type' method for " . $self->name . " because : $@";
+        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);         
+        my $method;
+        eval {
+            $method = $self->accessor_metaclass->new(
+                attribute     => $self,
+                is_inline     => $inline_me,
+                accessor_type => $type,
+            );            
+        };
+        confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;        
+        $self->associate_method($method);
+        return ($accessor, $method);
     }    
 }
 
@@ -330,7 +257,7 @@ sub install_accessors {
         }        
         my $method = $class->get_method($accessor);   
         $class->remove_method($accessor) 
-            if (blessed($method) && $method->isa('Class::MOP::Attribute::Accessor'));
+            if (blessed($method) && $method->isa('Class::MOP::Method::Accessor'));
     };
     
     sub remove_accessors {
@@ -344,18 +271,6 @@ sub install_accessors {
     }
 
 }
-
-package Class::MOP::Attribute::Accessor;
-
-use strict;
-use warnings;
-
-use Class::MOP::Method;
-
-our $VERSION   = '0.02';
-our $AUTHORITY = 'cpan:STEVAN';
-
-use base 'Class::MOP::Method';
 
 1;
 
@@ -532,15 +447,19 @@ back to their "unfulfilled" state.
 
 =over 4
 
-=item set_value $instance, $value
+=item B<set_value ($instance, $value)>
 
 Set the value without going through the accessor. Note that this may be done to
 even attributes with just read only accessors.
 
-=item get_value $instance
+=item B<get_value ($instance)>
 
 Return the value without going through the accessor. Note that this may be done
 even to attributes with just write only accessors.
+
+=item B<has_value ($instance)>
+
+=item B<clear_value ($instance)>
 
 =back
 
@@ -612,17 +531,17 @@ These are all basic predicate methods for the values passed into C<new>.
 
 =item B<detach_from_class>
 
-=item B<slot_name>
-
-=item B<allocate_slots>
-
-=item B<deallocate_slots>
-
 =back
 
 =head2 Attribute Accessor generation
 
 =over 4
+
+=item B<accessor_metaclass>
+
+=item B<associate_method>
+
+=item B<associated_methods>
 
 =item B<install_accessors>
 
@@ -640,34 +559,6 @@ a C<$value> (the value passed into the constructor for each of the
 different types). It will then either generate the method itself 
 (using the C<generate_*_method> methods listed below) or it will 
 use the custom method passed through the constructor. 
-
-=over 4
-
-=item B<generate_accessor_method>
-
-=item B<generate_predicate_method>
-
-=item B<generate_clearer_method>
-
-=item B<generate_reader_method>
-
-=item B<generate_writer_method>
-
-=back
-
-=over 4
-
-=item B<generate_accessor_method_inline>
-
-=item B<generate_predicate_method_inline>
-
-=item B<generate_clearer_method_inline>
-
-=item B<generate_reader_method_inline>
-
-=item B<generate_writer_method_inline>
-
-=back
 
 =item B<remove_accessors>
 

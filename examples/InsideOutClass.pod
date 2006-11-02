@@ -5,7 +5,7 @@ package # hide the package from PAUSE
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp         'confess';
 use Scalar::Util 'refaddr';
@@ -28,12 +28,27 @@ sub initialize_instance_slot {
     $_meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
+sub accessor_metaclass { 'InsideOutClass::Method::Accessor' }
+
+package # hide the package from PAUSE
+    InsideOutClass::Method::Accessor;
+    
+use strict;
+use warnings;
+
+our $VERSION = '0.01';
+
+use Carp         'confess';
+use Scalar::Util 'refaddr';
+
+use base 'Class::MOP::Method::Accessor';
+
 ## Method generation helpers
 
 sub generate_accessor_method {
-    my $self = shift;
-    my $meta_class = $self->associated_class;  
-    my $attr_name  = $self->name;
+    my $attr       = (shift)->associated_attribute;
+    my $meta_class = $attr->associated_class;  
+    my $attr_name  = $attr->name;
     return sub {
         my $meta_instance = $meta_class->get_meta_instance;
         $meta_instance->set_slot_value($_[0], $attr_name, $_[1]) if scalar(@_) == 2;
@@ -42,9 +57,9 @@ sub generate_accessor_method {
 }
 
 sub generate_reader_method {
-    my $self = shift;
-    my $meta_class = $self->associated_class;    
-    my $attr_name  = $self->name;
+    my $attr       = (shift)->associated_attribute;
+    my $meta_class = $attr->associated_class;  
+    my $attr_name  = $attr->name;
     return sub { 
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
         $meta_class->get_meta_instance
@@ -53,9 +68,9 @@ sub generate_reader_method {
 }
 
 sub generate_writer_method {
-    my $self = shift;
-    my $meta_class = $self->associated_class;    
-    my $attr_name  = $self->name;
+    my $attr       = (shift)->associated_attribute;
+    my $meta_class = $attr->associated_class;  
+    my $attr_name  = $attr->name;
     return sub { 
         $meta_class->get_meta_instance
                    ->set_slot_value($_[0], $attr_name, $_[1]);
@@ -63,9 +78,9 @@ sub generate_writer_method {
 }
 
 sub generate_predicate_method {
-    my $self = shift;
-    my $meta_class = $self->associated_class;   
-    my $attr_name  = $self->name;
+    my $attr       = (shift)->associated_attribute;
+    my $meta_class = $attr->associated_class;  
+    my $attr_name  = $attr->name;
     return sub { 
         defined $meta_class->get_meta_instance
                            ->get_slot_value($_[0], $attr_name) ? 1 : 0;

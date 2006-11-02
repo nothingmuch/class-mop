@@ -7,7 +7,7 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base 'Class::MOP::Attribute';
 
@@ -24,8 +24,22 @@ sub initialize_instance_slot {
 	}
 }
 
+sub accessor_metaclass { 'LazyClass::Method::Accessor' }
+
+package # hide the package from PAUSE
+    LazyClass::Method::Accessor;
+
+use strict;
+use warnings;
+
+use Carp 'confess';
+
+our $VERSION = '0.01';
+
+use base 'Class::MOP::Method::Accessor';
+
 sub generate_accessor_method {
-    my $attr = shift;
+    my $attr = (shift)->associated_attribute;
 
 	my $attr_name = $attr->name;
 	my $meta_instance = $attr->associated_class->get_meta_instance;
@@ -46,7 +60,7 @@ sub generate_accessor_method {
 }
 
 sub generate_reader_method {
-	my $attr = shift;
+    my $attr = (shift)->associated_attribute;
 
 	my $attr_name = $attr->name;
 	my $meta_instance = $attr->associated_class->get_meta_instance;
@@ -62,8 +76,6 @@ sub generate_reader_method {
 		$meta_instance->get_slot_value($_[0], $attr_name);
     };   
 }
-
-
 
 package # hide the package from PAUSE
     LazyClass::Instance;

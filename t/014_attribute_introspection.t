@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 53;
+use Test::More tests => 49;
 use Test::Exception;
 
 BEGIN {
@@ -37,21 +37,16 @@ BEGIN {
         slots
         get_value
         set_value
+        has_value
+        clear_value
         
         associated_class
-        attach_to_class detach_from_class
+        attach_to_class detach_from_class 
         
-        generate_accessor_method
-        generate_reader_method
-        generate_writer_method
-        generate_predicate_method
-        generate_clearer_method
+        accessor_metaclass
         
-        generate_accessor_method_inline
-        generate_reader_method_inline
-        generate_writer_method_inline
-        generate_predicate_method_inline    
-        generate_clearer_method_inline    
+        associated_methods
+        associate_method
         
         process_accessors
         install_accessors
@@ -69,7 +64,7 @@ BEGIN {
     
     my @attributes = qw(
         name accessor reader writer predicate clearer
-        init_arg default associated_class
+        init_arg default associated_class associated_methods
         );
 
     is_deeply(
