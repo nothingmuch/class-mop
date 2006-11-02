@@ -3,13 +3,19 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 29;
 
 BEGIN {
     use_ok('Class::MOP');
+    use_ok('Class::MOP::Package');    
+    use_ok('Class::MOP::Module');        
     use_ok('Class::MOP::Class');
+    use_ok('Class::MOP::Class::Immutable');    
     use_ok('Class::MOP::Attribute');
-    use_ok('Class::MOP::Method');            
+    use_ok('Class::MOP::Method');  
+    use_ok('Class::MOP::Method::Wrapped');                
+    use_ok('Class::MOP::Method::Accessor');                    
+    use_ok('Class::MOP::Method::Constructor');                    
     use_ok('Class::MOP::Instance');            
     use_ok('Class::MOP::Object');                
 }
@@ -18,10 +24,11 @@ BEGIN {
 
 my %METAS = (
     'Class::MOP::Attribute'           => Class::MOP::Attribute->meta, 
-    'Class::MOP::Method::Accessor'    => Class::MOP::Method::Accessor->meta,     
+    'Class::MOP::Method::Accessor'    => Class::MOP::Method::Accessor->meta,  
+    'Class::MOP::Method::Constructor' => Class::MOP::Method::Constructor->meta,         
     'Class::MOP::Package'             => Class::MOP::Package->meta, 
     'Class::MOP::Module'              => Class::MOP::Module->meta,     
-    'Class::MOP::Class'               => Class::MOP::Class->meta, 
+    'Class::MOP::Class'               => Class::MOP::Class->meta,      
     'Class::MOP::Method'              => Class::MOP::Method->meta,  
     'Class::MOP::Method::Wrapped'     => Class::MOP::Method::Wrapped->meta,      
     'Class::MOP::Instance'            => Class::MOP::Instance->meta,   
@@ -42,7 +49,8 @@ is_deeply(
         Class::MOP::Class->meta, 
         Class::MOP::Instance->meta,         
         Class::MOP::Method->meta,
-        Class::MOP::Method::Accessor->meta,        
+        Class::MOP::Method::Accessor->meta,
+        Class::MOP::Method::Constructor->meta,                        
         Class::MOP::Method::Wrapped->meta,
         Class::MOP::Module->meta, 
         Class::MOP::Object->meta,          
@@ -57,7 +65,8 @@ is_deeply(
         Class::MOP::Class
         Class::MOP::Instance
         Class::MOP::Method
-        Class::MOP::Method::Accessor         
+        Class::MOP::Method::Accessor 
+        Class::MOP::Method::Constructor        
         Class::MOP::Method::Wrapped
         Class::MOP::Module  
         Class::MOP::Object        
@@ -73,6 +82,7 @@ is_deeply(
        "Class::MOP::Instance-"            . $Class::MOP::Instance::VERSION            . "-cpan:STEVAN",
        "Class::MOP::Method-"              . $Class::MOP::Method::VERSION              . "-cpan:STEVAN",
        "Class::MOP::Method::Accessor-"    . $Class::MOP::Method::Accessor::VERSION    . "-cpan:STEVAN",                 
+       "Class::MOP::Method::Constructor-" . $Class::MOP::Method::Constructor::VERSION . "-cpan:STEVAN",                        
        "Class::MOP::Method::Wrapped-"     . $Class::MOP::Method::Wrapped::VERSION     . "-cpan:STEVAN",       
        "Class::MOP::Module-"              . $Class::MOP::Module::VERSION              . "-cpan:STEVAN",
        "Class::MOP::Object-"              . $Class::MOP::Object::VERSION              . "-cpan:STEVAN",
