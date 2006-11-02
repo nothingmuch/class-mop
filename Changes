@@ -5,6 +5,25 @@ Revision history for Perl extension Class-MOP.
       - added a few 'no warnings' lines to keep annoying 
         (and meaningless) warnings from chirping during 
         global destruction.
+        
+        
+    A   t/072_immutable_w_constructors.t
+    U   t/000_load.t
+    U   t/014_attribute_introspection.t
+    U   t/050_scala_style_mixin_composition.t
+    U   t/005_attributes.t
+    U   lib/Class/MOP.pm
+    G   lib/Class/MOP/Class.pm
+    A   lib/Class/MOP/Method
+    A   lib/Class/MOP/Method/Constructor.pm
+    A   lib/Class/MOP/Method/Accessor.pm
+    A   lib/Class/MOP/Method/Wrapped.pm
+    U   lib/Class/MOP/Class/Immutable.pm
+    U   lib/Class/MOP/Method.pm
+    U   lib/Class/MOP/Attribute.pm
+    U   examples/AttributesWithHistory.pod
+    U   examples/LazyClass.pod
+    U   examples/InsideOutClass.pod        
 
 0.35 Sat. Sept. 30, 2006
 
