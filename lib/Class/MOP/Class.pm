@@ -70,7 +70,6 @@ sub construct_class_instance {
                         : blessed($class))
                     : $class);
 
-    $class = blessed($class) || $class;
     # now create the metaclass
     my $meta;
     if ($class =~ /^Class::MOP::Class$/) {
