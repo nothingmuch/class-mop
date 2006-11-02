@@ -211,7 +211,7 @@ sub process_accessors {
         eval {
             $method = $self->accessor_metaclass->new(
                 attribute     => $self,
-                is_inline     => $inline_me,
+                as_inline     => $inline_me,
                 accessor_type => $type,
             );            
         };

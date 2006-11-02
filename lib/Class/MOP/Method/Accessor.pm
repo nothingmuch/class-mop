@@ -30,7 +30,7 @@ sub new {
         body          => undef,
         # specific to this subclass
         attribute     => $options{attribute},
-        is_inline     => ($options{is_inline} || 0),
+        as_inline     => ($options{as_inline} || 0),
         accessor_type => $options{accessor_type},        
     } => $class;
     
@@ -48,7 +48,7 @@ sub new {
 
 sub associated_attribute { (shift)->{attribute}     }
 sub accessor_type        { (shift)->{accessor_type} }
-sub is_inline            { (shift)->{is_inline}     }
+sub as_inline            { (shift)->{as_inline}     }
 
 ## factory 
 
@@ -59,7 +59,7 @@ sub intialize_body {
         'generate', 
         $self->accessor_type, 
         'method',
-        ($self->is_inline ? 'inline' : ())
+        ($self->as_inline ? 'inline' : ())
     );
     
     eval { $self->{body} = $self->$method_name() };
@@ -202,7 +202,7 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 
 =item B<accessor_type>
 
-=item B<is_inline>
+=item B<as_inline>
 
 =item B<associated_attribute>
 
@@ -231,6 +231,8 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 =head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
