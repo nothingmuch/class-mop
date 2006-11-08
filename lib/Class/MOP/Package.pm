@@ -28,7 +28,7 @@ sub initialize {
     # until we can bootstrap it
     no strict 'refs';
     return bless { 
-        '$:package'   => $package_name,
+        '$!package'   => $package_name,
         # NOTE:
         # because of issues with the Perl API 
         # to the typeglob in some versions, we 
@@ -36,7 +36,7 @@ sub initialize {
         # reference to the hash in the accessor. 
         # Ideally we could just store a ref and 
         # it would Just Work, but oh well :\
-        '%:namespace' => \undef,
+        '%!namespace' => \undef,
     } => $class;
 }
 
@@ -46,7 +46,7 @@ sub initialize {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name      { $_[0]->{'$:package'}   }
+sub name      { $_[0]->{'$!package'}   }
 sub namespace { 
     # NOTE:
     # because of issues with the Perl API 

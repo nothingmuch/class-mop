@@ -15,7 +15,7 @@ use Class::MOP;
 sub import {
     shift;
     my $metaclass;
-    if (!defined($_[0]) || $_[0] =~ /^\:(attribute|method|instance)_metaclass/) {
+    if (!defined($_[0]) || $_[0] =~ /^(attribute|method|instance)_metaclass/) {
         $metaclass = 'Class::MOP::Class';
     }
     else {
@@ -62,16 +62,16 @@ metaclass - a pragma for installing and using Class::MOP metaclasses
   # and custom attribute and method
   # metaclasses
   use metaclass 'MyMetaClass' => (
-      ':attribute_metaclass' => 'MyAttributeMetaClass',
-      ':method_metaclass'    => 'MyMethodMetaClass',    
+      'attribute_metaclass' => 'MyAttributeMetaClass',
+      'method_metaclass'    => 'MyMethodMetaClass',    
   );
 
   # ... or just specify custom attribute
   # and method classes, and Class::MOP::Class
   # is the assumed metaclass
   use metaclass (
-      ':attribute_metaclass' => 'MyAttributeMetaClass',
-      ':method_metaclass'    => 'MyMethodMetaClass',    
+      'attribute_metaclass' => 'MyAttributeMetaClass',
+      'method_metaclass'    => 'MyMethodMetaClass',    
   );
 
 =head1 DESCRIPTION

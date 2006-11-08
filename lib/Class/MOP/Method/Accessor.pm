@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
@@ -27,17 +27,17 @@ sub new {
         
     my $self = bless {
         # from our superclass
-        body          => undef,
+        '&!body'          => undef,
         # specific to this subclass
-        attribute     => $options{attribute},
-        as_inline     => ($options{as_inline} || 0),
-        accessor_type => $options{accessor_type},        
+        '$!attribute'     => $options{attribute},
+        '$!is_inline'     => ($options{is_inline} || 0),
+        '$!accessor_type' => $options{accessor_type},        
     } => $class;
     
     # we don't want this creating 
     # a cycle in the code, if not 
     # needed
-    weaken($self->{attribute});
+    weaken($self->{'$!attribute'});
     
     $self->intialize_body;
     
@@ -46,9 +46,9 @@ sub new {
 
 ## accessors
 
-sub associated_attribute { (shift)->{attribute}     }
-sub accessor_type        { (shift)->{accessor_type} }
-sub as_inline            { (shift)->{as_inline}     }
+sub associated_attribute { (shift)->{'$!attribute'}     }
+sub accessor_type        { (shift)->{'$!accessor_type'} }
+sub is_inline            { (shift)->{'$!is_inline'}     }
 
 ## factory 
 
@@ -59,10 +59,10 @@ sub intialize_body {
         'generate', 
         $self->accessor_type, 
         'method',
-        ($self->as_inline ? 'inline' : ())
+        ($self->is_inline ? 'inline' : ())
     );
     
-    eval { $self->{body} = $self->$method_name() };
+    eval { $self->{'&!body'} = $self->$method_name() };
     die $@ if $@;
 }
 
@@ -202,7 +202,7 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 
 =item B<accessor_type>
 
-=item B<as_inline>
+=item B<is_inline>
 
 =item B<associated_attribute>
 
@@ -231,8 +231,6 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 =head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
-
-Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

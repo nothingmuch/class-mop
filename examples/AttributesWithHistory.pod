@@ -12,7 +12,7 @@ use base 'Class::MOP::Attribute';
 # this is for an extra attribute constructor 
 # option, which is to be able to create a 
 # way for the class to access the history
-AttributesWithHistory->meta->add_attribute('history_accessor' => (
+AttributesWithHistory->meta->add_attribute('$!history_accessor' => (
     reader    => 'history_accessor',
     init_arg  => 'history_accessor',
     predicate => 'has_history_accessor',
@@ -20,7 +20,7 @@ AttributesWithHistory->meta->add_attribute('history_accessor' => (
 
 # this is a place to store the actual 
 # history of the attribute
-AttributesWithHistory->meta->add_attribute('_history' => (
+AttributesWithHistory->meta->add_attribute('$!_history' => (
     accessor => '_history',
     default  => sub { {} },
 ));

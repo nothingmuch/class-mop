@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.12';
+our $VERSION   = '0.14';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -45,20 +45,20 @@ sub new {
             if exists $options{default} && ref $options{default};      
             
     bless {
-        name      => $name,
-        accessor  => $options{accessor},
-        reader    => $options{reader},
-        writer    => $options{writer},
-        predicate => $options{predicate},
-        clearer   => $options{clearer},
-        init_arg  => $options{init_arg},
-        default   => $options{default},
+        '$!name'      => $name,
+        '$!accessor'  => $options{accessor},
+        '$!reader'    => $options{reader},
+        '$!writer'    => $options{writer},
+        '$!predicate' => $options{predicate},
+        '$!clearer'   => $options{clearer},
+        '$!init_arg'  => $options{init_arg},
+        '$!default'   => $options{default},
         # keep a weakened link to the 
         # class we are associated with
-        associated_class => undef,
+        '$!associated_class' => undef,
         # and a list of the methods 
         # associated with this attr
-        associated_methods => [],
+        '@!associated_methods' => [],
     } => $class;
 }
 
@@ -77,13 +77,13 @@ sub clone {
 
 sub initialize_instance_slot {
     my ($self, $meta_instance, $instance, $params) = @_;
-    my $init_arg = $self->{init_arg};
+    my $init_arg = $self->{'$!init_arg'};
     # try to fetch the init arg from the %params ...
     my $val;        
     $val = $params->{$init_arg} if exists $params->{$init_arg};
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
-    if (!defined $val && defined $self->{default}) {
+    if (!defined $val && defined $self->{'$!default'}) {
         $val = $self->default($instance);
     }
     $meta_instance->set_slot_value($instance, $self->name, $val);
@@ -93,31 +93,31 @@ sub initialize_instance_slot {
 # the next bunch of methods will get bootstrapped 
 # away in the Class::MOP bootstrapping section
 
-sub name { $_[0]->{name} }
+sub name { $_[0]->{'$!name'} }
 
-sub associated_class   { $_[0]->{associated_class}   }
-sub associated_methods { $_[0]->{associated_methods} }
+sub associated_class   { $_[0]->{'$!associated_class'}   }
+sub associated_methods { $_[0]->{'@!associated_methods'} }
 
-sub has_accessor  { defined($_[0]->{accessor})  ? 1 : 0 }
-sub has_reader    { defined($_[0]->{reader})    ? 1 : 0 }
-sub has_writer    { defined($_[0]->{writer})    ? 1 : 0 }
-sub has_predicate { defined($_[0]->{predicate}) ? 1 : 0 }
-sub has_clearer   { defined($_[0]->{clearer})   ? 1 : 0 }
-sub has_init_arg  { defined($_[0]->{init_arg})  ? 1 : 0 }
-sub has_default   { defined($_[0]->{default})   ? 1 : 0 }
+sub has_accessor  { defined($_[0]->{'$!accessor'})  ? 1 : 0 }
+sub has_reader    { defined($_[0]->{'$!reader'})    ? 1 : 0 }
+sub has_writer    { defined($_[0]->{'$!writer'})    ? 1 : 0 }
+sub has_predicate { defined($_[0]->{'$!predicate'}) ? 1 : 0 }
+sub has_clearer   { defined($_[0]->{'$!clearer'})   ? 1 : 0 }
+sub has_init_arg  { defined($_[0]->{'$!init_arg'})  ? 1 : 0 }
+sub has_default   { defined($_[0]->{'$!default'})   ? 1 : 0 }
 
-sub accessor  { $_[0]->{accessor}  } 
-sub reader    { $_[0]->{reader}    }
-sub writer    { $_[0]->{writer}    }
-sub predicate { $_[0]->{predicate} }
-sub clearer   { $_[0]->{clearer}   }
-sub init_arg  { $_[0]->{init_arg}  }
+sub accessor  { $_[0]->{'$!accessor'}  } 
+sub reader    { $_[0]->{'$!reader'}    }
+sub writer    { $_[0]->{'$!writer'}    }
+sub predicate { $_[0]->{'$!predicate'} }
+sub clearer   { $_[0]->{'$!clearer'}   }
+sub init_arg  { $_[0]->{'$!init_arg'}  }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
 sub is_default_a_coderef { 
-    ('CODE' eq (reftype($_[0]->{default}) || ''))    
+    ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))    
 }
 
 sub default { 
@@ -127,9 +127,9 @@ sub default {
         # we pass in the instance and default
         # can return a value based on that 
         # instance. Somewhat crude, but works.
-        return $self->{default}->($instance);
+        return $self->{'$!default'}->($instance);
     }           
-    $self->{default};
+    $self->{'$!default'};
 }
 
 # slots
@@ -142,19 +142,19 @@ sub attach_to_class {
     my ($self, $class) = @_;
     (blessed($class) && $class->isa('Class::MOP::Class'))
         || confess "You must pass a Class::MOP::Class instance (or a subclass)";
-    weaken($self->{associated_class} = $class);    
+    weaken($self->{'$!associated_class'} = $class);    
 }
 
 sub detach_from_class {
     my $self = shift;
-    $self->{associated_class} = undef;        
+    $self->{'$!associated_class'} = undef;        
 }
 
 # method association 
 
 sub associate_method {
     my ($self, $method) = @_;
-    push @{$self->{associated_methods}} => $method;
+    push @{$self->{'@!associated_methods'}} => $method;
 }
 
 ## Slot management
@@ -211,7 +211,7 @@ sub process_accessors {
         eval {
             $method = $self->accessor_metaclass->new(
                 attribute     => $self,
-                as_inline     => $inline_me,
+                is_inline     => $inline_me,
                 accessor_type => $type,
             );            
         };

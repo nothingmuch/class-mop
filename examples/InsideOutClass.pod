@@ -14,13 +14,13 @@ use base 'Class::MOP::Attribute';
 
 sub initialize_instance_slot {
     my ($self, $meta_instance, $instance, $params) = @_;
-    my $init_arg = $self->{init_arg};
+    my $init_arg = $self->init_arg;
     # try to fetch the init arg from the %params ...
     my $val;        
     $val = $params->{$init_arg} if exists $params->{$init_arg};
     # if nothing was in the %params, we can use the 
     # attribute's default value (if it has one)
-    if (!defined $val && defined $self->{default}) {
+    if (!defined $val && defined $self->default) {
         $val = $self->default($instance);
     }
     my $_meta_instance = $self->associated_class->get_meta_instance;
@@ -107,25 +107,25 @@ sub create_instance {
 
 sub get_slot_value {
 	my ($self, $instance, $slot_name) = @_;
-	$self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance};
+	$self->associated_metaclass->get_package_symbol('%' . $slot_name)->{refaddr $instance};
 }
 
 sub set_slot_value {
 	my ($self, $instance, $slot_name, $value) = @_;
-	$self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} = $value;
+	$self->associated_metaclass->get_package_symbol('%' . $slot_name)->{refaddr $instance} = $value;
 }
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
-    $self->{meta}->add_package_symbol(('%' . $slot_name) => {})
-        unless $self->{meta}->has_package_symbol('%' . $slot_name); 
-    $self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} = undef;
+    $self->associated_metaclass->add_package_symbol(('%' . $slot_name) => {})
+        unless $self->associated_metaclass->has_package_symbol('%' . $slot_name); 
+    $self->associated_metaclass->get_package_symbol('%' . $slot_name)->{refaddr $instance} = undef;
 }
 
 sub is_slot_initialized {
 	my ($self, $instance, $slot_name) = @_;
-	return 0 unless $self->{meta}->has_package_symbol('%' . $slot_name);
-	return exists $self->{meta}->get_package_symbol('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
+	return 0 unless $self->associated_metaclass->has_package_symbol('%' . $slot_name);
+	return exists $self->associated_metaclass->get_package_symbol('%' . $slot_name)->{refaddr $instance} ? 1 : 0;
 }
 
 1;

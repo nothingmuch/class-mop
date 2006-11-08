@@ -4,10 +4,12 @@ package Class::MOP::Class::Immutable;
 use strict;
 use warnings;
 
-use Carp         'confess';
-use Scalar::Util 'blessed', 'looks_like_number';
+use Class::MOP::Method::Constructor;
 
-our $VERSION   = '0.03';
+use Carp         'confess';
+use Scalar::Util 'blessed';
+
+our $VERSION   = '0.04';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Class';
@@ -39,19 +41,6 @@ for my $meth (qw(
     *{$meth} = sub {
         confess "Cannot call method '$meth' on an immutable instance";
     };
-}
-
-sub get_package_symbol {
-    my ($self, $variable) = @_;    
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
-    return *{$self->namespace->{$name}}{$type}
-        if exists $self->namespace->{$name};
-    # NOTE: 
-    # we have to do this here in order to preserve 
-    # perl's autovivification of variables. However 
-    # we do cut off direct access to add_package_symbol
-    # as shown above.
-    $self->Class::MOP::Package::add_package_symbol($variable);
 }
 
 # NOTE:
@@ -88,78 +77,28 @@ sub make_metaclass_immutable {
           
     if ($options{inline_accessors}) {
         foreach my $attr_name ($metaclass->get_attribute_list) {
-            my $attr = $metaclass->get_attribute($attr_name);
-            $attr->install_accessors(1); # inline the accessors
+            # inline the accessors
+            $metaclass->get_attribute($attr_name)
+                      ->install_accessors(1); 
         }      
     }
 
     if ($options{inline_constructor}) {       
+        my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
         $metaclass->add_method(
             $options{constructor_name},
-            $class->_generate_inline_constructor(
-                \%options, 
-                $meta_instance, 
-                $metaclass->{'___compute_all_applicable_attributes'}
-            )            
+            $constructor_class->new(
+                options       => \%options, 
+                meta_instance => $meta_instance, 
+                attributes    => $metaclass->{'___compute_all_applicable_attributes'}                
+            )
         );
     }
     
     # now cache the method map ...
-    $metaclass->{'___method_map'} = $metaclass->get_method_map;
+    $metaclass->{'___get_method_map'} = $metaclass->get_method_map;
           
     bless $metaclass => $class;
-}
-
-sub _generate_inline_constructor {
-    my ($class, $options, $meta_instance, $attrs) = @_;
-    # TODO:
-    # the %options should also include a both 
-    # a call 'initializer' and call 'SUPER::' 
-    # options, which should cover approx 90% 
-    # of the possible use cases (even if it 
-    # requires some adaption on the part of 
-    # the author, after all, nothing is free)
-    my $source = 'sub {';
-    $source .= "\n" . 'my ($class, %params) = @_;';
-    $source .= "\n" . 'my $instance = ' . $meta_instance->inline_create_instance('$class');
-    $source .= ";\n" . (join ";\n" => map { 
-        $class->_generate_slot_initializer($meta_instance, $attrs, $_) 
-    } 0 .. (@$attrs - 1));
-    $source .= ";\n" . 'return $instance';
-    $source .= ";\n" . '}'; 
-    warn $source if $options->{debug};   
-    my $code = eval $source;
-    confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
-    return $code;
-}
-
-sub _generate_slot_initializer {
-    my ($class, $meta_instance, $attrs, $index) = @_;
-    my $attr = $attrs->[$index];
-    my $default;
-    if ($attr->has_default) {
-        # NOTE:
-        # default values can either be CODE refs
-        # in which case we need to call them. Or 
-        # they can be scalars (strings/numbers)
-        # in which case we can just deal with them
-        # in the code we eval.
-        if ($attr->is_default_a_coderef) {
-            $default = '$attrs->[' . $index . ']->default($instance)';
-        }
-        else {
-            $default = $attrs->[$index]->default;
-            # make sure to quote strings ...
-            unless (looks_like_number($default)) {
-                $default = "'$default'";
-            }
-        }
-    }
-    $meta_instance->inline_set_slot_value(
-        '$instance', 
-        ("'" . $attr->name . "'"), 
-        ('$params{\'' . $attr->init_arg . '\'}' . (defined $default ? (' || ' . $default) : ''))
-    )    
 }
 
 # cached methods
@@ -168,7 +107,7 @@ sub get_meta_instance                 {   (shift)->{'___get_meta_instance'}     
 sub class_precedence_list             { @{(shift)->{'___class_precedence_list'}}             }
 sub compute_all_applicable_attributes { @{(shift)->{'___compute_all_applicable_attributes'}} }
 sub get_mutable_metaclass_name        {   (shift)->{'___original_class'}                     }
-sub get_method_map                    {   (shift)->{'___method_map'}                         }
+sub get_method_map                    {   (shift)->{'___get_method_map'}                     }
 
 1;
 
@@ -288,11 +227,6 @@ to this method, which
 =item B<superclasses>
 
 This method becomes read-only in an immutable class.
-
-=item B<get_package_symbol>
-
-This method must handle package variable autovivification 
-correctly, while still disallowing C<add_package_symbol>.
 
 =back
 

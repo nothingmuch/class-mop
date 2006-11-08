@@ -18,7 +18,7 @@ BEGIN {
     use strict;
     use warnings;    
     use metaclass (
-        ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
+        'instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     
     Foo->meta->add_attribute('foo' => (
@@ -54,7 +54,7 @@ BEGIN {
     use strict;
     use warnings;
     use metaclass (        
-        ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
+        'instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
     
     Baz->meta->add_attribute('bling' => (
