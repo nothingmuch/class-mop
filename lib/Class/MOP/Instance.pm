@@ -244,6 +244,8 @@ we will add then when we need them basically.
 
 =over 4
 
+=item B<associated_metaclass>
+
 =item B<get_all_slots>
 
 This will return the current list of slots based on what was 

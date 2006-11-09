@@ -49,7 +49,7 @@ my $instance;
     ok($anon_class->has_method('foo'), '... we have a foo method now');  
 
     $instance = $anon_class->new_object();
-    isa_ok($instance, $anon_class->name);
+    isa_ok($instance, $anon_class->name);  
     isa_ok($instance, 'Foo');    
 
     is($instance->foo, '__ANON__::foo', '... got the right return value of our foo method');

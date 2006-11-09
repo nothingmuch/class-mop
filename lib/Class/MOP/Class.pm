@@ -4,6 +4,7 @@ package Class::MOP::Class;
 use strict;
 use warnings;
 
+use Class::MOP::Immutable;
 use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 
@@ -729,14 +730,17 @@ sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
 {
-    use Class::MOP::Immutable;
-    
-    my $IMMUTABLE_META;
-
+    # NOTE:
+    # the immutable version of a 
+    # particular metaclass is 
+    # really class-level data so 
+    # we don't want to regenerate 
+    # it any more than we need to
+    my $IMMUTABLE_METACLASS;
     sub make_immutable {
         my ($self) = @_;
         
-        $IMMUTABLE_META ||= Class::MOP::Immutable->new($self->meta, {
+        $IMMUTABLE_METACLASS ||= Class::MOP::Immutable->new($self, {
             read_only   => [qw/superclasses/],
             cannot_call => [qw/
                 add_method
@@ -753,9 +757,9 @@ sub is_immutable { 0 }
                 get_meta_instance                 => 'SCALAR',     
                 get_method_map                    => 'SCALAR',     
             }
-        })->create_immutable_metaclass;
-                
-        $IMMUTABLE_META->make_metaclass_immutable(@_);
+        });   
+        
+        $IMMUTABLE_METACLASS->make_metaclass_immutable(@_)     
     }
 }
 

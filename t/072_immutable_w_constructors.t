@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 76;
+use Test::More tests => 73;
 use Test::Exception;
 
 BEGIN {
@@ -72,7 +72,6 @@ BEGIN {
     } '... changed Foo to be immutable';
 
     ok($meta->is_immutable, '... our class is now immutable');        
-    isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');    
     
     # they made a constructor for us :)
@@ -128,7 +127,6 @@ BEGIN {
     } '... changed Bar to be immutable';
 
     ok($meta->is_immutable, '... our class is now immutable');        
-    isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');    
     
     # they made a constructor for us :)
@@ -198,7 +196,6 @@ BEGIN {
     } '... changed Bar to be immutable';
 
     ok($meta->is_immutable, '... our class is now immutable');        
-    isa_ok($meta, 'Class::MOP::Class::Immutable');
     isa_ok($meta, 'Class::MOP::Class');    
     
     ok(!Baz->meta->has_method('new'), '... no constructor was made');
