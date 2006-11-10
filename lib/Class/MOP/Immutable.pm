@@ -85,16 +85,16 @@ sub make_metaclass_immutable {
     if ($options{inline_constructor}) {       
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
         
-        my $constructor = $constructor_class->new(
-            options       => \%options, 
-            meta_instance => $metaclass->get_meta_instance, 
-            attributes    => [ $metaclass->compute_all_applicable_attributes ]
-        );
-        
         $metaclass->add_method(
             $options{constructor_name},
-            $constructor
-        );
+            $constructor_class->new(
+                metaclass => $metaclass,
+                options   => \%options, 
+                # deprecate them ...
+                meta_instance => $metaclass->get_meta_instance, 
+                attributes    => [ $metaclass->compute_all_applicable_attributes ]            
+            )
+        ) unless $metaclass->has_method($options{constructor_name});
     }    
     
     my $memoized_methods = $self->options->{memoize};
@@ -139,7 +139,7 @@ sub create_methods_for_immutable_metaclass {
     
     foreach my $cannot_call_method (@{$self->options->{cannot_call}}) {
         $methods{$cannot_call_method} = sub {
-            confess "This method cannot be called on an immutable instance";
+            confess "This method ($cannot_call_method) cannot be called on an immutable instance";
         };
     }  
     
