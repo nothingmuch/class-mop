@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.13';
+our $VERSION   = '0.14';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -122,7 +122,7 @@ sub is_default_a_coderef {
 
 sub default { 
     my ($self, $instance) = @_;
-    if ($instance && $self->is_default_a_coderef) {
+    if (defined $instance && $self->is_default_a_coderef) {
         # if the default is a CODE ref, then 
         # we pass in the instance and default
         # can return a value based on that 
