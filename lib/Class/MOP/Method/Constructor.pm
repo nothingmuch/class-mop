@@ -18,22 +18,23 @@ sub new {
         
     (exists $options{options} && ref $options{options} eq 'HASH')
         || confess "You must pass a hash of options"; 
-        
-    (blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
-        || confess "You must pass a metaclass instance";
     
     my $self = bless {
         # from our superclass
         '&!body'          => undef,
         # specific to this subclass
-        '$!metaclass'     => $options{metaclass},
-        '%!options'       => $options{options},        
+        '%!options'       => $options{options},
+        '$!meta_instance' => $options{metaclass}->get_meta_instance,
+        '@!attributes'    => [ $options{metaclass}->compute_all_applicable_attributes ], 
+        # ...
+        '$!associated_metaclass' => $options{metaclass},
     } => $class;
 
     # we don't want this creating 
     # a cycle in the code, if not 
     # needed
-    weaken($self->{'$!metaclass'});
+#    weaken($self->{'$!meta_instance'});
+    weaken($self->{'$!associated_metaclass'});    
 
     $self->intialize_body;
 
@@ -50,9 +51,11 @@ sub is_inline { 1 }
 
 ## accessors 
 
-sub options       {   (shift)->{'%!options'}                      }
-sub meta_instance {   (shift)->{'$!metaclass'}->get_meta_instance }
-sub attributes    { [ (shift)->{'$!metaclass'}->compute_all_applicable_attributes ] }
+sub options       { (shift)->{'%!options'}       }
+sub meta_instance { (shift)->{'$!meta_instance'} }
+sub attributes    { (shift)->{'@!attributes'}    }
+
+sub associated_metaclass { (shift)->{'$!associated_metaclass'} }
 
 ## method
 
@@ -147,6 +150,8 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 =item B<attributes>
 
 =item B<meta_instance>
+
+=item B<associated_metaclass>
 
 =item B<options>
 

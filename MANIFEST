@@ -1,7 +1,7 @@
 Build.PL
 Changes
-META.yml
 Makefile.PL
+META.yml
 MANIFEST
 MANIFEST.SKIP
 README
@@ -17,12 +17,12 @@ lib/metaclass.pm
 lib/Class/MOP.pm
 lib/Class/MOP/Attribute.pm
 lib/Class/MOP/Class.pm
+lib/Class/MOP/Immutable.pm
 lib/Class/MOP/Instance.pm
 lib/Class/MOP/Method.pm
 lib/Class/MOP/Module.pm
 lib/Class/MOP/Object.pm
 lib/Class/MOP/Package.pm
-lib/Class/MOP/Class/Immutable.pm
 lib/Class/MOP/Method/Accessor.pm
 lib/Class/MOP/Method/Constructor.pm
 lib/Class/MOP/Method/Wrapped.pm

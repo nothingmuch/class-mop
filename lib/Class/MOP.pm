@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Immutable;
 
-our $VERSION   = '0.36';
+our $VERSION   = '0.37_001';
 our $AUTHORITY = 'cpan:STEVAN';
 
 {
@@ -438,8 +438,11 @@ Class::MOP::Method::Constructor->meta->add_attribute(
 );
 
 Class::MOP::Method::Constructor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!metaclass' => (
+    Class::MOP::Attribute->new('$!associated_metaclass' => (
         init_arg => 'metaclass',
+        reader   => { 
+            'associated_metaclass' => \&Class::MOP::Method::Constructor::associated_metaclass 
+        },        
     ))    
 );
 
