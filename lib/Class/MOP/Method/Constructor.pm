@@ -19,40 +19,40 @@ sub new {
     (exists $options{options} && ref $options{options} eq 'HASH')
         || confess "You must pass a hash of options"; 
         
-    (blessed $options{meta_instance} && $options{meta_instance}->isa('Class::MOP::Instance'))
-        || confess "You must supply a meta-instance";        
-    
-    (exists $options{attributes} && ref $options{attributes} eq 'ARRAY')
-        || confess "You must pass an array of options";        
-        
-    (blessed($_) && $_->isa('Class::MOP::Attribute'))
-        || confess "You must supply a list of attributes which is a 'Class::MOP::Attribute' instance"
-            for @{$options{attributes}};    
+    (blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
+        || confess "You must pass a metaclass instance";
     
     my $self = bless {
         # from our superclass
         '&!body'          => undef,
         # specific to this subclass
-        '%!options'       => $options{options},
-        '$!meta_instance' => $options{meta_instance},
-        '@!attributes'    => $options{attributes},        
+        '$!metaclass'     => $options{metaclass},
+        '%!options'       => $options{options},        
     } => $class;
 
     # we don't want this creating 
     # a cycle in the code, if not 
     # needed
-    weaken($self->{'$!meta_instance'});
+    weaken($self->{'$!metaclass'});
 
     $self->intialize_body;
 
     return $self;    
 }
 
+## predicates
+
+# NOTE:
+# if it is blessed into this class, 
+# then it is always inlined, that is 
+# pretty much what this class is for.
+sub is_inline { 1 }
+
 ## accessors 
 
-sub options       { (shift)->{'%!options'}       }
-sub meta_instance { (shift)->{'$!meta_instance'} }
-sub attributes    { (shift)->{'@!attributes'}    }
+sub options       {   (shift)->{'%!options'}                      }
+sub meta_instance {   (shift)->{'$!metaclass'}->get_meta_instance }
+sub attributes    { [ (shift)->{'$!metaclass'}->compute_all_applicable_attributes ] }
 
 ## method
 
@@ -141,6 +141,8 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 =over 4
 
 =item B<new>
+
+=item B<is_inline>
 
 =item B<attributes>
 

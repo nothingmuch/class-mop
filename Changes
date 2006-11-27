@@ -1,5 +1,31 @@
 Revision history for Perl extension Class-MOP.
 
+0.37_001
+    
+    ~~ GLOBAL CHANGES ~~
+    - All attribute names are now consistent and follow Perl 6 
+      style (prefixed with the sigil, and ! as the twigil for 
+      private attrs). This should not affect any code, unless 
+      you broke encapsulation, in which case, it is your problem 
+      anyway.
+      
+    !! Class::MOP::Class::Immutable has been removed
+    
+    * Class::MOP::Method::Constructor
+      - this has been moved out of Class::MOP::Class::Immutable 
+        and is a proper subclass of Class::MOP::Method now.
+        
+    * Class::MOP::Class
+      - this module now uses Class::MOP::Immutable for the 
+        immutable transformation instead of 
+        Class::MOP::Class::Immutable.
+        
+    + Class::MOP::Immutable 
+      - this module now controls the transformation from a mutable 
+        to an immutable version of the class. Docs for this will 
+        be coming eventually.
+    
+
 0.36 Sun. Nov. 5, 2006
     * Class::MOP::Class
       - added a few 'no warnings' lines to keep annoying 

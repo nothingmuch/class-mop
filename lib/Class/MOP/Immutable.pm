@@ -16,9 +16,9 @@ sub new {
     my ($class, $metaclass, $options) = @_;
     
     my $self = bless {
-        metaclass           => $metaclass,
-        options             => $options,
-        immutable_metaclass => undef,
+        '$!metaclass'           => $metaclass,
+        '%!options'             => $options,
+        '$!immutable_metaclass' => undef,
     } => $class;
     
     # NOTE:
@@ -29,9 +29,9 @@ sub new {
     return $self;
 }
 
-sub immutable_metaclass { (shift)->{immutable_metaclass} }
-sub metaclass           { (shift)->{metaclass}           }
-sub options             { (shift)->{options}             }
+sub immutable_metaclass { (shift)->{'$!immutable_metaclass'} }
+sub metaclass           { (shift)->{'$!metaclass'}           }
+sub options             { (shift)->{'%!options'}             }
 
 sub create_immutable_metaclass {
     my $self = shift;
@@ -41,7 +41,7 @@ sub create_immutable_metaclass {
     # metaclass is just a anon-class
     # which shadows the methods 
     # appropriately
-    $self->{immutable_metaclass} = Class::MOP::Class->create_anon_class(
+    $self->{'$!immutable_metaclass'} = Class::MOP::Class->create_anon_class(
         superclasses => [ blessed($self->metaclass) ],
         methods      => $self->create_methods_for_immutable_metaclass,
     ); 
@@ -71,6 +71,7 @@ sub make_metaclass_immutable {
     
     $options{inline_accessors}   = 1     unless exists $options{inline_accessors};
     $options{inline_constructor} = 1     unless exists $options{inline_constructor};
+    $options{inline_destructor}  = 0     unless exists $options{inline_destructor};    
     $options{constructor_name}   = 'new' unless exists $options{constructor_name};
     $options{debug}              = 0     unless exists $options{debug};    
     
@@ -88,13 +89,31 @@ sub make_metaclass_immutable {
         $metaclass->add_method(
             $options{constructor_name},
             $constructor_class->new(
-                metaclass => $metaclass,
-                options   => \%options, 
-                # deprecate them ...
-                meta_instance => $metaclass->get_meta_instance, 
-                attributes    => [ $metaclass->compute_all_applicable_attributes ]            
+                options   => \%options,           
+                metaclass => $metaclass,                
             )
         ) unless $metaclass->has_method($options{constructor_name});
+    }    
+    
+    if ($options{inline_destructor}) {       
+        (exists $options{destructor_class})
+            || confess "The 'inline_destructor' option is present, but "
+                     . "no destructor class was specified";
+        
+        my $destructor_class = $options{destructor_class};
+        
+        my $destructor = $destructor_class->new(
+            options   => \%options,
+            metaclass => $metaclass,
+        );
+        
+        $metaclass->add_method('DESTROY' => $destructor) 
+            # NOTE:
+            # we allow the destructor to determine 
+            # if it is needed or not, it can perform
+            # all sorts of checks because it has the 
+            # metaclass instance 
+            if $destructor->is_needed;
     }    
     
     my $memoized_methods = $self->options->{memoize};

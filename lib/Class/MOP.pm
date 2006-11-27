@@ -438,20 +438,8 @@ Class::MOP::Method::Constructor->meta->add_attribute(
 );
 
 Class::MOP::Method::Constructor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!meta_instance' => (
-        init_arg => 'meta_instance',
-        reader   => { 
-            'meta_instance' => \&Class::MOP::Method::Constructor::meta_instance 
-        },
-    ))    
-);
-
-Class::MOP::Method::Constructor->meta->add_attribute(
-    Class::MOP::Attribute->new('@!attributes' => (
-        init_arg => 'attributes',
-        reader   => { 
-            'attributes' => \&Class::MOP::Method::Constructor::attributes 
-        },
+    Class::MOP::Attribute->new('$!metaclass' => (
+        init_arg => 'metaclass',
     ))    
 );
 
