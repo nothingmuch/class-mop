@@ -8,7 +8,7 @@ use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');
-    use_ok('Class::MOP::Class::Immutable');    
+    use_ok('Class::MOP::Immutable');    
 }
 
 {

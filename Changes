@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.37_002
+    * /t 
+      - bad name in a test, causing meaningless failuress. 
+        No other changes.
+
 0.37_001
     
     ~~ GLOBAL CHANGES ~~
