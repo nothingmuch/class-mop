@@ -1228,13 +1228,13 @@ their own. See L<Class::MOP::Attribute> for more details.
 
 =item B<get_attribute_map>
 
-=item B<add_attribute ($attribute_name, $attribute_meta_object)>
+=item B<add_attribute ($attribute_meta_object | $attribute_name, %attribute_spec)>
 
-This stores a C<$attribute_meta_object> in the B<Class::MOP::Class> 
-instance associated with the given class, and associates it with 
-the C<$attribute_name>. Unlike methods, attributes within the MOP 
-are stored as meta-information only. They will be used later to 
-construct instances from (see C<construct_instance> above).
+This stores the C<$attribute_meta_object> (or creates one from the
+C<$attribute_name> and C<%attribute_spec>) in the B<Class::MOP::Class> 
+instance associated with the given class. Unlike methods, attributes 
+within the MOP are stored as meta-information only. They will be used 
+later to construct instances from (see C<construct_instance> above).
 More details about the attribute meta-objects can be found in the 
 L<Class::MOP::Attribute> or the L<Class::MOP/The Attribute protocol>
 section.
