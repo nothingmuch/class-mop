@@ -10,7 +10,7 @@ BEGIN {
     use_ok('Class::MOP::Package');    
     use_ok('Class::MOP::Module');        
     use_ok('Class::MOP::Class');
-    use_ok('Class::MOP::Class::Immutable');    
+    use_ok('Class::MOP::Immutable');    
     use_ok('Class::MOP::Attribute');
     use_ok('Class::MOP::Method');  
     use_ok('Class::MOP::Method::Wrapped');                
@@ -22,6 +22,8 @@ BEGIN {
 
 # make sure we are tracking metaclasses correctly
 
+my $CLASS_MOP_CLASS_IMMUTABLE_CLASS = 'Class::MOP::Class::__ANON__::SERIAL::1';
+
 my %METAS = (
     'Class::MOP::Attribute'           => Class::MOP::Attribute->meta, 
     'Class::MOP::Method::Accessor'    => Class::MOP::Method::Accessor->meta,  
@@ -32,14 +34,17 @@ my %METAS = (
     'Class::MOP::Method'              => Class::MOP::Method->meta,  
     'Class::MOP::Method::Wrapped'     => Class::MOP::Method::Wrapped->meta,      
     'Class::MOP::Instance'            => Class::MOP::Instance->meta,   
-    'Class::MOP::Object'              => Class::MOP::Object->meta,          
+    'Class::MOP::Object'              => Class::MOP::Object->meta,  
 );
 
 ok($_->is_immutable(), '... ' . $_->name . ' is immutable') for values %METAS;
 
 is_deeply(
     { Class::MOP::get_all_metaclasses },
-    \%METAS,
+    {
+        %METAS,
+        $CLASS_MOP_CLASS_IMMUTABLE_CLASS => $CLASS_MOP_CLASS_IMMUTABLE_CLASS->meta
+    },
     '... got all the metaclasses');
 
 is_deeply(
@@ -47,6 +52,7 @@ is_deeply(
     [ 
         Class::MOP::Attribute->meta, 
         Class::MOP::Class->meta, 
+        $CLASS_MOP_CLASS_IMMUTABLE_CLASS->meta,         
         Class::MOP::Instance->meta,         
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
@@ -54,13 +60,13 @@ is_deeply(
         Class::MOP::Method::Wrapped->meta,
         Class::MOP::Module->meta, 
         Class::MOP::Object->meta,          
-        Class::MOP::Package->meta,              
+        Class::MOP::Package->meta,             
     ],
     '... got all the metaclass instances');
 
 is_deeply(
     [ sort { $a cmp $b } Class::MOP::get_all_metaclass_names() ],
-    [ qw/
+    [ sort qw/
         Class::MOP::Attribute      
         Class::MOP::Class
         Class::MOP::Instance
@@ -71,7 +77,7 @@ is_deeply(
         Class::MOP::Module  
         Class::MOP::Object        
         Class::MOP::Package                      
-    / ],
+    /,  $CLASS_MOP_CLASS_IMMUTABLE_CLASS  ],
     '... got all the metaclass names');
     
 is_deeply(
@@ -79,6 +85,7 @@ is_deeply(
     [ 
        "Class::MOP::Attribute-"           . $Class::MOP::Attribute::VERSION           . "-cpan:STEVAN",  
        "Class::MOP::Class-"               . $Class::MOP::Class::VERSION               . "-cpan:STEVAN",
+       $CLASS_MOP_CLASS_IMMUTABLE_CLASS,
        "Class::MOP::Instance-"            . $Class::MOP::Instance::VERSION            . "-cpan:STEVAN",
        "Class::MOP::Method-"              . $Class::MOP::Method::VERSION              . "-cpan:STEVAN",
        "Class::MOP::Method::Accessor-"    . $Class::MOP::Method::Accessor::VERSION    . "-cpan:STEVAN",                 

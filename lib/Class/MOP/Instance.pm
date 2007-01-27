@@ -17,7 +17,7 @@ sub meta {
 sub new { 
     my ($class, $meta, @attrs) = @_;
     my @slots = map { $_->slots } @attrs;
-    bless {
+    my $instance = bless {
         # NOTE:
         # I am not sure that it makes
         # sense to pass in the meta
@@ -28,10 +28,16 @@ sub new {
         # which is *probably* a safe
         # assumption,.. but you can 
         # never tell <:)
-        meta  => $meta,
-        slots => { map { $_ => undef } @slots },
+        '$!meta'  => $meta,
+        '@!slots' => { map { $_ => undef } @slots },
     } => $class; 
+    
+    weaken($instance->{'$!meta'});
+    
+    return $instance;
 }
+
+sub associated_metaclass { (shift)->{'$!meta'} }
 
 sub create_instance {
     my $self = shift;
@@ -40,7 +46,7 @@ sub create_instance {
 
 sub bless_instance_structure {
     my ($self, $instance_structure) = @_;
-    bless $instance_structure, $self->{meta}->name;
+    bless $instance_structure, $self->associated_metaclass->name;
 }
 
 sub clone_instance {
@@ -52,12 +58,12 @@ sub clone_instance {
 
 sub get_all_slots {
     my $self = shift;
-    return keys %{$self->{slots}};
+    return keys %{$self->{'@!slots'}};
 }
 
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{slots}->{$slot_name} ? 1 : 0;
+    exists $self->{'@!slots'}->{$slot_name} ? 1 : 0;
 }
 
 # operations on created instances
@@ -237,6 +243,8 @@ NOTE: There might be more methods added to this part of the API,
 we will add then when we need them basically.
 
 =over 4
+
+=item B<associated_metaclass>
 
 =item B<get_all_slots>
 

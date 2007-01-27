@@ -18,41 +18,44 @@ sub new {
         
     (exists $options{options} && ref $options{options} eq 'HASH')
         || confess "You must pass a hash of options"; 
-        
-    (blessed $options{meta_instance} && $options{meta_instance}->isa('Class::MOP::Instance'))
-        || confess "You must supply a meta-instance";        
-    
-    (exists $options{attributes} && ref $options{attributes} eq 'ARRAY')
-        || confess "You must pass an array of options";        
-        
-    (blessed($_) && $_->isa('Class::MOP::Attribute'))
-        || confess "You must supply a list of attributes which is a 'Class::MOP::Attribute' instance"
-            for @{$options{attributes}};    
     
     my $self = bless {
         # from our superclass
-        body          => undef,
+        '&!body'          => undef,
         # specific to this subclass
-        options       => $options{options},
-        meta_instance => $options{meta_instance},
-        attributes    => $options{attributes},        
+        '%!options'       => $options{options},
+        '$!meta_instance' => $options{metaclass}->get_meta_instance,
+        '@!attributes'    => [ $options{metaclass}->compute_all_applicable_attributes ], 
+        # ...
+        '$!associated_metaclass' => $options{metaclass},
     } => $class;
 
     # we don't want this creating 
     # a cycle in the code, if not 
     # needed
-    weaken($self->{meta_instance});
+#    weaken($self->{'$!meta_instance'});
+    weaken($self->{'$!associated_metaclass'});    
 
     $self->intialize_body;
 
     return $self;    
 }
 
+## predicates
+
+# NOTE:
+# if it is blessed into this class, 
+# then it is always inlined, that is 
+# pretty much what this class is for.
+sub is_inline { 1 }
+
 ## accessors 
 
-sub options       { (shift)->{options}       }
-sub meta_instance { (shift)->{meta_instance} }
-sub attributes    { (shift)->{attributes}    }
+sub options       { (shift)->{'%!options'}       }
+sub meta_instance { (shift)->{'$!meta_instance'} }
+sub attributes    { (shift)->{'@!attributes'}    }
+
+sub associated_metaclass { (shift)->{'$!associated_metaclass'} }
 
 ## method
 
@@ -85,7 +88,7 @@ sub intialize_body {
         $code = eval $source;
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
     }
-    $self->{body} = $code;
+    $self->{'&!body'} = $code;
 }
 
 sub _generate_slot_initializer {
@@ -142,9 +145,13 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 =item B<new>
 
+=item B<is_inline>
+
 =item B<attributes>
 
 =item B<meta_instance>
+
+=item B<associated_metaclass>
 
 =item B<options>
 

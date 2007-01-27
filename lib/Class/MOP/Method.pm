@@ -16,7 +16,7 @@ use base 'Class::MOP::Object';
 # NOTE:
 # if poked in the right way, 
 # they should act like CODE refs.
-use overload '&{}' => sub { $_[0]->{body} }, fallback => 1;
+use overload '&{}' => sub { $_[0]->body }, fallback => 1;
 
 # introspection
 
@@ -33,13 +33,13 @@ sub wrap {
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
     bless { 
-        body => $code 
+        '&!body' => $code 
     } => blessed($class) || $class;
 }
 
 ## accessors
 
-sub body { (shift)->{body} }
+sub body { (shift)->{'&!body'} }
 
 # TODO - add associated_class
 
@@ -51,7 +51,7 @@ sub body { (shift)->{body} }
 # This gets the package stash name 
 # associated with the actual CODE-ref
 sub package_name { 
-	my $code = (shift)->{body};
+	my $code = (shift)->body;
 	svref_2object($code)->GV->STASH->NAME;
 }
 
@@ -61,7 +61,7 @@ sub package_name {
 # with. This gets the name associated
 # with the actual CODE-ref
 sub name { 
-	my $code = (shift)->{body};
+	my $code = (shift)->body;
 	svref_2object($code)->GV->NAME;
 }
 

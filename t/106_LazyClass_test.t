@@ -15,13 +15,13 @@ BEGIN {
     package BinaryTree;
     
     use metaclass (
-        ':attribute_metaclass' => 'LazyClass::Attribute',
-        ':instance_metaclass'  => 'LazyClass::Instance',        
+        'attribute_metaclass' => 'LazyClass::Attribute',
+        'instance_metaclass'  => 'LazyClass::Instance',        
     );
 
     BinaryTree->meta->add_attribute('$:node' => (
         accessor => 'node',
-        init_arg => ':node'
+        init_arg => 'node'
     ));
     
     BinaryTree->meta->add_attribute('$:left' => (
@@ -40,7 +40,7 @@ BEGIN {
     }
 }
 
-my $root = BinaryTree->new(':node' => 0);
+my $root = BinaryTree->new('node' => 0);
 isa_ok($root, 'BinaryTree');
 
 ok(exists($root->{'$:node'}), '... node attribute has been initialized yet');

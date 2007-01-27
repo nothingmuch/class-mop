@@ -4,6 +4,7 @@ package Class::MOP::Class;
 use strict;
 use warnings;
 
+use Class::MOP::Immutable;
 use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 
@@ -28,7 +29,7 @@ sub initialize {
     my $package_name = shift;
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";    
-    $class->construct_class_instance(':package' => $package_name, @_);
+    $class->construct_class_instance('package' => $package_name, @_);
 }
 
 sub reinitialize {
@@ -37,7 +38,7 @@ sub reinitialize {
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";    
     Class::MOP::remove_metaclass_by_name($package_name);
-    $class->construct_class_instance(':package' => $package_name, @_);
+    $class->construct_class_instance('package' => $package_name, @_);
 }       
     
 # NOTE: (meta-circularity) 
@@ -49,7 +50,7 @@ sub reinitialize {
 sub construct_class_instance {
     my $class        = shift;
     my %options      = @_;
-    my $package_name = $options{':package'};
+    my $package_name = $options{'package'};
     (defined $package_name && $package_name)
         || confess "You must pass a package name";  
     # NOTE:
@@ -76,7 +77,7 @@ sub construct_class_instance {
         no strict 'refs';                
         $meta = bless { 
             # inherited from Class::MOP::Package
-            '$:package'             => $package_name, 
+            '$!package'             => $package_name, 
             
             # NOTE:
             # since the following attributes will 
@@ -86,17 +87,18 @@ sub construct_class_instance {
             # listed here for reference, because they
             # should not actually have a value associated 
             # with the slot.
-            '%:namespace'           => \undef,                
+            '%!namespace'           => \undef,                
             # inherited from Class::MOP::Module
-            '$:version'             => \undef,
-            '$:authority'           => \undef,
+            '$!version'             => \undef,
+            '$!authority'           => \undef,
             # defined in Class::MOP::Class
+            '@!superclasses'        => \undef,
             
-            '%:methods'             => {},
-            '%:attributes'          => {},            
-            '$:attribute_metaclass' => $options{':attribute_metaclass'} || 'Class::MOP::Attribute',
-            '$:method_metaclass'    => $options{':method_metaclass'}    || 'Class::MOP::Method',
-            '$:instance_metaclass'  => $options{':instance_metaclass'}  || 'Class::MOP::Instance',
+            '%!methods'             => {},
+            '%!attributes'          => {},            
+            '$!attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
+            '$!method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
+            '$!instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
         } => $class;
     }
     else {
@@ -259,16 +261,16 @@ sub create {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub get_attribute_map   { $_[0]->{'%:attributes'}          }
-sub attribute_metaclass { $_[0]->{'$:attribute_metaclass'} }
-sub method_metaclass    { $_[0]->{'$:method_metaclass'}    }
-sub instance_metaclass  { $_[0]->{'$:instance_metaclass'}  }
+sub get_attribute_map   { $_[0]->{'%!attributes'}          }
+sub attribute_metaclass { $_[0]->{'$!attribute_metaclass'} }
+sub method_metaclass    { $_[0]->{'$!method_metaclass'}    }
+sub instance_metaclass  { $_[0]->{'$!instance_metaclass'}  }
 
 # FIXME:
 # this is a prime canidate for conversion to XS
 sub get_method_map {    
     my $self = shift;
-    my $map  = $self->{'%:methods'}; 
+    my $map  = $self->{'%!methods'}; 
     
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
@@ -340,11 +342,12 @@ sub clone_instance {
     (blessed($instance))
         || confess "You can only clone instances, \$self is not a blessed instance";
     my $meta_instance = $class->get_meta_instance();
-    my $clone = $meta_instance->clone_instance($instance);        
-    foreach my $key (keys %params) {
-        next unless $meta_instance->is_valid_slot($key);
-        $meta_instance->set_slot_value($clone, $key, $params{$key});
-    }
+    my $clone = $meta_instance->clone_instance($instance);     
+    foreach my $attr ($class->compute_all_applicable_attributes()) {
+        if ($params{$attr->init_arg}) {
+            $meta_instance->set_slot_value($clone, $attr->name, $params{$attr->init_arg});                    
+        }
+    }       
     return $clone;    
 }
 
@@ -726,8 +729,38 @@ sub find_attribute_by_name {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
-sub make_immutable {
-    return Class::MOP::Class::Immutable->make_metaclass_immutable(@_);
+{
+    # NOTE:
+    # the immutable version of a 
+    # particular metaclass is 
+    # really class-level data so 
+    # we don't want to regenerate 
+    # it any more than we need to
+    my $IMMUTABLE_METACLASS;
+    sub make_immutable {
+        my ($self) = @_;
+        
+        $IMMUTABLE_METACLASS ||= Class::MOP::Immutable->new($self, {
+            read_only   => [qw/superclasses/],
+            cannot_call => [qw/
+                add_method
+                alias_method
+                remove_method
+                add_attribute
+                remove_attribute
+                add_package_symbol
+                remove_package_symbol            
+            /],
+            memoize     => {
+                class_precedence_list             => 'ARRAY',
+                compute_all_applicable_attributes => 'ARRAY',            
+                get_meta_instance                 => 'SCALAR',     
+                get_method_map                    => 'SCALAR',     
+            }
+        });   
+        
+        $IMMUTABLE_METACLASS->make_metaclass_immutable(@_)     
+    }
 }
 
 1;

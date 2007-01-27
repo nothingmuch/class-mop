@@ -15,7 +15,7 @@ sub new {
     my ($class, $meta, @attrs) = @_;
     my $self = $class->SUPER::new($meta, @attrs);
     my $index = 0;
-    $self->{slot_index_map} = { map { $_ => $index++ } $self->get_all_slots };
+    $self->{'%!slot_index_map'} = { map { $_ => $index++ } $self->get_all_slots };
     return $self;
 }
 
@@ -31,7 +31,7 @@ sub clone_instance {
 
 # operations on meta instance
 
-sub get_slot_index_map { (shift)->{slot_index_map} }
+sub get_slot_index_map { (shift)->{'%!slot_index_map'} }
 
 sub get_all_slots {
     my $self = shift;
@@ -40,12 +40,12 @@ sub get_all_slots {
 
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    return $instance->[ $self->{slot_index_map}->{$slot_name} ];
+    return $instance->[ $self->{'%!slot_index_map'}->{$slot_name} ];
 }
 
 sub set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
-    $instance->[ $self->{slot_index_map}->{$slot_name} ] = $value;
+    $instance->[ $self->{'%!slot_index_map'}->{$slot_name} ] = $value;
 }
 
 sub is_slot_initialized {

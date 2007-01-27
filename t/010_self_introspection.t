@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 189;
+use Test::More tests => 191;
 use Test::Exception;
 
 BEGIN {
@@ -134,20 +134,22 @@ foreach my $non_method_name (qw(
 # check for the right attributes
 
 my @class_mop_package_attributes = (
-    '$:package', 
-    '%:namespace',
+    '$!package', 
+    '%!namespace',
 );
 
 my @class_mop_module_attributes = (
-    '$:version', '$:authority'
+    '$!version', 
+    '$!authority'
 );
 
 my @class_mop_class_attributes = (
-    '%:methods', 
-    '%:attributes', 
-    '$:attribute_metaclass', 
-    '$:method_metaclass', 
-    '$:instance_metaclass'
+    '@!superclasses',
+    '%!methods', 
+    '%!attributes', 
+    '$!attribute_metaclass', 
+    '$!method_metaclass', 
+    '$!instance_metaclass'
 );
 
 # check class
@@ -205,58 +207,58 @@ foreach my $attribute_name (@class_mop_module_attributes) {
 
 # ... package
 
-ok($class_mop_package_meta->get_attribute('$:package')->has_reader, '... Class::MOP::Class $:package has a reader');
-is(ref($class_mop_package_meta->get_attribute('$:package')->reader), 'HASH', '... Class::MOP::Class $:package\'s a reader is { name => sub { ... } }');
+ok($class_mop_package_meta->get_attribute('$!package')->has_reader, '... Class::MOP::Class $!package has a reader');
+is(ref($class_mop_package_meta->get_attribute('$!package')->reader), 'HASH', '... Class::MOP::Class $!package\'s a reader is { name => sub { ... } }');
 
-ok($class_mop_package_meta->get_attribute('$:package')->has_init_arg, '... Class::MOP::Class $:package has a init_arg');
-is($class_mop_package_meta->get_attribute('$:package')->init_arg, ':package', '... Class::MOP::Class $:package\'s a init_arg is :package');
+ok($class_mop_package_meta->get_attribute('$!package')->has_init_arg, '... Class::MOP::Class $!package has a init_arg');
+is($class_mop_package_meta->get_attribute('$!package')->init_arg, 'package', '... Class::MOP::Class $!package\'s a init_arg is package');
 
 # ... class
 
-ok($class_mop_class_meta->get_attribute('%:attributes')->has_reader, '... Class::MOP::Class %:attributes has a reader');
-is_deeply($class_mop_class_meta->get_attribute('%:attributes')->reader, 
+ok($class_mop_class_meta->get_attribute('%!attributes')->has_reader, '... Class::MOP::Class %!attributes has a reader');
+is_deeply($class_mop_class_meta->get_attribute('%!attributes')->reader, 
    { 'get_attribute_map' => \&Class::MOP::Class::get_attribute_map }, 
-   '... Class::MOP::Class %:attributes\'s a reader is &get_attribute_map');
+   '... Class::MOP::Class %!attributes\'s a reader is &get_attribute_map');
    
-ok($class_mop_class_meta->get_attribute('%:attributes')->has_init_arg, '... Class::MOP::Class %:attributes has a init_arg');
-is($class_mop_class_meta->get_attribute('%:attributes')->init_arg, 
-  ':attributes', 
-  '... Class::MOP::Class %:attributes\'s a init_arg is :attributes');   
+ok($class_mop_class_meta->get_attribute('%!attributes')->has_init_arg, '... Class::MOP::Class %!attributes has a init_arg');
+is($class_mop_class_meta->get_attribute('%!attributes')->init_arg, 
+  'attributes', 
+  '... Class::MOP::Class %!attributes\'s a init_arg is attributes');   
   
-ok($class_mop_class_meta->get_attribute('%:attributes')->has_default, '... Class::MOP::Class %:attributes has a default');
-is_deeply($class_mop_class_meta->get_attribute('%:attributes')->default('Foo'), 
+ok($class_mop_class_meta->get_attribute('%!attributes')->has_default, '... Class::MOP::Class %!attributes has a default');
+is_deeply($class_mop_class_meta->get_attribute('%!attributes')->default('Foo'), 
          {}, 
-         '... Class::MOP::Class %:attributes\'s a default of {}');  
+         '... Class::MOP::Class %!attributes\'s a default of {}');  
 
-ok($class_mop_class_meta->get_attribute('$:attribute_metaclass')->has_reader, '... Class::MOP::Class $:attribute_metaclass has a reader');
-is_deeply($class_mop_class_meta->get_attribute('$:attribute_metaclass')->reader, 
+ok($class_mop_class_meta->get_attribute('$!attribute_metaclass')->has_reader, '... Class::MOP::Class $!attribute_metaclass has a reader');
+is_deeply($class_mop_class_meta->get_attribute('$!attribute_metaclass')->reader, 
    { 'attribute_metaclass' => \&Class::MOP::Class::attribute_metaclass }, 
-  '... Class::MOP::Class $:attribute_metaclass\'s a reader is &attribute_metaclass');
+  '... Class::MOP::Class $!attribute_metaclass\'s a reader is &attribute_metaclass');
   
-ok($class_mop_class_meta->get_attribute('$:attribute_metaclass')->has_init_arg, '... Class::MOP::Class $:attribute_metaclass has a init_arg');
-is($class_mop_class_meta->get_attribute('$:attribute_metaclass')->init_arg, 
-   ':attribute_metaclass', 
-   '... Class::MOP::Class $:attribute_metaclass\'s a init_arg is :attribute_metaclass');  
+ok($class_mop_class_meta->get_attribute('$!attribute_metaclass')->has_init_arg, '... Class::MOP::Class $!attribute_metaclass has a init_arg');
+is($class_mop_class_meta->get_attribute('$!attribute_metaclass')->init_arg, 
+   'attribute_metaclass', 
+   '... Class::MOP::Class $!attribute_metaclass\'s a init_arg is attribute_metaclass');  
    
-ok($class_mop_class_meta->get_attribute('$:attribute_metaclass')->has_default, '... Class::MOP::Class $:attribute_metaclass has a default');
-is($class_mop_class_meta->get_attribute('$:attribute_metaclass')->default, 
+ok($class_mop_class_meta->get_attribute('$!attribute_metaclass')->has_default, '... Class::MOP::Class $!attribute_metaclass has a default');
+is($class_mop_class_meta->get_attribute('$!attribute_metaclass')->default, 
   'Class::MOP::Attribute', 
-  '... Class::MOP::Class $:attribute_metaclass\'s a default is Class::MOP:::Attribute');   
+  '... Class::MOP::Class $!attribute_metaclass\'s a default is Class::MOP:::Attribute');   
   
-ok($class_mop_class_meta->get_attribute('$:method_metaclass')->has_reader, '... Class::MOP::Class $:method_metaclass has a reader');
-is_deeply($class_mop_class_meta->get_attribute('$:method_metaclass')->reader, 
+ok($class_mop_class_meta->get_attribute('$!method_metaclass')->has_reader, '... Class::MOP::Class $!method_metaclass has a reader');
+is_deeply($class_mop_class_meta->get_attribute('$!method_metaclass')->reader, 
    { 'method_metaclass' => \&Class::MOP::Class::method_metaclass },
-   '... Class::MOP::Class $:method_metaclass\'s a reader is &method_metaclass');  
+   '... Class::MOP::Class $!method_metaclass\'s a reader is &method_metaclass');  
    
-ok($class_mop_class_meta->get_attribute('$:method_metaclass')->has_init_arg, '... Class::MOP::Class $:method_metaclass has a init_arg');
-is($class_mop_class_meta->get_attribute('$:method_metaclass')->init_arg, 
-  ':method_metaclass', 
-  '... Class::MOP::Class $:method_metaclass\'s init_arg is :method_metaclass');   
+ok($class_mop_class_meta->get_attribute('$!method_metaclass')->has_init_arg, '... Class::MOP::Class $!method_metaclass has a init_arg');
+is($class_mop_class_meta->get_attribute('$!method_metaclass')->init_arg, 
+  'method_metaclass', 
+  '... Class::MOP::Class $:method_metaclass\'s init_arg is method_metaclass');   
   
-ok($class_mop_class_meta->get_attribute('$:method_metaclass')->has_default, '... Class::MOP::Class $:method_metaclass has a default');
-is($class_mop_class_meta->get_attribute('$:method_metaclass')->default, 
+ok($class_mop_class_meta->get_attribute('$!method_metaclass')->has_default, '... Class::MOP::Class $!method_metaclass has a default');
+is($class_mop_class_meta->get_attribute('$!method_metaclass')->default, 
    'Class::MOP::Method', 
-  '... Class::MOP::Class $:method_metaclass\'s a default is Class::MOP:::Method');  
+  '... Class::MOP::Class $!method_metaclass\'s a default is Class::MOP:::Method');  
 
 # check the values of some of the methods
 

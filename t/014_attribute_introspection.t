@@ -62,9 +62,17 @@ BEGIN {
         ok($meta->has_method($method_name), '... Class::MOP::Attribute->has_method(' . $method_name . ')');
     }
     
-    my @attributes = qw(
-        name accessor reader writer predicate clearer
-        init_arg default associated_class associated_methods
+    my @attributes = (
+        '$!name',
+        '$!accessor',
+        '$!reader',
+        '$!writer',
+        '$!predicate',
+        '$!clearer',
+        '$!init_arg',
+        '$!default',
+        '$!associated_class',
+        '@!associated_methods',
         );
 
     is_deeply(

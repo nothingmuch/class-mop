@@ -12,7 +12,7 @@ use base 'Class::MOP::Class';
 sub initialize { 
     (shift)->SUPER::initialize(@_, 
         # use the custom attribute metaclass here 
-        ':attribute_metaclass' => 'ClassEncapsulatedAttributes::Attribute',
+        'attribute_metaclass' => 'ClassEncapsulatedAttributes::Attribute',
     );
 }
 

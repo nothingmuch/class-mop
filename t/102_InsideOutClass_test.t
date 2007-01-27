@@ -19,8 +19,8 @@ BEGIN {
     use warnings;    
     
     use metaclass (
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',
-        ':instance_metaclass'  => 'InsideOutClass::Instance'
+        'attribute_metaclass' => 'InsideOutClass::Attribute',
+        'instance_metaclass'  => 'InsideOutClass::Instance'
     );
     
     Foo->meta->add_attribute('foo' => (
@@ -56,8 +56,8 @@ BEGIN {
     use strict;
     use warnings;
     use metaclass (     
-        ':attribute_metaclass' => 'InsideOutClass::Attribute',
-        ':instance_metaclass'  => 'InsideOutClass::Instance'
+        'attribute_metaclass' => 'InsideOutClass::Attribute',
+        'instance_metaclass'  => 'InsideOutClass::Instance'
     );
     
     Baz->meta->add_attribute('bling' => (

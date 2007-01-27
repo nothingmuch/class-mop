@@ -85,27 +85,27 @@ sub wrap {
 	};
 	$_build_wrapped_method->($modifier_table);
 	my $method = $class->SUPER::wrap(sub { $modifier_table->{cache}->(@_) });	
-	$method->{modifier_table} = $modifier_table;
+	$method->{'%!modifier_table'} = $modifier_table;
 	$method;  
 }
 
 sub get_original_method {
 	my $code = shift; 
-    $code->{modifier_table}->{orig};
+    $code->{'%!modifier_table'}->{orig};
 }
 
 sub add_before_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	unshift @{$code->{modifier_table}->{before}} => $modifier;
-	$_build_wrapped_method->($code->{modifier_table});
+	unshift @{$code->{'%!modifier_table'}->{before}} => $modifier;
+	$_build_wrapped_method->($code->{'%!modifier_table'});
 }
 
 sub add_after_modifier {
 	my $code     = shift;
 	my $modifier = shift;
-	push @{$code->{modifier_table}->{after}} => $modifier;
-	$_build_wrapped_method->($code->{modifier_table});	
+	push @{$code->{'%!modifier_table'}->{after}} => $modifier;
+	$_build_wrapped_method->($code->{'%!modifier_table'});	
 }
 
 {
@@ -126,12 +126,12 @@ sub add_after_modifier {
 	sub add_around_modifier {
 		my $code     = shift;
 		my $modifier = shift;
-		unshift @{$code->{modifier_table}->{around}->{methods}} => $modifier;		
-		$code->{modifier_table}->{around}->{cache} = $compile_around_method->(
-			@{$code->{modifier_table}->{around}->{methods}},
-			$code->{modifier_table}->{orig}->body
+		unshift @{$code->{'%!modifier_table'}->{around}->{methods}} => $modifier;		
+		$code->{'%!modifier_table'}->{around}->{cache} = $compile_around_method->(
+			@{$code->{'%!modifier_table'}->{around}->{methods}},
+			$code->{'%!modifier_table'}->{orig}->body
 		);
-		$_build_wrapped_method->($code->{modifier_table});		
+		$_build_wrapped_method->($code->{'%!modifier_table'});		
 	}	
 }
 

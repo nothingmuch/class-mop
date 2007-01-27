@@ -33,8 +33,8 @@ isa_ok(Foo->meta, 'Class::MOP::Class');
     
     package Bar;
     use metaclass 'BarMeta' => (
-        ':attribute_metaclass' => 'BarMeta::Attribute',
-        ':method_metaclass'    => 'BarMeta::Method',        
+        'attribute_metaclass' => 'BarMeta::Attribute',
+        'method_metaclass'    => 'BarMeta::Method',        
     );
 }
 
