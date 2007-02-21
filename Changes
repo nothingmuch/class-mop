@@ -1,6 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
 0.37
+    ~~ Many documentation updates ~~
+
     * Class::MOP::Attribute
       - default now checks the instance with defined to 
         avoid setting off bool-overloads (found by Carl Franks)
