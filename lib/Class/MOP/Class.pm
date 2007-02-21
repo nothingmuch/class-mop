@@ -975,9 +975,15 @@ These are a few predicate methods for asking information about the class.
 
 =item B<is_anon_class>
 
+This returns true if the class is a C<Class::MOP::Class> created anon class.
+
 =item B<is_mutable>
 
+This returns true if the class is still mutable.
+
 =item B<is_immutable>
+
+This returns true if the class has been made immutable.
 
 =back
 
@@ -1297,11 +1303,15 @@ It will return undef if nothing is found.
 
 =back
 
-=head2 Class closing
+=head2 Class Immutability
 
 =over 4
 
-=item B<make_immutable>
+=item B<make_immutable (%options)>
+
+This method will invoke a tranforamtion upon the class which will 
+make it immutable. Details of this transformation can be found in 
+the L<Class::MOP::Immutable> documentation.
 
 =back
 

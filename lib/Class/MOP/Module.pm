@@ -69,7 +69,7 @@ package for the given instance.
 
 =item B<identifier>
 
-This constructs a string of the name, version and authrity.
+This constructs a string of the name, version and authority.
 
 =back
 

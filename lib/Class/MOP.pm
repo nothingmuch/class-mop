@@ -500,11 +500,6 @@ __END__
 
 Class::MOP - A Meta Object Protocol for Perl 5
 
-=head1 SYNOPSIS
-
-  # ... This will come later, for now see
-  # the other SYNOPSIS for more information
-
 =head1 DESCRIPTON
 
 This module is an attempt to create a meta object protocol for the 
@@ -764,7 +759,7 @@ L<http://citeseer.ist.psu.edu/37617.html>
 
 =back
 
-=head2 Article 
+=head2 Articles 
 
 =over 4
 

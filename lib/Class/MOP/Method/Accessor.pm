@@ -188,23 +188,78 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 
 =head1 SYNOPSIS
 
-  # ... more to come later maybe
+    use Class::MOP::Method::Accessor;
+
+    my $reader = Class::MOP::Method::Accessor->new(
+        attribute     => $attribute,
+        is_inline     => 1,
+        accessor_type => 'reader',
+    );
+    
+    $reader->body->($instance); # call the reader method
 
 =head1 DESCRIPTION
+
+This is a C<Class::MOP::Method> subclass which is used interally 
+by C<Class::MOP::Attribute> to generate accessor code. It can 
+handle generation of readers, writers, predicate and clearer 
+methods, both as closures and as more optimized inline methods.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new>
+=item B<new (%options)>
 
-=item B<intialize_body>
+This creates the method based on the criteria in C<%options>, 
+these options are:
+
+=over 4
+
+=item I<attribute>
+
+This must be an instance of C<Class::MOP::Attribute> which this 
+accessor is being generated for. This paramter is B<required>.
+
+=item I<accessor_type>
+
+This is a string from the following set; reader, writer, accessor, 
+predicate or clearer. This is used to determine which type of 
+method is to be generated.
+
+=item I<is_inline>
+
+This is a boolean to indicate if the method should be generated
+as a closure, or as a more optimized inline version.
+
+=back
 
 =item B<accessor_type>
 
+This returns the accessor type which was passed into C<new>.
+
 =item B<is_inline>
 
+This returns the boolean which was passed into C<new>.
+
 =item B<associated_attribute>
+
+This returns the attribute instance which was passed into C<new>.
+
+=item B<intialize_body>
+
+This will actually generate the method based on the specified 
+criteria passed to the constructor.
+
+=back
+
+=head2 Method Generators
+
+These methods will generate appropriate code references for 
+the various types of accessors which are supported by 
+C<Class::MOP::Attribute>. The names pretty much explain it all.
+
+=over 4
 
 =item B<generate_accessor_method>
 

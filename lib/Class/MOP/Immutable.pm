@@ -194,19 +194,61 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
 
 =head1 SYNOPSIS
 
+    use Class::MOP::Immutable;
+    
+    my $immutable_metaclass = Class::MOP::Immutable->new($metaclass, {
+        read_only   => [qw/superclasses/],
+        cannot_call => [qw/
+            add_method
+            alias_method
+            remove_method
+            add_attribute
+            remove_attribute
+            add_package_symbol
+            remove_package_symbol            
+        /],
+        memoize     => {
+            class_precedence_list             => 'ARRAY',
+            compute_all_applicable_attributes => 'ARRAY',            
+            get_meta_instance                 => 'SCALAR',     
+            get_method_map                    => 'SCALAR',     
+        }
+    });   
+
+    $immutable_metaclass->make_metaclass_immutable(@_)
+
 =head1 DESCRIPTION
+
+This is basically a module for applying a transformation on a given 
+metaclass. Current features include making methods read-only, 
+making methods un-callable and memoizing methods (in a type specific
+way too). 
+
+This module is fairly new to the MOP, and quite possibly will be 
+expanded and further generalized as the need arises.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new>
- 
+=item B<new ($metaclass, \%options)>
+
+Given a C<$metaclass> and a set of C<%options> this module will  
+prepare an immutable version of the C<$metaclass>, which can then 
+be applied to the C<$metaclass> using the C<make_metaclass_immutable> 
+method.
+
 =item B<options>
+
+Returns the options HASH set in C<new>.
 
 =item B<metaclass>
 
+Returns the metaclass set in C<new>.
+
 =item B<immutable_metaclass>
+
+Returns the immutable metaclass created within C<new>.
 
 =back
 
@@ -214,9 +256,17 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
 
 =item B<create_immutable_metaclass>
 
+This will create the immutable version of the C<$metaclass>, but will 
+not actually change the original metaclass. 
+
 =item B<create_methods_for_immutable_metaclass>
 
+This will create all the methods for the immutable metaclass based 
+on the C<%options> passed into C<new>.
+
 =item B<make_metaclass_immutable>
+
+This will actually change the C<$metaclass> into the immutable version.
 
 =back
 

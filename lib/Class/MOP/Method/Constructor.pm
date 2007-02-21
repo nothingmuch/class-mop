@@ -33,7 +33,6 @@ sub new {
     # we don't want this creating 
     # a cycle in the code, if not 
     # needed
-#    weaken($self->{'$!meta_instance'});
     weaken($self->{'$!associated_metaclass'});    
 
     $self->intialize_body;
@@ -137,25 +136,55 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 =head1 SYNOPSIS
 
+  use Class::MOP::Method::Constructor;
+  
+  my $constructor = Class::MOP::Method::Constructor->new(
+      metaclass => $metaclass,       
+      options   => {
+          debug => 1, # this is all for now
+      },                        
+  );
+  
+  # calling the constructor ...
+  $constructor->body->($metaclass->name, %params);
+  
 =head1 DESCRIPTION
+
+This is a subclass of C<Class::MOP::Method> which deals with 
+class constructors.  
 
 =head1 METHODS
 
 =over 4
 
-=item B<new>
-
-=item B<is_inline>
-
-=item B<attributes>
-
-=item B<meta_instance>
-
-=item B<associated_metaclass>
+=item B<new (metaclass => $meta, options => \%options)>
 
 =item B<options>
 
+This returns the options HASH which is passed into C<new>.
+
+=item B<associated_metaclass>
+
+This returns the metaclass which is passed into C<new>.
+
+=item B<attributes>
+
+This returns the list of attributes which are associated with the 
+metaclass which is passed into C<new>.
+
+=item B<meta_instance>
+
+This returns the meta instance which is associated with the 
+metaclass which is passed into C<new>.
+
+=item B<is_inline>
+
+This returns a boolean, but since constructors are very rarely 
+not inlined, this always returns true for now.
+
 =item B<intialize_body>
+
+This creates the code reference for the constructor itself. 
 
 =back
 
