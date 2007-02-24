@@ -3,16 +3,29 @@
 use strict;
 use warnings;
 
-use Test::More tests => 68;
+use FindBin;
+use File::Spec::Functions;
+
+use Test::More tests => 70;
+use Test::Exception;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    use_ok('t::lib::BinaryTree');
 }
+
+use lib catdir($FindBin::Bin, 'lib');
 
 ## ----------------------------------------------------------------------------
 ## These are all tests which are derived from the Tree::Binary test suite
 ## ----------------------------------------------------------------------------
+
+ok(!Class::MOP::is_class_loaded('BinaryTree'), '... the binary tree class is not loaded');
+
+lives_ok {
+    Class::MOP::load_class('BinaryTree');
+} '... loaded the BinaryTree class without dying';
+
+ok(Class::MOP::is_class_loaded('BinaryTree'), '... the binary tree class is now loaded');
 
 ## ----------------------------------------------------------------------------
 ## t/10_Tree_Binary_test.t

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 39;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -36,6 +36,8 @@ my %METAS = (
     'Class::MOP::Instance'            => Class::MOP::Instance->meta,   
     'Class::MOP::Object'              => Class::MOP::Object->meta,  
 );
+
+ok(Class::MOP::is_class_loaded($_), '... ' . $_ . ' is loaded') for keys %METAS;
 
 ok($_->is_immutable(), '... ' . $_->name . ' is immutable') for values %METAS;
 
