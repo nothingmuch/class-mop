@@ -1,6 +1,7 @@
 use Module::Build;
 
 use strict;
+use warnings;
 
 my $build = Module::Build->new(
     module_name => 'Class::MOP',
