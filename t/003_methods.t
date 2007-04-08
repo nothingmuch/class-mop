@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 64;
+use Test::More tests => 66;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -21,6 +21,9 @@ BEGIN {
     # import a sub
     use Scalar::Util 'blessed'; 
     
+    sub pie;
+    sub cake ();
+
     use constant FOO_CONSTANT => 'Foo-CONSTANT';
     
     # define a sub in package
@@ -55,6 +58,9 @@ BEGIN {
 }
 
 my $Foo = Class::MOP::Class->initialize('Foo');
+
+ok(!$Foo->has_method('pie'), '... got the method stub pie');
+ok(!$Foo->has_method('cake'), '... got the constant method stub cake');
 
 my $foo = sub { 'Foo::foo' };
 

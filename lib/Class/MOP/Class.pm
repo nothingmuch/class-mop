@@ -13,7 +13,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.21';
+our $VERSION   = '0.22';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -863,6 +863,10 @@ it.
 This will create an anonymous class, it works much like C<create> but 
 it does not need a C<$package_name>. Instead it will create a suitably 
 unique package name for you to stash things into.
+
+On very important distinction is that anon classes are destroyed once 
+the metaclass they are attached to goes out of scope. In the DESTROY 
+method, the created package will be removed from the symbol table. 
 
 =item B<initialize ($package_name, %options)>
 

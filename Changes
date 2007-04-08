@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.38
+    ~~ More documentation updates ~~
+    * Class::MOP::Package
+      - we now deal with stub methods properly
+        - added tests for this
+
 0.37 Sat. March 10, 2007
     ~~ Many, many documentation updates ~~
     
