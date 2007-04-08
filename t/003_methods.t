@@ -116,7 +116,7 @@ for my $method_name (qw/FOO_CONSTANT
     isa_ok($Foo->get_method($method_name), 'Class::MOP::Method');
     {
         no strict 'refs';
-        is($Foo->get_method($method_name)->body, \&{'Foo::' . $method_name}, '... body matches CODE ref in package');
+        is($Foo->get_method($method_name)->body, \&{'Foo::' . $method_name}, '... body matches CODE ref in package for ' . $method_name);
     }
 }
 
