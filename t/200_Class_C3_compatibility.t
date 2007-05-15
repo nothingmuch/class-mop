@@ -56,8 +56,12 @@ is_deeply(
 
 ok(Diamond_A->meta->has_method('hello'), '... A has a method hello');
 ok(!Diamond_B->meta->has_method('hello'), '... B does not have a method hello');
-ok(defined &Diamond_B::hello, '... B does have an alias to the method hello');    
 
 ok(Diamond_C->meta->has_method('hello'), '... C has a method hello');
 ok(!Diamond_D->meta->has_method('hello'), '... D does not have a method hello');
-ok(defined &Diamond_D::hello, '... D does have an alias to the method hello');    
+
+SKIP: {
+    skip "C3 does not make aliases on 5.9.5+", 2 if $] > 5.009_004;
+    ok(defined &Diamond_B::hello, '... B does have an alias to the method hello');
+    ok(defined &Diamond_D::hello, '... D does have an alias to the method hello');
+}

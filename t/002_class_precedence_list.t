@@ -46,19 +46,24 @@ is_deeply(
 
 =cut
 
-{
-    package My::2::A;
-    use metaclass;    
-    our @ISA = ('My::2::C');
+# 5.9.5+ dies at the moment of
+# recursive @ISA definition, not later when
+# you try to use the @ISAs.
+eval {
+    {
+        package My::2::A;
+        use metaclass;    
+        our @ISA = ('My::2::C');
         
-    package My::2::B;
-    our @ISA = ('My::2::A');
+        package My::2::B;
+        our @ISA = ('My::2::A');
     
-    package My::2::C;
-    our @ISA = ('My::2::B');           
-}
+        package My::2::C;
+        our @ISA = ('My::2::B');           
+    }
 
-eval { My::2::B->meta->class_precedence_list };
+    My::2::B->meta->class_precedence_list
+};
 ok($@, '... recursive inheritance breaks correctly :)');
 
 =pod
