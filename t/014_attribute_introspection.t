@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 49;
+use Test::More tests => 51;
 use Test::Exception;
 
 BEGIN {
@@ -27,8 +27,8 @@ BEGIN {
         
         name
         has_accessor  accessor
-        has_writer    writer
-        has_reader    reader
+        has_writer    writer     get_write_method
+        has_reader    reader     get_read_method
         has_predicate predicate
         has_clearer   clearer
         has_init_arg  init_arg

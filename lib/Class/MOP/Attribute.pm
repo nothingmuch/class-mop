@@ -116,6 +116,9 @@ sub init_arg  { $_[0]->{'$!init_arg'}  }
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
+sub get_read_method  { $_[0]->reader || $_[0]->accessor }
+sub get_write_method { $_[0]->writer || $_[0]->accessor }
+
 sub is_default_a_coderef { 
     ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))    
 }
@@ -514,6 +517,14 @@ argument C<$instance> into it and return the value.
 
 Returns a list of slots required by the attribute. This is usually 
 just one, which is the name of the attribute.
+
+=item B<get_read_method>
+
+=item B<get_write_method>
+
+Return the name of a method suitable for reading / writing the value of the
+attribute in the associated class. Suitable for use whether C<reader> and
+C<writer> or C<accessor> was used.
 
 =back
 

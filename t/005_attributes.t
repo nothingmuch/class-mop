@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 43;
+use Test::More tests => 47;
 use Test::Exception;
 
 BEGIN { 
@@ -53,6 +53,10 @@ my $BAR_ATTR_2 = Class::MOP::Attribute->new('$bar');
     ::ok($meta->has_attribute('$bar'), '... Bar has $bar attribute');
     ::is($meta->get_attribute('$bar'), $BAR_ATTR, '... got the right attribute back for Bar');
 
+    my $attr = $meta->get_attribute('$bar');
+    ::is($attr->get_read_method,  'bar', '... got the right read method for Bar');
+    ::is($attr->get_write_method, 'bar', '... got the right write method for Bar');
+
     ::ok($meta->has_method('bar'), '... an accessor has been created');
     ::isa_ok($meta->get_method('bar'), 'Class::MOP::Method::Accessor');      
 }
@@ -66,6 +70,10 @@ my $BAR_ATTR_2 = Class::MOP::Attribute->new('$bar');
     } '... we added an attribute to Baz successfully';
     ::ok($meta->has_attribute('$baz'), '... Baz has $baz attribute');    
     ::is($meta->get_attribute('$baz'), $BAZ_ATTR, '... got the right attribute back for Baz');
+
+    my $attr = $meta->get_attribute('$baz');
+    ::is($attr->get_read_method,  'get_baz', '... got the right read method for Baz');
+    ::is($attr->get_write_method, 'set_baz', '... got the right write method for Baz');
 
     ::ok($meta->has_method('get_baz'), '... a reader has been created');
     ::ok($meta->has_method('set_baz'), '... a writer has been created');
