@@ -835,28 +835,6 @@ All complex software has bugs lurking in it, and this module is no
 exception. If you find a bug please either email me, or add the bug
 to cpan-RT.
 
-=head1 CODE COVERAGE
-
-I use L<Devel::Cover> to test the code coverage of my tests, below is the 
-L<Devel::Cover> report on this module's test suite.
-
- ---------------------------- ------ ------ ------ ------ ------ ------ ------
- File                           stmt   bran   cond    sub    pod   time  total
- ---------------------------- ------ ------ ------ ------ ------ ------ ------
- Class/MOP.pm                   97.7  100.0   88.9   94.7  100.0    3.2   96.6
- Class/MOP/Attribute.pm         75.5   77.9   82.4   88.3  100.0    4.0   81.5
- Class/MOP/Class.pm             96.9   88.8   72.1   98.2  100.0   35.8   91.4
- Class/MOP/Class/Immutable.pm   88.2   60.0    n/a   95.5  100.0    0.5   84.6
- Class/MOP/Instance.pm          86.4   75.0   33.3   86.2  100.0    1.2   87.5
- Class/MOP/Method.pm            97.5   75.0   61.5   80.6  100.0   12.7   89.7
- Class/MOP/Module.pm           100.0    n/a   55.6  100.0  100.0    0.1   90.7
- Class/MOP/Object.pm            73.3    n/a   20.0   80.0  100.0    0.1   66.7
- Class/MOP/Package.pm           94.6   71.7   33.3  100.0  100.0   42.2   87.0
- metaclass.pm                  100.0  100.0   83.3  100.0    n/a    0.2   97.7
- ---------------------------- ------ ------ ------ ------ ------ ------ ------
- Total                          91.3   80.4   69.8   91.9  100.0  100.0   88.1
- ---------------------------- ------ ------ ------ ------ ------ ------ ------
-
 =head1 ACKNOWLEDGEMENTS
 
 =over 4
@@ -871,7 +849,15 @@ Thanks to Rob for actually getting the development of this module kick-started.
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
-Yuval Kogman E<lt>nothingmuch@woobling.comE<gt>
+B<with contributions from:>
+
+Brandon (blblack) Black
+
+Guillermo (groditi) Roditi
+
+Rob (robkinyon) Kinyon
+
+Yuval (nothingmuch) Kogman
 
 =head1 COPYRIGHT AND LICENSE
 

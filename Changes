@@ -6,6 +6,7 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Package
       - we now deal with stub methods properly
         - added tests for this
+      - fixed some tests failing on 5.9.5
         
     * Class::MOP::Attribute
       - added get_read_method and get_write_method
