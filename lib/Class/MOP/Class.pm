@@ -313,6 +313,18 @@ sub construct_instance {
     foreach my $attr ($class->compute_all_applicable_attributes()) {
         $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
+    # NOTE: 
+    # this will only work for a HASH instance type
+    if ($class->is_anon_class) {
+        (reftype($instance) eq 'HASH')
+            || confess "Currently only HASH based instances are supported with instance of anon-classes";
+        # NOTE:
+        # At some point we should make this official
+        # as a reserved slot name, but right now I am 
+        # going to keep it here.
+        # my $RESERVED_MOP_SLOT = '__MOP__';
+        $instance->{'__MOP__'} = $class;
+    }
     return $instance;
 }
 
@@ -867,6 +879,12 @@ unique package name for you to stash things into.
 On very important distinction is that anon classes are destroyed once 
 the metaclass they are attached to goes out of scope. In the DESTROY 
 method, the created package will be removed from the symbol table. 
+
+It is also worth noting that any instances created with an anon-class
+will keep a special reference to the anon-meta which will prevent the 
+anon-class from going out of scope until all instances of it have also 
+been destroyed. This however only works for HASH based instance types, 
+as we use a special reserved slot (C<__MOP__>) to store this. 
 
 =item B<initialize ($package_name, %options)>
 

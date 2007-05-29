@@ -28,7 +28,6 @@ my $anon_meta_name;
     $anon_class->add_attribute( $_, reader => $_ ) for qw/bar baz/;
 
     my $obj = $anon_class->new_object(bar => 'a', baz => 'b');
-    #$obj->{___keep_metaclass_alive___} = $anon_class;
     return $obj;
   }
 

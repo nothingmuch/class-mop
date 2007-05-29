@@ -18,9 +18,14 @@ Revision history for Perl extension Class-MOP.
       - fixed RT issue #27329, clone object now 
         handles undef values correctly.
         - added tests for this
-
-    * Tests
-      - added 019_anon_class_keep_alive.t by groditi       
+      - Corrected anon-class handling so that they 
+        will not get reaped when instances still 
+        exist which need to reference them. This is 
+        the correct behavior, hopefully this is an 
+        obscure enough feature that there are not too 
+        many work arounds out in the wild.
+        - added tests for this by groditi   
+        - updated docs to explain this    
 
 0.37 Sat. March 10, 2007
     ~~ Many, many documentation updates ~~
