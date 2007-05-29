@@ -3,12 +3,17 @@
 use strict;
 use warnings;
 
+use FindBin;
+use File::Spec::Functions;
+
 use Test::More tests => 36;
 use Test::Exception;
 
 BEGIN {
     use_ok('Class::MOP');
 }
+
+use lib catdir($FindBin::Bin, 'lib');
 
 # make sure the Class::MOP::Class->meta does the right thing
 
@@ -21,7 +26,7 @@ is($new_meta, $meta, '... it still creates the singleton');
 
 my $cloned_meta = $meta->clone_object($meta);
 isa_ok($cloned_meta, 'Class::MOP::Class');
-is($cloned_meta, $meta, '... it creates the singleton even if you try to clone it');    
+is($cloned_meta, $meta, '... it creates the singleton even if you try to clone it');
 
 # make sure other metaclasses do the right thing
 
@@ -35,13 +40,8 @@ isa_ok($foo_meta, 'Class::MOP::Class');
 
 is($meta->new_object('package' => 'Foo'), $foo_meta, '... got the right Foo->meta singleton');
 is($meta->clone_object($foo_meta), $foo_meta, '... cloning got the right Foo->meta singleton');
-    
-# make sure subclassed of Class::MOP::Class do the right thing
 
-{
-    package MyMetaClass;
-    use base 'Class::MOP::Class';
-}
+# make sure subclassed of Class::MOP::Class do the right thing
 
 my $my_meta = MyMetaClass->meta;
 isa_ok($my_meta, 'Class::MOP::Class');
@@ -67,7 +67,7 @@ is($bar_meta->version, undef, '... Bar does not exists, so it has no version');
 
 $bar_meta->superclasses('Foo');
 
-# check with MyMetaClass 
+# check with MyMetaClass
 
 {
     package Baz;
@@ -106,14 +106,14 @@ isnt($cloned_foo, $foo, '... $cloned_foo is a new object different from $foo');
 
 dies_ok {
     $foo_meta->clone_object($meta);
-} '... this dies as expected';  
+} '... this dies as expected';
 
 # test stuff
 
 {
     package FooBar;
     use metaclass;
-    
+
     FooBar->meta->add_attribute('test');
 }
 
@@ -124,7 +124,7 @@ my $attr_clone = $attr->clone();
 isa_ok($attr_clone, 'Class::MOP::Attribute');
 
 isnt($attr, $attr_clone, '... we successfully cloned our attributes');
-is($attr->associated_class, 
-   $attr_clone->associated_class, 
+is($attr->associated_class,
+   $attr_clone->associated_class,
    '... we successfully did not clone our associated metaclass');
 

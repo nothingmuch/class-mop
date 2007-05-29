@@ -25,7 +25,11 @@ Revision history for Perl extension Class-MOP.
         obscure enough feature that there are not too 
         many work arounds out in the wild.
         - added tests for this by groditi   
-        - updated docs to explain this    
+        - updated docs to explain this
+
+    * metaclass
+      - load custom metaclass automatically.
+        - modified tests to test this behavior
 
 0.37 Sat. March 10, 2007
     ~~ Many, many documentation updates ~~
