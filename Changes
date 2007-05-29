@@ -13,6 +13,11 @@ Revision history for Perl extension Class-MOP.
         thanks to groditi for this code, tests 
         and docs.
         - added tests and POD for this
+    
+    * Class::MOP::Class
+      - fixed RT issue #27329, clone object now 
+        handles undef values correctly.
+        - added tests for this
 
 0.37 Sat. March 10, 2007
     ~~ Many, many documentation updates ~~

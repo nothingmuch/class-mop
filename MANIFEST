@@ -72,6 +72,7 @@ t/107_C3MethodDispatchOrder_test.t
 t/108_ArrayBasedStorage_test.t
 t/200_Class_C3_compatibility.t
 t/300_random_eval_bug.t
+t/301_RT_27329_fix.t
 t/pod.t
 t/pod_coverage.t
 t/lib/BinaryTree.pm

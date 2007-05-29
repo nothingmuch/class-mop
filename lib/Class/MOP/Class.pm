@@ -13,7 +13,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.22';
+our $VERSION   = '0.23';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -344,7 +344,7 @@ sub clone_instance {
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);     
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        if ($params{$attr->init_arg}) {
+        if (exists $params{$attr->init_arg}) {
             $meta_instance->set_slot_value($clone, $attr->name, $params{$attr->init_arg});                    
         }
     }       
