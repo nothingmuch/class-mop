@@ -20,11 +20,15 @@ sub import {
     }
     else {
         $metaclass = shift;
+        #make sure the custom metaclass gets loaded
         Class::MOP::load_class($metaclass);
         ($metaclass->isa('Class::MOP::Class'))
             || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
     }
     my %options = @_;
+    #make sure the custom metaclasses get loaded
+    map{ Class::MOP::load_class($options{$_}) }
+      grep{ /^(attribute|method|instance)_metaclass/ } keys %options;
     my $package = caller();
 
     # create a meta object so we can install &meta
