@@ -19,6 +19,9 @@ Revision history for Perl extension Class-MOP.
         handles undef values correctly.
         - added tests for this
 
+    * Tests
+      - added 019_anon_class_keep_alive.t by groditi       
+
 0.37 Sat. March 10, 2007
     ~~ Many, many documentation updates ~~
     
