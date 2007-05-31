@@ -1,12 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
-0.38
+0.38 Thurs. May 31, 2007
     ~~ More documentation updates ~~
     
     * Class::MOP::Package
       - we now deal with stub methods properly
         - added tests for this
-      - fixed some tests failing on 5.9.5
+      - fixed some tests failing on 5.9.5 (thanks blblack)
         
     * Class::MOP::Attribute
       - added get_read_method and get_write_method
@@ -28,7 +28,7 @@ Revision history for Perl extension Class-MOP.
         - updated docs to explain this
 
     * metaclass
-      - load custom metaclasses automatically.
+      - load custom metaclasses automatically (thanks groditi)
         - added tests for this behavior
 
 0.37 Sat. March 10, 2007

@@ -13,7 +13,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.23';
+our $VERSION   = '0.22';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
