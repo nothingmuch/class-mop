@@ -12,20 +12,20 @@ use Scalar::Util 'blessed';
 our $VERSION   = '0.01';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub new { 
+sub new {
     my ($class, $metaclass, $options) = @_;
-    
+
     my $self = bless {
         '$!metaclass'           => $metaclass,
         '%!options'             => $options,
         '$!immutable_metaclass' => undef,
     } => $class;
-    
+
     # NOTE:
-    # we initialize the immutable 
+    # we initialize the immutable
     # version of the metaclass here
     $self->create_immutable_metaclass;
-    
+
     return $self;
 }
 
@@ -37,23 +37,23 @@ sub create_immutable_metaclass {
     my $self = shift;
 
     # NOTE:
-    # The immutable version of the 
+    # The immutable version of the
     # metaclass is just a anon-class
-    # which shadows the methods 
+    # which shadows the methods
     # appropriately
     $self->{'$!immutable_metaclass'} = Class::MOP::Class->create_anon_class(
         superclasses => [ blessed($self->metaclass) ],
         methods      => $self->create_methods_for_immutable_metaclass,
-    ); 
+    );
 }
 
 my %DEFAULT_METHODS = (
-    meta => sub { 
+    meta => sub {
         my $self = shift;
-        # if it is not blessed, then someone is asking 
+        # if it is not blessed, then someone is asking
         # for the meta of Class::MOP::Class::Immutable
         return Class::MOP::Class->initialize($self) unless blessed($self);
-        # otherwise, they are asking for the metaclass 
+        # otherwise, they are asking for the metaclass
         # which has been made immutable, which is itself
         return $self;
     },
@@ -63,107 +63,156 @@ my %DEFAULT_METHODS = (
 );
 
 # NOTE:
-# this will actually convert the 
-# existing metaclass to an immutable 
+# this will actually convert the
+# existing metaclass to an immutable
 # version of itself
 sub make_metaclass_immutable {
     my ($self, $metaclass, %options) = @_;
-    
+
     $options{inline_accessors}   = 1     unless exists $options{inline_accessors};
     $options{inline_constructor} = 1     unless exists $options{inline_constructor};
-    $options{inline_destructor}  = 0     unless exists $options{inline_destructor};    
+    $options{inline_destructor}  = 0     unless exists $options{inline_destructor};
     $options{constructor_name}   = 'new' unless exists $options{constructor_name};
-    $options{debug}              = 0     unless exists $options{debug};    
-    
+    $options{debug}              = 0     unless exists $options{debug};
+
     if ($options{inline_accessors}) {
         foreach my $attr_name ($metaclass->get_attribute_list) {
             # inline the accessors
             $metaclass->get_attribute($attr_name)
-                      ->install_accessors(1); 
-        }      
+                      ->install_accessors(1);
+        }
     }
 
-    if ($options{inline_constructor}) {       
+    if ($options{inline_constructor}) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
-        
+
         $metaclass->add_method(
             $options{constructor_name},
             $constructor_class->new(
-                options   => \%options,           
-                metaclass => $metaclass,                
+                options   => \%options,
+                metaclass => $metaclass,
             )
         ) unless $metaclass->has_method($options{constructor_name});
-    }    
-    
-    if ($options{inline_destructor}) {       
+    }
+
+    if ($options{inline_destructor}) {
         (exists $options{destructor_class})
             || confess "The 'inline_destructor' option is present, but "
                      . "no destructor class was specified";
-        
+
         my $destructor_class = $options{destructor_class};
-        
+
         my $destructor = $destructor_class->new(
             options   => \%options,
             metaclass => $metaclass,
         );
-        
-        $metaclass->add_method('DESTROY' => $destructor) 
+
+        $metaclass->add_method('DESTROY' => $destructor)
             # NOTE:
-            # we allow the destructor to determine 
+            # we allow the destructor to determine
             # if it is needed or not, it can perform
-            # all sorts of checks because it has the 
-            # metaclass instance 
+            # all sorts of checks because it has the
+            # metaclass instance
             if $destructor->is_needed;
-    }    
-    
+    }
+
     my $memoized_methods = $self->options->{memoize};
     foreach my $method_name (keys %{$memoized_methods}) {
         my $type = $memoized_methods->{$method_name};
-    
+
         ($metaclass->can($method_name))
-            || confess "Could not find the method '$method_name' in " . $metaclass->name;        
-    
-        my $memoized_method;
+            || confess "Could not find the method '$method_name' in " . $metaclass->name;
+
         if ($type eq 'ARRAY') {
             $metaclass->{'___' . $method_name} = [ $metaclass->$method_name ];
         }
         elsif ($type eq 'HASH') {
-            $metaclass->{'___' . $method_name} = { $metaclass->$method_name };                       
+            $metaclass->{'___' . $method_name} = { $metaclass->$method_name };
         }
         elsif ($type eq 'SCALAR') {
             $metaclass->{'___' . $method_name} = $metaclass->$method_name;
         }
-    }  
-    $metaclass->{'___original_class'} = blessed($metaclass);    
+    }
 
+    #I'm not sure i understand this, stevan suggested the addition i don't think its actually needed
+    #my $is_immutable = $metaclass->is_anon_class;
+    #$self->immutable_metaclass->add_method('is_anon_class' => sub { $is_immutable });
+
+    $metaclass->{'___original_class'} = blessed($metaclass);
     bless $metaclass => $self->immutable_metaclass->name;
+}
+
+sub make_metaclass_mutable {
+    my ($self, $immutable, %options) = @_;
+
+    my $original_class = $immutable->get_mutable_metaclass_name;
+    delete $immutable->{'___original_class'} ;
+    bless $immutable => $original_class;
+
+    my $memoized_methods = $self->options->{memoize};
+    foreach my $method_name (keys %{$memoized_methods}) {
+        my $type = $memoized_methods->{$method_name};
+
+        ($immutable->can($method_name))
+          || confess "Could not find the method '$method_name' in " . $immutable->name;
+        if ($type eq 'SCALAR' || $type eq 'ARRAY' ||  $type eq 'HASH' ) {
+            delete $immutable->{'___' . $method_name};
+        }
+    }
+
+    if ($options{inline_destructor} && $immutable->has_method('DESTROY')) {
+        $immutable->remove_method('DESTROY')
+          if $immutable->get_method('DESTROY')->blessed eq $options{destructor_class};
+    }
+
+    #14:01 <@stevan> nah,. you shouldnt
+    #14:01 <@stevan> they are just inlined
+    #14:01 <@stevan> which is the default in Moose anyway
+    #14:02 <@stevan> and adding new attributes will just DWIM
+    #14:02 <@stevan> and you really cant change an attribute anyway
+    #if ($options{inline_accessors}) {
+    #    foreach my $attr_name ($immutable->get_attribute_list) {
+    #        my $attr = $immutable->get_attribute($attr_name);
+    #        $attr->remove_accessors;
+    #        $attr->install_accessors(0);
+    #    }
+    #}
+
+    #14:26 <@stevan> the only user of ::Method::Constructor is immutable
+    #14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
+    #14:27 <@stevan> so I am not worried
+    $options{constructor_name} = 'new' unless exists $options{constructor_name};
+    if ($options{inline_constructor}) {
+        my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
+        $immutable->remove_method( $options{constructor_name}  )
+          if $immutable->get_method($options{constructor_name})->blessed eq $constructor_class;
+    }
 }
 
 sub create_methods_for_immutable_metaclass {
     my $self = shift;
-    
+
     my %methods = %DEFAULT_METHODS;
-    
+
     foreach my $read_only_method (@{$self->options->{read_only}}) {
         my $method = $self->metaclass->meta->find_method_by_name($read_only_method);
-        
+
         (defined $method)
             || confess "Could not find the method '$read_only_method' in " . $self->metaclass->name;
-        
+
         $methods{$read_only_method} = sub {
             confess "This method is read-only" if scalar @_ > 1;
             goto &{$method->body}
         };
     }
-    
+
     foreach my $cannot_call_method (@{$self->options->{cannot_call}}) {
         $methods{$cannot_call_method} = sub {
             confess "This method ($cannot_call_method) cannot be called on an immutable instance";
         };
-    }  
-    
+    }
+
     my $memoized_methods = $self->options->{memoize};
-    
     foreach my $method_name (keys %{$memoized_methods}) {
         my $type = $memoized_methods->{$method_name};
         if ($type eq 'ARRAY') {
@@ -174,11 +223,11 @@ sub create_methods_for_immutable_metaclass {
         }
         elsif ($type eq 'SCALAR') {
             $methods{$method_name} = sub { $_[0]->{'___' . $method_name} };
-        }        
-    }       
-    
-    $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };     
-    
+        }
+    }
+
+    $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };
+
     return \%methods;
 }
 
@@ -188,14 +237,14 @@ __END__
 
 =pod
 
-=head1 NAME 
+=head1 NAME
 
 Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
 
 =head1 SYNOPSIS
 
     use Class::MOP::Immutable;
-    
+
     my $immutable_metaclass = Class::MOP::Immutable->new($metaclass, {
         read_only   => [qw/superclasses/],
         cannot_call => [qw/
@@ -205,26 +254,26 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
             add_attribute
             remove_attribute
             add_package_symbol
-            remove_package_symbol            
+            remove_package_symbol
         /],
         memoize     => {
             class_precedence_list             => 'ARRAY',
-            compute_all_applicable_attributes => 'ARRAY',            
-            get_meta_instance                 => 'SCALAR',     
-            get_method_map                    => 'SCALAR',     
+            compute_all_applicable_attributes => 'ARRAY',
+            get_meta_instance                 => 'SCALAR',
+            get_method_map                    => 'SCALAR',
         }
-    });   
+    });
 
     $immutable_metaclass->make_metaclass_immutable(@_)
 
 =head1 DESCRIPTION
 
-This is basically a module for applying a transformation on a given 
-metaclass. Current features include making methods read-only, 
+This is basically a module for applying a transformation on a given
+metaclass. Current features include making methods read-only,
 making methods un-callable and memoizing methods (in a type specific
-way too). 
+way too).
 
-This module is fairly new to the MOP, and quite possibly will be 
+This module is fairly new to the MOP, and quite possibly will be
 expanded and further generalized as the need arises.
 
 =head1 METHODS
@@ -233,9 +282,9 @@ expanded and further generalized as the need arises.
 
 =item B<new ($metaclass, \%options)>
 
-Given a C<$metaclass> and a set of C<%options> this module will  
-prepare an immutable version of the C<$metaclass>, which can then 
-be applied to the C<$metaclass> using the C<make_metaclass_immutable> 
+Given a C<$metaclass> and a set of C<%options> this module will
+prepare an immutable version of the C<$metaclass>, which can then
+be applied to the C<$metaclass> using the C<make_metaclass_immutable>
 method.
 
 =item B<options>
@@ -256,17 +305,23 @@ Returns the immutable metaclass created within C<new>.
 
 =item B<create_immutable_metaclass>
 
-This will create the immutable version of the C<$metaclass>, but will 
-not actually change the original metaclass. 
+This will create the immutable version of the C<$metaclass>, but will
+not actually change the original metaclass.
 
 =item B<create_methods_for_immutable_metaclass>
 
-This will create all the methods for the immutable metaclass based 
+This will create all the methods for the immutable metaclass based
 on the C<%options> passed into C<new>.
 
-=item B<make_metaclass_immutable>
+=item B<make_metaclass_immutable (%options)>
 
 This will actually change the C<$metaclass> into the immutable version.
+
+=item B<make_metaclass_mutable (%options)>
+
+This will change the C<$metaclass> into the mutable version by reversing
+the immutable process. C<%options> should be the same options that were
+given to make_metaclass_immutable.
 
 =back
 
@@ -281,6 +336,6 @@ Copyright 2006, 2007 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
