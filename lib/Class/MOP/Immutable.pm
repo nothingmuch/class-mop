@@ -47,7 +47,9 @@ sub create_immutable_metaclass {
     );
 }
 
+
 my %DEFAULT_METHODS = (
+    # I don't really understand this, but removing it breaks tests (groditi)
     meta => sub {
         my $self = shift;
         # if it is not blessed, then someone is asking
@@ -57,9 +59,9 @@ my %DEFAULT_METHODS = (
         # which has been made immutable, which is itself
         return $self;
     },
-    is_mutable     => sub {  0  },
-    is_immutable   => sub {  1  },
-    make_immutable => sub { ( ) },
+    is_mutable     => sub { 0  },
+    is_immutable   => sub { 1  },
+    make_immutable => sub { () },
 );
 
 # NOTE:

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 193;
+use Test::More tests => 195;
 use Test::Exception;
 
 BEGIN {
@@ -72,7 +72,7 @@ my @class_mop_class_methods = qw(
     has_attribute get_attribute add_attribute remove_attribute
     get_attribute_list get_attribute_map compute_all_applicable_attributes find_attribute_by_name
 
-    is_mutable is_immutable make_mutable make_immutable
+    is_mutable is_immutable make_mutable make_immutable create_immutable_transformer
 
     DESTROY
 );

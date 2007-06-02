@@ -3,6 +3,9 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class::Immutable
       - added make_metaclass_mutable + docs (groditi)
       - removed unused variable
+      - added create_immutable_transformer
+        necessary for sane overloading of immutable behavior
+         - tests for this (groditi) 
 
     * Class::MOP::Class
       - Immutability can now be undone,

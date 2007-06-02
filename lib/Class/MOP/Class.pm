@@ -743,61 +743,39 @@ sub is_immutable { 0 }
 
 #Why I changed this (groditi)
 # - One Metaclass may have many Classes through many Metaclass instances
-# - One Metaclass should only have one Immutable Metaclass instance
+# - One Metaclass should only have one Immutable Transformer instance
 # - Each Class may have different Immutabilizing options
 # - Therefore each Metaclass instance may have different Immutabilizing options
-# - We need to store one Immutable Metaclass instance per Metaclass
-# - We need to store one set of Immutable Metaclass options per Class
+# - We need to store one Immutable Transformer instance per Metaclass
+# - We need to store one set of Immutable Transformer options per Class
 # - Upon make_mutable we may delete the Immutabilizing options
-# - We could clean the immutable Metaclass instance when there is no more
-#     immutable Classes with this Metaclass, but we can also keep it in case
+# - We could clean the immutable Transformer instance when there is no more
+#     immutable Classes of that type, but we can also keep it in case
 #     another class with this same Metaclass becomes immutable. It is a case
 #     of trading of storing an instance to avoid unnecessary instantiations of
-#     Immutable Metaclass instances. You may view this as a memory leak, however
+#     Immutable Transformers. You may view this as a memory leak, however
 #     Because we have few Metaclasses, in practice it seems acceptable
-# - To allow Immutable Metaclass instances to be cleaned up we could weaken
-#     the reference stored in  $IMMUTABLE_METACLASSES{$class} and ||= should DWIM
+# - To allow Immutable Transformers instances to be cleaned up we could weaken
+#     the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
 
 {
-    # NOTE:
-    # the immutable version of a
-    # particular metaclass is
-    # really class-level data so
-    # we don't want to regenerate
-    # it any more than we need to
-    my %IMMUTABLE_METACLASSES;
+    my %IMMUTABLE_TRANSFORMERS;
     my %IMMUTABLE_OPTIONS;
     sub make_immutable {
         my $self = shift;
         my %options = @_;
-        my $class = blessed $self || $self;;
+        my $class = blessed $self || $self;
 
-        $IMMUTABLE_METACLASSES{$class} ||= Class::MOP::Immutable->new($self, {
-            read_only   => [qw/superclasses/],
-            cannot_call => [qw/
-                add_method
-                alias_method
-                remove_method
-                add_attribute
-                remove_attribute
-                add_package_symbol
-                remove_package_symbol
-            /],
-            memoize     => {
-                class_precedence_list             => 'ARRAY',
-                compute_all_applicable_attributes => 'ARRAY',
-                get_meta_instance                 => 'SCALAR',
-                get_method_map                    => 'SCALAR',
-            }
-        });
+        $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
+        my $transformer = $IMMUTABLE_TRANSFORMERS{$class};
 
-        $IMMUTABLE_METACLASSES{$class}->make_metaclass_immutable($self, %options);
+        $transformer->make_metaclass_immutable($self, %options);
         $IMMUTABLE_OPTIONS{refaddr $self} =
-            { %options,  IMMUTABLE_METACLASS => $IMMUTABLE_METACLASSES{$class} };
+            { %options,  IMMUTABLE_TRANSFORMER => $transformer };
 
         if( exists $options{debug} && $options{debug} ){
-            print STDERR "# of Metaclass options:     ", keys %IMMUTABLE_OPTIONS;
-            print STDERR "# of Immutable metaclasses: ", keys %IMMUTABLE_METACLASSES;
+            print STDERR "# of Metaclass options:      ", keys %IMMUTABLE_OPTIONS;
+            print STDERR "# of Immutable transformers: ", keys %IMMUTABLE_TRANSFORMERS;
         }
     }
 
@@ -805,10 +783,33 @@ sub is_immutable { 0 }
         my $self = shift;
         return if $self->is_mutable;
         my $options = delete $IMMUTABLE_OPTIONS{refaddr $self};
-        my $immutable_metaclass = delete $options->{IMMUTABLE_METACLASS};
-        $immutable_metaclass->make_metaclass_mutable($self, %$options);
+        confess "unable to find immutabilizing options" unless $options;
+        my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
+        $transformer->make_metaclass_mutable($self, %$options);
     }
+}
 
+sub create_immutable_transformer {
+    my $self = shift;
+    my $class = Class::MOP::Immutable->new($self, {
+       read_only   => [qw/superclasses/],
+       cannot_call => [qw/
+           add_method
+           alias_method
+           remove_method
+           add_attribute
+           remove_attribute
+           add_package_symbol
+           remove_package_symbol
+       /],
+       memoize     => {
+           class_precedence_list             => 'ARRAY',
+           compute_all_applicable_attributes => 'ARRAY',
+           get_meta_instance                 => 'SCALAR',
+           get_method_map                    => 'SCALAR',
+       }
+    });
+    return $class;
 }
 
 1;

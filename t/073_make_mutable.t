@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 101;
+use Test::More tests => 104;
 use Test::Exception;
 
 use Scalar::Util;
@@ -120,11 +120,15 @@ BEGIN {
 
 {
 
+    ok(Baz->meta->is_immutable,  'Superclass is immutable');
     my $meta = Baz->meta->create_anon_class(superclasses => ['Baz']);
     my @orig_keys  = sort keys %$meta;
     my @orig_meths = sort { $a->{name} cmp $b->{name} }
       $meta->compute_all_applicable_methods;
     ok($meta->is_anon_class,                  'We have an anon metaclass');
+    ok($meta->is_mutable,  '... our anon class is mutable');
+    ok(!$meta->is_immutable,  '... our anon class is not immutable');
+
     lives_ok {$meta->make_immutable(
                                     inline_accessor    => 1,
                                     inline_destructor  => 0,

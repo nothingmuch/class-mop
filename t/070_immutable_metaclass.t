@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 73;
+use Test::More tests => 83;
 use Test::Exception;
 
 BEGIN {
@@ -38,6 +38,35 @@ BEGIN {
     __PACKAGE__->meta->superclasses('Bar');
 
     __PACKAGE__->meta->add_attribute('bah');
+}
+
+{
+  my $meta = Foo->meta;
+
+  my $transformer;
+  lives_ok{ $transformer = $meta->create_immutable_transformer }
+    "Created immutable transformer";
+  isa_ok($transformer, 'Class::MOP::Immutable', '... transformer isa Class::MOP::Immutable');
+  my $methods = $transformer->create_methods_for_immutable_metaclass;
+
+  my $immutable_metaclass = $transformer->immutable_metaclass;
+  is($transformer->metaclass, $meta,      '... transformer has correct metaclass');
+  ok($immutable_metaclass->is_anon_class, '... immutable_metaclass is an anonymous class');
+
+  #I don't understand why i need to ->meta here...
+  my $obj = $immutable_metaclass->name;
+  ok(!$obj->is_mutable,     '... immutable_metaclass is not mutable');
+  ok($obj->is_immutable,    '... immutable_metaclass is immutable');
+  ok(!$obj->make_immutable, '... immutable_metaclass make_mutable is noop');
+  is($obj->meta, $immutable_metaclass, '... immutable_metaclass meta hack works');
+
+  is_deeply(
+            [ $immutable_metaclass->superclasses ],
+            [ $meta->blessed ],
+            '... immutable_metaclass superclasses are correct'
+           );
+  ok($immutable_metaclass->has_method('get_mutable_metaclass_name'));
+
 }
 
 {

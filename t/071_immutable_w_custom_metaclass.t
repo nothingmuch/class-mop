@@ -6,7 +6,7 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 10;
+use Test::More tests => 15;
 use Test::Exception;
 use Scalar::Util;
 
@@ -50,13 +50,17 @@ use lib catdir($FindBin::Bin, 'lib');
 
 {
     my $meta = Baz->meta;
+    ok($meta->is_mutable, '... Baz is mutable');
     is(Foo->meta->blessed, Bar->meta->blessed, 'Foo and Bar immutable metaclasses match');
     is($meta->blessed, 'MyMetaClass', 'Baz->meta blessed as MyMetaClass');
     ok(Baz->can('mymetaclass_attributes'), '... Baz can do method before immutable');
     ok($meta->can('mymetaclass_attributes'), '... meta can do method before immutable');
-    $meta->make_immutable;
+    lives_ok { $meta->make_immutable } "Baz is now immutable";
+    ok($meta->is_immutable, '... Baz is immutable');
     isa_ok($meta, 'MyMetaClass', 'Baz->meta');
     ok(Baz->can('mymetaclass_attributes'), '... Baz can do method after imutable');
     ok($meta->can('mymetaclass_attributes'), '... meta can do method after immutable');
     isnt(Baz->meta->blessed, Bar->meta->blessed, 'Baz and Bar immutable metaclasses are different');
+    lives_ok { $meta->make_mutable } "Baz is now mutable";
+    ok($meta->is_mutable, '... Baz is mutable again');
 }
