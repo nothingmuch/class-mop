@@ -85,7 +85,6 @@ sub make_metaclass_immutable {
 
     if ($options{inline_constructor}) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
-
         $metaclass->add_method(
             $options{constructor_name},
             $constructor_class->new(

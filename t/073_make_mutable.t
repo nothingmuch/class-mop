@@ -47,12 +47,12 @@ BEGIN {
     is($meta->name, 'Baz', '... checking the Baz metaclass');
     my @orig_keys = sort keys %$meta;
 
-    lives_ok {$meta->make_immutable() } '... changed Baz to be immutable';
+    lives_ok {$meta->make_immutable; } '... changed Baz to be immutable';
     ok(!$meta->is_mutable,              '... our class is no longer mutable');
     ok($meta->is_immutable,             '... our class is now immutable');
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
 
-    lives_ok { $meta->make_mutable() }  '... changed Baz to be mutable';
+    lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
     ok($meta->is_mutable,               '... our class is mutable');
     ok(!$meta->is_immutable,            '... our class is not immutable');
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
@@ -118,13 +118,12 @@ BEGIN {
              class_precedence_list  get_method_map );
 }
 
-
-
 {
 
     my $meta = Baz->meta->create_anon_class(superclasses => ['Baz']);
     my @orig_keys  = sort keys %$meta;
-    my @orig_meths = sort $meta->compute_all_applicable_methods;
+    my @orig_meths = sort { $a->{name} cmp $b->{name} }
+      $meta->compute_all_applicable_methods;
     ok($meta->is_anon_class,                  'We have an anon metaclass');
     lives_ok {$meta->make_immutable(
                                     inline_accessor    => 1,
@@ -144,7 +143,8 @@ BEGIN {
     my $instance = $meta->new_object;
 
     my @new_keys  = sort keys %$meta;
-    my @new_meths = sort $meta->compute_all_applicable_methods;
+    my @new_meths = sort { $a->{name} cmp $b->{name} }
+      $meta->compute_all_applicable_methods;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
     is_deeply(\@orig_meths, \@new_meths, '... no straneous methods');
 

@@ -7,6 +7,14 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - Immutability can now be undone,
         added make_mutable + tests + docs (groditi)
+      - Massive changes to the way Immutable is done
+        for details see comments next to make_immutable
+        This fixes a bug where custom metaclasses broke
+        when made immutable. We are now keeping one immutable 
+        metaclass instance per metaclass instead of just one 
+        to prevent isa hierarchy corruption. Memory use will go
+        up, but I suspect it will be neglible.
+         - New tests added for this behavior.  (groditi)
 
 0.38 Thurs. May 31, 2007
     ~~ More documentation updates ~~
