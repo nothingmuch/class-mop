@@ -324,6 +324,10 @@ This will change the C<$metaclass> into the mutable version by reversing
 the immutable process. C<%options> should be the same options that were
 given to make_metaclass_immutable.
 
+=item B<create_immutable_transformer>
+
+Create a transformer suitable for making this class immutable
+
 =back
 
 =head1 AUTHORS
