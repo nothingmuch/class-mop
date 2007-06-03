@@ -9,7 +9,7 @@ use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken', 'refaddr';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
@@ -770,7 +770,7 @@ sub is_immutable { 0 }
         my $transformer = $IMMUTABLE_TRANSFORMERS{$class};
 
         $transformer->make_metaclass_immutable($self, %options);
-        $IMMUTABLE_OPTIONS{refaddr $self} =
+        $IMMUTABLE_OPTIONS{$self->name} =
             { %options,  IMMUTABLE_TRANSFORMER => $transformer };
 
         if( exists $options{debug} && $options{debug} ){
@@ -782,7 +782,7 @@ sub is_immutable { 0 }
     sub make_mutable{
         my $self = shift;
         return if $self->is_mutable;
-        my $options = delete $IMMUTABLE_OPTIONS{refaddr $self};
+        my $options = delete $IMMUTABLE_OPTIONS{$self->name};
         confess "unable to find immutabilizing options" unless $options;
         my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
         $transformer->make_metaclass_mutable($self, %$options);
