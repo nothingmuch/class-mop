@@ -61,6 +61,7 @@ t/061_instance_inline.t
 t/070_immutable_metaclass.t
 t/071_immutable_w_custom_metaclass.t
 t/072_immutable_w_constructors.t
+t/073_make_mutable.t
 t/080_meta_package.t
 t/081_meta_package_extension.t
 t/100_BinaryTree_test.t

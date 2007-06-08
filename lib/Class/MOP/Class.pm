@@ -741,22 +741,23 @@ sub find_attribute_by_name {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
-#Why I changed this (groditi)
-# - One Metaclass may have many Classes through many Metaclass instances
-# - One Metaclass should only have one Immutable Transformer instance
-# - Each Class may have different Immutabilizing options
-# - Therefore each Metaclass instance may have different Immutabilizing options
-# - We need to store one Immutable Transformer instance per Metaclass
-# - We need to store one set of Immutable Transformer options per Class
-# - Upon make_mutable we may delete the Immutabilizing options
-# - We could clean the immutable Transformer instance when there is no more
-#     immutable Classes of that type, but we can also keep it in case
-#     another class with this same Metaclass becomes immutable. It is a case
-#     of trading of storing an instance to avoid unnecessary instantiations of
-#     Immutable Transformers. You may view this as a memory leak, however
-#     Because we have few Metaclasses, in practice it seems acceptable
-# - To allow Immutable Transformers instances to be cleaned up we could weaken
-#     the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
+# NOTE:
+# Why I changed this (groditi)
+#  - One Metaclass may have many Classes through many Metaclass instances
+#  - One Metaclass should only have one Immutable Transformer instance
+#  - Each Class may have different Immutabilizing options
+#  - Therefore each Metaclass instance may have different Immutabilizing options
+#  - We need to store one Immutable Transformer instance per Metaclass
+#  - We need to store one set of Immutable Transformer options per Class
+#  - Upon make_mutable we may delete the Immutabilizing options
+#  - We could clean the immutable Transformer instance when there is no more
+#      immutable Classes of that type, but we can also keep it in case
+#      another class with this same Metaclass becomes immutable. It is a case
+#      of trading of storing an instance to avoid unnecessary instantiations of
+#      Immutable Transformers. You may view this as a memory leak, however
+#      Because we have few Metaclasses, in practice it seems acceptable
+#  - To allow Immutable Transformers instances to be cleaned up we could weaken
+#      the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
 
 {
     my %IMMUTABLE_TRANSFORMERS;
@@ -1376,6 +1377,10 @@ the L<Class::MOP::Immutable> documentation.
 
 This method will reverse tranforamtion upon the class which
 made it immutable.
+
+=item B<create_immutable_transformer>
+
+Create a transformer suitable for making this class immutable
 
 =back
 

@@ -9,7 +9,7 @@ use Class::MOP::Method::Constructor;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
 sub new {
@@ -135,10 +135,6 @@ sub make_metaclass_immutable {
         }
     }
 
-    #I'm not sure i understand this, stevan suggested the addition i don't think its actually needed
-    #my $is_immutable = $metaclass->is_anon_class;
-    #$self->immutable_metaclass->add_method('is_anon_class' => sub { $is_immutable });
-
     $metaclass->{'___original_class'} = blessed($metaclass);
     bless $metaclass => $self->immutable_metaclass->name;
 }
@@ -166,22 +162,23 @@ sub make_metaclass_mutable {
           if $immutable->get_method('DESTROY')->blessed eq $options{destructor_class};
     }
 
-    #14:01 <@stevan> nah,. you shouldnt
-    #14:01 <@stevan> they are just inlined
-    #14:01 <@stevan> which is the default in Moose anyway
-    #14:02 <@stevan> and adding new attributes will just DWIM
-    #14:02 <@stevan> and you really cant change an attribute anyway
-    #if ($options{inline_accessors}) {
-    #    foreach my $attr_name ($immutable->get_attribute_list) {
-    #        my $attr = $immutable->get_attribute($attr_name);
-    #        $attr->remove_accessors;
-    #        $attr->install_accessors(0);
-    #    }
-    #}
+    # NOTE:
+    # 14:01 <@stevan> nah,. you shouldnt
+    # 14:01 <@stevan> they are just inlined
+    # 14:01 <@stevan> which is the default in Moose anyway
+    # 14:02 <@stevan> and adding new attributes will just DWIM
+    # 14:02 <@stevan> and you really cant change an attribute anyway
+    # if ($options{inline_accessors}) {
+    #     foreach my $attr_name ($immutable->get_attribute_list) {
+    #         my $attr = $immutable->get_attribute($attr_name);
+    #         $attr->remove_accessors;
+    #         $attr->install_accessors(0);
+    #     }
+    # }
 
-    #14:26 <@stevan> the only user of ::Method::Constructor is immutable
-    #14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
-    #14:27 <@stevan> so I am not worried
+    # 14:26 <@stevan> the only user of ::Method::Constructor is immutable
+    # 14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
+    # 14:27 <@stevan> so I am not worried
     $options{constructor_name} = 'new' unless exists $options{constructor_name};
     if ($options{inline_constructor}) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
@@ -323,10 +320,6 @@ This will actually change the C<$metaclass> into the immutable version.
 This will change the C<$metaclass> into the mutable version by reversing
 the immutable process. C<%options> should be the same options that were
 given to make_metaclass_immutable.
-
-=item B<create_immutable_transformer>
-
-Create a transformer suitable for making this class immutable
 
 =back
 
