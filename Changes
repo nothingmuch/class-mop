@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.41 Sun. July 15, 2007
+    * t/
+        Arghh!!! My TODO test didn't work, so I handle
+        it manually now so that people can use this 
+        with 5.9.5/bleadperl without issue.
+
 0.40 Tues, July 3, 2007
     * t/
       ~ marked a test in 003_methods.t as TODO 
