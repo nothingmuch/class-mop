@@ -84,7 +84,7 @@ is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
 
-if (!$Foo->has_method('FOO_CONSTANT')) {
+if ($Foo->has_method('FOO_CONSTANT')) {
     pass('... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
 }
 else {
