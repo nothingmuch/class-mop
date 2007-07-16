@@ -84,22 +84,7 @@ is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
 
-if ($Foo->has_method('FOO_CONSTANT')) {
-    pass('... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
-}
-else {
-    diag(q{
-        FIXME:
-        You are using bleadperl or 5.9.5 which handles constants 
-        in a differnt way then prior versions of perl. This will
-        cause this test to break, but the test it not critical 
-        to the operation of this module, so I am letting pass 
-        with a big FIXME note until I have the tuits to install
-        5.9.5 and fix it. 
-        
-        Of course, patches are *always* welcome :) });    
-    pass('... FIXME: Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');    
-}
+ok($Foo->has_method('FOO_CONSTANT'), '... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
 ok($Foo->has_method('bar'), '... Foo->has_method(bar) (defined in Foo)');
 ok($Foo->has_method('baz'), '... Foo->has_method(baz) (typeglob aliased within Foo)');
 ok($Foo->has_method('floob'), '... Foo->has_method(floob) (defined in Foo:: using symbol tables and Sub::Name w/out package name)');

@@ -124,10 +124,13 @@ sub has_package_symbol {
     # this. Which of course means that 
     # if you put \undef in your scalar
     # then this is broken.
-    
-    if ($type eq 'SCALAR') {    
+
+    if (ref($self->namespace->{$name}) eq 'SCALAR') {
+        return ($type eq 'CODE' ? 1 : 0);
+    }
+    elsif ($type eq 'SCALAR') {    
         my $val = *{$self->namespace->{$name}}{$type};
-        defined(${$val}) ? 1 : 0;        
+        return defined(${$val}) ? 1 : 0;        
     }
     else {
         defined(*{$self->namespace->{$name}}{$type}) ? 1 : 0;
@@ -141,7 +144,19 @@ sub get_package_symbol {
 
     $self->add_package_symbol($variable)
         unless exists $self->namespace->{$name};
-    return *{$self->namespace->{$name}}{$type};
+
+    if (ref($self->namespace->{$name}) eq 'SCALAR') {
+        if ($type eq 'CODE') {
+            no strict 'refs';
+            return \&{$self->name.'::'.$name};
+        }
+        else {
+            return undef;
+        }
+    }
+    else {
+        return *{$self->namespace->{$name}}{$type};
+    }
 }
 
 sub remove_package_symbol {
@@ -194,9 +209,10 @@ sub list_all_package_symbols {
     # type (SCALAR|ARRAY|HASH|CODE)
     my $namespace = $self->namespace;
     return grep { 
-        defined(*{$namespace->{$_}}{$type_filter}) 
-    } grep {
-        ref(\$namespace->{$_}) eq 'GLOB'   
+        (ref($namespace->{$_})
+            ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
+            : (ref(\$namespace->{$_}) eq 'GLOB'
+               && defined(*{$namespace->{$_}}{$type_filter})));
     } keys %{$namespace};
 }
 

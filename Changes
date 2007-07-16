@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Package
+      - alter symbol table handling to deal with 5.8.x and 5.9.x
+    * t/
+        Get rid of the crappy workaround from 0.40/41
+
 0.41 Sun. July 15, 2007
     * t/
         Arghh!!! My TODO test didn't work, so I handle
