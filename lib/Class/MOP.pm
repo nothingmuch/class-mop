@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Immutable;
 
-our $VERSION   = '0.41';
+our $VERSION   = '0.42';
 our $AUTHORITY = 'cpan:STEVAN';
 
 {
@@ -854,6 +854,8 @@ B<with contributions from:>
 Brandon (blblack) Black
 
 Guillermo (groditi) Roditi
+
+Matt (mst) Trout
 
 Rob (robkinyon) Kinyon
 
