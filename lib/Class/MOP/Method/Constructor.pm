@@ -16,14 +16,15 @@ sub new {
     my $class   = shift;
     my %options = @_;
         
-    (exists $options{options} && ref $options{options} eq 'HASH')
-        || confess "You must pass a hash of options"; 
+    (blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
+        || confess "You must pass a metaclass instance if you want to inline"
+            if $options{is_inline}; 
     
     my $self = bless {
         # from our superclass
         '&!body'          => undef,
         # specific to this subclass
-        '%!options'              => $options{options},
+        '%!options'              => $options{options} || {},
         '$!associated_metaclass' => $options{metaclass},
         '$!is_inline'            => ($options{is_inline} || 0),        
     } => $class;
