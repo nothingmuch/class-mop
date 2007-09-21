@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 39;
+use Test::More tests => 42;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -14,6 +14,7 @@ BEGIN {
     use_ok('Class::MOP::Attribute');
     use_ok('Class::MOP::Method');  
     use_ok('Class::MOP::Method::Wrapped');                
+    use_ok('Class::MOP::Method::Generated');     
     use_ok('Class::MOP::Method::Accessor');                    
     use_ok('Class::MOP::Method::Constructor');                    
     use_ok('Class::MOP::Instance');            
@@ -26,6 +27,7 @@ my $CLASS_MOP_CLASS_IMMUTABLE_CLASS = 'Class::MOP::Class::__ANON__::SERIAL::1';
 
 my %METAS = (
     'Class::MOP::Attribute'           => Class::MOP::Attribute->meta, 
+    'Class::MOP::Method::Generated'   => Class::MOP::Method::Generated->meta,
     'Class::MOP::Method::Accessor'    => Class::MOP::Method::Accessor->meta,  
     'Class::MOP::Method::Constructor' => Class::MOP::Method::Constructor->meta,         
     'Class::MOP::Package'             => Class::MOP::Package->meta, 
@@ -59,6 +61,7 @@ is_deeply(
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
         Class::MOP::Method::Constructor->meta,                        
+        Class::MOP::Method::Generated->meta,        
         Class::MOP::Method::Wrapped->meta,
         Class::MOP::Module->meta, 
         Class::MOP::Object->meta,          
@@ -74,7 +77,8 @@ is_deeply(
         Class::MOP::Instance
         Class::MOP::Method
         Class::MOP::Method::Accessor 
-        Class::MOP::Method::Constructor        
+        Class::MOP::Method::Constructor   
+        Class::MOP::Method::Generated             
         Class::MOP::Method::Wrapped
         Class::MOP::Module  
         Class::MOP::Object        
@@ -91,7 +95,8 @@ is_deeply(
        "Class::MOP::Instance-"            . $Class::MOP::Instance::VERSION            . "-cpan:STEVAN",
        "Class::MOP::Method-"              . $Class::MOP::Method::VERSION              . "-cpan:STEVAN",
        "Class::MOP::Method::Accessor-"    . $Class::MOP::Method::Accessor::VERSION    . "-cpan:STEVAN",                 
-       "Class::MOP::Method::Constructor-" . $Class::MOP::Method::Constructor::VERSION . "-cpan:STEVAN",                        
+       "Class::MOP::Method::Constructor-" . $Class::MOP::Method::Constructor::VERSION . "-cpan:STEVAN",
+       "Class::MOP::Method::Generated-"   . $Class::MOP::Method::Generated::VERSION   . "-cpan:STEVAN",                        
        "Class::MOP::Method::Wrapped-"     . $Class::MOP::Method::Wrapped::VERSION     . "-cpan:STEVAN",       
        "Class::MOP::Module-"              . $Class::MOP::Module::VERSION              . "-cpan:STEVAN",
        "Class::MOP::Object-"              . $Class::MOP::Object::VERSION              . "-cpan:STEVAN",

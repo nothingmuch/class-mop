@@ -92,6 +92,7 @@ sub make_metaclass_immutable {
             $constructor_class->new(
                 options   => \%options,
                 metaclass => $metaclass,
+                is_inline => 1,
             )
         ) unless $metaclass->has_method($options{constructor_name});
     }

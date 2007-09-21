@@ -7,10 +7,10 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Method';
+use base 'Class::MOP::Method::Generated';
 
 sub new {
     my $class   = shift;
@@ -39,7 +39,7 @@ sub new {
     # needed
     weaken($self->{'$!attribute'});
     
-    $self->intialize_body;
+    $self->initialize_body;
     
     return $self;
 }
@@ -48,11 +48,10 @@ sub new {
 
 sub associated_attribute { (shift)->{'$!attribute'}     }
 sub accessor_type        { (shift)->{'$!accessor_type'} }
-sub is_inline            { (shift)->{'$!is_inline'}     }
 
 ## factory 
 
-sub intialize_body {
+sub initialize_body {
     my $self = shift;
     
     my $method_name = join "_" => (
@@ -246,7 +245,7 @@ This returns the boolean which was passed into C<new>.
 
 This returns the attribute instance which was passed into C<new>.
 
-=item B<intialize_body>
+=item B<initialize_body>
 
 This will actually generate the method based on the specified 
 criteria passed to the constructor.

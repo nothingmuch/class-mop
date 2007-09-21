@@ -13,7 +13,7 @@ use Class::MOP::Method;
 
 use Class::MOP::Immutable;
 
-our $VERSION   = '0.42';
+our $VERSION   = '0.43';
 our $AUTHORITY = 'cpan:STEVAN';
 
 {
@@ -429,6 +429,16 @@ Class::MOP::Method::Wrapped->meta->add_attribute(
 );
 
 ## --------------------------------------------------------
+## Class::MOP::Method::Generated
+
+Class::MOP::Method::Generated->meta->add_attribute(
+    Class::MOP::Attribute->new('$!is_inline' => (
+        init_arg => 'is_inline',
+        reader   => { 'is_inline' => \&Class::MOP::Method::Generated::is_inline },
+    ))    
+);
+
+## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
 
 Class::MOP::Method::Accessor->meta->add_attribute(
@@ -447,12 +457,6 @@ Class::MOP::Method::Accessor->meta->add_attribute(
     ))    
 );
 
-Class::MOP::Method::Accessor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!is_inline' => (
-        init_arg => 'is_inline',
-        reader   => { 'is_inline' => \&Class::MOP::Method::Accessor::is_inline },
-    ))    
-);
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Constructor
@@ -514,6 +518,8 @@ $_->meta->make_immutable(
     
     Class::MOP::Object   
 
+    Class::MOP::Method::Generated
+    
     Class::MOP::Method::Accessor
     Class::MOP::Method::Constructor    
     Class::MOP::Method::Wrapped           

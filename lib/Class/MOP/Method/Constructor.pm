@@ -7,10 +7,10 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken', 'looks_like_number';
 
-our $VERSION   = '0.01';
+our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Method';
+use base 'Class::MOP::Method::Generated';
 
 sub new {
     my $class   = shift;
@@ -23,11 +23,9 @@ sub new {
         # from our superclass
         '&!body'          => undef,
         # specific to this subclass
-        '%!options'       => $options{options},
-        '$!meta_instance' => $options{metaclass}->get_meta_instance,
-        '@!attributes'    => [ $options{metaclass}->compute_all_applicable_attributes ], 
-        # ...
+        '%!options'              => $options{options},
         '$!associated_metaclass' => $options{metaclass},
+        '$!is_inline'            => ($options{is_inline} || 0),        
     } => $class;
 
     # we don't want this creating 
@@ -35,40 +33,52 @@ sub new {
     # needed
     weaken($self->{'$!associated_metaclass'});    
 
-    $self->intialize_body;
+    $self->initialize_body;
 
     return $self;    
 }
 
-## predicates
-
-# NOTE:
-# if it is blessed into this class, 
-# then it is always inlined, that is 
-# pretty much what this class is for.
-sub is_inline { 1 }
-
 ## accessors 
 
-sub options       { (shift)->{'%!options'}       }
-sub meta_instance { (shift)->{'$!meta_instance'} }
-sub attributes    { (shift)->{'@!attributes'}    }
-
+sub options              { (shift)->{'%!options'}              }
 sub associated_metaclass { (shift)->{'$!associated_metaclass'} }
+
+## cached values ...
+
+sub meta_instance { 
+    my $self = shift;
+    $self->{'$!meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
+}
+
+sub attributes { 
+    my $self = shift;
+    $self->{'@!attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
+}
 
 ## method
 
-sub intialize_body {
+sub initialize_body {
+    my $self        = shift;
+    my $method_name = 'generate_constructor_method';
+    
+    $method_name .= '_inline' if $self->is_inline;
+    
+    $self->{'&!body'} = $self->$method_name;
+}
+
+sub generate_constructor_method {
+    return sub { (shift)->meta->new_object(@_) }
+}
+
+sub generate_constructor_method_inline {
     my $self = shift;
-    # TODO:
-    # the %options should also include a both 
-    # a call 'initializer' and call 'SUPER::' 
-    # options, which should cover approx 90% 
-    # of the possible use cases (even if it 
-    # requires some adaption on the part of 
-    # the author, after all, nothing is free)
+
     my $source = 'sub {';
     $source .= "\n" . 'my ($class, %params) = @_;';
+    
+    $source .= "\n" . 'return $class->meta->new_object(%params)';
+    $source .= "\n" . '    if $class ne \'' . $self->associated_metaclass->name . '\';';    
+    
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map { 
         $self->_generate_slot_initializer($_) 
@@ -87,7 +97,7 @@ sub intialize_body {
         $code = eval $source;
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
     }
-    $self->{'&!body'} = $code;
+    return $code;
 }
 
 sub _generate_slot_initializer {
@@ -182,9 +192,19 @@ metaclass which is passed into C<new>.
 This returns a boolean, but since constructors are very rarely 
 not inlined, this always returns true for now.
 
-=item B<intialize_body>
+=item B<initialize_body>
 
 This creates the code reference for the constructor itself. 
+
+=back
+
+=head2 Method Generators
+
+=over 4
+
+=item B<generate_constructor_method>
+
+=item B<generate_constructor_method_inline>
 
 =back
 

@@ -1,5 +1,24 @@
 Revision history for Perl extension Class-MOP.
 
+0.43
+    * Class::MOP::Method::Accessor 
+      - made this a subclass of Class::MOP::Method::Generated
+        - removed the relevant attributes
+
+    * Class::MOP::Method::Constructor
+      - fixed the cached values we had to be more sane
+      - made this a subclass of Class::MOP::Method::Generated
+      - fixed generated constructor so it properly handles 
+        subclasses now.
+        - added tests for this
+      - added the option to allow for both inlined and 
+        non-inlined constructors.
+
+    * Class::MOP::Method::Generated
+      - added this class as an abstract base for the 
+        Class::MOP::Method::{Constructor,Accessor} classes
+        - added tests for this
+
 0.42 Mon. July 16, 2007
     !!! Horray for mst, he fixed it !!!
 

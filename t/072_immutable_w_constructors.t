@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 73;
+use Test::More tests => 77;
 use Test::Exception;
 
 BEGIN {
@@ -87,8 +87,18 @@ BEGIN {
         my $foo = Foo->new(bar => 'BAZ');
         isa_ok($foo, 'Foo');
         is($foo->bar, 'BAZ', '... got the right parameter value');
+    }   
+    
+    # NOTE:
+    # check that the constructor correctly handles inheritance
+    {
+        my $bar = Bar->new();
+        isa_ok($bar, 'Bar');
+        isa_ok($bar, 'Foo');        
+        is($bar->bar, 'BAR', '... got the right inherited parameter value');
+        is($bar->baz, 'BAZ', '... got the right inherited parameter value');        
     }    
-
+    
     # check out accessors too
     {
         my $bar_accessor = $meta->get_method('bar');
