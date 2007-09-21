@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 47;
+use Test::More tests => 50;
 use Test::Exception;
 
 BEGIN { 
@@ -20,6 +20,10 @@ my $BAZ_ATTR = Class::MOP::Attribute->new('$baz' => (
 ));
 
 my $BAR_ATTR_2 = Class::MOP::Attribute->new('$bar');
+
+is($FOO_ATTR->name, '$foo', '... got the attributes name correctly');
+is($BAR_ATTR->name, '$bar', '... got the attributes name correctly');
+is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
 
 {
     package Foo;
