@@ -29,6 +29,9 @@ sub initialize {
     my $package_name = shift;
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";
+    if (defined(my $meta = Class::MOP::get_metaclass_by_name($package_name))) {
+        return $meta;
+    }
     $class->construct_class_instance('package' => $package_name, @_);
 }
 
@@ -58,8 +61,10 @@ sub construct_class_instance {
     # and it is still defined (it has not been
     # reaped by DESTROY yet, which can happen
     # annoyingly enough during global destruction)
-    return Class::MOP::get_metaclass_by_name($package_name)
-        if Class::MOP::does_metaclass_exist($package_name);
+
+    if (defined(my $meta = Class::MOP::get_metaclass_by_name($package_name))) {
+        return $meta;
+    }
 
     # NOTE:
     # we need to deal with the possibility

@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Class
+      - optimise metaclass-already-exists check in construct_class_instance
+      - duplicate check into initialize to save a call through
+
 0.43
     * Class::MOP::Method::Accessor 
       - made this a subclass of Class::MOP::Method::Generated
