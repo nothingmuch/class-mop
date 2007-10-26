@@ -91,8 +91,7 @@ sub initialize_instance_slot {
     # attribute's default value (if it has one)
     if (!defined $val && defined $self->{'$!default'}) {
         $val = $self->default($instance);
-    }
-    if (!defined $val && defined $self->{'$!builder'}) {
+    } elsif (!defined $val && defined $self->{'$!builder'}) {
         my $builder = $self->{'$!builder'};
         confess(blessed($instance)." does not support builder method '$builder' for attribute '" . $self->name . "'")
             unless $instance->can($builder);
