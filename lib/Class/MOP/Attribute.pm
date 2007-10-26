@@ -9,41 +9,46 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.15';
+our $VERSION   = '0.16';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
 
-sub meta { 
+sub meta {
     require Class::MOP::Class;
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
 # NOTE: (meta-circularity)
-# This method will be replaced in the 
-# boostrap section of Class::MOP, by 
-# a new version which uses the 
+# This method will be replaced in the
+# boostrap section of Class::MOP, by
+# a new version which uses the
 # &Class::MOP::Class::construct_instance
 # method to build an attribute meta-object
 # which itself is described with attribute
-# meta-objects. 
+# meta-objects.
 #     - Ain't meta-circularity grand? :)
 sub new {
     my $class   = shift;
     my $name    = shift;
-    my %options = @_;    
-        
+    my %options = @_;
+
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
-        
-    $options{init_arg} = $name 
+
+    $options{init_arg} = $name
         if not exists $options{init_arg};
-            
+    if(exists $options{builder}){
+        confess("builder must be a defined scalar value which is a method name")
+            if ref $options{builder} || !(defined $options{builder});
+        confess("Setting both default and builder is not allowed.")
+            if exists $options{default};
+    }
     (is_default_a_coderef(\%options))
-        || confess("References are not allowed as default values, you must ". 
+        || confess("References are not allowed as default values, you must ".
                    "wrap then in a CODE reference (ex: sub { [] } and not [])")
-            if exists $options{default} && ref $options{default};      
-            
+            if exists $options{default} && ref $options{default};
+
     bless {
         '$!name'      => $name,
         '$!accessor'  => $options{accessor},
@@ -51,21 +56,22 @@ sub new {
         '$!writer'    => $options{writer},
         '$!predicate' => $options{predicate},
         '$!clearer'   => $options{clearer},
+        '$!builder'   => $options{builder},
         '$!init_arg'  => $options{init_arg},
         '$!default'   => $options{default},
-        # keep a weakened link to the 
+        # keep a weakened link to the
         # class we are associated with
         '$!associated_class' => undef,
-        # and a list of the methods 
+        # and a list of the methods
         # associated with this attr
         '@!associated_methods' => [],
     } => $class;
 }
 
 # NOTE:
-# this is a primative (and kludgy) clone operation 
+# this is a primative (and kludgy) clone operation
 # for now, it will be replaced in the Class::MOP
-# bootstrap with a proper one, however we know 
+# bootstrap with a proper one, however we know
 # that this one will work fine for now.
 sub clone {
     my $self    = shift;
@@ -79,18 +85,24 @@ sub initialize_instance_slot {
     my ($self, $meta_instance, $instance, $params) = @_;
     my $init_arg = $self->{'$!init_arg'};
     # try to fetch the init arg from the %params ...
-    my $val;        
+    my $val;
     $val = $params->{$init_arg} if exists $params->{$init_arg};
-    # if nothing was in the %params, we can use the 
+    # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
     if (!defined $val && defined $self->{'$!default'}) {
         $val = $self->default($instance);
+    }
+    if (!defined $val && defined $self->{'$!builder'}) {
+        my $builder = $self->{'$!builder'};
+        confess(blessed($instance)." does not support builder method '$builder' for attribute '" . $self->name . "'")
+            unless $instance->can($builder);
+        $val = $instance->$builder;
     }
     $meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
 # NOTE:
-# the next bunch of methods will get bootstrapped 
+# the next bunch of methods will get bootstrapped
 # away in the Class::MOP bootstrapping section
 
 sub name { $_[0]->{'$!name'} }
@@ -103,14 +115,16 @@ sub has_reader    { defined($_[0]->{'$!reader'})    ? 1 : 0 }
 sub has_writer    { defined($_[0]->{'$!writer'})    ? 1 : 0 }
 sub has_predicate { defined($_[0]->{'$!predicate'}) ? 1 : 0 }
 sub has_clearer   { defined($_[0]->{'$!clearer'})   ? 1 : 0 }
+sub has_builder   { defined($_[0]->{'$!builder'})   ? 1 : 0 }
 sub has_init_arg  { defined($_[0]->{'$!init_arg'})  ? 1 : 0 }
 sub has_default   { defined($_[0]->{'$!default'})   ? 1 : 0 }
 
-sub accessor  { $_[0]->{'$!accessor'}  } 
+sub accessor  { $_[0]->{'$!accessor'}  }
 sub reader    { $_[0]->{'$!reader'}    }
 sub writer    { $_[0]->{'$!writer'}    }
 sub predicate { $_[0]->{'$!predicate'} }
 sub clearer   { $_[0]->{'$!clearer'}   }
+sub builder   { $_[0]->{'$!builder'}   }
 sub init_arg  { $_[0]->{'$!init_arg'}  }
 
 # end bootstrapped away method section.
@@ -119,19 +133,19 @@ sub init_arg  { $_[0]->{'$!init_arg'}  }
 sub get_read_method  { $_[0]->reader || $_[0]->accessor }
 sub get_write_method { $_[0]->writer || $_[0]->accessor }
 
-sub is_default_a_coderef { 
-    ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))    
+sub is_default_a_coderef {
+    ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))
 }
 
-sub default { 
+sub default {
     my ($self, $instance) = @_;
     if (defined $instance && $self->is_default_a_coderef) {
-        # if the default is a CODE ref, then 
+        # if the default is a CODE ref, then
         # we pass in the instance and default
-        # can return a value based on that 
+        # can return a value based on that
         # instance. Somewhat crude, but works.
         return $self->{'$!default'}->($instance);
-    }           
+    }
     $self->{'$!default'};
 }
 
@@ -139,21 +153,21 @@ sub default {
 
 sub slots { (shift)->name }
 
-# class association 
+# class association
 
 sub attach_to_class {
     my ($self, $class) = @_;
     (blessed($class) && $class->isa('Class::MOP::Class'))
         || confess "You must pass a Class::MOP::Class instance (or a subclass)";
-    weaken($self->{'$!associated_class'} = $class);    
+    weaken($self->{'$!associated_class'} = $class);
 }
 
 sub detach_from_class {
     my $self = shift;
-    $self->{'$!associated_class'} = undef;        
+    $self->{'$!associated_class'} = undef;
 }
 
-# method association 
+# method association
 
 sub associate_method {
     my ($self, $method) = @_;
@@ -180,18 +194,18 @@ sub get_value {
 
 sub has_value {
     my ($self, $instance) = @_;
-    
+
     defined Class::MOP::Class->initialize(blessed($instance))
                              ->get_meta_instance
-                             ->get_slot_value($instance, $self->name) ? 1 : 0;    
+                             ->get_slot_value($instance, $self->name) ? 1 : 0;
 }
 
 sub clear_value {
     my ($self, $instance) = @_;
-        
+
     Class::MOP::Class->initialize(blessed($instance))
                      ->get_meta_instance
-                     ->deinitialize_slot($instance, $self->name);    
+                     ->deinitialize_slot($instance, $self->name);
 }
 
 ## load em up ...
@@ -206,34 +220,34 @@ sub process_accessors {
         my ($name, $method) = %{$accessor};
         $method = $self->accessor_metaclass->wrap($method);
         $self->associate_method($method);
-        return ($name, $method);        
+        return ($name, $method);
     }
     else {
-        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);         
+        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
         my $method;
         eval {
             $method = $self->accessor_metaclass->new(
                 attribute     => $self,
                 is_inline     => $inline_me,
                 accessor_type => $type,
-            );            
+            );
         };
-        confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;        
+        confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;
         $self->associate_method($method);
         return ($accessor, $method);
-    }    
+    }
 }
 
 sub install_accessors {
     my $self   = shift;
     my $inline = shift;
     my $class  = $self->associated_class;
-    
+
     $class->add_method(
         $self->process_accessors('accessor' => $self->accessor(), $inline)
     ) if $self->has_accessor();
 
-    $class->add_method(            
+    $class->add_method(
         $self->process_accessors('reader' => $self->reader(), $inline)
     ) if $self->has_reader();
 
@@ -244,11 +258,11 @@ sub install_accessors {
     $class->add_method(
         $self->process_accessors('predicate' => $self->predicate(), $inline)
     ) if $self->has_predicate();
-    
+
     $class->add_method(
         $self->process_accessors('clearer' => $self->clearer(), $inline)
     ) if $self->has_clearer();
-    
+
     return;
 }
 
@@ -257,25 +271,25 @@ sub install_accessors {
         my ($accessor, $class) = @_;
         if (reftype($accessor) && reftype($accessor) eq 'HASH') {
             ($accessor) = keys %{$accessor};
-        }        
-        my $method = $class->get_method($accessor);   
-        $class->remove_method($accessor) 
+        }
+        my $method = $class->get_method($accessor);
+        $class->remove_method($accessor)
             if (blessed($method) && $method->isa('Class::MOP::Method::Accessor'));
     };
-    
+
     sub remove_accessors {
         my $self = shift;
         # TODO:
-        # we really need to make sure to remove from the 
-        # associates methods here as well. But this is 
-        # such a slimly used method, I am not worried 
+        # we really need to make sure to remove from the
+        # associates methods here as well. But this is
+        # such a slimly used method, I am not worried
         # about it right now.
         $_remove_accessor->($self->accessor(),  $self->associated_class()) if $self->has_accessor();
         $_remove_accessor->($self->reader(),    $self->associated_class()) if $self->has_reader();
         $_remove_accessor->($self->writer(),    $self->associated_class()) if $self->has_writer();
         $_remove_accessor->($self->predicate(), $self->associated_class()) if $self->has_predicate();
         $_remove_accessor->($self->clearer(),   $self->associated_class()) if $self->has_clearer();
-        return;                        
+        return;
     }
 
 }
@@ -286,23 +300,23 @@ __END__
 
 =pod
 
-=head1 NAME 
+=head1 NAME
 
 Class::MOP::Attribute - Attribute Meta Object
 
 =head1 SYNOPSIS
-  
+
   Class::MOP::Attribute->new('$foo' => (
       accessor  => 'foo',        # dual purpose get/set accessor
-      predicate => 'has_foo'     # predicate check for defined-ness      
+      predicate => 'has_foo'     # predicate check for defined-ness
       init_arg  => '-foo',       # class->new will look for a -foo key
       default   => 'BAR IS BAZ!' # if no -foo key is provided, use this
   ));
-  
+
   Class::MOP::Attribute->new('$.bar' => (
       reader    => 'bar',        # getter
-      writer    => 'set_bar',    # setter     
-      predicate => 'has_bar'     # predicate check for defined-ness      
+      writer    => 'set_bar',    # setter
+      predicate => 'has_bar'     # predicate check for defined-ness
       init_arg  => ':bar',       # class->new will look for a :bar key
       # no default value means it is undef
   ));
@@ -310,13 +324,13 @@ Class::MOP::Attribute - Attribute Meta Object
 =head1 DESCRIPTION
 
 The Attribute Protocol is almost entirely an invention of this module,
-and is completely optional to this MOP. This is because Perl 5 does not 
-have consistent notion of what is an attribute of a class. There are 
-so many ways in which this is done, and very few (if any) are 
+and is completely optional to this MOP. This is because Perl 5 does not
+have consistent notion of what is an attribute of a class. There are
+so many ways in which this is done, and very few (if any) are
 easily discoverable by this module.
 
-So, all that said, this module attempts to inject some order into this 
-chaos, by introducing a consistent API which can be used to create 
+So, all that said, this module attempts to inject some order into this
+chaos, by introducing a consistent API which can be used to create
 object attributes.
 
 =head1 METHODS
@@ -327,7 +341,7 @@ object attributes.
 
 =item B<new ($name, ?%options)>
 
-An attribute must (at the very least), have a C<$name>. All other 
+An attribute must (at the very least), have a C<$name>. All other
 C<%options> are contained added as key-value pairs. Acceptable keys
 are as follows:
 
@@ -335,60 +349,67 @@ are as follows:
 
 =item I<init_arg>
 
-This should be a string value representing the expected key in 
-an initialization hash. For instance, if we have an I<init_arg> 
+This should be a string value representing the expected key in
+an initialization hash. For instance, if we have an I<init_arg>
 value of C<-foo>, then the following code will Just Work.
 
   MyClass->meta->construct_instance(-foo => "Hello There");
 
-In an init_arg is not assigned, it will automatically use the 
+In an init_arg is not assigned, it will automatically use the
 value of C<$name>.
 
 =item I<default>
 
-The value of this key is the default value which 
-C<Class::MOP::Class::construct_instance> will initialize the 
-attribute to. 
+The value of this key is the default value which
+C<Class::MOP::Class::construct_instance> will initialize the
+attribute to.
+
+=item I<builder>
+
+The value of this key is the name of the method that will be
+called to obtain the value used to initialize the attribute.
+This should be a method in the class associated with the attribute,
+not a method in the attribute class itself.
 
 B<NOTE:>
-If the value is a simple scalar (string or number), then it can 
-be just passed as is. However, if you wish to initialize it with 
-a HASH or ARRAY ref, then you need to wrap that inside a CODE 
+If the value is a simple scalar (string or number), then it can
+be just passed as is. However, if you wish to initialize it with
+a HASH or ARRAY ref, then you need to wrap that inside a CODE
 reference, like so:
 
   Class::MOP::Attribute->new('@foo' => (
       default => sub { [] },
   ));
-  
-  # or ...  
-  
+
+  # or ...
+
   Class::MOP::Attribute->new('%foo' => (
       default => sub { {} },
-  ));  
+  ));
 
-If you wish to initialize an attribute with a CODE reference 
+If you wish to initialize an attribute with a CODE reference
 itself, then you need to wrap that in a subroutine as well, like
 so:
-  
+
   Class::MOP::Attribute->new('&foo' => (
       default => sub { sub { print "Hello World" } },
   ));
 
-And lastly, if the value of your attribute is dependent upon 
-some other aspect of the instance structure, then you can take 
-advantage of the fact that when the I<default> value is a CODE 
-reference, it is passed the raw (unblessed) instance structure 
+And lastly, if the value of your attribute is dependent upon
+some other aspect of the instance structure, then you can take
+advantage of the fact that when the I<default> value is a CODE
+reference, it is passed the raw (unblessed) instance structure
 as it's only argument. So you can do things like this:
 
   Class::MOP::Attribute->new('$object_identity' => (
       default => sub { Scalar::Util::refaddr($_[0]) },
   ));
 
-This last feature is fairly limited as there is no gurantee of 
-the order of attribute initializations, so you cannot perform 
-any kind of dependent initializations. However, if this is 
-something you need, you could subclass B<Class::MOP::Class> and 
-this class to acheive it. However, this is currently left as 
+This last feature is fairly limited as there is no gurantee of
+the order of attribute initializations, so you cannot perform
+any kind of dependent initializations. However, if this is
+something you need, you could subclass B<Class::MOP::Class> and
+this class to acheive it. However, this is currently left as
 an exercise to the reader :).
 
 =back
@@ -403,39 +424,39 @@ reference which will be installed as the method itself.
 
 =item I<accessor>
 
-The I<accessor> is a standard perl-style read/write accessor. It will 
-return the value of the attribute, and if a value is passed as an argument, 
+The I<accessor> is a standard perl-style read/write accessor. It will
+return the value of the attribute, and if a value is passed as an argument,
 it will assign that value to the attribute.
 
 B<NOTE:>
-This method will properly handle the following code, by assigning an 
+This method will properly handle the following code, by assigning an
 C<undef> value to the attribute.
 
   $object->set_something(undef);
 
 =item I<reader>
 
-This is a basic read-only accessor, it will just return the value of 
+This is a basic read-only accessor, it will just return the value of
 the attribute.
 
 =item I<writer>
 
-This is a basic write accessor, it accepts a single argument, and 
-assigns that value to the attribute. This method does not intentially 
-return a value, however perl will return the result of the last 
-expression in the subroutine, which returns in this returning the 
-same value that it was passed. 
+This is a basic write accessor, it accepts a single argument, and
+assigns that value to the attribute. This method does not intentially
+return a value, however perl will return the result of the last
+expression in the subroutine, which returns in this returning the
+same value that it was passed.
 
 B<NOTE:>
-This method will properly handle the following code, by assigning an 
+This method will properly handle the following code, by assigning an
 C<undef> value to the attribute.
 
   $object->set_something();
 
 =item I<predicate>
 
-This is a basic test to see if the value of the attribute is not 
-C<undef>. It will return true (C<1>) if the attribute's value is 
+This is a basic test to see if the value of the attribute is not
+C<undef>. It will return true (C<1>) if the attribute's value is
 defined, and false (C<0>) otherwise.
 
 =item I<clearer>
@@ -449,14 +470,14 @@ back to their "unfulfilled" state.
 
 =item B<initialize_instance_slot ($instance, $params)>
 
-=back 
+=back
 
 =head2 Value management
 
-These methods are basically "backdoors" to the instance, which can be used 
-to bypass the regular accessors, but still stay within the context of the MOP. 
+These methods are basically "backdoors" to the instance, which can be used
+to bypass the regular accessors, but still stay within the context of the MOP.
 
-These methods are not for general use, and should only be used if you really 
+These methods are not for general use, and should only be used if you really
 know what you are doing.
 
 =over 4
@@ -473,20 +494,20 @@ even to attributes with just write only accessors.
 
 =item B<has_value ($instance)>
 
-Returns a boolean indicating if the item in the C<$instance> has a value in it. 
+Returns a boolean indicating if the item in the C<$instance> has a value in it.
 This is basically what the default C<predicate> method calls.
 
 =item B<clear_value ($instance)>
 
 This will clear the value in the C<$instance>. This is basically what the default
-C<clearer> would call. Note that this may be done even if the attirbute does not 
+C<clearer> would call. Note that this may be done even if the attirbute does not
 have any associated read, write or clear methods.
 
 =back
 
 =head2 Informational
 
-These are all basic read-only value accessors for the values 
+These are all basic read-only value accessors for the values
 passed into C<new>. I think they are pretty much self-explanitory.
 
 =over 4
@@ -509,13 +530,13 @@ passed into C<new>. I think they are pretty much self-explanitory.
 
 =item B<default (?$instance)>
 
-As noted in the documentation for C<new> above, if the I<default> 
+As noted in the documentation for C<new> above, if the I<default>
 value is a CODE reference, this accessor will pass a single additional
 argument C<$instance> into it and return the value.
 
 =item B<slots>
 
-Returns a list of slots required by the attribute. This is usually 
+Returns a list of slots required by the attribute. This is usually
 just one, which is the name of the attribute.
 
 =item B<get_read_method>
@@ -552,8 +573,8 @@ These are all basic predicate methods for the values passed into C<new>.
 
 =head2 Class association
 
-These methods allow you to manage the attributes association with 
-the class that contains it. These methods should not be used 
+These methods allow you to manage the attributes association with
+the class that contains it. These methods should not be used
 lightly, nor are they very magical, they are mostly used internally
 and by metaclass instances.
 
@@ -565,17 +586,17 @@ This returns the metaclass this attribute is associated with.
 
 =item B<attach_to_class ($class)>
 
-This will store a weaken reference to C<$class> internally. You should 
+This will store a weaken reference to C<$class> internally. You should
 note that just changing the class assocation will not remove the attribute
 from it's old class, and initialize it (and it's accessors) in the new
 C<$class>. It is up to you to do this manually.
 
 =item B<detach_from_class>
 
-This will remove the weakened reference to the class. It does B<not> 
-remove the attribute itself from the class (or remove it's accessors), 
-you must do that yourself if you want too. Actually if that is what 
-you want to do, you should probably be looking at 
+This will remove the weakened reference to the class. It does B<not>
+remove the attribute itself from the class (or remove it's accessors),
+you must do that yourself if you want too. Actually if that is what
+you want to do, you should probably be looking at
 L<Class::MOP::Class::remove_attribute> instead.
 
 =back
@@ -587,43 +608,43 @@ L<Class::MOP::Class::remove_attribute> instead.
 =item B<accessor_metaclass>
 
 Accessors are generated by an accessor metaclass, which is usually
-a subclass of C<Class::MOP::Method::Accessor>. This method returns 
+a subclass of C<Class::MOP::Method::Accessor>. This method returns
 the name of the accessor metaclass that this attribute uses.
 
 =item B<associate_method ($method)>
 
-This will associate a C<$method> with the given attribute which is 
-used internally by the accessor generator. 
+This will associate a C<$method> with the given attribute which is
+used internally by the accessor generator.
 
 =item B<associated_methods>
 
-This will return the list of methods which have been associated with 
-the C<associate_method> methods. 
+This will return the list of methods which have been associated with
+the C<associate_method> methods.
 
 =item B<install_accessors>
 
-This allows the attribute to generate and install code for it's own 
-I<accessor/reader/writer/predicate> methods. This is called by 
+This allows the attribute to generate and install code for it's own
+I<accessor/reader/writer/predicate> methods. This is called by
 C<Class::MOP::Class::add_attribute>.
 
-This method will call C<process_accessors> for each of the possible 
+This method will call C<process_accessors> for each of the possible
 method types (accessor, reader, writer & predicate).
 
 =item B<process_accessors ($type, $value)>
 
-This takes a C<$type> (accessor, reader, writer or predicate), and 
+This takes a C<$type> (accessor, reader, writer or predicate), and
 a C<$value> (the value passed into the constructor for each of the
-different types). It will then either generate the method itself 
-(using the C<generate_*_method> methods listed below) or it will 
-use the custom method passed through the constructor. 
+different types). It will then either generate the method itself
+(using the C<generate_*_method> methods listed below) or it will
+use the custom method passed through the constructor.
 
 =item B<remove_accessors>
 
-This allows the attribute to remove the method for it's own 
-I<accessor/reader/writer/predicate/clearer>. This is called by 
+This allows the attribute to remove the method for it's own
+I<accessor/reader/writer/predicate/clearer>. This is called by
 C<Class::MOP::Class::remove_attribute>.
 
-NOTE: This does not currently remove methods from the list returned 
+NOTE: This does not currently remove methods from the list returned
 by C<associated_methods>, that is on the TODO list.
 
 =back
@@ -634,13 +655,13 @@ by C<associated_methods>, that is on the TODO list.
 
 =item B<meta>
 
-This will return a B<Class::MOP::Class> instance which is related 
+This will return a B<Class::MOP::Class> instance which is related
 to this class.
 
-It should also be noted that B<Class::MOP> will actually bootstrap 
-this module by installing a number of attribute meta-objects into 
-it's metaclass. This will allow this class to reap all the benifits 
-of the MOP when subclassing it. 
+It should also be noted that B<Class::MOP> will actually bootstrap
+this module by installing a number of attribute meta-objects into
+it's metaclass. This will allow this class to reap all the benifits
+of the MOP when subclassing it.
 
 =back
 
@@ -655,7 +676,7 @@ Copyright 2006, 2007 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 

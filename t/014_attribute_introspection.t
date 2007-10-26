@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 51;
+use Test::More tests => 54;
 use Test::Exception;
 
 BEGIN {
-    use_ok('Class::MOP');        
+    use_ok('Class::MOP');
 }
 
 {
@@ -18,50 +18,51 @@ BEGIN {
 {
     my $meta = Class::MOP::Attribute->meta();
     isa_ok($meta, 'Class::MOP::Class');
-    
+
     my @methods = qw(
         meta
         new clone
-        
+
         initialize_instance_slot
-        
+
         name
         has_accessor  accessor
         has_writer    writer     get_write_method
         has_reader    reader     get_read_method
         has_predicate predicate
         has_clearer   clearer
+        has_builder   builder
         has_init_arg  init_arg
         has_default   default    is_default_a_coderef
-        
+
         slots
         get_value
         set_value
         has_value
         clear_value
-        
+
         associated_class
-        attach_to_class detach_from_class 
-        
+        attach_to_class detach_from_class
+
         accessor_metaclass
-        
+
         associated_methods
         associate_method
-        
+
         process_accessors
         install_accessors
         remove_accessors
         );
-        
+
     is_deeply(
         [ sort $meta->get_method_list ],
         [ sort @methods ],
-        '... our method list matches');        
-    
+        '... our method list matches');
+
     foreach my $method_name (@methods) {
         ok($meta->has_method($method_name), '... Class::MOP::Attribute->has_method(' . $method_name . ')');
     }
-    
+
     my @attributes = (
         '$!name',
         '$!accessor',
@@ -69,6 +70,7 @@ BEGIN {
         '$!writer',
         '$!predicate',
         '$!clearer',
+        '$!builder',
         '$!init_arg',
         '$!default',
         '$!associated_class',
@@ -79,15 +81,15 @@ BEGIN {
         [ sort $meta->get_attribute_list ],
         [ sort @attributes ],
         '... our attribute list matches');
-    
+
     foreach my $attribute_name (@attributes) {
-        ok($meta->has_attribute($attribute_name), '... Class::MOP::Attribute->has_attribute(' . $attribute_name . ')');        
+        ok($meta->has_attribute($attribute_name), '... Class::MOP::Attribute->has_attribute(' . $attribute_name . ')');
     }
-    
-    # We could add some tests here to make sure that 
-    # the attribute have the appropriate 
-    # accessor/reader/writer/predicate combinations, 
-    # but that is getting a little excessive so I  
-    # wont worry about it for now. Maybe if I get 
+
+    # We could add some tests here to make sure that
+    # the attribute have the appropriate
+    # accessor/reader/writer/predicate combinations,
+    # but that is getting a little excessive so I
+    # wont worry about it for now. Maybe if I get
     # bored I will do it.
 }

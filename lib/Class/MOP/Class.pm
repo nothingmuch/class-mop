@@ -13,7 +13,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.22';
+our $VERSION   = '0.23';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -789,7 +789,7 @@ sub is_immutable { 0 }
         my $self = shift;
         return if $self->is_mutable;
         my $options = delete $IMMUTABLE_OPTIONS{$self->name};
-        confess "unable to find immutabilizing options" unless $options;
+        confess "unable to find immutabilizing options" unless ref $options;
         my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
         $transformer->make_metaclass_mutable($self, %$options);
     }
