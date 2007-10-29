@@ -405,12 +405,12 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
             if ref $options{builder} || !(defined $options{builder});
         confess("Setting both default and builder is not allowed.")
             if exists $options{default};
+    } else {
+        (Class::MOP::Attribute::is_default_a_coderef(\%options))
+            || confess("References are not allowed as default values, you must ".
+                       "wrap then in a CODE reference (ex: sub { [] } and not [])")
+                if exists $options{default} && ref $options{default};
     }
-    (Class::MOP::Attribute::is_default_a_coderef(\%options))
-        || confess("References are not allowed as default values, you must ".
-                   "wrap then in a CODE reference (ex: sub { [] } and not [])")
-            if exists $options{default} && ref $options{default};
-
     # return the new object
     $class->meta->new_object(name => $name, %options);
 });

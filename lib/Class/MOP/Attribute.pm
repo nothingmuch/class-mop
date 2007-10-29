@@ -43,12 +43,12 @@ sub new {
             if ref $options{builder} || !(defined $options{builder});
         confess("Setting both default and builder is not allowed.")
             if exists $options{default};
+    } else {
+        (is_default_a_coderef(\%options))
+            || confess("References are not allowed as default values, you must ".
+                       "wrap then in a CODE reference (ex: sub { [] } and not [])")
+                if exists $options{default} && ref $options{default};
     }
-    (is_default_a_coderef(\%options))
-        || confess("References are not allowed as default values, you must ".
-                   "wrap then in a CODE reference (ex: sub { [] } and not [])")
-            if exists $options{default} && ref $options{default};
-
     bless {
         '$!name'      => $name,
         '$!accessor'  => $options{accessor},
@@ -91,11 +91,12 @@ sub initialize_instance_slot {
     # attribute's default value (if it has one)
     if (!defined $val && defined $self->{'$!default'}) {
         $val = $self->default($instance);
-    } elsif (!defined $val && defined $self->{'$!builder'}) {
-        my $builder = $self->{'$!builder'};
-        confess(blessed($instance)." does not support builder method '$builder' for attribute '" . $self->name . "'")
-            unless $instance->can($builder);
-        $val = $instance->$builder;
+    } elsif (!defined $val && defined( my $builder = $self->{'$!builder'})) {
+        if($builder = $instance->can($builder) ){
+            $val = $instance->$builder;
+        } else {
+            confess(blessed($instance)." does not support builder method '$builder' for attribute '" . $self->name . "'");
+        }
     }
     $meta_instance->set_slot_value($instance, $self->name, $val);
 }
