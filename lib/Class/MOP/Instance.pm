@@ -9,31 +9,31 @@ use Scalar::Util 'weaken', 'blessed';
 our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub meta { 
+sub meta {
     require Class::MOP::Class;
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
-sub new { 
+sub new {
     my ($class, $meta, @attrs) = @_;
     my @slots = map { $_->slots } @attrs;
     my $instance = bless {
         # NOTE:
         # I am not sure that it makes
         # sense to pass in the meta
-        # The ideal would be to just 
-        # pass in the class name, but 
-        # that is placing too much of 
-        # an assumption on bless(), 
+        # The ideal would be to just
+        # pass in the class name, but
+        # that is placing too much of
+        # an assumption on bless(),
         # which is *probably* a safe
-        # assumption,.. but you can 
+        # assumption,.. but you can
         # never tell <:)
         '$!meta'  => $meta,
         '@!slots' => { map { $_ => undef } @slots },
-    } => $class; 
-    
+    } => $class;
+
     weaken($instance->{'$!meta'});
-    
+
     return $instance;
 }
 
@@ -70,7 +70,7 @@ sub is_valid_slot {
 
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    return $instance->{$slot_name};
+    $self->is_slot_initialized($instance, $slot_name) ? $instance->{$slot_name} : undef;
 }
 
 sub set_slot_value {
@@ -80,7 +80,7 @@ sub set_slot_value {
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
-    $self->set_slot_value($instance, $slot_name, undef);
+    #$self->set_slot_value($instance, $slot_name, undef);
 }
 
 sub deinitialize_slot {
@@ -108,13 +108,13 @@ sub is_slot_initialized {
 }
 
 sub weaken_slot_value {
-	my ($self, $instance, $slot_name) = @_;
-	weaken $instance->{$slot_name};
+        my ($self, $instance, $slot_name) = @_;
+        weaken $instance->{$slot_name};
 }
 
 sub strengthen_slot_value {
-	my ($self, $instance, $slot_name) = @_;
-	$self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
+        my ($self, $instance, $slot_name) = @_;
+        $self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
 }
 
 # inlinable operation snippets
@@ -133,12 +133,13 @@ sub inline_slot_access {
 
 sub inline_get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    $self->inline_slot_access($instance, $slot_name);
+    'exists ' . $self->inline_slot_access($instance, $slot_name) .
+    ' ? ' . $self->inline_slot_access($instance, $slot_name) . ' : undef'
 }
 
 sub inline_set_slot_value {
     my ($self, $instance, $slot_name, $value) = @_;
-    $self->inline_slot_access($instance, $slot_name) . " = $value", 
+    $self->inline_slot_access($instance, $slot_name) . " = $value",
 }
 
 sub inline_initialize_slot {
@@ -171,37 +172,37 @@ __END__
 
 =pod
 
-=head1 NAME 
+=head1 NAME
 
 Class::MOP::Instance - Instance Meta Object
 
 =head1 SYNOPSIS
 
-  # for the most part, this protocol is internal 
-  # and not for public usage, but this how one 
+  # for the most part, this protocol is internal
+  # and not for public usage, but this how one
   # might use it
-  
+
   package Foo;
-  
+
   use strict;
   use warnings;
   use metaclass (
       ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
   );
-  
+
   # now Foo->new produces blessed ARRAY ref based objects
 
 =head1 DESCRIPTION
 
-This is a sub-protocol which governs instance creation 
+This is a sub-protocol which governs instance creation
 and access to the slots of the instance structure.
 
-This may seem like over-abstraction, but by abstracting 
-this process into a sub-protocol we make it possible to 
-easily switch the details of how an object's instance is 
-stored with minimal impact. In most cases just subclassing 
-this class will be all you need to do (see the examples; 
-F<examples/ArrayBasedStorage.pod> and 
+This may seem like over-abstraction, but by abstracting
+this process into a sub-protocol we make it possible to
+easily switch the details of how an object's instance is
+stored with minimal impact. In most cases just subclassing
+this class will be all you need to do (see the examples;
+F<examples/ArrayBasedStorage.pod> and
 F<examples/InsideOutClass.pod> for details).
 
 =head1 METHODS
@@ -210,12 +211,12 @@ F<examples/InsideOutClass.pod> for details).
 
 =item B<new ($meta, @attrs)>
 
-Creates a new instance meta-object and gathers all the slots from 
+Creates a new instance meta-object and gathers all the slots from
 the list of C<@attrs> given.
 
 =item B<meta>
 
-This will return a B<Class::MOP::Class> instance which is related 
+This will return a B<Class::MOP::Class> instance which is related
 to this class.
 
 =back
@@ -226,7 +227,7 @@ to this class.
 
 =item B<create_instance>
 
-This creates the appropriate structure needed for the instance and 
+This creates the appropriate structure needed for the instance and
 then calls C<bless_instance_structure> to bless it into the class.
 
 =item B<bless_instance_structure ($instance_structure)>
@@ -239,7 +240,7 @@ This does just exactly what it says it does.
 
 =head2 Instrospection
 
-NOTE: There might be more methods added to this part of the API, 
+NOTE: There might be more methods added to this part of the API,
 we will add then when we need them basically.
 
 =over 4
@@ -248,7 +249,7 @@ we will add then when we need them basically.
 
 =item B<get_all_slots>
 
-This will return the current list of slots based on what was 
+This will return the current list of slots based on what was
 given to this object in C<new>.
 
 =item B<is_valid_slot ($slot_name)>
@@ -257,9 +258,9 @@ given to this object in C<new>.
 
 =head2 Operations on Instance Structures
 
-An important distinction of this sub-protocol is that the 
-instance meta-object is a different entity from the actual 
-instance it creates. For this reason, any actions on slots 
+An important distinction of this sub-protocol is that the
+instance meta-object is a different entity from the actual
+instance it creates. For this reason, any actions on slots
 require that the C<$instance_structure> is passed into them.
 
 =over 4
@@ -286,18 +287,18 @@ require that the C<$instance_structure> is passed into them.
 
 =head2 Inlineable Instance Operations
 
-This part of the API is currently un-used. It is there for use 
-in future experiments in class finailization mostly. Best to 
+This part of the API is currently un-used. It is there for use
+in future experiments in class finailization mostly. Best to
 ignore this for now.
 
 =over 4
 
 =item B<is_inlinable>
 
-Each meta-instance should override this method to tell Class::MOP if it's 
-possible to inline the slot access. 
+Each meta-instance should override this method to tell Class::MOP if it's
+possible to inline the slot access.
 
-This is currently only used by Class::MOP::Class::Immutable when performing 
+This is currently only used by Class::MOP::Class::Immutable when performing
 optimizations.
 
 =item B<inline_create_instance>
@@ -333,7 +334,7 @@ Copyright 2006, 2007 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 

@@ -4,10 +4,12 @@ package # hide the package from PAUSE
 
 use strict;
 use warnings;
+use Scalar::Util qw/refaddr/;
 
 use Carp 'confess';
 
 our $VERSION = '0.01';
+my $unbound = \'empty-slot-value';
 
 use base 'Class::MOP::Instance';
 
@@ -21,7 +23,9 @@ sub new {
 
 sub create_instance {
     my $self = shift;
-    $self->bless_instance_structure([]);
+    my $instance = $self->bless_instance_structure([]);
+    $self->initialize_all_slots($instance);
+    return $instance;
 }
 
 sub clone_instance {
@@ -33,6 +37,16 @@ sub clone_instance {
 
 sub get_slot_index_map { (shift)->{'%!slot_index_map'} }
 
+sub initialize_slot {
+    my ($self, $instance, $slot_name) = @_;
+    $self->set_slot_value($instance, $slot_name, $unbound);
+}
+
+sub deinitialize_slot {
+    my ( $self, $instance, $slot_name ) = @_;
+    $self->set_slot_value($instance, $slot_name, $unbound);
+}
+
 sub get_all_slots {
     my $self = shift;
     return sort $self->SUPER::get_all_slots;
@@ -40,7 +54,9 @@ sub get_all_slots {
 
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    return $instance->[ $self->{'%!slot_index_map'}->{$slot_name} ];
+    my $value = $instance->[ $self->{'%!slot_index_map'}->{$slot_name} ];
+    return $value unless ref $value;
+    refaddr $value eq refaddr $unbound ? undef : $value;
 }
 
 sub set_slot_value {
@@ -49,10 +65,11 @@ sub set_slot_value {
 }
 
 sub is_slot_initialized {
-    # NOTE:
-    # maybe use CLOS's *special-unbound-value*
-    # for this ?
-    confess "Cannot really tell this for sure";
+    my ($self, $instance, $slot_name) = @_;
+    # NOTE: maybe use CLOS's *special-unbound-value* for this?
+    my $value = $instance->[ $self->{'%!slot_index_map'}->{$slot_name} ];
+    return 1 unless ref $value;
+    refaddr $value eq refaddr $unbound ? 0 : 1;
 }
 
 1;

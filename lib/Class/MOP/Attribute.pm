@@ -85,20 +85,20 @@ sub initialize_instance_slot {
     my ($self, $meta_instance, $instance, $params) = @_;
     my $init_arg = $self->{'$!init_arg'};
     # try to fetch the init arg from the %params ...
-    my $val;
-    $val = $params->{$init_arg} if exists $params->{$init_arg};
+
     # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
-    if (!defined $val && defined $self->{'$!default'}) {
-        $val = $self->default($instance);
-    } elsif (!defined $val && defined( my $builder = $self->{'$!builder'})) {
+    if(exists $params->{$init_arg}){
+        $meta_instance->set_slot_value($instance, $self->name, $params->{$init_arg});
+    } elsif (defined $self->{'$!default'}) {
+        $meta_instance->set_slot_value($instance, $self->name, $self->default($instance));
+    } elsif (defined( my $builder = $self->{'$!builder'})) {
         if($builder = $instance->can($builder) ){
-            $val = $instance->$builder;
+            $meta_instance->set_slot_value($instance, $self->name, $instance->$builder);
         } else {
             confess(blessed($instance)." does not support builder method '$builder' for attribute '" . $self->name . "'");
         }
     }
-    $meta_instance->set_slot_value($instance, $self->name, $val);
 }
 
 # NOTE:
@@ -195,9 +195,9 @@ sub get_value {
 sub has_value {
     my ($self, $instance) = @_;
 
-    defined Class::MOP::Class->initialize(blessed($instance))
-                             ->get_meta_instance
-                             ->get_slot_value($instance, $self->name) ? 1 : 0;
+    Class::MOP::Class->initialize(blessed($instance))
+                     ->get_meta_instance
+                     ->is_slot_initialized($instance, $self->name);
 }
 
 sub clear_value {

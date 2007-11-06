@@ -15,43 +15,43 @@ use base 'Class::MOP::Method::Generated';
 sub new {
     my $class   = shift;
     my %options = @_;
-        
+
     (blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
         || confess "You must pass a metaclass instance if you want to inline"
-            if $options{is_inline}; 
-    
+            if $options{is_inline};
+
     my $self = bless {
         # from our superclass
         '&!body'          => undef,
         # specific to this subclass
         '%!options'              => $options{options} || {},
         '$!associated_metaclass' => $options{metaclass},
-        '$!is_inline'            => ($options{is_inline} || 0),        
+        '$!is_inline'            => ($options{is_inline} || 0),
     } => $class;
 
-    # we don't want this creating 
-    # a cycle in the code, if not 
+    # we don't want this creating
+    # a cycle in the code, if not
     # needed
-    weaken($self->{'$!associated_metaclass'});    
+    weaken($self->{'$!associated_metaclass'});
 
     $self->initialize_body;
 
-    return $self;    
+    return $self;
 }
 
-## accessors 
+## accessors
 
 sub options              { (shift)->{'%!options'}              }
 sub associated_metaclass { (shift)->{'$!associated_metaclass'} }
 
 ## cached values ...
 
-sub meta_instance { 
+sub meta_instance {
     my $self = shift;
     $self->{'$!meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
 }
 
-sub attributes { 
+sub attributes {
     my $self = shift;
     $self->{'@!attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
 }
@@ -61,9 +61,9 @@ sub attributes {
 sub initialize_body {
     my $self        = shift;
     my $method_name = 'generate_constructor_method';
-    
+
     $method_name .= '_inline' if $self->is_inline;
-    
+
     $self->{'&!body'} = $self->$method_name;
 }
 
@@ -76,25 +76,25 @@ sub generate_constructor_method_inline {
 
     my $source = 'sub {';
     $source .= "\n" . 'my ($class, %params) = @_;';
-    
+
     $source .= "\n" . 'return $class->meta->new_object(%params)';
-    $source .= "\n" . '    if $class ne \'' . $self->associated_metaclass->name . '\';';    
-    
+    $source .= "\n" . '    if $class ne \'' . $self->associated_metaclass->name . '\';';
+
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
-    $source .= ";\n" . (join ";\n" => map { 
-        $self->_generate_slot_initializer($_) 
+    $source .= ";\n" . (join ";\n" => map {
+        $self->_generate_slot_initializer($_)
     } 0 .. (@{$self->attributes} - 1));
     $source .= ";\n" . 'return $instance';
-    $source .= ";\n" . '}'; 
-    warn $source if $self->options->{debug};   
-    
+    $source .= ";\n" . '}';
+    warn $source if $self->options->{debug};
+
     my $code;
     {
         # NOTE:
         # create the nessecary lexicals
-        # to be picked up in the eval 
+        # to be picked up in the eval
         my $attrs = $self->attributes;
-        
+
         $code = eval $source;
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
     }
@@ -104,14 +104,14 @@ sub generate_constructor_method_inline {
 sub _generate_slot_initializer {
     my $self  = shift;
     my $index = shift;
-    
+
     my $attr = $self->attributes->[$index];
-    
+
     my $default;
     if ($attr->has_default) {
         # NOTE:
         # default values can either be CODE refs
-        # in which case we need to call them. Or 
+        # in which case we need to call them. Or
         # they can be scalars (strings/numbers)
         # in which case we can just deal with them
         # in the code we eval.
@@ -125,12 +125,21 @@ sub _generate_slot_initializer {
                 $default = "'$default'";
             }
         }
+    } elsif( $attr->has_builder ) {
+        $default = '$instance->'.$attr->builder;
     }
-    $self->meta_instance->inline_set_slot_value(
-        '$instance', 
-        ("'" . $attr->name . "'"), 
-        ('$params{\'' . $attr->init_arg . '\'}' . (defined $default ? (' || ' . $default) : ''))
-    );   
+
+  'if(exists $params{\'' . $attr->init_arg . '\'}){' . "\n" .
+        $self->meta_instance->inline_set_slot_value(
+            '$instance',
+            ("'" . $attr->name . "'"),
+            '$params{\'' . $attr->init_arg . '\'}' ) . "\n" .
+   '} ' . (!defined $default ? '' : 'else {' . "\n" .
+        $self->meta_instance->inline_set_slot_value(
+            '$instance',
+            ("'" . $attr->name . "'"),
+             $default ) . "\n" .
+   '}');
 }
 
 1;
@@ -141,28 +150,28 @@ __END__
 
 =pod
 
-=head1 NAME 
+=head1 NAME
 
 Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 =head1 SYNOPSIS
 
   use Class::MOP::Method::Constructor;
-  
+
   my $constructor = Class::MOP::Method::Constructor->new(
-      metaclass => $metaclass,       
+      metaclass => $metaclass,
       options   => {
           debug => 1, # this is all for now
-      },                        
+      },
   );
-  
+
   # calling the constructor ...
   $constructor->body->($metaclass->name, %params);
-  
+
 =head1 DESCRIPTION
 
-This is a subclass of C<Class::MOP::Method> which deals with 
-class constructors.  
+This is a subclass of C<Class::MOP::Method> which deals with
+class constructors.
 
 =head1 METHODS
 
@@ -180,22 +189,22 @@ This returns the metaclass which is passed into C<new>.
 
 =item B<attributes>
 
-This returns the list of attributes which are associated with the 
+This returns the list of attributes which are associated with the
 metaclass which is passed into C<new>.
 
 =item B<meta_instance>
 
-This returns the meta instance which is associated with the 
+This returns the meta instance which is associated with the
 metaclass which is passed into C<new>.
 
 =item B<is_inline>
 
-This returns a boolean, but since constructors are very rarely 
+This returns a boolean, but since constructors are very rarely
 not inlined, this always returns true for now.
 
 =item B<initialize_body>
 
-This creates the code reference for the constructor itself. 
+This creates the code reference for the constructor itself.
 
 =back
 
@@ -220,7 +229,7 @@ Copyright 2006, 2007 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 

@@ -9,8 +9,8 @@ use File::Spec::Functions;
 use Test::More tests => 70;
 use Test::Exception;
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {
+    use_ok('Class::MOP');
 }
 
 use lib catdir($FindBin::Bin, 'lib');
@@ -76,7 +76,7 @@ can_ok($btree, 'getUID');
 
 {
     my $UID = $btree->getUID();
-    is(("$btree" =~ /\((.*?)\)$/), $UID, '... our UID is derived from the stringified object');
+    is(("$btree" =~ /\((.*?)\)$/)[0], $UID, '... our UID is derived from the stringified object');
 }
 
 can_ok($btree, 'getNodeValue');
@@ -85,33 +85,33 @@ is($btree->getNodeValue(), '/', '... got what we expected');
 {
     can_ok($btree, 'getLeft');
     my $left = $btree->getLeft();
-    
+
     isa_ok($left, 'BinaryTree');
-    
+
     is($left->getNodeValue(), '+', '... got what we expected');
-    
-    can_ok($left, 'getParent');    
-    
+
+    can_ok($left, 'getParent');
+
     my $parent = $left->getParent();
     isa_ok($parent, 'BinaryTree');
-    
-    is($parent, $btree, '.. got what we expected');    
+
+    is($parent, $btree, '.. got what we expected');
 }
 
 {
     can_ok($btree, 'getRight');
     my $right = $btree->getRight();
-    
+
     isa_ok($right, 'BinaryTree');
-    
+
     is($right->getNodeValue(), '*', '... got what we expected');
 
     can_ok($right, 'getParent');
-    
+
     my $parent = $right->getParent();
     isa_ok($parent, 'BinaryTree');
-    
-    is($parent, $btree, '.. got what we expected');    
+
+    is($parent, $btree, '.. got what we expected');
 }
 
 ## mutators
@@ -131,13 +131,13 @@ is($btree->getNodeValue(), '*', '... got what we expected');
     can_ok($btree, 'removeLeft');
     my $left = $btree->removeLeft();
     isa_ok($left, 'BinaryTree');
-    
+
     ok(!$btree->hasLeft(), '... we dont have a left node anymore');
     ok(!$btree->isLeaf(), '... and we are not a leaf node');
-     
+
     $btree->setLeft($left);
-    
-    ok($btree->hasLeft(), '... we have our left node again');  
+
+    ok($btree->hasLeft(), '... we have our left node again');
     is($btree->getLeft(), $left, '... and it is what we told it to be');
 }
 
@@ -145,14 +145,14 @@ is($btree->getNodeValue(), '*', '... got what we expected');
     # remove left leaf
     my $left_leaf = $btree->getLeft()->removeLeft();
     isa_ok($left_leaf, 'BinaryTree');
-    
+
     ok($left_leaf->isLeaf(), '... our left leaf is a leaf');
-    
+
     ok(!$btree->getLeft()->hasLeft(), '... we dont have a left leaf node anymore');
-    
+
     $btree->getLeft()->setLeft($left_leaf);
-    
-    ok($btree->getLeft()->hasLeft(), '... we have our left leaf node again');  
+
+    ok($btree->getLeft()->hasLeft(), '... we have our left leaf node again');
     is($btree->getLeft()->getLeft(), $left_leaf, '... and it is what we told it to be');
 }
 
@@ -160,28 +160,28 @@ is($btree->getNodeValue(), '*', '... got what we expected');
     can_ok($btree, 'removeRight');
     my $right = $btree->removeRight();
     isa_ok($right, 'BinaryTree');
-    
+
     ok(!$btree->hasRight(), '... we dont have a right node anymore');
-    ok(!$btree->isLeaf(), '... and we are not a leaf node');    
-    
+    ok(!$btree->isLeaf(), '... and we are not a leaf node');
+
     $btree->setRight($right);
-    
-    ok($btree->hasRight(), '... we have our right node again');  
-    is($btree->getRight(), $right, '... and it is what we told it to be')  
+
+    ok($btree->hasRight(), '... we have our right node again');
+    is($btree->getRight(), $right, '... and it is what we told it to be')
 }
 
 {
     # remove right leaf
     my $right_leaf = $btree->getRight()->removeRight();
     isa_ok($right_leaf, 'BinaryTree');
-    
+
     ok($right_leaf->isLeaf(), '... our right leaf is a leaf');
-    
+
     ok(!$btree->getRight()->hasRight(), '... we dont have a right leaf node anymore');
-    
+
     $btree->getRight()->setRight($right_leaf);
-    
-    ok($btree->getRight()->hasRight(), '... we have our right leaf node again');  
+
+    ok($btree->getRight()->hasRight(), '... we have our right leaf node again');
     is($btree->getRight()->getRight(), $right_leaf, '... and it is what we told it to be');
 }
 
@@ -226,10 +226,10 @@ is($btree->getNodeValue(), '*', '... got what we expected');
                                             )
                             );
     isa_ok($btree, 'BinaryTree');
-    
+
     can_ok($btree, 'size');
     cmp_ok($btree->size(), '==', 14, '... we have 14 nodes in the tree');
-    
+
     can_ok($btree, 'height');
     cmp_ok($btree->height(), '==', 6, '... the tree is 6 nodes tall');
 
@@ -243,8 +243,8 @@ sub inOrderTraverse {
     my @results;
     my $_inOrderTraverse = sub {
         my ($tree, $traversal_function) = @_;
-        $traversal_function->($tree->getLeft(), $traversal_function) if $tree->hasLeft();  
-        push @results => $tree->getNodeValue();   
+        $traversal_function->($tree->getLeft(), $traversal_function) if $tree->hasLeft();
+        push @results => $tree->getNodeValue();
         $traversal_function->($tree->getRight(), $traversal_function) if $tree->hasRight();
     };
     $_inOrderTraverse->($tree, $_inOrderTraverse);
@@ -257,7 +257,7 @@ sub inOrderTraverse {
                     ->setLeft(
                         BinaryTree->new(2)
                             ->setLeft(
-                                BinaryTree->new(1)	
+                                BinaryTree->new(1)
                                 )
                             ->setRight(
                                 BinaryTree->new(3)
@@ -266,22 +266,22 @@ sub inOrderTraverse {
                     ->setRight(
                         BinaryTree->new(6)
                             ->setLeft(
-                                BinaryTree->new(5)	
+                                BinaryTree->new(5)
                                 )
                             ->setRight(
                                 BinaryTree->new(7)
                                 )
                         );
     isa_ok($btree, 'BinaryTree');
-    
+
     is_deeply(
         [ inOrderTraverse($btree) ],
         [ 1 .. 7 ],
         '... check that our tree starts out correctly');
-    
+
     can_ok($btree, 'mirror');
     $btree->mirror();
-    
+
     is_deeply(
         [ inOrderTraverse($btree) ],
         [ reverse(1 .. 7) ],
@@ -296,10 +296,10 @@ sub inOrderTraverse {
                             ->setLeft(
                                 BinaryTree->new(1)
                                         ->setRight(
-                                            BinaryTree->new(10)  
+                                            BinaryTree->new(10)
                                                 ->setLeft(
-                                                    BinaryTree->new(5)                                        
-                                                )                                                                                  
+                                                    BinaryTree->new(5)
+                                                )
                                         )
                                 )
                             ->setRight(
@@ -309,24 +309,24 @@ sub inOrderTraverse {
                     ->setRight(
                         BinaryTree->new(6)
                             ->setLeft(
-                                BinaryTree->new(5)	
+                                BinaryTree->new(5)
                                     ->setRight(
                                         BinaryTree->new(7)
                                             ->setLeft(
                                                 BinaryTree->new(90)
-                                            )  
+                                            )
                                             ->setRight(
                                                 BinaryTree->new(91)
-                                            )                                                                                    
-                                        )                                
+                                            )
+                                        )
                                 )
                         );
     isa_ok($btree, 'BinaryTree');
-    
+
     my @results = inOrderTraverse($btree);
-    
+
     $btree->mirror();
-    
+
     is_deeply(
         [ inOrderTraverse($btree) ],
         [ reverse(@results) ],
