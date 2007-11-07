@@ -1,32 +1,24 @@
 Revision history for Perl extension Class-MOP.
 
-    * Class::MOP::Class
-      - optimise metaclass-already-exists check in construct_class_instance
-      - duplicate check into initialize to save a call through
-
-    * Class::MOP::MOP
+0.43
+    * Class::MOP
       - Add support for the 'builder' attribute (groditi)
+
+    * Class::MOP::Class
+      - optimise metaclass-already-exists check in 
+        construct_class_instance (groditi)
+      - duplicate check into initialize to save a 
+        call through (groditi)
 
     * Class::MOP::Attribute
       - Add support for the 'builder' attribute (groditi)
       - Make predicates check for the existence of a value, not whether 
-        it is defined
+        it is defined (groditi)
 
     * Class::MOP::Instance
       - Make predicates check for the existence of a value, not whether 
-        it is defined
+        it is defined (groditi)
 
-    * Class::MOP::Method::Constructor
-      - Update inlined methods for builder and predicate changes  
-
-    *t/
-      - Alter tests (005, 014 020, 021) for new builder addition
-      - Tests for new predicate behavior (and corrections to old tests) 
-
-    *examples/
-      - Update ArrayRef based class example to work with predicate changes
-
-0.43
     * Class::MOP::Method::Accessor 
       - made this a subclass of Class::MOP::Method::Generated
         - removed the relevant attributes
@@ -39,11 +31,19 @@ Revision history for Perl extension Class-MOP.
         - added tests for this
       - added the option to allow for both inlined and 
         non-inlined constructors.
+      - Update inlined methods for builder and predicate changes (groditi)
 
     * Class::MOP::Method::Generated
       - added this class as an abstract base for the 
         Class::MOP::Method::{Constructor,Accessor} classes
         - added tests for this
+
+    *t/
+      - Alter tests (005, 014 020, 021) for new builder addition (groditi)
+      - Tests for new predicate behavior (and corrections to old tests) (groditi)
+
+    *examples/
+      - Update ArrayRef based class example to work with predicate changes
 
 0.42 Mon. July 16, 2007
     !!! Horray for mst, he fixed it !!!
