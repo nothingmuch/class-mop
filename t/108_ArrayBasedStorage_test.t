@@ -3,71 +3,72 @@
 use strict;
 use warnings;
 
-use Test::More tests => 69;
+use Test::More tests => 72;
 use File::Spec;
 use Scalar::Util 'reftype';
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {
+    use_ok('Class::MOP');
     require_ok(File::Spec->catdir('examples', 'ArrayBasedStorage.pod'));
 }
 
 {
     package Foo;
-    
+
     use strict;
-    use warnings;    
+    use warnings;
     use metaclass (
         'instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
-    
+
     Foo->meta->add_attribute('foo' => (
         accessor  => 'foo',
+        clearer   => 'clear_foo',
         predicate => 'has_foo',
     ));
-    
+
     Foo->meta->add_attribute('bar' => (
         reader  => 'get_bar',
         writer  => 'set_bar',
-        default => 'FOO is BAR'            
+        default => 'FOO is BAR'
     ));
-    
+
     sub new  {
         my $class = shift;
         $class->meta->new_object(@_);
     }
-    
+
     package Bar;
-    
+
     use strict;
     use warnings;
-    
+
     use base 'Foo';
-    
+
     Bar->meta->add_attribute('baz' => (
         accessor  => 'baz',
         predicate => 'has_baz',
-    ));   
-    
+    ));
+
     package Baz;
-    
+
     use strict;
     use warnings;
-    use metaclass (        
+    use metaclass (
         'instance_metaclass'  => 'ArrayBasedStorage::Instance',
     );
-    
+
     Baz->meta->add_attribute('bling' => (
         accessor  => 'bling',
         default   => 'Baz::bling'
-    ));     
-    
+    ));
+
     package Bar::Baz;
-    
+
     use strict;
     use warnings;
-    
-    use base 'Bar', 'Baz'; 
+
+    use base 'Bar', 'Baz';
 }
 
 my $foo = Foo->new();
@@ -79,6 +80,7 @@ can_ok($foo, 'foo');
 can_ok($foo, 'has_foo');
 can_ok($foo, 'get_bar');
 can_ok($foo, 'set_bar');
+can_ok($foo, 'clear_foo');
 
 ok(!$foo->has_foo, '... Foo::foo is not defined yet');
 is($foo->foo(), undef, '... Foo::foo is not defined yet');
@@ -88,6 +90,11 @@ $foo->foo('This is Foo');
 
 ok($foo->has_foo, '... Foo::foo is defined now');
 is($foo->foo(), 'This is Foo', '... Foo::foo == "This is Foo"');
+
+$foo->clear_foo;
+
+ok(!$foo->has_foo, '... Foo::foo is not defined anymore');
+is($foo->foo(), undef, '... Foo::foo is not defined anymore');
 
 $foo->set_bar(42);
 is($foo->get_bar(), 42, '... Foo::bar == 42');
