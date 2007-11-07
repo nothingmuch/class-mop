@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 54;
+use Test::More tests => 71;
 use Test::Exception;
 
 BEGIN {
@@ -183,6 +183,31 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     } '... we added an attribute to Buzz successfully';
 
     ::lives_ok {
+        $meta->add_attribute(
+            Class::MOP::Attribute->new(
+                 '$bar' => (
+                            accessor  => 'bar',
+                            predicate => 'has_bar',
+                            clearer   => 'clear_bar',
+                           )
+                )
+        );
+    } '... we added an attribute to Buzz successfully';
+
+    ::lives_ok {
+        $meta->add_attribute(
+            Class::MOP::Attribute->new(
+                 '$bah' => (
+                            accessor  => 'bah',
+                            predicate => 'has_bah',
+                            clearer   => 'clear_bah',
+                            default   => 'BAH',
+                           )
+                )
+        );
+    } '... we added an attribute to Buzz successfully';
+
+    ::lives_ok {
         $meta->add_method(build_foo => sub{ blessed shift; });
     } '... we added a method to Buzz successfully';
 }
@@ -190,5 +215,33 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
 {
   my $buzz;
   ::lives_ok { $buzz = Buzz->meta->new_object } '...Buzz instantiated successfully';
-  ::is($buzz->foo, 'Buzz', 'foo builder works as expected');
+  ::is($buzz->foo, 'Buzz', '...foo builder works as expected');
+  ::ok(!$buzz->has_bar, '...bar is not set');
+  ::is($buzz->bar, undef, '...bar returns undef');
+  ::ok(!$buzz->has_bar, '...bar was not autovivified');
+
+  $buzz->bar(undef);
+  ::ok($buzz->has_bar, '...bar is set');
+  ::is($buzz->bar, undef, '...bar is undef');
+  $buzz->clear_bar;
+  ::ok(!$buzz->has_bar, '...bar is no longerset');
+
+  my $buzz2;
+  ::lives_ok { $buzz2 = Buzz->meta->new_object('$bar' => undef) } '...Buzz instantiated successfully';
+  ::ok($buzz2->has_bar, '...bar is set');
+  ::is($buzz2->bar, undef, '...bar is undef');
+
+}
+
+{
+  my $buzz;
+  ::lives_ok { $buzz = Buzz->meta->new_object } '...Buzz instantiated successfully';
+  ::ok($buzz->has_bah, '...bah is set');
+  ::is($buzz->bah, 'BAH', '...bah returns "BAH" ');
+
+  my $buzz2;
+  ::lives_ok { $buzz2 = Buzz->meta->new_object('$bah' => undef) } '...Buzz instantiated successfully';
+  ::ok($buzz2->has_bah, '...bah is set');
+  ::is($buzz2->bah, undef, '...bah is undef');
+
 }
