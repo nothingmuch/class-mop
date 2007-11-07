@@ -9,9 +9,22 @@ Revision history for Perl extension Class-MOP.
 
     * Class::MOP::Attribute
       - Add support for the 'builder' attribute (groditi)
+      - Make predicates check for the existence of a value, not whether 
+        it is defined
+
+    * Class::MOP::Instance
+      - Make predicates check for the existence of a value, not whether 
+        it is defined
+
+    * Class::MOP::Method::Constructor
+      - Update inlined methods for builder and predicate changes  
 
     *t/
       - Alter tests (005, 014 020, 021) for new builder addition
+      - Tests for new predicate behavior (and corrections to old tests) 
+
+    *examples/
+      - Update ArrayRef based class example to work with predicate changes
 
 0.43
     * Class::MOP::Method::Accessor 
