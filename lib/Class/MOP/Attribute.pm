@@ -569,6 +569,8 @@ These are all basic predicate methods for the values passed into C<new>.
 
 =item B<has_default>
 
+=item B<has_builder>
+
 =back
 
 =head2 Class association
