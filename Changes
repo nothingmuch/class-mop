@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.43
+0.43 Tues. Nov. 13, 2007
     * Class::MOP
       - Add support for the 'builder' attribute (groditi)
 
