@@ -1,4 +1,3 @@
-Build.PL
 Changes
 examples/ArrayBasedStorage.pod
 examples/AttributesWithHistory.pod
@@ -10,6 +9,7 @@ examples/LazyClass.pod
 examples/Perl6Attribute.pod
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
+inc/Module/Install/Build.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Makefile.pm
