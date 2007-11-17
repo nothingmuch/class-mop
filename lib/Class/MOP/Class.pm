@@ -78,7 +78,7 @@ sub construct_class_instance {
 
     # now create the metaclass
     my $meta;
-    if ($class =~ /^Class::MOP::Class$/) {
+    if ($class eq 'Class::MOP::Class') {
         no strict 'refs';
         $meta = bless {
             # inherited from Class::MOP::Package
