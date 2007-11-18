@@ -110,7 +110,7 @@ sub add_after_modifier {
 
 {
 	# NOTE:
-	# this is another possible canidate for 
+	# this is another possible candidate for 
 	# optimization as well. There is an overhead
 	# associated with the currying that, if 
 	# eliminated might make around modifiers
