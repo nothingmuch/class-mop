@@ -377,7 +377,7 @@ sub superclasses {
         @{$self->get_package_symbol('@ISA')} = @supers;
         # NOTE:
         # we need to check the metaclass
-        # compatability here so that we can
+        # compatibility here so that we can
         # be sure that the superclass is
         # not potentially creating an issues
         # we don't know about
@@ -389,7 +389,7 @@ sub superclasses {
 sub class_precedence_list {
     my $self = shift;
     # NOTE:
-    # We need to check for ciruclar inheirtance here.
+    # We need to check for circular inheritance here.
     # This will do nothing if all is well, and blow
     # up otherwise. Yes, it's an ugly hack, better
     # suggestions are welcome.
