@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.17';
+our $VERSION   = '0.18';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -135,6 +135,26 @@ sub init_arg  { $_[0]->{'$!init_arg'}  }
 
 sub get_read_method  { $_[0]->reader || $_[0]->accessor }
 sub get_write_method { $_[0]->writer || $_[0]->accessor }
+
+sub get_read_method_ref {
+    my $self = shift;
+    if (my $reader = $self->get_read_method) {    
+        return $self->associated_class->get_method($reader);
+    }
+    else {
+        return sub { $self->get_value(@_) };
+    }
+}
+
+sub get_write_method_ref {
+    my $self = shift;    
+    if (my $writer = $self->get_write_method) {    
+        return $self->assocaited_class->get_method($writer);
+    }
+    else {
+        return sub { $self->set_value(@_) };
+    }
+}
 
 sub is_default_a_coderef {
     ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))
@@ -546,9 +566,20 @@ just one, which is the name of the attribute.
 
 =item B<get_write_method>
 
-Return the name of a method suitable for reading / writing the value of the
-attribute in the associated class. Suitable for use whether C<reader> and
-C<writer> or C<accessor> was used.
+Return the name of a method name suitable for reading / writing the value 
+of the attribute in the associated class. Suitable for use whether 
+C<reader> and C<writer> or C<accessor> was used.
+
+=item B<get_read_method_ref>
+
+=item B<get_write_method_ref>
+
+Return the CODE reference of a method suitable for reading / writing the 
+value of the attribute in the associated class. Suitable for use whether 
+C<reader> and C<writer> or C<accessor> was specified or not.
+
+NOTE: If not reader/writer/accessor was specified, this will use the 
+attribute get_value/set_value methods, which can be very inefficient.
 
 =back
 

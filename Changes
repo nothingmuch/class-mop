@@ -5,6 +5,11 @@ Revision history for Perl extension Class-MOP.
       - added the linearized_isa method instead of constantly 
         pruning duplicate classes (this will be even more 
         useful in the 5.10-compat version coming soon)
+    
+    * Class::MOP::Attribute
+      - added the get_read_method_ref and get_write_method_ref
+        methods which allow you to retrieve a CODE ref which 
+        can always be used to read or write an attribute.
 
 0.45 Thurs. Nov. 13, 2007
     * Class::MOP::Attribute
