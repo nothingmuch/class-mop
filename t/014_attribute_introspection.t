@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 54;
+use Test::More tests => 56;
 use Test::Exception;
 
 BEGIN {
@@ -27,8 +27,8 @@ BEGIN {
 
         name
         has_accessor  accessor
-        has_writer    writer     get_write_method
-        has_reader    reader     get_read_method
+        has_writer    writer     get_write_method get_write_method_ref
+        has_reader    reader     get_read_method  get_read_method_ref
         has_predicate predicate
         has_clearer   clearer
         has_builder   builder
@@ -75,7 +75,7 @@ BEGIN {
         '$!default',
         '$!associated_class',
         '@!associated_methods',
-        );
+    );
 
     is_deeply(
         [ sort $meta->get_attribute_list ],
