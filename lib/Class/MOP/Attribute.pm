@@ -90,12 +90,15 @@ sub initialize_instance_slot {
     # attribute's default value (if it has one)
     if(exists $params->{$init_arg}){
         $meta_instance->set_slot_value($instance, $self->name, $params->{$init_arg});
-    } elsif (defined $self->{'$!default'}) {
+    } 
+    elsif (defined $self->{'$!default'}) {
         $meta_instance->set_slot_value($instance, $self->name, $self->default($instance));
-    } elsif (defined( my $builder = $self->{'$!builder'})) {
-        if($builder = $instance->can($builder) ){
+    } 
+    elsif (defined( my $builder = $self->{'$!builder'})) {
+        if ($builder = $instance->can($builder)) {
             $meta_instance->set_slot_value($instance, $self->name, $instance->$builder);
-        } else {
+        } 
+        else {
             confess(blessed($instance)." does not support builder method '". $self->{'$!builder'} ."' for attribute '" . $self->name . "'");
         }
     }

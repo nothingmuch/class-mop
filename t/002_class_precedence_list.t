@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 8;
 
 BEGIN {
     use_ok('Class::MOP');   
@@ -35,6 +35,11 @@ is_deeply(
     [ My::D->meta->class_precedence_list ], 
     [ 'My::D', 'My::B', 'My::A', 'My::C', 'My::A' ], 
     '... My::D->meta->class_precedence_list == (D B A C A)');
+
+is_deeply(
+    [ My::D->meta->linearized_isa ], 
+    [ 'My::D', 'My::B', 'My::A', 'My::C' ], 
+    '... My::D->meta->linearized_isa == (D B A C)');
 
 =pod
 
@@ -92,6 +97,11 @@ is_deeply(
     [ My::3::D->meta->class_precedence_list ], 
     [ 'My::3::D', 'My::3::B', 'My::3::A', 'My::3::C', 'My::3::A', 'My::3::B', 'My::3::A' ], 
     '... My::3::D->meta->class_precedence_list == (D B A C A B A)');
+
+is_deeply(
+    [ My::3::D->meta->linearized_isa ], 
+    [ 'My::3::D', 'My::3::B', 'My::3::A', 'My::3::C' ], 
+    '... My::3::D->meta->linearized_isa == (D B A C B)');
 
 =pod
 
