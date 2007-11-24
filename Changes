@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.47 Sat. Nov. 24, 2007
+    * Class::MOP::Attribute
+      - fixed misspelling in get_write_method_ref
+
 0.46 Fri. Nov. 23, 2007
     * Class::MOP::Class
       - added the linearized_isa method instead of constantly 

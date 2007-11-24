@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.18';
+our $VERSION   = '0.19';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -138,7 +138,7 @@ sub get_write_method { $_[0]->writer || $_[0]->accessor }
 
 sub get_read_method_ref {
     my $self = shift;
-    if (my $reader = $self->get_read_method) {    
+    if ((my $reader = $self->get_read_method) && $self->associated_class) {   
         return $self->associated_class->get_method($reader);
     }
     else {
@@ -148,8 +148,8 @@ sub get_read_method_ref {
 
 sub get_write_method_ref {
     my $self = shift;    
-    if (my $writer = $self->get_write_method) {    
-        return $self->assocaited_class->get_method($writer);
+    if ((my $writer = $self->get_write_method) && $self->associated_class) {    
+        return $self->associated_class->get_method($writer);
     }
     else {
         return sub { $self->set_value(@_) };
