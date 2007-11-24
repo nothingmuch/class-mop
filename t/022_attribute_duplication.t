@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util;
 
-use Test::More tests => 29;
+use Test::More tests => 32;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -47,6 +47,9 @@ one first.
         
         ::isa_ok($reader, 'Class::MOP::Method');
         ::isa_ok($writer, 'Class::MOP::Method');        
+
+        ::is($reader->fully_qualified_name, 'Foo::get_bar', '... it is the sub we are looking for');
+        ::is($writer->fully_qualified_name, 'Foo::set_bar', '... it is the sub we are looking for');
         
         ::is(Scalar::Util::reftype($reader->body), 'CODE', '... it is a plain old sub');
         ::is(Scalar::Util::reftype($writer->body), 'CODE', '... it is a plain old sub');                
@@ -71,7 +74,9 @@ one first.
         my $writer = $bar_attr2->get_write_method_ref;        
         
         ::isa_ok($reader, 'Class::MOP::Method');
-        ::ok(!Scalar::Util::blessed($writer), '... the writer method is not blessed though');        
+        ::ok(!Scalar::Util::blessed($writer), '... the writer method is not blessed though');    
+        
+        ::is($reader->fully_qualified_name, 'Foo::assign_bar', '... it is the sub we are looking for');            
         
         ::is(Scalar::Util::reftype($reader->body), 'CODE', '... it is a plain old sub');
         ::is(Scalar::Util::reftype($writer), 'CODE', '... it is a plain old sub');                

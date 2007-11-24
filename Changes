@@ -3,6 +3,7 @@ Revision history for Perl extension Class-MOP.
 0.47 Sat. Nov. 24, 2007
     * Class::MOP::Attribute
       - fixed misspelling in get_write_method_ref
+        - added more tests for this
 
 0.46 Fri. Nov. 23, 2007
     * Class::MOP::Class
