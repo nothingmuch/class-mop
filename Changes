@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.48
+0.48 Mon. Nov. 16, 2007
     * Class::MOP::Attribute
       - fixed get_read/write_method to handle the 
         HASH ref case, which makes the 
