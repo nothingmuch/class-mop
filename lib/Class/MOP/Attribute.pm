@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.19';
+our $VERSION   = '0.20';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -133,8 +133,25 @@ sub init_arg  { $_[0]->{'$!init_arg'}  }
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
-sub get_read_method  { $_[0]->reader || $_[0]->accessor }
-sub get_write_method { $_[0]->writer || $_[0]->accessor }
+sub get_read_method  { 
+    my $self   = shift;    
+    my $reader = $self->reader || $self->accessor;
+    # normal case ...
+    return $reader unless ref $reader;
+    # the HASH ref case
+    my ($name) = %$reader;
+    return $name;
+}
+
+sub get_write_method { 
+    my $self   = shift;
+    my $writer = $self->writer || $self->accessor; 
+    # normal case ...
+    return $writer unless ref $writer;
+    # the HASH ref case
+    my ($name) = %$writer;
+    return $name;    
+}
 
 sub get_read_method_ref {
     my $self = shift;
@@ -148,7 +165,7 @@ sub get_read_method_ref {
 
 sub get_write_method_ref {
     my $self = shift;    
-    if ((my $writer = $self->get_write_method) && $self->associated_class) {    
+    if ((my $writer = $self->get_write_method) && $self->associated_class) {         
         return $self->associated_class->get_method($writer);
     }
     else {
