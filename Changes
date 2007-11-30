@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+0.49
+    ~ some doc cleanup ~
+
 0.48 Mon. Nov. 26, 2007
     * Class::MOP::Attribute
       - fixed get_read/write_method to handle the 

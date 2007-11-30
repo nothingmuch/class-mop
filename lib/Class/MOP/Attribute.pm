@@ -398,18 +398,18 @@ value of C<-foo>, then the following code will Just Work.
 In an init_arg is not assigned, it will automatically use the
 value of C<$name>.
 
-=item I<default>
-
-The value of this key is the default value which
-C<Class::MOP::Class::construct_instance> will initialize the
-attribute to.
-
 =item I<builder>
 
 The value of this key is the name of the method that will be
 called to obtain the value used to initialize the attribute.
 This should be a method in the class associated with the attribute,
 not a method in the attribute class itself.
+
+=item I<default>
+
+The value of this key is the default value which
+C<Class::MOP::Class::construct_instance> will initialize the
+attribute to.
 
 B<NOTE:>
 If the value is a simple scalar (string or number), then it can
