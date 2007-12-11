@@ -13,7 +13,7 @@ use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use B            'svref_2object';
 
-our $VERSION   = '0.24';
+our $VERSION   = '0.25';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -1087,6 +1087,10 @@ what B<Class::ISA::super_path> does, but we don't remove duplicate names.
 
 This returns a list based on C<class_precedence_list> but with all 
 duplicates removed.
+
+=item B<subclasses>
+
+This returns a list of subclasses for this class.
 
 =back
 
