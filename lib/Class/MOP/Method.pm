@@ -6,7 +6,7 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
-use B            'svref_2object';
+#use B            'svref_2object';
 
 our $VERSION   = '0.05';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -52,7 +52,7 @@ sub body { (shift)->{'&!body'} }
 # associated with the actual CODE-ref
 sub package_name { 
 	my $code = (shift)->body;
-	svref_2object($code)->GV->STASH->NAME;
+	(Class::MOP::get_code_info($code))[0];
 }
 
 # NOTE: 
@@ -62,7 +62,7 @@ sub package_name {
 # with the actual CODE-ref
 sub name { 
 	my $code = (shift)->body;
-	svref_2object($code)->GV->NAME;
+	(Class::MOP::get_code_info($code))[1];
 }
 
 sub fully_qualified_name {

@@ -16,6 +16,9 @@ use Class::MOP::Immutable;
 our $VERSION   = '0.49';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use XSLoader;
+XSLoader::load( 'Class::MOP', $VERSION );
+
 {
     # Metaclasses are singletons, so we cache them here.
     # there is no need to worry about destruction though
@@ -731,6 +734,10 @@ been loaded.
 NOTE: This does a basic check of the symbol table to try and
 determine as best it can if the C<$class_name> is loaded, it
 is probably correct about 99% of the time.
+
+=item B<check_package_cache_flag>
+
+=item B<get_code_info ($code)>
 
 =back
 

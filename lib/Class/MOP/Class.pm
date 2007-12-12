@@ -11,7 +11,6 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
-use B            'svref_2object';
 
 our $VERSION   = '0.25';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -104,6 +103,14 @@ sub construct_class_instance {
             '$!attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
             '$!method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
             '$!instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
+            
+            ## uber-private variables
+            # NOTE:
+            # this starts out as undef so that 
+            # we can tell the first time the 
+            # methods are fetched
+            # - SL
+            '$!_package_cache_flag'       => undef,            
         } => $class;
     }
     else {
@@ -116,6 +123,10 @@ sub construct_class_instance {
 
     # and check the metaclass compatibility
     $meta->check_metaclass_compatability();
+    
+    # initialize some stuff
+    $meta->get_method_map;
+    $meta->reset_package_cache_flag;    
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -125,6 +136,16 @@ sub construct_class_instance {
     Class::MOP::weaken_metaclass($package_name) if $meta->is_anon_class;
 
     $meta;
+}
+
+sub reset_package_cache_flag {
+    # NOTE:
+    # we can manually update the cache number 
+    # since we are actually adding the method
+    # to our cache as well. This avoids us 
+    # having to regenerate the method_map.
+    # - SL    
+    (shift)->{'$!_package_cache_flag'} = Class::MOP::check_package_cache_flag();    
 }
 
 sub check_metaclass_compatability {
@@ -275,6 +296,12 @@ sub instance_metaclass  { $_[0]->{'$!instance_metaclass'}  }
 # this is a prime canidate for conversion to XS
 sub get_method_map {
     my $self = shift;
+    
+    if (defined $self->{'$!_package_cache_flag'} && 
+                $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag()) {
+        return $self->{'%!methods'};
+    }
+    
     my $map  = $self->{'%!methods'};
 
     my $class_name       = $self->name;
@@ -287,9 +314,9 @@ sub get_method_map {
                 defined $map->{$symbol} &&
                         $map->{$symbol}->body == $code;
 
-        my $gv = svref_2object($code)->GV;
-        next if ($gv->STASH->NAME || '') ne $class_name &&
-                ($gv->NAME        || '') ne '__ANON__';
+        my ($pkg, $name) = Class::MOP::get_code_info($code);
+        next if ($pkg  || '') ne $class_name &&
+                ($name || '') ne '__ANON__';
 
         $map->{$symbol} = $method_metaclass->wrap($code);
     }
@@ -474,6 +501,7 @@ sub add_method {
 
     my $full_method_name = ($self->name . '::' . $method_name);
     $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
+    $self->reset_package_cache_flag;    
 }
 
 {
@@ -550,6 +578,7 @@ sub alias_method {
         || confess "Your code block must be a CODE reference";
 
     $self->add_package_symbol("&${method_name}" => $body);
+    $self->reset_package_cache_flag;     
 }
 
 sub has_method {
@@ -580,12 +609,11 @@ sub remove_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    my $removed_method = $self->get_method($method_name);
-
-    do {
-        $self->remove_package_symbol("&${method_name}");
-        delete $self->get_method_map->{$method_name};
-    } if defined $removed_method;
+    my $removed_method = delete $self->get_method_map->{$method_name};
+    
+    $self->remove_package_symbol("&${method_name}");
+    
+    $self->reset_package_cache_flag;        
 
     return $removed_method;
 }
@@ -963,6 +991,13 @@ C<construct_class_instance> method. This will check that the
 metaclass you are creating is compatible with the metaclasses of all
 your ancestors. For more inforamtion about metaclass compatibility
 see the C<About Metaclass compatibility> section in L<Class::MOP>.
+
+=item B<reset_package_cache_flag>
+
+This will reset the package cache flag for this particular metaclass
+it is basically the value of the C<Class::MOP::get_package_cache_flag> 
+function. This is very rarely needed from outside of C<Class::MOP::Class>
+but in some cases you might want to use it, so it is here.
 
 =back
 

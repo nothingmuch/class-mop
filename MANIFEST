@@ -30,6 +30,7 @@ lib/Class/MOP/Module.pm
 lib/Class/MOP/Object.pm
 lib/Class/MOP/Package.pm
 lib/metaclass.pm
+MOP.xs
 Makefile.PL
 MANIFEST
 META.yml

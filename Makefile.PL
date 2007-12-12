@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use inc::Module::Install;
+use inc::Module::Install 0.65;
 
 name 'Class-MOP';
 all_from 'lib/Class/MOP.pm';
@@ -15,4 +15,5 @@ build_requires 'Test::More'      => '0.62';
 build_requires 'Test::Exception' => '0.21';
 build_requires 'File::Spec'      => '0';
 
+auto_provides;
 WriteAll();
