@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 201;
+use Test::More tests => 203;
 use Test::Exception;
 
 BEGIN {
@@ -52,6 +52,7 @@ my @class_mop_class_methods = qw(
 
     initialize reinitialize create
     
+    update_package_cache_flag
     reset_package_cache_flag
 
     create_anon_class is_anon_class

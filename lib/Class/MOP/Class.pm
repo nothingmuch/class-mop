@@ -122,11 +122,7 @@ sub construct_class_instance {
     }
 
     # and check the metaclass compatibility
-    $meta->check_metaclass_compatability();
-    
-    # initialize some stuff
-    $meta->get_method_map;
-    $meta->reset_package_cache_flag;    
+    $meta->check_metaclass_compatability();  
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -138,7 +134,8 @@ sub construct_class_instance {
     $meta;
 }
 
-sub reset_package_cache_flag {
+sub reset_package_cache_flag  { (shift)->{'$!_package_cache_flag'} = undef } 
+sub update_package_cache_flag {
     # NOTE:
     # we can manually update the cache number 
     # since we are actually adding the method
@@ -501,7 +498,7 @@ sub add_method {
 
     my $full_method_name = ($self->name . '::' . $method_name);
     $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
-    $self->reset_package_cache_flag;    
+    $self->update_package_cache_flag;    
 }
 
 {
@@ -578,7 +575,7 @@ sub alias_method {
         || confess "Your code block must be a CODE reference";
 
     $self->add_package_symbol("&${method_name}" => $body);
-    $self->reset_package_cache_flag;     
+    $self->update_package_cache_flag;     
 }
 
 sub has_method {
@@ -613,7 +610,7 @@ sub remove_method {
     
     $self->remove_package_symbol("&${method_name}");
     
-    $self->reset_package_cache_flag;        
+    $self->update_package_cache_flag;        
 
     return $removed_method;
 }
@@ -992,12 +989,16 @@ metaclass you are creating is compatible with the metaclasses of all
 your ancestors. For more inforamtion about metaclass compatibility
 see the C<About Metaclass compatibility> section in L<Class::MOP>.
 
-=item B<reset_package_cache_flag>
+=item B<update_package_cache_flag>
 
 This will reset the package cache flag for this particular metaclass
 it is basically the value of the C<Class::MOP::get_package_cache_flag> 
 function. This is very rarely needed from outside of C<Class::MOP::Class>
 but in some cases you might want to use it, so it is here.
+
+=item B<reset_package_cache_flag>
+
+Clear this flag, used in Moose.
 
 =back
 
