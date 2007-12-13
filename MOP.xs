@@ -32,7 +32,6 @@ get_code_info(coderef)
     char* name;
     char* pkg;
   PPCODE:
-
     if( SvOK(coderef) && SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV){
       coderef = SvRV(coderef);
       name    = GvNAME( CvGV(coderef) );
