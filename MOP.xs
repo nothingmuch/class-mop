@@ -18,7 +18,8 @@ get_code_info:
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 SV*
-check_package_cache_flag()
+check_package_cache_flag(pkg)
+  SV* pkg
   CODE:
     RETVAL = newSViv(PL_sub_generation);
   OUTPUT:

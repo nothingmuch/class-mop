@@ -136,13 +136,14 @@ sub construct_class_instance {
 
 sub reset_package_cache_flag  { (shift)->{'$!_package_cache_flag'} = undef } 
 sub update_package_cache_flag {
+    my $self = shift;
     # NOTE:
     # we can manually update the cache number 
     # since we are actually adding the method
     # to our cache as well. This avoids us 
     # having to regenerate the method_map.
     # - SL    
-    (shift)->{'$!_package_cache_flag'} = Class::MOP::check_package_cache_flag();    
+    $self->{'$!_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
 sub check_metaclass_compatability {
@@ -295,7 +296,7 @@ sub get_method_map {
     my $self = shift;
     
     if (defined $self->{'$!_package_cache_flag'} && 
-                $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag()) {
+                $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name)) {
         return $self->{'%!methods'};
     }
     
