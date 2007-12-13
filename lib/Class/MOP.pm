@@ -895,6 +895,8 @@ Rob (robkinyon) Kinyon
 
 Yuval (nothingmuch) Kogman
 
+Scott (konobi) McWhirter
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2006, 2007 by Infinity Interactive, Inc.

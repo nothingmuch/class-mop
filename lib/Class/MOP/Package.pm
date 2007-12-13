@@ -75,7 +75,7 @@ sub namespace {
         (defined $variable)
             || confess "You must pass a variable name";    
 
-        my ($sigil, $name) = ($variable =~ /^(.)(.*)$/); 
+        my $sigil = substr($variable, 0, 1, '');
 
         (defined $sigil)
             || confess "The variable name must include a sigil";    
@@ -83,7 +83,7 @@ sub namespace {
         (exists $SIGIL_MAP{$sigil})
             || confess "I do not recognize that sigil '$sigil'";    
         
-        return ($name, $sigil, $SIGIL_MAP{$sigil});
+        return ($variable, $sigil, $SIGIL_MAP{$sigil});
     }
 }
 
