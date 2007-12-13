@@ -21,7 +21,7 @@ BEGIN {
     XSLoader::load( 'Class::MOP', $VERSION );    
     
     unless ($] < 5.009_005) {
-        no warnings 'redefine';
+        no warnings 'redefine', 'prototype';
         *check_package_cache_flag = \&mro::get_pkg_gen;
     }
 }
