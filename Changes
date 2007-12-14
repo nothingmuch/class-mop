@@ -1,10 +1,33 @@
 Revision history for Perl extension Class-MOP.
 
-0.49
-    ~ some doc cleanup ~
-    
+0.49 Fri. Dec. 14, 2007
+    !! Class::MOP now loads ~45% faster !!
+    !! with XS speedups (thanks konobi) !!
+        
+    * Class::MOP
+      - removed the dependency on B
+      - added two XS functions (thanks konobi)
+        - get_code_info($code) which replaces all
+          the B fiddling we were doing with
+          faster/leaner XS level fiddling
+        - check_package_cache_flag($pkg_name) which 
+          returns the PL_sub_generation variable to 
+          be used to help manage method caching.
+          
+          NOTE: 
+          In 5.10 or greater this will actually 
+          use the mro::get_pkg_gen instead to give 
+          even more accurate caching information. 
+          blblack++ for that stuff :)
+          
     * Class::MOP::Class
       - added the &subclasses method (thanks rlb)
+      - added the update_package_cache_flag and 
+        reset_package_cache_flag which help keep 
+        track of when we need to re-fetch the 
+        method map. 
+      - Several small improvements to take advantage
+        of the new method map caching features
 
 0.48 Mon. Nov. 26, 2007
     * Class::MOP::Attribute
