@@ -69,13 +69,19 @@ my %DEFAULT_METHODS = (
 # existing metaclass to an immutable
 # version of itself
 sub make_metaclass_immutable {
-    my ($self, $metaclass, %options) = @_;
+    my ($self, $metaclass, $options) = @_;
 
-    $options{inline_accessors}   = 1     unless exists $options{inline_accessors};
-    $options{inline_constructor} = 1     unless exists $options{inline_constructor};
-    $options{inline_destructor}  = 0     unless exists $options{inline_destructor};
-    $options{constructor_name}   = 'new' unless exists $options{constructor_name};
-    $options{debug}              = 0     unless exists $options{debug};
+    foreach my $pair (
+            [ inline_accessors   => 1     ],
+            [ inline_constructor => 1     ],
+            [ inline_destructor  => 0     ],
+            [ constructor_name   => 'new' ],
+            [ debug              => 0     ],
+        ) {
+        $options->{$pair->[0]} = $pair->[1] unless exists $options->{$pair->[0]};
+    }
+
+    my %options = %$options;
 
     if ($options{inline_accessors}) {
         foreach my $attr_name ($metaclass->get_attribute_list) {
@@ -141,7 +147,9 @@ sub make_metaclass_immutable {
 }
 
 sub make_metaclass_mutable {
-    my ($self, $immutable, %options) = @_;
+    my ($self, $immutable, $options) = @_;
+
+    my %options = %$options;
 
     my $original_class = $immutable->get_mutable_metaclass_name;
     delete $immutable->{'___original_class'} ;
@@ -180,7 +188,6 @@ sub make_metaclass_mutable {
     # 14:26 <@stevan> the only user of ::Method::Constructor is immutable
     # 14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
     # 14:27 <@stevan> so I am not worried
-    $options{constructor_name} = 'new' unless exists $options{constructor_name};
     if ($options{inline_constructor}) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
         $immutable->remove_method( $options{constructor_name}  )

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 104;
+use Test::More tests => 108;
 use Test::Exception;
 
 use Scalar::Util;
@@ -51,11 +51,13 @@ BEGIN {
     ok(!$meta->is_mutable,              '... our class is no longer mutable');
     ok($meta->is_immutable,             '... our class is now immutable');
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
+    ok($meta->get_method_map->{new},    '... inlined constructor created');
 
     lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
     ok($meta->is_mutable,               '... our class is mutable');
     ok(!$meta->is_immutable,            '... our class is not immutable');
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
+    ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
 
     my @new_keys = sort keys %$meta;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
@@ -88,6 +90,9 @@ BEGIN {
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       compute_all_applicable_attributes
              class_precedence_list  get_method_map );
+
+    lives_ok {$meta->make_immutable; } '... changed Baz to be immutable again';
+    ok($meta->get_method_map->{new},    '... inlined constructor recreated');
 }
 
 {

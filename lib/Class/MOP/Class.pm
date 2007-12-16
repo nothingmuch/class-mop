@@ -808,7 +808,7 @@ sub is_immutable { 0 }
         $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
         my $transformer = $IMMUTABLE_TRANSFORMERS{$class};
 
-        $transformer->make_metaclass_immutable($self, %options);
+        $transformer->make_metaclass_immutable($self, \%options);
         $IMMUTABLE_OPTIONS{$self->name} =
             { %options,  IMMUTABLE_TRANSFORMER => $transformer };
 
@@ -824,7 +824,7 @@ sub is_immutable { 0 }
         my $options = delete $IMMUTABLE_OPTIONS{$self->name};
         confess "unable to find immutabilizing options" unless ref $options;
         my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
-        $transformer->make_metaclass_mutable($self, %$options);
+        $transformer->make_metaclass_mutable($self, $options);
     }
 }
 
