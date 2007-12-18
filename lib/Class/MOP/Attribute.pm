@@ -534,7 +534,7 @@ even to attributes with just write only accessors.
 
 =item B<has_value ($instance)>
 
-Returns a boolean indicating if the item in the C<$instance> has a value in it.
+Return a boolean indicating if the item in the C<$instance> has a value in it.
 This is basically what the default C<predicate> method calls.
 
 =item B<clear_value ($instance)>
@@ -570,13 +570,15 @@ passed into C<new>. I think they are pretty much self-explanitory.
 
 =item B<default (?$instance)>
 
-As noted in the documentation for C<new> above, if the I<default>
-value is a CODE reference, this accessor will pass a single additional
-argument C<$instance> into it and return the value.
+Return the default value for the attribute.
+
+If you pass in an C<$instance> argument to this accessor and the
+I<default> is a CODE reference, then the CODE reference will be
+executed with the C<$instance> as its argument.
 
 =item B<slots>
 
-Returns a list of slots required by the attribute. This is usually
+Return a list of slots required by the attribute. This is usually
 just one, which is the name of the attribute.
 
 =item B<get_read_method>
