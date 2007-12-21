@@ -1,7 +1,19 @@
 Revision history for Perl extension Class-MOP.
 
+0.50
+    * Class::MOP::Class
+      - fixed bug in immutable to make sure that 
+        transformation arguments are saved 
+        correctly (mst)
+        
+    * Class::MOP::Immutable
+      - fixed a bug (see above)
+      
+    * Class::MOP::Attribute
+      - some doc updates
+
 0.49 Fri. Dec. 14, 2007
-    !! Class::MOP now loads ~45% faster !!
+    !! Class::MOP now loads ~70% faster !!
     !! with XS speedups (thanks konobi) !!
         
     * Class::MOP

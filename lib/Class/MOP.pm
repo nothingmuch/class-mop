@@ -14,7 +14,7 @@ use Class::MOP::Method;
 use Class::MOP::Immutable;
 
 BEGIN {
-    our $VERSION   = '0.49';
+    our $VERSION   = '0.50';
     our $AUTHORITY = 'cpan:STEVAN';    
     
     use XSLoader;
