@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.50
+0.50 Fri. Dec. 21, 2007
     * Class::MOP::Class
       - fixed bug in immutable to make sure that 
         transformation arguments are saved 
