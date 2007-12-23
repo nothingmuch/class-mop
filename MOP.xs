@@ -17,6 +17,8 @@ get_code_info:
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
+PROTOTYPES: ENABLE
+
 SV*
 check_package_cache_flag(pkg)
   SV* pkg
