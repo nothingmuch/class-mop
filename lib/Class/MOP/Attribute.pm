@@ -495,9 +495,19 @@ C<undef> value to the attribute.
 
 =item I<predicate>
 
-This is a basic test to see if the value of the attribute is not
-C<undef>. It will return true (C<1>) if the attribute's value is
-defined, and false (C<0>) otherwise.
+This is a basic test to see if any value has been set for the 
+attribute. It will return true (C<1>) if the attribute has been set 
+to any value (even C<undef>), and false (C<0>) otherwise.
+
+B<NOTE:>
+The predicate will return true even when you set an attribute's
+value to C<undef>. This behaviour has changed as of version 0.43. In 
+older versions, the predicate (erroneously) checked for attribute 
+value definedness, instead of presence as it is now.
+
+If you really want to get rid of the value, you have to define and 
+use a I<clearer> (see below).
+
 
 =item I<clearer>
 
