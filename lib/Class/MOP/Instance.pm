@@ -108,13 +108,13 @@ sub is_slot_initialized {
 }
 
 sub weaken_slot_value {
-        my ($self, $instance, $slot_name) = @_;
-        weaken $instance->{$slot_name};
+    my ($self, $instance, $slot_name) = @_;
+    weaken $instance->{$slot_name};
 }
 
 sub strengthen_slot_value {
-        my ($self, $instance, $slot_name) = @_;
-        $self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
+    my ($self, $instance, $slot_name) = @_;
+    $self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
 }
 
 # inlinable operation snippets
@@ -329,7 +329,7 @@ Stevan Little E<lt>stevan@iinteractive.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006, 2007 by Infinity Interactive, Inc.
+Copyright 2006-2008 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 

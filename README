@@ -1,4 +1,4 @@
-Class::MOP version 0.50
+Class::MOP version 0.51
 ===========================
 
 See the individual module documentation for more information
@@ -23,7 +23,7 @@ This module requires these other modules and libraries:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2006, 2007 Infinity Interactive, Inc.
+Copyright (C) 2006-2008 Infinity Interactive, Inc.
 
 http://www.iinteractive.com
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.51
+    ~~~ some misc. doc. fixes ~~~
+    ~~ updated copyright dates ~~
+
 0.50 Fri. Dec. 21, 2007
     * Class::MOP::Class
       - fixed bug in immutable to make sure that 
