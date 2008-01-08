@@ -234,6 +234,8 @@ sub create_methods_for_immutable_metaclass {
 
     $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };
 
+    $methods{immutable_transformer} = sub { $self };
+
     return \%methods;
 }
 
