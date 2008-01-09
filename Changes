@@ -3,6 +3,21 @@ Revision history for Perl extension Class-MOP.
 0.51
     ~~~ some misc. doc. fixes ~~~
     ~~ updated copyright dates ~~
+    
+    * Class::MOP
+      - now sets the IS_RUNNING_ON_5_10 
+        constant so that we can take advantage
+        of some of the nice bits of 5.10
+    
+    * Class::MOP::Class
+      - uses the IS_RUNNING_ON_5_10 flag to 
+        optimize the &linearized_isa method 
+        and avoid the hack/check for circular
+        inheritence in &class_precedence_list 
+    
+    * Class::MOP::Immutable 
+      - the immutable class now keeps track of 
+        the transformer which immutablized it
 
 0.50 Fri. Dec. 21, 2007
     * Class::MOP::Class

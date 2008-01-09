@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.25';
+our $VERSION   = '0.26';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -423,7 +423,7 @@ sub subclasses {
 
         my $symbol_table_hashref = do { no strict 'refs'; \%{"${outer_class}::"} };
 
-      SYMBOL:
+        SYMBOL:
         for my $symbol ( keys %$symbol_table_hashref ) {
             next SYMBOL if $symbol !~ /\A (\w+):: \z/x;
             my $inner_class = $1;
@@ -457,18 +457,28 @@ sub subclasses {
 
 
 sub linearized_isa {
-    my %seen;
-    grep { !($seen{$_}++) } (shift)->class_precedence_list
+    if (Class::MOP::IS_RUNNING_ON_5_10()) {
+        return @{ mro::get_linear_isa( (shift)->name ) };
+    }
+    else {
+        my %seen;
+        return grep { !($seen{$_}++) } (shift)->class_precedence_list;
+    }
 }
 
 sub class_precedence_list {
     my $self = shift;
-    # NOTE:
-    # We need to check for circular inheritance here.
-    # This will do nothing if all is well, and blow
-    # up otherwise. Yes, it's an ugly hack, better
-    # suggestions are welcome.
-    { ($self->name || return)->isa('This is a test for circular inheritance') }
+
+    unless (Class::MOP::IS_RUNNING_ON_5_10()) { 
+        # NOTE:
+        # We need to check for circular inheritance here
+        # if we are are not on 5.10, cause 5.8 detects it 
+        # late. This will do nothing if all is well, and 
+        # blow up otherwise. Yes, it's an ugly hack, better
+        # suggestions are welcome.        
+        # - SL
+        ($self->name || return)->isa('This is a test for circular inheritance') 
+    }
 
     (
         $self->name,
