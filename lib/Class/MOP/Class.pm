@@ -393,6 +393,18 @@ sub clone_instance {
     return $clone;
 }
 
+sub rebless_instance {
+    my ($self, $instance, $new_metaclass) = @_;
+
+    # it's okay (expected, even) to pass in a package name
+    unless (blessed $new_metaclass) {
+        $new_metaclass = $self->initialize($new_metaclass);
+    }
+
+    my $meta_instance = $self->get_meta_instance();
+    return $meta_instance->rebless_instance_structure($instance, $new_metaclass);
+}
+
 # Inheritance
 
 sub superclasses {

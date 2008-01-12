@@ -14,10 +14,16 @@ Revision history for Perl extension Class-MOP.
         optimize the &linearized_isa method 
         and avoid the hack/check for circular
         inheritence in &class_precedence_list 
+      - added rebless_instance method (Sartak)
+        - added tests for this
     
     * Class::MOP::Immutable 
       - the immutable class now keeps track of 
         the transformer which immutablized it
+
+    * Class::MOP::Instance
+      - added rebless_instance_structure method (Sartak)
+        - added tests for this
 
 0.50 Fri. Dec. 21, 2007
     * Class::MOP::Class

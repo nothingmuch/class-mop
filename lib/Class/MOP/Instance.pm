@@ -117,6 +117,11 @@ sub strengthen_slot_value {
     $self->set_slot_value($instance, $slot_name, $self->get_slot_value($instance, $slot_name));
 }
 
+sub rebless_instance_structure {
+    my ($self, $instance, $metaclass) = @_;
+    bless $instance, $metaclass->name;
+}
+
 # inlinable operation snippets
 
 sub is_inlinable { 1 }
