@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 36;
+use Test::More tests => 27;
 use Test::Exception;
 use Scalar::Util 'blessed';
 
@@ -43,20 +43,8 @@ is($foo->whoami, "child", 'reblessed->whoami gives child');
 is($foo->parent, "parent", 'reblessed->parent gives parent');
 is($foo->child, "child", 'reblessed->child gives child');
 
-$foo->meta->rebless_instance($foo, "LeftField");
-is(blessed($foo), 'LeftField', "rebless_instance doesn't have to work on subclasses");
-is($foo->whoami, "leftfield", "reblessed->whoami gives leftfield");
-is($foo->myhax, "areleet", "new method works fine");
-dies_ok { $foo->parent } "LeftField->parent method doesn't exist";
-dies_ok { $foo->child  } "LeftField->child method doesn't exist";
-
-$foo->meta->rebless_instance($foo, "NonExistent");
-is(blessed($foo), 'NonExistent', "rebless_instance doesn't require an already-existing package");
-ok($foo->isa('NonExistent'), "still have a blessed reference");
-dies_ok { $foo->whoami } "NonExistent->whoami method doesn't exist";
-dies_ok { $foo->myhax  } "NonExistent->myhax method doesn't exist";
-dies_ok { $foo->parent } "NonExistent->parent method doesn't exist";
-dies_ok { $foo->child  } "NonExistent->child method doesn't exist";
+throws_ok { $foo->meta->rebless_instance($foo, "LeftField") } qr/You may rebless only into a subclass. \(LeftField\) is not a subclass of \(Child\)\./;
+throws_ok { $foo->meta->rebless_instance($foo, "NonExistent") } qr/You may rebless only into a subclass. \(NonExistent\) is not a subclass of \(Child\)\./;
 
 # make sure our ->meta is still sane
 my $bar = Parent->new;

@@ -401,6 +401,18 @@ sub rebless_instance {
         $new_metaclass = $self->initialize($new_metaclass);
     }
 
+    # make sure we're reblessing into a subclass
+    my $is_subclass = 0;
+    for my $superclass ($new_metaclass->linearized_isa) {
+        if ($superclass eq $self->name) {
+            $is_subclass = 1;
+            last;
+        }
+    }
+
+    $is_subclass
+        || confess "You may rebless only into a subclass. (". $new_metaclass->name .") is not a subclass of (". $self->name .").";
+
     my $meta_instance = $self->get_meta_instance();
     return $meta_instance->rebless_instance_structure($instance, $new_metaclass);
 }
