@@ -44,10 +44,10 @@ is($foo->parent, "parent", 'reblessed->parent gives parent');
 is($foo->child, "child", 'reblessed->child gives child');
 
 throws_ok { LeftField->meta->rebless_instance($foo, "LeftField") }
-          qr/You may rebless only into a subclass. \(LeftField\) is not a subclass of \(Child\)\./;
+          qr/You may rebless only into a subclass of \(Child\), of which \(LeftField\) isn't\./;
 
 throws_ok { Class::MOP::Class->initialize("NonExistent")->rebless_instance($foo) }
-          qr/You may rebless only into a subclass. \(NonExistent\) is not a subclass of \(Child\)\./;
+          qr/You may rebless only into a subclass of \(Child\), of which \(NonExistent\) isn't\./;
 
 # make sure our ->meta is still sane
 my $bar = Parent->new;

@@ -399,7 +399,7 @@ sub rebless_instance {
     my $meta_instance = $self->get_meta_instance();
 
     $self->name->isa($old_metaclass->name)
-        || confess "You may rebless only into a subclass. (". $self->name .") is not a subclass of (". $old_metaclass->name .").";
+        || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
     $meta_instance->rebless_instance_structure($instance, $self);
