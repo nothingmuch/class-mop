@@ -418,7 +418,7 @@ sub rebless_instance {
     $meta_instance->rebless_instance_structure($instance, $new_metaclass);
 
     # check and upgrade all attributes
-    my %params = map { $_->name => $_->get_value($instance) }
+    my %params = map { $_->name => $meta_instance->get_slot_value($instance, $_->name) }
                  grep { $meta_instance->is_slot_initialized($instance, $_->name) }
                  $new_metaclass->compute_all_applicable_attributes;
 
