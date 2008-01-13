@@ -400,6 +400,7 @@ sub rebless_instance {
     unless (blessed $new_metaclass) {
         $new_metaclass = $self->initialize($new_metaclass);
     }
+    my $meta_instance = $self->get_meta_instance();
 
     # make sure we're reblessing into a subclass
     my $is_subclass = 0;
@@ -413,8 +414,17 @@ sub rebless_instance {
     $is_subclass
         || confess "You may rebless only into a subclass. (". $new_metaclass->name .") is not a subclass of (". $self->name .").";
 
-    my $meta_instance = $self->get_meta_instance();
-    return $meta_instance->rebless_instance_structure($instance, $new_metaclass);
+    # rebless!
+    $meta_instance->rebless_instance_structure($instance, $new_metaclass);
+
+    # check and upgrade all attributes
+    my %params = map { $_->name => $_->get_value($instance) }
+                 grep { $meta_instance->is_slot_initialized($instance, $_->name) }
+                 $new_metaclass->compute_all_applicable_attributes;
+
+    foreach my $attr ($new_metaclass->compute_all_applicable_attributes) {
+        $attr->initialize_instance_slot($meta_instance, $instance, \%params);
+    }
 }
 
 # Inheritance
