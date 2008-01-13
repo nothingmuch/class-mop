@@ -394,35 +394,22 @@ sub clone_instance {
 }
 
 sub rebless_instance {
-    my ($self, $instance, $new_metaclass) = @_;
-
-    # it's okay (expected, even) to pass in a package name
-    unless (blessed $new_metaclass) {
-        $new_metaclass = $self->initialize($new_metaclass);
-    }
+    my ($self, $instance) = @_;
+    my $old_metaclass = $instance->meta();
     my $meta_instance = $self->get_meta_instance();
 
-    # make sure we're reblessing into a subclass
-    my $is_subclass = 0;
-    for my $superclass ($new_metaclass->linearized_isa) {
-        if ($superclass eq $self->name) {
-            $is_subclass = 1;
-            last;
-        }
-    }
-
-    $is_subclass
-        || confess "You may rebless only into a subclass. (". $new_metaclass->name .") is not a subclass of (". $self->name .").";
+    $self->name->isa($old_metaclass->name)
+        || confess "You may rebless only into a subclass. (". $self->name .") is not a subclass of (". $old_metaclass->name .").";
 
     # rebless!
-    $meta_instance->rebless_instance_structure($instance, $new_metaclass);
+    $meta_instance->rebless_instance_structure($instance, $self);
 
     # check and upgrade all attributes
     my %params = map { $_->name => $meta_instance->get_slot_value($instance, $_->name) }
                  grep { $meta_instance->is_slot_initialized($instance, $_->name) }
-                 $new_metaclass->compute_all_applicable_attributes;
+                 $self->compute_all_applicable_attributes;
 
-    foreach my $attr ($new_metaclass->compute_all_applicable_attributes) {
+    foreach my $attr ($self->compute_all_applicable_attributes) {
         $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
 }

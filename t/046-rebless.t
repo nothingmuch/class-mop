@@ -37,14 +37,17 @@ is($foo->whoami, "parent", 'Parent->whoami gives parent');
 is($foo->parent, "parent", 'Parent->parent gives parent');
 dies_ok { $foo->child } "Parent->child method doesn't exist";
 
-$foo->meta->rebless_instance($foo, "Child");
+Child->meta->rebless_instance($foo);
 is(blessed($foo), 'Child', 'rebless_instance really reblessed the instance');
 is($foo->whoami, "child", 'reblessed->whoami gives child');
 is($foo->parent, "parent", 'reblessed->parent gives parent');
 is($foo->child, "child", 'reblessed->child gives child');
 
-throws_ok { $foo->meta->rebless_instance($foo, "LeftField") } qr/You may rebless only into a subclass. \(LeftField\) is not a subclass of \(Child\)\./;
-throws_ok { $foo->meta->rebless_instance($foo, "NonExistent") } qr/You may rebless only into a subclass. \(NonExistent\) is not a subclass of \(Child\)\./;
+throws_ok { LeftField->meta->rebless_instance($foo, "LeftField") }
+          qr/You may rebless only into a subclass. \(LeftField\) is not a subclass of \(Child\)\./;
+
+throws_ok { Class::MOP::Class->initialize("NonExistent")->rebless_instance($foo) }
+          qr/You may rebless only into a subclass. \(NonExistent\) is not a subclass of \(Child\)\./;
 
 # make sure our ->meta is still sane
 my $bar = Parent->new;
@@ -58,7 +61,7 @@ ok($bar->meta->has_method('parent'), 'metaclass has "parent" method');
 
 is(blessed($bar->meta->new_object), 'Parent', 'new_object gives a Parent');
 
-$bar->meta->rebless_instance($bar, "Child");
+Child->meta->rebless_instance($bar);
 is(blessed($bar), 'Child', "rebless really reblessed");
 is(blessed($bar->meta), 'Class::MOP::Class', "meta gives a Class::MOP::Class");
 is($bar->meta->name, 'Child', "this Class::MOP::Class instance is for Child");
