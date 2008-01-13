@@ -1106,6 +1106,15 @@ shallow cloning is outside the scope of the meta-object protocol. I
 think Yuval "nothingmuch" Kogman put it best when he said that cloning
 is too I<context-specific> to be part of the MOP.
 
+=item B<rebless_instance($instance)>
+
+This will change the class of C<$instance> to the class of the invoking
+C<Class::MOP::Class>. You may only rebless the instance to a subclass of
+itself. This limitation may be relaxed in the future.
+
+This can be useful in a number of situations, such as when you are writing
+a program that doesn't know everything at object construction time.
+
 =back
 
 =head2 Informational
