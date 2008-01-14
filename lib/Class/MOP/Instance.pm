@@ -288,6 +288,8 @@ require that the C<$instance_structure> is passed into them.
 
 =item B<strengthen_slot_value ($instance_structure, $slot_name)>
 
+=item B<rebless_instance_structure ($instance_structure, $new_metaclass)>
+
 =back
 
 =head2 Inlineable Instance Operations
