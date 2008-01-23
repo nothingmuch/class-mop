@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.26';
+our $VERSION   = '0.27';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -395,7 +395,17 @@ sub clone_instance {
 
 sub rebless_instance {
     my ($self, $instance) = @_;
-    my $old_metaclass = $instance->meta();
+
+    my $old_metaclass;
+    if ($instance->can('meta')) {
+        ($instance->meta->isa('Class::MOP::Class'))
+            || confess 'Cannot rebless instance if ->meta is not an instance of Class::MOP::Class';
+        $old_metaclass = $instance->meta;
+    }
+    else {
+        $old_metaclass = $self->initialize(blessed($instance));
+    }
+
     my $meta_instance = $self->get_meta_instance();
 
     $self->name->isa($old_metaclass->name)

@@ -1,5 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
+0.52 
+    * Class::MOP::Class
+      - fixed bug in rebless_instance 
+        (discovered by ash)
+
+    * Class::MOP::Method::Constructor
+      - removed assumptions about the existence of 
+        a &meta method
+
 0.51 Mon. Jan. 14, 2008
     ~~~ some misc. doc. fixes ~~~
     ~~ updated copyright dates ~~

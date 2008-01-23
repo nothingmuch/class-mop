@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken', 'looks_like_number';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Generated';
@@ -68,7 +68,7 @@ sub initialize_body {
 }
 
 sub generate_constructor_method {
-    return sub { (shift)->meta->new_object(@_) }
+    return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
 }
 
 sub generate_constructor_method_inline {
@@ -77,7 +77,7 @@ sub generate_constructor_method_inline {
     my $source = 'sub {';
     $source .= "\n" . 'my ($class, %params) = @_;';
 
-    $source .= "\n" . 'return $class->meta->new_object(%params)';
+    $source .= "\n" . 'return Class::MOP::Class->initialize($class)->new_object(%params)';
     $source .= "\n" . '    if $class ne \'' . $self->associated_metaclass->name . '\';';
 
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
