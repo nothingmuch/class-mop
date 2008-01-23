@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.52 
+0.52 Tues. Jan. 22, 2008
     * Class::MOP::Class
       - fixed bug in rebless_instance 
         (discovered by ash)
