@@ -124,16 +124,12 @@ sub rebless_instance_structure {
 
 sub get_all_slot_values {
     my ($self, $instance) = @_;
-    my $class = $self->associated_metaclass;
-    my %map;
 
-    for my $attr ($class->compute_all_applicable_attributes) {
-        my $name = $attr->name;
-        $map{$name} = $self->get_slot_value($instance, $name)
-            if $self->is_slot_initialized($instance, $name);
-    }
-
-    return \%map;
+    return +{
+        map { $_->name => $_->get_value($instance) }
+            grep { $_->has_value($instance) }
+                $self->associated_metaclass->compute_all_applicable_attributes
+    };
 }
 
 # inlinable operation snippets
