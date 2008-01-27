@@ -439,7 +439,7 @@ sub get_attribute_values {
     return +{
         map { $_->name => $_->get_value($instance) }
             grep { $_->has_value($instance) }
-                $self->>compute_all_applicable_attributes
+                $self->compute_all_applicable_attributes
     };
 }
 

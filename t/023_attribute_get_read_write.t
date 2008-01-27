@@ -117,7 +117,7 @@ my $foo = bless {}, 'Foo';
 $foo->set_bar(1);
 $foo->baz(10);
 
-is_deeply($foo->meta->get_meta_instance->get_all_slot_values($foo), {
+is_deeply($foo->meta->get_attribute_values($foo), {
     bar => 1,
     baz => 10,
 });
@@ -125,13 +125,13 @@ is_deeply($foo->meta->get_meta_instance->get_all_slot_values($foo), {
 my $bar = bless {}, 'Bar';
 $bar->set_bar(99);
 
-is_deeply($bar->meta->get_meta_instance->get_all_slot_values($bar), {
+is_deeply($bar->meta->get_attribute_values($bar), {
     bar => 99,
 });
 
 $bar->quux(1337);
 
-is_deeply($bar->meta->get_meta_instance->get_all_slot_values($bar), {
+is_deeply($bar->meta->get_attribute_values($bar), {
     bar  => 99,
     quux => 1337,
 });
