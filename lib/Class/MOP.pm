@@ -135,9 +135,7 @@ Class::MOP::Package->meta->add_attribute(
             # rather than re-produce it here
             'namespace' => \&Class::MOP::Package::namespace
         },
-        # NOTE:
-        # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',
+        init_arg => undef,
         default  => sub { \undef }
     ))
 );
@@ -172,9 +170,7 @@ Class::MOP::Module->meta->add_attribute(
             # rather than re-produce it here
             'version' => \&Class::MOP::Module::version
         },
-        # NOTE:
-        # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',
+        init_arg => undef,
         default  => sub { \undef }
     ))
 );
@@ -193,9 +189,7 @@ Class::MOP::Module->meta->add_attribute(
             # rather than re-produce it here
             'authority' => \&Class::MOP::Module::authority
         },
-        # NOTE:
-        # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',
+        init_arg => undef,
         default  => sub { \undef }
     ))
 );
@@ -240,9 +234,7 @@ Class::MOP::Class->meta->add_attribute(
             # rather than re-produce it here
             'superclasses' => \&Class::MOP::Class::superclasses
         },
-        # NOTE:
-        # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',
+        init_arg => undef,
         default  => sub { \undef }
     ))
 );

@@ -49,10 +49,16 @@ sub new {
                        "wrap then in a CODE reference (ex: sub { [] } and not [])")
                 if exists $options{default} && ref $options{default};
     }
+    if( $options{required} and not( defined($options{builder}) || defined($options{init_arg}) || exists $options{default} ) ) {
+        confess("A required attribute must have either 'init_arg', 'builder', or 'default'");
+    }
     bless {
         '$!name'      => $name,
         '$!accessor'  => $options{accessor},
         '$!reader'    => $options{reader},
+        # NOTE:
+        # protect this from silliness
+        init_arg => '!............( DO NOT DO THIS )............!',
         '$!writer'    => $options{writer},
         '$!predicate' => $options{predicate},
         '$!clearer'   => $options{clearer},
@@ -88,7 +94,7 @@ sub initialize_instance_slot {
 
     # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
-    if(exists $params->{$init_arg}){
+    if(defined $init_arg and exists $params->{$init_arg}){
         $meta_instance->set_slot_value($instance, $self->name, $params->{$init_arg});
     } 
     elsif (defined $self->{'$!default'}) {
