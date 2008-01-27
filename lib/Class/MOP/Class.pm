@@ -433,6 +433,27 @@ sub rebless_instance {
     }
 }
 
+sub get_attribute_values {
+    my ($self, $instance) = @_;
+
+    return +{
+        map { $_->name => $_->get_value($instance) }
+            grep { $_->has_value($instance) }
+                $self->>compute_all_applicable_attributes
+    };
+}
+
+sub get_init_args {
+    my ($self, $instance) = @_;
+
+    return +{
+        map { $_->init_arg => $_->get_value($instance) }
+            grep { $_->has_value($instance) }
+                grep { defined($_->init_arg) } 
+                    $self->compute_all_applicable_attributes
+    };
+}
+
 # Inheritance
 
 sub superclasses {
@@ -1124,6 +1145,16 @@ thought, research and discussion, I have decided that anything but basic
 shallow cloning is outside the scope of the meta-object protocol. I
 think Yuval "nothingmuch" Kogman put it best when he said that cloning
 is too I<context-specific> to be part of the MOP.
+
+=item B<get_attribute_values($instance)>
+
+Returns the values of the C<$instance>'s fields keyed by the attribute names.
+
+=item B<get_init_args($instance)>
+
+Returns a hash reference where the keys are all the attributes' C<init_arg>s
+and the values are the instance's fields. Attributes without an C<init_arg>
+will be skipped.
 
 =item B<rebless_instance($instance)>
 

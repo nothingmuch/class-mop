@@ -122,16 +122,6 @@ sub rebless_instance_structure {
     bless $instance, $metaclass->name;
 }
 
-sub get_all_slot_values {
-    my ($self, $instance) = @_;
-
-    return +{
-        map { $_->name => $_->get_value($instance) }
-            grep { $_->has_value($instance) }
-                $self->associated_metaclass->compute_all_applicable_attributes
-    };
-}
-
 # inlinable operation snippets
 
 sub is_inlinable { 1 }
@@ -283,8 +273,6 @@ require that the C<$instance_structure> is passed into them.
 =item B<get_slot_value ($instance_structure, $slot_name)>
 
 =item B<set_slot_value ($instance_structure, $slot_name, $value)>
-
-=item B<get_all_slot_values ($instance_structure)>
 
 =item B<initialize_slot ($instance_structure, $slot_name)>
 
