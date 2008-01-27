@@ -386,8 +386,10 @@ sub clone_instance {
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        if (exists $params{$attr->init_arg}) {
-            $meta_instance->set_slot_value($clone, $attr->name, $params{$attr->init_arg});
+        if ( defined( my $init_arg = $attr->init_arg ) ) {
+            if (exists $params{$init_arg}) {
+                $attr->set_value($clone, $params{$init_arg});
+            }
         }
     }
     return $clone;
@@ -415,12 +417,10 @@ sub rebless_instance {
     $meta_instance->rebless_instance_structure($instance, $self);
 
     # check and upgrade all attributes
-    my %params = map { $_->name => $meta_instance->get_slot_value($instance, $_->name) }
-                 grep { $meta_instance->is_slot_initialized($instance, $_->name) }
-                 $self->compute_all_applicable_attributes;
-
-    foreach my $attr ($self->compute_all_applicable_attributes) {
-        $attr->initialize_instance_slot($meta_instance, $instance, \%params);
+    foreach my $attr ( $self->compute_all_applicable_attributes ) {
+        if ( $attr->has_value($instance) ) {
+            $attr->set_value($instance, $attr->get_value($instance) );
+        }
     }
 }
 
