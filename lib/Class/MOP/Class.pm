@@ -416,11 +416,20 @@ sub rebless_instance {
     # rebless!
     $meta_instance->rebless_instance_structure($instance, $self);
 
-    # check and upgrade all attributes
+    my %params;
+
     foreach my $attr ( $self->compute_all_applicable_attributes ) {
         if ( $attr->has_value($instance) ) {
-            $attr->set_value($instance, $attr->get_value($instance) );
+            if ( defined( my $init_arg = $attr->init_arg ) ) {
+                $params{$init_arg} = $attr->get_value($instance);
+            } else {
+                $attr->set_value($instance);
+            }
         }
+    }
+
+    foreach my $attr ($self->compute_all_applicable_attributes) {
+        $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
 }
 
