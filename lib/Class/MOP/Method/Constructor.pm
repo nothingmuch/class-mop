@@ -129,17 +129,28 @@ sub _generate_slot_initializer {
         $default = '$instance->'.$attr->builder;
     }
 
-  'if(exists $params{\'' . $attr->init_arg . '\'}){' . "\n" .
-        $self->meta_instance->inline_set_slot_value(
-            '$instance',
-            ("'" . $attr->name . "'"),
-            '$params{\'' . $attr->init_arg . '\'}' ) . "\n" .
-   '} ' . (!defined $default ? '' : 'else {' . "\n" .
-        $self->meta_instance->inline_set_slot_value(
-            '$instance',
-            ("'" . $attr->name . "'"),
-             $default ) . "\n" .
-   '}');
+    if ( defined $attr->init_arg ) {
+      return (
+          'if(exists $params{\'' . $attr->init_arg . '\'}){' . "\n" .
+                $self->meta_instance->inline_set_slot_value(
+                    '$instance',
+                    ("'" . $attr->name . "'"),
+                    '$params{\'' . $attr->init_arg . '\'}' ) . "\n" .
+           '} ' . (!defined $default ? '' : 'else {' . "\n" .
+                $self->meta_instance->inline_set_slot_value(
+                    '$instance',
+                    ("'" . $attr->name . "'"),
+                     $default ) . "\n" .
+           '}')
+        );
+    } elsif ( defined $default ) {
+        return (
+            $self->meta_instance->inline_set_slot_value(
+                '$instance',
+                ("'" . $attr->name . "'"),
+                 $default ) . "\n"
+        );
+    } else { return '' }
 }
 
 1;
