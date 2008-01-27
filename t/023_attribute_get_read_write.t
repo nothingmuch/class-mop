@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util 'blessed', 'reftype';
 
-use Test::More tests => 35;
+use Test::More tests => 38;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -34,6 +34,14 @@ and get_read/write_method_ref methods
     Foo->meta->add_attribute('gorch' => 
         reader => { 'get_gorch', => sub { (shift)->{gorch} } }
     );       
+
+    package Bar;
+    use metaclass;
+    Bar->meta->superclasses('Foo');
+
+    Bar->meta->add_attribute('quux' =>
+        accessor => 'quux',
+    );
 }
 
 can_ok('Foo', 'get_bar');
@@ -104,3 +112,27 @@ ok(!$gorch_attr->get_write_method, '... $attr does not have an write method');
     
     is($reader->fully_qualified_name, 'Foo::get_gorch', '... it is the sub we are looking for');
 }
+
+my $foo = bless {}, 'Foo';
+$foo->set_bar(1);
+$foo->baz(10);
+
+is_deeply($foo->meta->get_meta_instance->get_all_slot_values($foo), {
+    bar => 1,
+    baz => 10,
+});
+
+my $bar = bless {}, 'Bar';
+$bar->set_bar(99);
+
+is_deeply($bar->meta->get_meta_instance->get_all_slot_values($bar), {
+    bar => 99,
+});
+
+$bar->quux(1337);
+
+is_deeply($bar->meta->get_meta_instance->get_all_slot_values($bar), {
+    bar  => 99,
+    quux => 1337,
+});
+
