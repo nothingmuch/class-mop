@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.27';
+our $VERSION   = '0.28';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
