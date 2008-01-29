@@ -63,14 +63,14 @@ sub get_all_slots {
 
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{'@!slots'}->{$slot_name} ? 1 : 0;
+    exists $self->{'@!slots'}->{$slot_name};
 }
 
 # operations on created instances
 
 sub get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    $self->is_slot_initialized($instance, $slot_name) ? $instance->{$slot_name} : undef;
+    $instance->{$slot_name};
 }
 
 sub set_slot_value {
@@ -104,7 +104,7 @@ sub deinitialize_all_slots {
 
 sub is_slot_initialized {
     my ($self, $instance, $slot_name, $value) = @_;
-    exists $instance->{$slot_name} ? 1 : 0;
+    exists $instance->{$slot_name};
 }
 
 sub weaken_slot_value {
@@ -138,8 +138,7 @@ sub inline_slot_access {
 
 sub inline_get_slot_value {
     my ($self, $instance, $slot_name) = @_;
-    'exists ' . $self->inline_slot_access($instance, $slot_name) .
-    ' ? ' . $self->inline_slot_access($instance, $slot_name) . ' : undef'
+    $self->inline_slot_access($instance, $slot_name);
 }
 
 sub inline_set_slot_value {
@@ -158,7 +157,7 @@ sub inline_deinitialize_slot {
 }
 sub inline_is_slot_initialized {
     my ($self, $instance, $slot_name) = @_;
-    "exists " . $self->inline_slot_access($instance, $slot_name) . " ? 1 : 0";
+    "exists " . $self->inline_slot_access($instance, $slot_name);
 }
 
 sub inline_weaken_slot_value {

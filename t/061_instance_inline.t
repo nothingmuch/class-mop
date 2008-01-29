@@ -18,7 +18,7 @@ my $C = 'Class::MOP::Instance';
     my $value     = '$value';
 
     is($C->inline_get_slot_value($instance, $slot_name),
-      'exists $self->{"foo"} ? $self->{"foo"} : undef',
+      '$self->{"foo"}',
       '... got the right code for get_slot_value');
 
     is($C->inline_set_slot_value($instance, $slot_name, $value),
@@ -30,7 +30,7 @@ my $C = 'Class::MOP::Instance';
       '... got the right code for initialize_slot');
 
     is($C->inline_is_slot_initialized($instance, $slot_name),
-      'exists $self->{"foo"} ? 1 : 0',
+      'exists $self->{"foo"}',
       '... got the right code for get_slot_value');
 
     is($C->inline_weaken_slot_value($instance, $slot_name),
@@ -48,7 +48,7 @@ my $C = 'Class::MOP::Instance';
     my $value     = '[]';
 
     is($C->inline_get_slot_value($instance, $slot_name),
-      'exists $_[0]->{$attr_name} ? $_[0]->{$attr_name} : undef',
+      '$_[0]->{$attr_name}',
       '... got the right code for get_slot_value');
 
     is($C->inline_set_slot_value($instance, $slot_name, $value),
@@ -60,7 +60,7 @@ my $C = 'Class::MOP::Instance';
       '... got the right code for initialize_slot');
 
     is($C->inline_is_slot_initialized($instance, $slot_name),
-      'exists $_[0]->{$attr_name} ? 1 : 0',
+      'exists $_[0]->{$attr_name}',
       '... got the right code for get_slot_value');
 
     is($C->inline_weaken_slot_value($instance, $slot_name),
@@ -81,7 +81,7 @@ my $accessor_string = "sub {\n"
 is($accessor_string,
    q|sub {
 $_[0]->{$attr_name} = $_[1] if scalar @_ == 2;
-exists $_[0]->{$attr_name} ? $_[0]->{$attr_name} : undef;
+$_[0]->{$attr_name};
 }|,
     '... got the right code string for accessor');
 
@@ -91,7 +91,7 @@ my $reader_string = "sub {\n"
 
 is($reader_string,
    q|sub {
-exists $_[0]->{$attr_name} ? $_[0]->{$attr_name} : undef;
+$_[0]->{$attr_name};
 }|,
     '... got the right code string for reader');
 
