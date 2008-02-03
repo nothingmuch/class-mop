@@ -182,24 +182,19 @@ Class::MOP::Instance - Instance Meta Object
 
 =head1 SYNOPSIS
 
-  # for the most part, this protocol is internal
-  # and not for public usage, but this how one
-  # might use it
-
-  package Foo;
-
-  use strict;
-  use warnings;
-  use metaclass (
-      ':instance_metaclass'  => 'ArrayBasedStorage::Instance',
-  );
-
-  # now Foo->new produces blessed ARRAY ref based objects
+    # This API is largely internal
+    # you shouldn't need it unless you are writing meta attributes or meta
+    # instances
 
 =head1 DESCRIPTION
 
-This is a sub-protocol which governs instance creation
-and access to the slots of the instance structure.
+The meta instance is used by attributes for low level storage.
+
+Using this API generally violates attribute encapsulation and is not
+reccomended, instead look at L<Class::MOP::Attribute/get_value>,
+L<Class::MOP::Attribute/set_value> for the reccomended way to fiddle with
+attribute values in a generic way, independant of how/whether accessors have
+been defined. Accessors can be found using L<Class::MOP::Class/get_attribute>.
 
 This may seem like over-abstraction, but by abstracting
 this process into a sub-protocol we make it possible to
