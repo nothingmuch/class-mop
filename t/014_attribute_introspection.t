@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 56;
+use Test::More tests => 58;
 use Test::Exception;
 
 BEGIN {
@@ -34,6 +34,7 @@ BEGIN {
         has_builder   builder
         has_init_arg  init_arg
         has_default   default    is_default_a_coderef
+        has_initializer initializer
 
         slots
         get_value

@@ -68,6 +68,7 @@ sub new {
         # keep a weakened link to the
         # class we are associated with
         '$!associated_class' => undef,
+        '$!initializer'      => $options{initializer},
         # and a list of the methods
         # associated with this attr
         '@!associated_methods' => [],
@@ -95,14 +96,29 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
     if(defined $init_arg and exists $params->{$init_arg}){
-        $meta_instance->set_slot_value($instance, $self->name, $params->{$init_arg});
+        $meta_instance->_set_initial_slot_value(
+            $instance,
+            $self->name,
+            $params->{$init_arg},
+            $self->initializer,
+        );
     } 
     elsif (defined $self->{'$!default'}) {
-        $meta_instance->set_slot_value($instance, $self->name, $self->default($instance));
+        $meta_instance->_set_initial_slot_value(
+            $instance,
+            $self->name,
+            $self->default($instance),
+            $self->initializer,
+        );
     } 
     elsif (defined( my $builder = $self->{'$!builder'})) {
         if ($builder = $instance->can($builder)) {
-            $meta_instance->set_slot_value($instance, $self->name, $instance->$builder);
+            $meta_instance->_set_initial_slot_value(
+                $instance,
+                $self->name,
+                $instance->$builder,
+                $self->initializer,
+            );
         } 
         else {
             confess(blessed($instance)." does not support builder method '". $self->{'$!builder'} ."' for attribute '" . $self->name . "'");
@@ -127,6 +143,7 @@ sub has_clearer   { defined($_[0]->{'$!clearer'})   ? 1 : 0 }
 sub has_builder   { defined($_[0]->{'$!builder'})   ? 1 : 0 }
 sub has_init_arg  { defined($_[0]->{'$!init_arg'})  ? 1 : 0 }
 sub has_default   { defined($_[0]->{'$!default'})   ? 1 : 0 }
+sub has_initializer { defined($_[0]->{'$!initializer'})  ? 1 : 0 }
 
 sub accessor  { $_[0]->{'$!accessor'}  }
 sub reader    { $_[0]->{'$!reader'}    }
@@ -135,6 +152,7 @@ sub predicate { $_[0]->{'$!predicate'} }
 sub clearer   { $_[0]->{'$!clearer'}   }
 sub builder   { $_[0]->{'$!builder'}   }
 sub init_arg  { $_[0]->{'$!init_arg'}  }
+sub initializer { $_[0]->{'$!initializer'} }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
@@ -580,6 +598,8 @@ passed into C<new>. I think they are pretty much self-explanitory.
 
 =item B<clearer>
 
+=item B<initializer>
+
 =item B<init_arg>
 
 =item B<is_default_a_coderef>
@@ -633,6 +653,8 @@ These are all basic predicate methods for the values passed into C<new>.
 =item B<has_predicate>
 
 =item B<has_clearer>
+
+=item B<has_initializer>
 
 =item B<has_init_arg>
 
