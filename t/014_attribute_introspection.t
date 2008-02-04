@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 59;
 use Test::Exception;
 
 BEGIN {
@@ -73,6 +73,7 @@ BEGIN {
         '$!clearer',
         '$!builder',
         '$!init_arg',
+        '$!initializer',
         '$!default',
         '$!associated_class',
         '@!associated_methods',
