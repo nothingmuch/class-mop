@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 59;
+use Test::More tests => 60;
 use Test::Exception;
 
 BEGIN {
@@ -39,6 +39,7 @@ BEGIN {
         slots
         get_value
         set_value
+        set_initial_value
         has_value
         clear_value
 

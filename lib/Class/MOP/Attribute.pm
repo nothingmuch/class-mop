@@ -240,6 +240,14 @@ sub associate_method {
 
 ## Slot management
 
+sub set_initial_value {
+    my ($self, $instance, $value) = @_;
+
+    Class::MOP::Class->initialize(blessed($instance))
+                     ->get_meta_instance
+                     ->_set_initial_slot_value($instance, $self->name, $value, $self->initializer);
+}
+
 sub set_value {
     my ($self, $instance, $value) = @_;
 
