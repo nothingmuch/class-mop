@@ -339,8 +339,8 @@ Class::MOP::Attribute->meta->add_attribute(
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('$!initializer' => (
         init_arg  => 'initializer',
-        reader    => { 'initializer' => \&Class::MOP::Attribute::initializer },
-        predicate => { 'has_initializer'  => \&Class::MOP::Attribute::has_initializer },
+        reader    => { 'initializer'     => \&Class::MOP::Attribute::initializer     },
+        predicate => { 'has_initializer' => \&Class::MOP::Attribute::has_initializer },
     ))
 );
 

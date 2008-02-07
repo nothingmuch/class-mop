@@ -78,20 +78,6 @@ sub set_slot_value {
     $instance->{$slot_name} = $value;
 }
 
-sub _set_initial_slot_value {
-  my ($self, $instance, $slot_name, $value, $initializer) = @_;
-
-  return $self->set_slot_value($instance, $slot_name, $value)
-      unless $initializer;
-
-  my $callback = sub {
-    $self->set_slot_value($instance, $slot_name, $_[0]);
-  };
-
-  # most things will just want to set a value, so make it first arg
-  $instance->$initializer($value, $callback, $self);
-}
-
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
     #$self->set_slot_value($instance, $slot_name, undef);

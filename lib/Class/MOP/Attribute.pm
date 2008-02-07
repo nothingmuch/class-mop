@@ -56,22 +56,22 @@ sub new {
         '$!name'      => $name,
         '$!accessor'  => $options{accessor},
         '$!reader'    => $options{reader},
-        # NOTE:
-        # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',
-        '$!writer'    => $options{writer},
-        '$!predicate' => $options{predicate},
-        '$!clearer'   => $options{clearer},
-        '$!builder'   => $options{builder},
-        '$!init_arg'  => $options{init_arg},
-        '$!default'   => $options{default},
+        '$!writer'      => $options{writer},
+        '$!predicate'   => $options{predicate},
+        '$!clearer'     => $options{clearer},
+        '$!builder'     => $options{builder},
+        '$!init_arg'    => $options{init_arg},
+        '$!default'     => $options{default},
+        '$!initializer' => $options{initializer},        
         # keep a weakened link to the
         # class we are associated with
         '$!associated_class' => undef,
-        '$!initializer'      => $options{initializer},
         # and a list of the methods
         # associated with this attr
         '@!associated_methods' => [],
+        # NOTE:
+        # protect this from silliness
+        init_arg => '!............( DO NOT DO THIS )............!',        
     } => $class;
 }
 
@@ -96,34 +96,49 @@ sub initialize_instance_slot {
     # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
     if(defined $init_arg and exists $params->{$init_arg}){
-        $meta_instance->_set_initial_slot_value(
+        $self->_set_initial_slot_value(
+            $meta_instance, 
             $instance,
-            $self->name,
             $params->{$init_arg},
-            $self->initializer,
         );
     } 
     elsif (defined $self->{'$!default'}) {
-        $meta_instance->_set_initial_slot_value(
+        $self->_set_initial_slot_value(
+            $meta_instance, 
             $instance,
-            $self->name,
             $self->default($instance),
-            $self->initializer,
         );
     } 
     elsif (defined( my $builder = $self->{'$!builder'})) {
         if ($builder = $instance->can($builder)) {
-            $meta_instance->_set_initial_slot_value(
+            $self->_set_initial_slot_value(
+                $meta_instance, 
                 $instance,
-                $self->name,
                 $instance->$builder,
-                $self->initializer,
             );
         } 
         else {
             confess(blessed($instance)." does not support builder method '". $self->{'$!builder'} ."' for attribute '" . $self->name . "'");
         }
     }
+}
+
+sub _set_initial_slot_value {
+    my ($self, $meta_instance, $instance, $value) = @_;
+
+    my $slot_name = $self->name;
+
+    return $meta_instance->set_slot_value($instance, $slot_name, $value)
+        unless $self->has_initializer;
+
+    my $callback = sub {
+        $meta_instance->set_slot_value($instance, $slot_name, $_[0]);
+    };
+    
+    my $initializer = $self->initializer;
+
+    # most things will just want to set a value, so make it first arg
+    $instance->$initializer($value, $callback, $self);
 }
 
 # NOTE:
@@ -135,23 +150,23 @@ sub name { $_[0]->{'$!name'} }
 sub associated_class   { $_[0]->{'$!associated_class'}   }
 sub associated_methods { $_[0]->{'@!associated_methods'} }
 
-sub has_accessor  { defined($_[0]->{'$!accessor'})  ? 1 : 0 }
-sub has_reader    { defined($_[0]->{'$!reader'})    ? 1 : 0 }
-sub has_writer    { defined($_[0]->{'$!writer'})    ? 1 : 0 }
-sub has_predicate { defined($_[0]->{'$!predicate'}) ? 1 : 0 }
-sub has_clearer   { defined($_[0]->{'$!clearer'})   ? 1 : 0 }
-sub has_builder   { defined($_[0]->{'$!builder'})   ? 1 : 0 }
-sub has_init_arg  { defined($_[0]->{'$!init_arg'})  ? 1 : 0 }
-sub has_default   { defined($_[0]->{'$!default'})   ? 1 : 0 }
+sub has_accessor    { defined($_[0]->{'$!accessor'})     ? 1 : 0 }
+sub has_reader      { defined($_[0]->{'$!reader'})       ? 1 : 0 }
+sub has_writer      { defined($_[0]->{'$!writer'})       ? 1 : 0 }
+sub has_predicate   { defined($_[0]->{'$!predicate'})    ? 1 : 0 }
+sub has_clearer     { defined($_[0]->{'$!clearer'})      ? 1 : 0 }
+sub has_builder     { defined($_[0]->{'$!builder'})      ? 1 : 0 }
+sub has_init_arg    { defined($_[0]->{'$!init_arg'})     ? 1 : 0 }
+sub has_default     { defined($_[0]->{'$!default'})      ? 1 : 0 }
 sub has_initializer { defined($_[0]->{'$!initializer'})  ? 1 : 0 }
 
-sub accessor  { $_[0]->{'$!accessor'}  }
-sub reader    { $_[0]->{'$!reader'}    }
-sub writer    { $_[0]->{'$!writer'}    }
-sub predicate { $_[0]->{'$!predicate'} }
-sub clearer   { $_[0]->{'$!clearer'}   }
-sub builder   { $_[0]->{'$!builder'}   }
-sub init_arg  { $_[0]->{'$!init_arg'}  }
+sub accessor    { $_[0]->{'$!accessor'}    }
+sub reader      { $_[0]->{'$!reader'}      }
+sub writer      { $_[0]->{'$!writer'}      }
+sub predicate   { $_[0]->{'$!predicate'}   }
+sub clearer     { $_[0]->{'$!clearer'}     }
+sub builder     { $_[0]->{'$!builder'}     }
+sub init_arg    { $_[0]->{'$!init_arg'}    }
 sub initializer { $_[0]->{'$!initializer'} }
 
 # end bootstrapped away method section.
@@ -242,10 +257,11 @@ sub associate_method {
 
 sub set_initial_value {
     my ($self, $instance, $value) = @_;
-
-    Class::MOP::Class->initialize(blessed($instance))
-                     ->get_meta_instance
-                     ->_set_initial_slot_value($instance, $self->name, $value, $self->initializer);
+    $self->set_initial_slot_value(
+        Class::MOP::Class->initialize(blessed($instance))->get_meta_instance,
+        $instance,
+        $value
+    );
 }
 
 sub set_value {

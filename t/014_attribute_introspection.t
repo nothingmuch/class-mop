@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 60;
+use Test::More tests => 61;
 use Test::Exception;
 
 BEGIN {
@@ -24,6 +24,7 @@ BEGIN {
         new clone
 
         initialize_instance_slot
+        _set_initial_slot_value
 
         name
         has_accessor  accessor
