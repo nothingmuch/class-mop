@@ -12,6 +12,7 @@ Revision history for Perl extension Class-MOP.
           to indicate that no constructor args can 
           be passed (thanks to nothingmuch)
           - added tests for this
+        - added attribute initializer attribute (rjbs)
           
     * Class::MOP.
         - making this use the new init_arg => undef
