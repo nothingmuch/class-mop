@@ -257,7 +257,7 @@ sub associate_method {
 
 sub set_initial_value {
     my ($self, $instance, $value) = @_;
-    $self->set_initial_slot_value(
+    $self->_set_initial_slot_value(
         Class::MOP::Class->initialize(blessed($instance))->get_meta_instance,
         $instance,
         $value
