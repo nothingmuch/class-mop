@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 56;
+use Test::More tests => 60;
 use Test::Exception;
 
 BEGIN {
@@ -34,10 +34,12 @@ BEGIN {
         has_builder   builder
         has_init_arg  init_arg
         has_default   default    is_default_a_coderef
+        has_initializer initializer
 
         slots
         get_value
         set_value
+        set_initial_value
         has_value
         clear_value
 
@@ -72,6 +74,7 @@ BEGIN {
         '$!clearer',
         '$!builder',
         '$!init_arg',
+        '$!initializer',
         '$!default',
         '$!associated_class',
         '@!associated_methods',
