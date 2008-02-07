@@ -89,7 +89,7 @@ sub _set_initial_slot_value {
   };
 
   # most things will just want to set a value, so make it first arg
-  $instance->$initializer($value, $slot_name, $callback);
+  $instance->$initializer($value, $callback, $self);
 }
 
 sub initialize_slot {

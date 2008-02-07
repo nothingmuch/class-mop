@@ -569,6 +569,11 @@ know what you are doing.
 Set the value without going through the accessor. Note that this may be done to
 even attributes with just read only accessors.
 
+=item B<set_initial_value ($instance, $value)>
+
+This method sets the value without going through the accessor -- but it is only
+called when the instance data is first initialized.
+
 =item B<get_value ($instance)>
 
 Return the value without going through the accessor. Note that this may be done

@@ -25,7 +25,7 @@ This checks that the initializer is used to set the initial value.
         reader => 'get_bar',
         writer => 'set_bar',
         initializer => sub {
-          my ($self, $value, $name, $callback) = @_;
+          my ($self, $value, $callback, $attr) = @_;
           $callback->($value * 2);
         },
     );  
