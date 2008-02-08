@@ -444,7 +444,8 @@ value of C<-foo>, then the following code will Just Work.
   MyClass->meta->construct_instance(-foo => "Hello There");
 
 In an init_arg is not assigned, it will automatically use the
-value of C<$name>.
+value of C<$name>.  If an explicit C<undef> is given for an init_arg,
+an attribute value can't be specified during initialization.
 
 =item I<builder>
 
@@ -499,6 +500,37 @@ any kind of dependent initializations. However, if this is
 something you need, you could subclass B<Class::MOP::Class> and
 this class to acheive it. However, this is currently left as
 an exercise to the reader :).
+
+=item I<initializer>
+
+This may be a method name (referring to a method on the class with this
+attribute) or a CODE ref.  The initializer is used to set the attribute value
+on an instance when the attribute is set during instance initialization.  When
+called, it is passed the instance (as the invocant), the value to set, a
+slot-setting CODE ref, and the attribute meta-instance.  The slot-setting code
+is provided to make it easy to set the (possibly altered) value on the instance
+without going through several more method calls.
+
+If no initializer is given (as is the common case) initial attribute values are
+set directly, bypassing the writer.
+
+This contrived example shows an initializer that sets the attribute to twice
+the given value.
+
+  Class::MOP::Attribute->new('$doubled' => (
+      initializer => sub {
+          my ($instance, $value, $set) = @_;
+          $set->($value * 2);
+      },
+  ));
+
+As method names can be given as initializers, one can easily make
+attribute initialization use the writer:
+
+  Class::MOP::Attribute->new('$some_attr' => (
+      writer      => 'some_attr',
+      initializer => 'some_attr',
+  ));
 
 =back
 
@@ -555,7 +587,6 @@ value definedness, instead of presence as it is now.
 
 If you really want to get rid of the value, you have to define and 
 use a I<clearer> (see below).
-
 
 =item I<clearer>
 
