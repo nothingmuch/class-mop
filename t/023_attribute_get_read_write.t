@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util 'blessed', 'reftype';
 
-use Test::More tests => 38;
+use Test::More tests => 35;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -112,27 +112,3 @@ ok(!$gorch_attr->get_write_method, '... $attr does not have an write method');
     
     is($reader->fully_qualified_name, 'Foo::get_gorch', '... it is the sub we are looking for');
 }
-
-my $foo = bless {}, 'Foo';
-$foo->set_bar(1);
-$foo->baz(10);
-
-is_deeply($foo->meta->get_attribute_values($foo), {
-    bar => 1,
-    baz => 10,
-});
-
-my $bar = bless {}, 'Bar';
-$bar->set_bar(99);
-
-is_deeply($bar->meta->get_attribute_values($bar), {
-    bar => 99,
-});
-
-$bar->quux(1337);
-
-is_deeply($bar->meta->get_attribute_values($bar), {
-    bar  => 99,
-    quux => 1337,
-});
-

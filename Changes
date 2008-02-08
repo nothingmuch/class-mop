@@ -1,11 +1,7 @@
 Revision history for Perl extension Class-MOP.
 
 0.53
-    ~~~ some misc. doc. fixes ~~~
-    
-    * Class::MOP::Instance
-      - added get_all_slot_values method (Sartak)
-        - added tests for this (Sartak)
+    ~~ several doc. fixes and updates ~~
         
     * Class::MOP::Class
       Class::MOP::Method::Constructor
