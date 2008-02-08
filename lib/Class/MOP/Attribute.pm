@@ -71,7 +71,7 @@ sub new {
         '@!associated_methods' => [],
         # NOTE:
         # protect this from silliness
-        init_arg => '!............( DO NOT DO THIS )............!',        
+        init_arg => undef,
     } => $class;
 }
 
