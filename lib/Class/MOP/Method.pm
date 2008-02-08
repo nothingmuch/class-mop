@@ -80,10 +80,6 @@ __END__
 
 Class::MOP::Method - Method Meta Object
 
-=head1 SYNOPSIS
-
-  # ... more to come later maybe
-
 =head1 DESCRIPTION
 
 The Method Protocol is very small, since methods in Perl 5 are just 
@@ -107,7 +103,10 @@ to this class.
 
 =over 4
 
-=item B<wrap (&code)>
+=item B<wrap ($code)>
+
+This is the basic constructor, it returns a B<Class::MOP::Method> 
+instance which wraps the given C<$code> reference.
 
 =back
 
@@ -117,11 +116,19 @@ to this class.
 
 =item B<body>
 
+This returns the actual CODE reference of the particular instance.
+
 =item B<name>
+
+This returns the name of the CODE reference.
 
 =item B<package_name>
 
+This returns the package name that the CODE reference is attached to.
+
 =item B<fully_qualified_name>
+
+This returns the fully qualified name of the CODE reference.
 
 =back
 

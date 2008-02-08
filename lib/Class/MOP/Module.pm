@@ -47,15 +47,24 @@ __END__
 
 Class::MOP::Module - Module Meta Object
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
+
+This is an abstraction of a Perl 5 module, it is a superclass of
+L<Class::MOP::Class>. A module essentially a package with metadata, 
+in our case the version and authority. 
 
 =head1 METHODS
 
 =over 4
 
 =item B<meta>
+
+Returns a metaclass for this package.
+
+=item B<initialize ($package_name)>
+
+This will initialize a Class::MOP::Module instance which represents 
+the module of C<$package_name>.
 
 =item B<version>
 

@@ -182,7 +182,8 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 =head1 DESCRIPTION
 
 This is a subclass of C<Class::MOP::Method> which deals with
-class constructors.
+class constructors. This is used when making a class immutable
+to generate an optimized constructor.
 
 =head1 METHODS
 
@@ -219,7 +220,7 @@ This creates the code reference for the constructor itself.
 
 =back
 
-=head2 Method Generators
+=head2 Method Generators 
 
 =over 4
 

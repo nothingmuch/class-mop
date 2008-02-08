@@ -566,7 +566,7 @@ Class::MOP - A Meta Object Protocol for Perl 5
 
 =head1 DESCRIPTON
 
-This module is an attempt to create a meta object protocol for the
+This module is a fully functioning meta object protocol for the
 Perl 5 object system. It makes no attempt to change the behavior or
 characteristics of the Perl 5 object system, only to create a
 protocol for its manipulation and introspection.
@@ -694,7 +694,7 @@ programming. So in other words, don't worry about it.
 
 =head1 PROTOCOLS
 
-The protocol is divided into 3 main sub-protocols:
+The protocol is divided into 4 main sub-protocols:
 
 =over 4
 
@@ -710,7 +710,7 @@ See L<Class::MOP::Class> for more details.
 
 This provides a consistent represenation for an attribute of a
 Perl 5 class. Since there are so many ways to create and handle
-atttributes in Perl 5 OO, this attempts to provide as much of a
+attributes in Perl 5 OO, this attempts to provide as much of a
 unified approach as possible, while giving the freedom and
 flexibility to subclass for specialization.
 
@@ -724,6 +724,16 @@ approach this topic, so we try to keep it pretty basic, while still
 making it possible to extend the system in many ways.
 
 See L<Class::MOP::Method> for more details.
+
+=item The Instance protocol
+
+This provides a layer of abstraction for creating object instances. 
+Since the other layers use this protocol, it is relatively easy to 
+change the type of your instances from the default HASH ref to other
+types of references. Several examples are provided in the F<examples/> 
+directory included in this distribution.
+
+See L<Class::MOP::Instance> for more details.
 
 =back
 
@@ -749,6 +759,8 @@ compat.
 
 This will load a given C<$class_name> and if it does not have an
 already initialized metaclass, then it will intialize one for it.
+This function can be used in place of tricks like 
+C<eval "use $module"> or using C<require>.
 
 =item B<is_class_loaded ($class_name)>
 
@@ -761,7 +773,18 @@ is probably correct about 99% of the time.
 
 =item B<check_package_cache_flag ($pkg)>
 
+This will return an integer that is managed by C<Class::MOP::Class>
+to determine if a module's symbol table has been altered. 
+
+In Perl 5.10 or greater, this flag is package specific. However in 
+versions prior to 5.10, this will use the C<PL_sub_generation> variable
+which is not package specific. 
+
 =item B<get_code_info ($code)>
+
+This function returns two values, the name of the package the C<$code> 
+is from and the name of the C<$code> itself. This is used by several 
+elements of the MOP to detemine where a given C<$code> reference is from.
 
 =back
 
@@ -791,13 +814,27 @@ been cached by B<Class::MOP::Class>.
 
 =item B<get_metaclass_by_name ($name)>
 
+This will return a cached B<Class::MOP::Class> instance of nothing
+if no metaclass exist by that C<$name>.
+
 =item B<store_metaclass_by_name ($name, $meta)>
+
+This will store a metaclass in the cache at the supplied C<$key>.
 
 =item B<weaken_metaclass ($name)>
 
+In rare cases it is desireable to store a weakened reference in 
+the metaclass cache. This function will weaken the reference to 
+the metaclass stored in C<$name>.
+
 =item B<does_metaclass_exist ($name)>
 
+This will return true of there exists a metaclass stored in the 
+C<$name> key and return false otherwise.
+
 =item B<remove_metaclass_by_name ($name)>
+
+This will remove a the metaclass stored in the C<$name> key.
 
 =back
 

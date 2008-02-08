@@ -53,7 +53,7 @@ my %DEFAULT_METHODS = (
     meta => sub {
         my $self = shift;
         # if it is not blessed, then someone is asking
-        # for the meta of Class::MOP::Class::Immutable
+        # for the meta of Class::MOP::Immutable
         return Class::MOP::Class->initialize($self) unless blessed($self);
         # otherwise, they are asking for the metaclass
         # which has been made immutable, which is itself
@@ -281,8 +281,9 @@ metaclass. Current features include making methods read-only,
 making methods un-callable and memoizing methods (in a type specific
 way too).
 
-This module is fairly new to the MOP, and quite possibly will be
-expanded and further generalized as the need arises.
+This module is not for the feint of heart, it does some whacky things
+to the metaclass in order to make it immutable. If you are just curious, 
+I suggest you turn back now, there is nothing to see here.
 
 =head1 METHODS
 

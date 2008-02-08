@@ -226,9 +226,11 @@ __END__
 
 Class::MOP::Package - Package Meta Object
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
+
+This is an abstraction of a Perl 5 package, it is a superclass of
+L<Class::MOP::Class> and provides all of the symbol table 
+introspection methods.
 
 =head1 METHODS
 
@@ -236,7 +238,12 @@ Class::MOP::Package - Package Meta Object
 
 =item B<meta>
 
+Returns a metaclass for this package.
+
 =item B<initialize ($package_name)>
+
+This will initialize a Class::MOP::Package instance which represents 
+the package of C<$package_name>.
 
 =item B<name>
 

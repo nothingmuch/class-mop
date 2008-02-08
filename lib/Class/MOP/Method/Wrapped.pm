@@ -145,11 +145,10 @@ __END__
 
 Class::MOP::Method::Wrapped - Method Meta Object to handle before/around/after modifiers
 
-=head1 SYNOPSIS
-
-  # ... more to come later maybe
-
 =head1 DESCRIPTION
+
+This is a L<Class::MOP::Method> subclass which provides the funtionality 
+to wrap a given CODE reference with before, after and around method modifiers.
 
 =head1 METHODS
 
@@ -157,13 +156,23 @@ Class::MOP::Method::Wrapped - Method Meta Object to handle before/around/after m
 
 =over 4
 
-=item B<wrap (&code)>
+=item B<wrap ($code)>
+
+This is the constructor, it will return a B<Class::MOP::Method::Wrapped>
+instance that can be used to add before, after and around modifiers to.
 
 =item B<get_original_method>
+
+This returns the original CODE reference that was provided to the 
+constructor.
 
 =back
 
 =head2 Modifiers
+
+These three methods will add the method modifiers to the wrapped 
+CODE reference. For more information on how method modifiers work, 
+see the section in L<Class::MOP::Class>.
 
 =over 4
 

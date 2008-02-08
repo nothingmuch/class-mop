@@ -180,12 +180,6 @@ __END__
 
 Class::MOP::Instance - Instance Meta Object
 
-=head1 SYNOPSIS
-
-    # This API is largely internal
-    # you shouldn't need it unless you are writing meta attributes or meta
-    # instances
-
 =head1 DESCRIPTION
 
 The meta instance is used by attributes for low level storage.
@@ -235,6 +229,8 @@ This does just exactly what it says it does.
 
 =item B<clone_instance ($instance_structure)>
 
+This too does just exactly what it says it does.
+
 =back
 
 =head2 Instrospection
@@ -246,12 +242,16 @@ we will add then when we need them basically.
 
 =item B<associated_metaclass>
 
+This returns the metaclass associated with this instance.
+
 =item B<get_all_slots>
 
 This will return the current list of slots based on what was
 given to this object in C<new>.
 
 =item B<is_valid_slot ($slot_name)>
+
+This will return true if C<$slot_name> is a valid slot name.
 
 =back
 
@@ -261,6 +261,10 @@ An important distinction of this sub-protocol is that the
 instance meta-object is a different entity from the actual
 instance it creates. For this reason, any actions on slots
 require that the C<$instance_structure> is passed into them.
+
+The names of these methods pretty much explain exactly 
+what they do, if that is not enough then I suggest reading 
+the source, it is very straightfoward.
 
 =over 4
 
@@ -288,19 +292,13 @@ require that the C<$instance_structure> is passed into them.
 
 =head2 Inlineable Instance Operations
 
-This part of the API is currently un-used. It is there for use
-in future experiments in class finailization mostly. Best to
-ignore this for now.
-
 =over 4
 
 =item B<is_inlinable>
 
 Each meta-instance should override this method to tell Class::MOP if it's
-possible to inline the slot access.
-
-This is currently only used by Class::MOP::Class::Immutable when performing
-optimizations.
+possible to inline the slot access. This is currently only used by 
+L<Class::MOP::Immutable> when performing optimizations.
 
 =item B<inline_create_instance>
 

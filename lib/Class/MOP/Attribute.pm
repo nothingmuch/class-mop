@@ -487,7 +487,7 @@ so:
 And lastly, if the value of your attribute is dependent upon
 some other aspect of the instance structure, then you can take
 advantage of the fact that when the I<default> value is a CODE
-reference, it is passed the raw (unblessed) instance structure
+reference, it is passed the (as yet unfinished) instance structure
 as it's only argument. So you can do things like this:
 
   Class::MOP::Attribute->new('$object_identity' => (
@@ -511,9 +511,6 @@ slot-setting CODE ref, and the attribute meta-instance.  The slot-setting code
 is provided to make it easy to set the (possibly altered) value on the instance
 without going through several more method calls.
 
-If no initializer is given (as is the common case) initial attribute values are
-set directly, bypassing the writer.
-
 This contrived example shows an initializer that sets the attribute to twice
 the given value.
 
@@ -531,6 +528,9 @@ attribute initialization use the writer:
       writer      => 'some_attr',
       initializer => 'some_attr',
   ));
+
+Your writer will simply need to examine it's C<@_> and determine under
+which context it is being called.
 
 =back
 
@@ -597,7 +597,14 @@ back to their "unfulfilled" state.
 
 =item B<clone (%options)>
 
+This will return a clone of the attribute instance, allowing the overriding
+of various attributes through the C<%options> supplied.
+
 =item B<initialize_instance_slot ($instance, $params)>
+
+This method is used internally to initialize the approriate slot for this 
+attribute in a given C<$instance>, the C<$params> passed are those that were
+passed to the constructor.
 
 =back
 
@@ -693,7 +700,7 @@ Return the CODE reference of a method suitable for reading / writing the
 value of the attribute in the associated class. Suitable for use whether 
 C<reader> and C<writer> or C<accessor> was specified or not.
 
-NOTE: If not reader/writer/accessor was specified, this will use the 
+NOTE: If no reader/writer/accessor was specified, this will use the 
 attribute get_value/set_value methods, which can be very inefficient.
 
 =back
@@ -772,7 +779,8 @@ used internally by the accessor generator.
 =item B<associated_methods>
 
 This will return the list of methods which have been associated with
-the C<associate_method> methods.
+the C<associate_method> methods. This is a good way of seeing what 
+methods are used to manage a given attribute. 
 
 =item B<install_accessors>
 
@@ -813,7 +821,7 @@ to this class.
 
 It should also be noted that B<Class::MOP> will actually bootstrap
 this module by installing a number of attribute meta-objects into
-it's metaclass. This will allow this class to reap all the benifits
+it's metaclass. This will allow this class to reap all the benefits
 of the MOP when subclassing it.
 
 =back
