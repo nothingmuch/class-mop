@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.53
+0.53 Thurs. Feb. 14, 1008
     ~~ several doc. fixes and updates ~~
         
     * Class::MOP::Class
