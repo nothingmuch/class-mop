@@ -8,7 +8,7 @@ use File::Spec;
 
 BEGIN { 
     use_ok('Class::MOP');    
-    require_ok(File::Spec->catdir('examples', 'ClassEncapsulatedAttributes.pod'));
+    require_ok(File::Spec->catfile('examples', 'ClassEncapsulatedAttributes.pod'));
 }
 
 {

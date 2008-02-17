@@ -12,7 +12,7 @@ BEGIN {
     plan tests => 5;    
 
     use_ok('Class::MOP');    
-    require_ok(File::Spec->catdir('examples', 'C3MethodDispatchOrder.pod'));
+    require_ok(File::Spec->catfile('examples', 'C3MethodDispatchOrder.pod'));
 }
 
 {

@@ -9,7 +9,7 @@ use Scalar::Util 'reftype';
 
 BEGIN { 
     use_ok('Class::MOP');    
-    require_ok(File::Spec->catdir('examples', 'InsideOutClass.pod'));
+    require_ok(File::Spec->catfile('examples', 'InsideOutClass.pod'));
 }
 
 {

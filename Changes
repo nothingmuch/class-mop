@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.54
+    * t/
+      - fixed the filename length on several 
+        test files so we install on VMS better
+        (RT #32295)
+      - fixed incorrect use of catdir when it 
+        should be catfile (RT #32385)
+
 0.53 Thurs. Feb. 14, 1008
     ~~ several doc. fixes and updates ~~
         
