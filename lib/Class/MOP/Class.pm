@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.28';
+our $VERSION   = '0.29';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -866,6 +866,8 @@ sub is_immutable { 0 }
             print STDERR "# of Metaclass options:      ", keys %IMMUTABLE_OPTIONS;
             print STDERR "# of Immutable transformers: ", keys %IMMUTABLE_TRANSFORMERS;
         }
+        
+        1;
     }
 
     sub make_mutable{
@@ -875,6 +877,7 @@ sub is_immutable { 0 }
         confess "unable to find immutabilizing options" unless ref $options;
         my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
         $transformer->make_metaclass_mutable($self, $options);
+        1;
     }
 }
 

@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.54
+    * Class::MOP::Class
+      - make_{immutable,mutable} now return 1
+        (cause Sartak asked)
+ 
     * t/
       - fixed the filename length on several 
         test files so we install on VMS better
