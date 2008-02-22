@@ -6,7 +6,7 @@ use warnings;
 
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 # introspection
@@ -28,7 +28,7 @@ sub meta {
 sub dump { 
     my $self = shift;
     require Data::Dumper;
-    $Data::Dumper::Maxdepth = shift || 1;
+    local $Data::Dumper::Maxdepth = shift || 1;
     Data::Dumper::Dumper $self;
 }
 

@@ -4,6 +4,10 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - make_{immutable,mutable} now return 1
         (cause Sartak asked)
+        
+    * Class::MOP::Object
+      - localizing the Data::Dumper configurations so 
+        that it does not pollute others (RT #33509)        
  
     * t/
       - fixed the filename length on several 
