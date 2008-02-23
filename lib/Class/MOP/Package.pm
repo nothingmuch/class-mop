@@ -10,6 +10,8 @@ use Carp         'confess';
 our $VERSION   = '0.07';
 our $AUTHORITY = 'cpan:STEVAN';
 
+use overload ();
+
 use base 'Class::MOP::Object';
 
 # introspection
@@ -216,6 +218,19 @@ sub list_all_package_symbols {
     } keys %{$namespace};
 }
 
+sub is_overloaded {
+    my $self = shift;
+    overload::Overloaded( $self->name );
+}
+
+sub overload_fallback {
+    my $self = shift;
+
+    return unless $self->is_overloaded;
+
+    ${ $self->get_package_symbol('$()') }
+}
+
 1;
 
 __END__
@@ -290,6 +305,14 @@ the package.
 
 By passing a C<$type_filter>, you can limit the list to only those 
 which match the filter (either SCALAR, ARRAY, HASH or CODE).
+
+=item B<is_overloaded>
+
+Whether or not the package has overloading enabled.
+
+=item B<overload_fallback>
+
+Returns the value of L<overload>'s C<fallback> parameter.
 
 =back
 

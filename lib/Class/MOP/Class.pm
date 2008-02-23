@@ -290,6 +290,13 @@ sub attribute_metaclass { $_[0]->{'$!attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'$!method_metaclass'}    }
 sub instance_metaclass  { $_[0]->{'$!instance_metaclass'}  }
 
+my %overload_symbols;
+
+BEGIN {
+    %overload_symbols = ( map { ("($_" => $_) } map { split } values %overload::ops );
+    delete @overload_symbols{map { "($_" } split ' ', $overload::ops{special}};
+}
+
 # FIXME:
 # this is a prime canidate for conversion to XS
 sub get_method_map {
@@ -306,7 +313,11 @@ sub get_method_map {
     my $method_metaclass = $self->method_metaclass;
 
     foreach my $symbol ($self->list_all_package_symbols('CODE')) {
-        my $code = $self->get_package_symbol('&' . $symbol);
+        my $overload = $overload_symbols{$symbol};
+
+        my $code = defined($overload)
+            ? overload::Method( $class_name, $overload )
+            : $self->get_package_symbol('&' . $symbol);
 
         next if exists  $map->{$symbol} &&
                 defined $map->{$symbol} &&
@@ -314,9 +325,10 @@ sub get_method_map {
 
         my ($pkg, $name) = Class::MOP::get_code_info($code);
         next if ($pkg  || '') ne $class_name &&
-                ($name || '') ne '__ANON__';
+                ($name || '') ne '__ANON__' &&
+                !defined($overload);
 
-        $map->{$symbol} = $method_metaclass->wrap($code);
+        $map->{$symbol} = $method_metaclass->wrap($code, $overload);
     }
 
     return $map;

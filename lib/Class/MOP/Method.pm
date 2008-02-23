@@ -28,18 +28,22 @@ sub meta {
 # construction
 
 sub wrap { 
-    my $class = shift;
-    my $code  = shift;
+    my ( $class, $code, $op ) = @_;
+
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+
     bless { 
-        '&!body' => $code 
+        '&!body' => $code,
+        '$!op'   => $op,
     } => blessed($class) || $class;
 }
 
 ## accessors
 
 sub body { (shift)->{'&!body'} }
+
+sub op   { (shift)->{'$!op'} }
 
 # TODO - add associated_class
 
@@ -117,6 +121,10 @@ instance which wraps the given C<$code> reference.
 =item B<body>
 
 This returns the actual CODE reference of the particular instance.
+
+=item B<op>
+
+This returns the operator name this method is an overload for, if any.
 
 =item B<name>
 
