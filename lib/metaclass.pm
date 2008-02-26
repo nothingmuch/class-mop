@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.04';
+our $VERSION   = '0.05';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use Class::MOP;
@@ -26,9 +26,14 @@ sub import {
             || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
     }
     my %options = @_;
-    #make sure the custom metaclasses get loaded
-    map{ Class::MOP::load_class($options{$_}) }
-      grep{ /^(attribute|method|instance)_metaclass/ } keys %options;
+    
+    # make sure the custom metaclasses get loaded
+    foreach my $class (grep { 
+                            /^(attribute|method|instance)_metaclass/ 
+                        } keys %options) {
+        Class::MOP::load_class($options{$class})
+    }
+
     my $package = caller();
 
     # create a meta object so we can install &meta

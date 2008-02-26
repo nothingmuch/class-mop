@@ -1,6 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
 0.54
+    * Class::MOP
+      metaclass
+      - making sure that load_class never gets
+        passed a value from @_ or $_ to squash 
+        Ovid's bug (http://use.perl.org/~Ovid/journal/35763)
+
     * Class::MOP::Class
       - make_{immutable,mutable} now return 1
         (cause Sartak asked)
