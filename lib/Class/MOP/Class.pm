@@ -17,10 +17,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
 
-# Self-introspection
-
-sub meta { Class::MOP::Class->initialize(blessed($_[0]) || $_[0]) }
-
 # Creation
 
 sub initialize {
@@ -243,6 +239,18 @@ sub create {
                    "(I found an uneven number of params in \@_)";
 
     my (%options) = @_;
+    
+    (ref $options{superclasses} eq 'ARRAY')
+        || confess "You must pass an ARRAY ref of superclasses"
+            if exists $options{superclasses};
+            
+    (ref $options{attributes} eq 'ARRAY')
+        || confess "You must pass an ARRAY ref of attributes"
+            if exists $options{attributes};      
+            
+    (ref $options{methods} eq 'HASH')
+        || confess "You must pass an HASH ref of methods"
+            if exists $options{methods};                  
 
     my $code = "package $package_name;";
     $code .= "\$$package_name\:\:VERSION = '" . $options{version} . "';"

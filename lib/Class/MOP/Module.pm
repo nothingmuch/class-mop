@@ -6,17 +6,10 @@ use warnings;
 
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Package';
-
-# introspection
-
-sub meta { 
-    require Class::MOP::Class;
-    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
-}
 
 sub version {  
     my $self = shift;

@@ -6,9 +6,8 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
-#use B            'svref_2object';
 
-our $VERSION   = '0.05';
+our $VERSION   = '0.06';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -17,13 +16,6 @@ use base 'Class::MOP::Object';
 # if poked in the right way, 
 # they should act like CODE refs.
 use overload '&{}' => sub { $_[0]->body }, fallback => 1;
-
-# introspection
-
-sub meta { 
-    require Class::MOP::Class;
-    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
-}
 
 # construction
 

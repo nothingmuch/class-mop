@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 61;
+use Test::More tests => 60;
 use Test::Exception;
 
 BEGIN {
@@ -20,7 +20,6 @@ BEGIN {
     isa_ok($meta, 'Class::MOP::Class');
 
     my @methods = qw(
-        meta
         new clone
 
         initialize_instance_slot

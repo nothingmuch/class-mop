@@ -10,10 +10,23 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - make_{immutable,mutable} now return 1
         (cause Sartak asked)
+      - improved error handling in ->create method
         
     * Class::MOP::Object
       - localizing the Data::Dumper configurations so 
         that it does not pollute others (RT #33509)        
+ 
+    * Class::MOP::Class
+      Class::MOP::Package
+      Class::MOP::Module
+      Class::MOP::Method
+      Class::MOP::Attribute
+      - these classes no longer define their own ->meta, 
+        but instead just inherit from Class::MOP::Object      
+      
+    * Class::MOP::Instance
+      Class::MOP::Immutable                        
+      - these classes now inherit from Class::MOP::Object
  
     * t/
       - fixed the filename length on several 

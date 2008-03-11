@@ -6,13 +6,10 @@ use warnings;
 
 use Scalar::Util 'weaken', 'blessed';
 
-our $VERSION   = '0.04';
+our $VERSION   = '0.05';
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub meta {
-    require Class::MOP::Class;
-    Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
-}
+use base 'Class::MOP::Object';
 
 sub new {
     my ($class, $meta, @attrs) = @_;
