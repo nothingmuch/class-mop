@@ -2,7 +2,7 @@ Revision history for Perl extension Class-MOP.
 
 0.54
     * Class::MOP
-      metaclass
+      metaclass.pm
       - making sure that load_class never gets
         passed a value from @_ or $_ to squash 
         Ovid's bug (http://use.perl.org/~Ovid/journal/35763)
@@ -11,6 +11,9 @@ Revision history for Perl extension Class-MOP.
       - make_{immutable,mutable} now return 1
         (cause Sartak asked)
       - improved error handling in ->create method
+      - rebless_instance now takes extra params which 
+        will be used to populate values 
+        - added tests for this
         
     * Class::MOP::Object
       - localizing the Data::Dumper configurations so 

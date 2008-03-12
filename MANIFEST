@@ -69,6 +69,7 @@ t/043_instance_metaclass_incompat.t
 t/044_instance_metaclass_incompat_dyn.t
 t/045_metaclass_loads_classes.t
 t/046_rebless_instance.t
+t/047_rebless_with_extra_params.t
 t/050_scala_style_mixin_composition.t
 t/060_instance.t
 t/061_instance_inline.t
