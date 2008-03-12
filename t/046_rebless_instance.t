@@ -43,7 +43,7 @@ is($foo->whoami, "child", 'reblessed->whoami gives child');
 is($foo->parent, "parent", 'reblessed->parent gives parent');
 is($foo->child, "child", 'reblessed->child gives child');
 
-throws_ok { LeftField->meta->rebless_instance($foo, "LeftField") }
+throws_ok { LeftField->meta->rebless_instance($foo) }
           qr/You may rebless only into a subclass of \(Child\), of which \(LeftField\) isn't\./;
 
 throws_ok { Class::MOP::Class->initialize("NonExistent")->rebless_instance($foo) }
