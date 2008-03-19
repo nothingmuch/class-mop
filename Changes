@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.55
+    * Class::MOP::Class
+      - rebless_instance now returns the instance 
+        it has just blessed, this is mostly to 
+        facilitate chaining
+
 0.54 Fri. March, 14, 2008
     * Class::MOP
       metaclass.pm

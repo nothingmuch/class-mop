@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.29';
+our $VERSION   = '0.30';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -439,6 +439,8 @@ sub rebless_instance {
     foreach my $attr ($self->compute_all_applicable_attributes) {
         $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
+    
+    $instance;
 }
 
 # Inheritance
