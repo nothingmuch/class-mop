@@ -253,7 +253,7 @@ sub associate_method {
 sub set_initial_value {
     my ($self, $instance, $value) = @_;
     $self->_set_initial_slot_value(
-        Class::MOP::Class->initialize(blessed($instance))->get_meta_instance,
+        $self->associated_class->get_meta_instance,
         $instance,
         $value
     );
@@ -262,33 +262,33 @@ sub set_initial_value {
 sub set_value {
     my ($self, $instance, $value) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
-                     ->get_meta_instance
-                     ->set_slot_value($instance, $self->name, $value);
+    $self->associated_class
+         ->get_meta_instance
+         ->set_slot_value($instance, $self->name, $value);
 }
 
 sub get_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
-                     ->get_meta_instance
-                     ->get_slot_value($instance, $self->name);
+    $self->associated_class
+         ->get_meta_instance
+         ->get_slot_value($instance, $self->name);
 }
 
 sub has_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
-                     ->get_meta_instance
-                     ->is_slot_initialized($instance, $self->name);
+    $self->associated_class
+         ->get_meta_instance
+         ->is_slot_initialized($instance, $self->name);
 }
 
 sub clear_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
-                     ->get_meta_instance
-                     ->deinitialize_slot($instance, $self->name);
+    $self->associated_class
+         ->get_meta_instance
+         ->deinitialize_slot($instance, $self->name);
 }
 
 ## load em up ...
