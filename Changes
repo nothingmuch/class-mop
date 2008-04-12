@@ -5,6 +5,8 @@ Revision history for Perl extension Class-MOP.
       - rebless_instance now returns the instance 
         it has just blessed, this is mostly to 
         facilitate chaining
+      - set the attr correctly in rebless_instance 
+        when it has no init_arg
 
 0.54 Fri. March, 14, 2008
     * Class::MOP
