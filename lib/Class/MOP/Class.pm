@@ -431,7 +431,7 @@ sub rebless_instance {
                     unless exists $params{$init_arg};
             } 
             else {
-                $attr->set_value($instance);
+                $attr->set_value($instance, $attr->get_value($instance));
             }
         }
     }
