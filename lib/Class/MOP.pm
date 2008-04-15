@@ -4,6 +4,8 @@ package Class::MOP;
 use strict;
 use warnings;
 
+use MRO::Compat;
+
 use Carp         'confess';
 use Scalar::Util 'weaken';
 

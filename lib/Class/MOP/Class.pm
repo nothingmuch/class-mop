@@ -507,13 +507,7 @@ sub subclasses {
 
 
 sub linearized_isa {
-    if (Class::MOP::IS_RUNNING_ON_5_10()) {
-        return @{ mro::get_linear_isa( (shift)->name ) };
-    }
-    else {
-        my %seen;
-        return grep { !($seen{$_}++) } (shift)->class_precedence_list;
-    }
+    return @{ mro::get_linear_isa( (shift)->name ) };
 }
 
 sub class_precedence_list {
