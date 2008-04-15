@@ -512,6 +512,7 @@ sub linearized_isa {
 
 sub class_precedence_list {
     my $self = shift;
+    my $name = $self->name;
 
     unless (Class::MOP::IS_RUNNING_ON_5_10()) { 
         # NOTE:
@@ -521,15 +522,26 @@ sub class_precedence_list {
         # blow up otherwise. Yes, it's an ugly hack, better
         # suggestions are welcome.        
         # - SL
-        ($self->name || return)->isa('This is a test for circular inheritance') 
+        ($name || return)->isa('This is a test for circular inheritance') 
     }
 
-    (
-        $self->name,
-        map {
-            $self->initialize($_)->class_precedence_list()
-        } $self->superclasses()
-    );
+    # if our mro is c3, we can 
+    # just grab the linear_isa
+    if (mro::get_mro($name) eq 'c3') {
+        return @{ mro::get_linear_isa($name) }
+    }
+    else {
+        # NOTE:
+        # we can't grab the linear_isa for dfs
+        # since it has all the duplicates 
+        # already removed.
+        return (
+            $name,
+            map {
+                $self->initialize($_)->class_precedence_list()
+            } $self->superclasses()
+        );
+    }
 }
 
 ## Methods

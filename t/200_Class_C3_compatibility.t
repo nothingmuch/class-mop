@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 8;
 
 =pod
 
@@ -14,34 +14,32 @@ approach to method resolution.
 =cut
 
 BEGIN {
-    eval "use Class::C3";
-    plan skip_all => "Class::C3 required for this test" if $@;
-    plan tests => 7;    
+    use_ok('Class::MOP');  
 }
 
 {
     package Diamond_A;
-    Class::C3->import; 
+    use mro 'c3';
     use metaclass; # everyone will just inherit this now :)
     
     sub hello { 'Diamond_A::hello' }
 }
 {
     package Diamond_B;
+    use mro 'c3';    
     use base 'Diamond_A';
-    Class::C3->import; 
 }
 {
     package Diamond_C;
-    Class::C3->import; 
+    use mro 'c3';
     use base 'Diamond_A';     
     
     sub hello { 'Diamond_C::hello' }
 }
 {
     package Diamond_D;
+    use mro 'c3';    
     use base ('Diamond_B', 'Diamond_C');
-    Class::C3->import; 
 }
 
 # we have to manually initialize 
@@ -50,7 +48,8 @@ BEGIN {
 Class::C3::initialize();
 
 is_deeply(
-    [ Class::C3::calculateMRO('Diamond_D') ],
+#    [ Class::C3::calculateMRO('Diamond_D') ],
+    [ Diamond_D->meta->class_precedence_list ],
     [ qw(Diamond_D Diamond_B Diamond_C Diamond_A) ],
     '... got the right MRO for Diamond_D');
 
