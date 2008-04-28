@@ -1,8 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
-0.55
-    ~   added MRO::Compat as a dependency    ~
-    ~ all classes now have proper c3 support ~
+0.55 Mon. April 28, 2008
+    - All classes now have proper C3 MRO support
+      - added MRO::Compat as a dependency to allow
+        for the C3 MRO support to Just Work in all
+        perl versions
     
     * Class::MOP::Class
       - rebless_instance now returns the instance 
