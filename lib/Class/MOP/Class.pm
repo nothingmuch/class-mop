@@ -1267,7 +1267,7 @@ C<$method_name>, or return undef if that method does not exist.
 The Class::MOP::Method is codifiable, so you can use it like a normal
 CODE reference, see L<Class::MOP::Method> for more information.
 
-=item B<find_method_by_name ($method_name>
+=item B<find_method_by_name ($method_name)>
 
 This will return a CODE reference of the specified C<$method_name>,
 or return undef if that method does not exist.
