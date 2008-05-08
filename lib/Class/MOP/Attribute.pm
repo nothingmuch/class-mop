@@ -167,6 +167,9 @@ sub initializer { $_[0]->{'$!initializer'} }
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
+sub has_read_method  { $_[0]->has_reader || $_[0]->has_accessor }
+sub has_write_method { $_[0]->has_writer || $_[0]->has_accessor }
+
 sub get_read_method  { 
     my $self   = shift;    
     my $reader = $self->reader || $self->accessor;
@@ -697,6 +700,14 @@ C<reader> and C<writer> or C<accessor> was specified or not.
 
 NOTE: If no reader/writer/accessor was specified, this will use the 
 attribute get_value/set_value methods, which can be very inefficient.
+
+=item B<has_read_method>
+
+=item B<has_write_method>
+
+Return whether a method exists suitable for reading / writing the value 
+of the attribute in the associated class. Suitable for use whether 
+C<reader> and C<writer> or C<accessor> was used.
 
 =back
 

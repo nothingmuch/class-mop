@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+NEXT
+    * Class::MOP::Attribute
+      - add has_read_method and has_write_method
+
 0.55 Mon. April 28, 2008
     - All classes now have proper C3 MRO support
       - added MRO::Compat as a dependency to allow
