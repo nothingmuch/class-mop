@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 83;
+use Test::More tests => 84;
 use Test::Exception;
 
 BEGIN {
@@ -96,6 +96,7 @@ BEGIN {
 
     dies_ok { $meta->add_package_symbol()    } '... exception thrown as expected';
     dies_ok { $meta->remove_package_symbol() } '... exception thrown as expected';
+    lives_ok{ $meta->identifier()            } '... no exception for get_package_symbol special case';
 
     my @supers;
     lives_ok {

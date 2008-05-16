@@ -907,7 +907,6 @@ sub create_immutable_transformer {
            remove_method
            add_attribute
            remove_attribute
-           add_package_symbol
            remove_package_symbol
        /],
        memoize     => {
@@ -916,7 +915,14 @@ sub create_immutable_transformer {
            compute_all_applicable_attributes => 'ARRAY',
            get_meta_instance                 => 'SCALAR',
            get_method_map                    => 'SCALAR',
-       }
+       },
+       around => { 
+           add_package_symbol => sub {
+               my $original = shift;
+               confess "NO ADD SYMBOLS FOR YOU" unless caller eq 'get_package_symbol'; 
+               $original->(@_);
+           },
+       },
     });
     return $class;
 }

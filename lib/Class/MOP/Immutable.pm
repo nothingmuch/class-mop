@@ -8,6 +8,7 @@ use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
 use Scalar::Util 'blessed';
+use Sub::Name    'subname';
 
 our $VERSION   = '0.05';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -232,6 +233,13 @@ sub create_methods_for_immutable_metaclass {
         elsif ($type eq 'SCALAR') {
             $methods{$method_name} = sub { $_[0]->{'___' . $method_name} };
         }
+    }
+    
+    my $around_methods = $self->options->{around};
+    foreach my $method_name (keys %{$around_methods}) {
+        my $method = $self->metaclass->meta->find_method_by_name($method_name);
+        $method = Class::MOP::Method::Wrapped->wrap($method);
+        $method->add_around_modifier(subname ':around' => $around_methods->{$method_name});
     }
 
     $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };
