@@ -12,7 +12,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.30';
+our $VERSION   = '0.31';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -900,29 +900,34 @@ sub is_immutable { 0 }
 sub create_immutable_transformer {
     my $self = shift;
     my $class = Class::MOP::Immutable->new($self, {
-       read_only   => [qw/superclasses/],
-       cannot_call => [qw/
+        read_only   => [qw/superclasses/],
+        cannot_call => [qw/
            add_method
            alias_method
            remove_method
            add_attribute
            remove_attribute
            remove_package_symbol
-       /],
-       memoize     => {
+        /],
+        memoize     => {
            class_precedence_list             => 'ARRAY',
            linearized_isa                    => 'ARRAY',
            compute_all_applicable_attributes => 'ARRAY',
            get_meta_instance                 => 'SCALAR',
            get_method_map                    => 'SCALAR',
-       },
-       around => { 
-           add_package_symbol => sub {
-               my $original = shift;
-               confess "NO ADD SYMBOLS FOR YOU" unless caller eq 'get_package_symbol'; 
-               $original->(@_);
-           },
-       },
+        },
+        # NOTE:
+        # this is ugly, but so are typeglobs, 
+        # so whattayahgonnadoboutit
+        # - SL
+        wrapped => { 
+            add_package_symbol => sub {
+                my $original = shift;
+                confess "Cannot add package symbols to an immutable metaclass" 
+                    unless (caller(2))[3] eq 'Class::MOP::Package::get_package_symbol'; 
+                goto $original->body;
+            },
+        },
     });
     return $class;
 }

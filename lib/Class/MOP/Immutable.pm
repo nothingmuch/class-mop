@@ -10,7 +10,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.05';
+our $VERSION   = '0.06';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -235,11 +235,17 @@ sub create_methods_for_immutable_metaclass {
         }
     }
     
-    my $around_methods = $self->options->{around};
-    foreach my $method_name (keys %{$around_methods}) {
+    my $wrapped_methods = $self->options->{wrapped};
+    
+    foreach my $method_name (keys %{ $wrapped_methods }) {
         my $method = $self->metaclass->meta->find_method_by_name($method_name);
-        $method = Class::MOP::Method::Wrapped->wrap($method);
-        $method->add_around_modifier(subname ':around' => $around_methods->{$method_name});
+
+        (defined $method)
+            || confess "Could not find the method '$method_name' in " . $self->metaclass->name;
+
+        my $wrapper = $wrapped_methods->{$method_name};
+
+        $methods{$method_name} = sub { $wrapper->($method, @_) };
     }
 
     $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };

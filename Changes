@@ -1,8 +1,18 @@
 Revision history for Perl extension Class-MOP.
 
-NEXT
+0.56
     * Class::MOP::Attribute
       - add has_read_method and has_write_method
+     
+    * Class::MOP::Immutable
+      - added the ability to "wrap" methods when 
+        making the class immutable
+        
+    * Class::MOP::Class
+      - now handling the edge case of ->meta->indentifier
+        dying by wrapping add_package_symbol to specifically 
+        allow for it to work.
+        - added tests for this
 
 0.55 Mon. April 28, 2008
     - All classes now have proper C3 MRO support
