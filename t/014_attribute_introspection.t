@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 60;
+use Test::More tests => 62;
 use Test::Exception;
 
 BEGIN {
@@ -20,21 +20,24 @@ BEGIN {
     isa_ok($meta, 'Class::MOP::Class');
 
     my @methods = qw(
-        new clone
+        new
+        clone
 
         initialize_instance_slot
         _set_initial_slot_value
 
         name
-        has_accessor  accessor
-        has_writer    writer     get_write_method get_write_method_ref
-        has_reader    reader     get_read_method  get_read_method_ref
-        has_predicate predicate
-        has_clearer   clearer
-        has_builder   builder
-        has_init_arg  init_arg
-        has_default   default    is_default_a_coderef
-        has_initializer initializer
+        has_accessor      accessor
+        has_writer        writer
+        has_write_method  get_write_method  get_write_method_ref
+        has_reader        reader
+        has_read_method   get_read_method   get_read_method_ref
+        has_predicate     predicate
+        has_clearer       clearer
+        has_builder       builder
+        has_init_arg      init_arg
+        has_default       default           is_default_a_coderef
+        has_initializer   initializer
 
         slots
         get_value
@@ -44,7 +47,8 @@ BEGIN {
         clear_value
 
         associated_class
-        attach_to_class detach_from_class
+        attach_to_class
+        detach_from_class
 
         accessor_metaclass
 
