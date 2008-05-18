@@ -426,7 +426,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
     } else {
         (Class::MOP::Attribute::is_default_a_coderef(\%options))
             || confess("References are not allowed as default values, you must ".
-                       "wrap then in a CODE reference (ex: sub { [] } and not [])")
+                       "wrap the default of '$name' in a CODE reference (ex: sub { [] } and not [])")
                 if exists $options{default} && ref $options{default};
     }
     # return the new object
