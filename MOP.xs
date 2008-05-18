@@ -5,10 +5,6 @@
 #include "ppport.h"
 
 /*
-check_method_cache_flag:
-  check the PL_sub_generation 
-  ISA/method cache thing
-
 get_code_info:
   Pass in a coderef, returns:
   [ $pkg_name, $coderef_name ] ie:
@@ -18,14 +14,6 @@ get_code_info:
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 PROTOTYPES: ENABLE
-
-SV*
-check_package_cache_flag(pkg)
-  SV* pkg
-  CODE:
-    RETVAL = newSViv(PL_sub_generation);
-  OUTPUT:
-    RETVAL
 
 void
 get_code_info(coderef)

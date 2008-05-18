@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.56
+    * Class::MOP
+      - we now get the &check_package_cache_flag
+        function from MRO::Compat
+
     * Class::MOP::Attribute
       - add has_read_method and has_write_method
      

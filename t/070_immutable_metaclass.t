@@ -62,7 +62,7 @@ BEGIN {
 
   is_deeply(
             [ $immutable_metaclass->superclasses ],
-            [ $meta->blessed ],
+            [ Scalar::Util::blessed($meta) ],
             '... immutable_metaclass superclasses are correct'
            );
   ok($immutable_metaclass->has_method('get_mutable_metaclass_name'));

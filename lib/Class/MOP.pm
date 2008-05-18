@@ -22,15 +22,12 @@ BEGIN {
     use XSLoader;
     XSLoader::load( 'Class::MOP', $VERSION );    
     
-    unless ($] < 5.009_005) {
-        require mro;
-        no warnings 'redefine', 'prototype';
-        *check_package_cache_flag = \&mro::get_pkg_gen;
-        *IS_RUNNING_ON_5_10 = sub () { 1 };
-    }
-    else {
-        *IS_RUNNING_ON_5_10 = sub () { 0 };        
-    }
+    *IS_RUNNING_ON_5_10 = ($] < 5.009_005) 
+        ? sub () { 0 }
+        : sub () { 1 };        
+    
+    # get it from MRO::Compat now ...
+    *check_package_cache_flag = \&mro::get_pkg_gen;    
 }
 
 {

@@ -24,7 +24,7 @@ my $anon_meta_name;
 
     my $anon_class = Class::MOP::Class->create_anon_class(superclasses => [$class]);
     $anon_class_name = $anon_class->name;
-    $anon_meta_name = $anon_class->blessed;
+    $anon_meta_name = Scalar::Util::blessed($anon_class);
     $anon_class->add_attribute( $_, reader => $_ ) for qw/bar baz/;
 
     my $obj = $anon_class->new_object(bar => 'a', baz => 'b');

@@ -171,7 +171,7 @@ sub make_metaclass_mutable {
 
     if ($options{inline_destructor} && $immutable->has_method('DESTROY')) {
         $immutable->remove_method('DESTROY')
-          if $immutable->get_method('DESTROY')->blessed eq $options{destructor_class};
+          if blessed($immutable->get_method('DESTROY')) eq $options{destructor_class};
     }
 
     # NOTE:
@@ -191,10 +191,10 @@ sub make_metaclass_mutable {
     # 14:26 <@stevan> the only user of ::Method::Constructor is immutable
     # 14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
     # 14:27 <@stevan> so I am not worried
-    if ($options{inline_constructor}) {
+    if ($options{inline_constructor}  && $immutable->has_method($options{constructor_name})) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
         $immutable->remove_method( $options{constructor_name}  )
-          if $immutable->get_method($options{constructor_name})->blessed eq $constructor_class;
+          if blessed($immutable->get_method($options{constructor_name})) eq $constructor_class;
     }
 }
 
