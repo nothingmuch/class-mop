@@ -26,8 +26,8 @@ sub wrap {
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
     bless { 
         '&!body' => $code,
-        '$!package_name' => $params{package_name} || (Class::MOP::get_code_info($code))[0],
-        '$!name' => $params{name} || (Class::MOP::get_code_info($code))[1],
+        '$!package_name' => $params{package_name} || Class::MOP::stash_name($code),
+        '$!name' => $params{name} || Class::MOP::sub_name($code),
     } => blessed($class) || $class;
 }
 
