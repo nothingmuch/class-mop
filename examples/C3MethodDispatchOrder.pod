@@ -23,21 +23,28 @@ my $_find_method = sub {
 C3MethodDispatchOrder->meta->add_around_method_modifier('initialize' => sub {
 	my $cont = shift;
     my $meta = $cont->(@_);
-    $meta->add_method('AUTOLOAD' => sub {
-        my $meta = $_[0]->meta;
-        my $method_name;
-        {
-            no strict 'refs';
-            my $label = ${$meta->name . '::AUTOLOAD'};
-            $method_name = (split /\:\:/ => $label)[-1];
-        }
-        my $method = $_find_method->($meta, $method_name);
+    
+    # we need to look at $AUTOLOAD in the package where the coderef belongs
+    # if subname works, then it'll be where this AUTOLOAD method was installed
+    # otherwise, it'll be $C3MethodDispatchOrder::AUTOLOAD. get_code_info
+    # tells us where AUTOLOAD will look
+    my $autoload;
+    $autoload = sub {
+        my ($package) = Class::MOP::get_code_info($autoload);
+        my $label = ${ $package->meta->get_package_symbol('$AUTOLOAD') };
+        my $method_name = (split /\:\:/ => $label)[-1];
+        my $method = $_find_method->($_[0]->meta, $method_name);
         (defined $method) || confess "Method ($method_name) not found";
         goto &$method;
-    }) unless $meta->has_method('AUTOLOAD');
+    };
+
+    $meta->add_method('AUTOLOAD' => $autoload)
+        unless $meta->has_method('AUTOLOAD');
+    
     $meta->add_method('can' => sub {
         $_find_method->($_[0]->meta, $_[1]);
     }) unless $meta->has_method('can');   
+    
 	return $meta;
 });
 

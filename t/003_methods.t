@@ -7,6 +7,7 @@ use Test::More tests => 66;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
+use Sub::Name ();
 
 BEGIN {
     use_ok('Class::MOP');   
