@@ -28,7 +28,7 @@ C3MethodDispatchOrder->meta->add_around_method_modifier('initialize' => sub {
         my $method_name;
         {
             no strict 'refs';
-            my $label = ${$meta->name . '::AUTOLOAD'};
+            my $label = ${ $meta->get_package_symbol('$AUTOLOAD') };
             $method_name = (split /\:\:/ => $label)[-1];
         }
         my $method = $_find_method->($meta, $method_name);
