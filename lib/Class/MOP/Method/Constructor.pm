@@ -20,6 +20,9 @@ sub new {
         || confess "You must pass a metaclass instance if you want to inline"
             if $options{is_inline};
 
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";
+
     my $self = bless {
         # from our superclass
         '&!body'                 => undef,

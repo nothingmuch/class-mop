@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 28;
 use Test::Exception;
 
 BEGIN {
@@ -11,7 +11,11 @@ BEGIN {
     use_ok('Class::MOP::Method');
 }
 
-my $method = Class::MOP::Method->wrap(sub { 1 });
+my $method = Class::MOP::Method->wrap(
+    sub { 1 },
+    package_name => 'main',
+    name         => '__ANON__',
+);
 is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to the same meta');
 
 is($method->package_name, 'main', '... our package is main::');
@@ -51,3 +55,20 @@ dies_ok {
 dies_ok {
     Class::MOP::Method->wrap([])
 } '... bad args for &wrap';
+
+dies_ok {
+    Class::MOP::Method->wrap(sub { 'FAIL' })
+} '... bad args for &wrap';
+
+dies_ok {
+    Class::MOP::Method->wrap(sub { 'FAIL' }, package_name => 'main')
+} '... bad args for &wrap';
+
+dies_ok {
+    Class::MOP::Method->wrap(sub { 'FAIL' }, name => '__ANON__')
+} '... bad args for &wrap';
+
+
+
+
+

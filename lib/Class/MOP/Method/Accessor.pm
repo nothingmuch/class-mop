@@ -25,6 +25,9 @@ sub new {
     (blessed($options{attribute}) && $options{attribute}->isa('Class::MOP::Attribute'))
         || confess "You must supply an attribute which is a 'Class::MOP::Attribute' instance";
 
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";
+
     my $self = bless {
         # from our superclass
         '&!body'          => undef,

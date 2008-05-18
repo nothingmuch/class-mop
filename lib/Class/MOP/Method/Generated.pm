@@ -15,6 +15,9 @@ sub new {
     my $class   = shift;
     my %options = @_;  
         
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";     
+        
     my $self = bless {
         # from our superclass
         '&!body'          => undef,

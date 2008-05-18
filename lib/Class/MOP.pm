@@ -528,6 +528,9 @@ Class::MOP::Method->meta->add_method('wrap' => sub {
     ('CODE' eq (Scalar::Util::reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
 
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";
+
     # return the new object
     $class->meta->new_object(body => $code, %options);
 });
@@ -562,6 +565,8 @@ Class::MOP::Method::Generated->meta->add_attribute(
 
 Class::MOP::Method::Generated->meta->add_method('new' => sub {
     my ($class, %options) = @_;
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";    
     my $self = $class->meta->new_object(%options);
     $self->initialize_body;  
     $self;
@@ -598,6 +603,9 @@ Class::MOP::Method::Accessor->meta->add_method('new' => sub {
 
     (Scalar::Util::blessed($options{attribute}) && $options{attribute}->isa('Class::MOP::Attribute'))
         || confess "You must supply an attribute which is a 'Class::MOP::Attribute' instance";
+
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";
 
     # return the new object
     my $self = $class->meta->new_object(%options);
@@ -642,6 +650,9 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
     (Scalar::Util::blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
         || confess "You must pass a metaclass instance if you want to inline"
             if $options{is_inline};
+
+    ($options{package_name} && $options{name})
+        || confess "You must supply the package_name and name parameters";
 
     # return the new object
     my $self = $class->meta->new_object(%options);

@@ -326,7 +326,11 @@ sub get_method_map {
 
         #warn "Checking $pkg against $class_name && $name against __ANON__";
 
-        $map->{$symbol} = $method_metaclass->wrap($code);
+        $map->{$symbol} = $method_metaclass->wrap(
+            $code,
+            package_name => $class_name,
+            name         => $symbol,
+        );
     }
 
     return $map;

@@ -25,6 +25,9 @@ sub wrap {
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
     
+    ($params{package_name} && $params{name})
+        || confess "You must supply the package_name and name parameters";
+    
     bless { 
         '&!body'         => $code,
         '$!package_name' => $params{package_name},
