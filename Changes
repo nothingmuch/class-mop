@@ -4,6 +4,11 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP
       - we now get the &check_package_cache_flag
         function from MRO::Compat
+      - All XS based functionality is now optional
+        and a Pure Perl version is supplied
+        - the CLASS_MOP_NO_XS environment variable
+          can now be used to force non-XS versions 
+          to always be used
 
     * Class::MOP::Attribute
       - add has_read_method and has_write_method
@@ -17,6 +22,22 @@ Revision history for Perl extension Class-MOP.
         dying by wrapping add_package_symbol to specifically 
         allow for it to work.
         - added tests for this
+        
+    * Class::MOP::Attribute    
+      Class::MOP::Class
+      Class::MOP::Immutable    
+      - any time a method meta object is constructed
+        we make sure to pass the correct package and 
+        method name information
+        
+    * Class::MOP::Method
+      Class::MOP::Method::Wrapped
+      Class::MOP::Method::Generated
+      Class::MOP::Method::Accessor
+      Class::MOP::Method::Consructor                
+      - all these classes are now bootstrapped properly
+        and now store the package_name and name attributes
+        correctly as well
 
 0.55 Mon. April 28, 2008
     - All classes now have proper C3 MRO support

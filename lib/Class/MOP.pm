@@ -50,8 +50,21 @@ BEGIN {
         # the XS as possible.
         # - SL
         no warnings 'prototype', 'redefine';
-        # get this from MRO::Compat ...
-        *check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp;
+        
+        unless (IS_RUNNING_ON_5_10()) {
+            # get this from MRO::Compat ...
+            *check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp;
+        }
+        else {
+            # NOTE:
+            # but if we are running 5.10 
+            # there is no need to use the 
+            # Pure Perl version since we 
+            # can use the built in mro 
+            # version instead.
+            # - SL
+            *check_package_cache_flag = \&mro::get_pkg_gen; 
+        }
         # our own version of Sub::Name
         *subname       = $_PP_subname;
         # and the Sub::Identify version of the get_code_info
@@ -81,10 +94,7 @@ BEGIN {
         # for naming our CVs, if not, we 
         # use the workaround instead.
         if ( eval { require Sub::Name } ) {
-            *subname = sub {
-                #warn "Class::MOP::subname called with @_";
-                Sub::Name::subname(@_);
-            };
+            *subname = \&Sub::Name::subname;
         } 
         else {
             *subname = $_PP_subname;
