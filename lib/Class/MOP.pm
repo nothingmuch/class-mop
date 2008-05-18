@@ -28,6 +28,10 @@ BEGIN {
     
     # get it from MRO::Compat now ...
     *check_package_cache_flag = \&mro::get_pkg_gen;    
+
+    # UNCOMMENT ME TO TEST WITHOUT XS
+    #no warnings 'prototype', 'redefine';
+    #*check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp
 }
 
 {

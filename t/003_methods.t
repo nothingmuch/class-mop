@@ -29,6 +29,9 @@ BEGIN {
     # define a sub in package
     sub bar { 'Foo::bar' } 
     *baz = \&bar;
+    
+    # create something with the typeglob inside the package
+    *baaz = sub { 'Foo::baaz' };    
 
     { # method named with Sub::Name inside the package scope
         no strict 'refs';
@@ -36,7 +39,10 @@ BEGIN {
     }
 
     # We hateses the "used only once" warnings
-    { my $temp = \&Foo::baz }
+    { 
+        my $temp1 = \&Foo::baz;
+        my $temp2 = \&Foo::baaz;    
+    }
     
     package OinkyBoinky;
     our @ISA = "Foo";
@@ -84,12 +90,14 @@ is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
 
-ok($Foo->has_method('FOO_CONSTANT'), '... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
+ok(!$Foo->has_method('FOO_CONSTANT'), '... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
+ok(!$Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
+
 ok($Foo->has_method('bar'), '... Foo->has_method(bar) (defined in Foo)');
 ok($Foo->has_method('baz'), '... Foo->has_method(baz) (typeglob aliased within Foo)');
+ok($Foo->has_method('baaz'), '... Foo->has_method(baaz) (typeglob aliased within Foo)');
 ok($Foo->has_method('floob'), '... Foo->has_method(floob) (defined in Foo:: using symbol tables and Sub::Name w/out package name)');
 ok($Foo->has_method('blah'), '... Foo->has_method(blah) (defined in main:: using fully qualified package name)');
-ok($Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
 ok($Foo->has_method('bang'), '... Foo->has_method(bang) (defined in main:: using symbol tables and Sub::Name)');
 ok($Foo->has_method('evaled_foo'), '... Foo->has_method(evaled_foo) (evaled in main::)');
 
@@ -105,18 +113,28 @@ is( reftype($bar->body), "CODE", "the returned value is a code ref" );
 
 
 # calling get_method blessed them all
-for my $method_name (qw/FOO_CONSTANT
-                    	bar
+for my $method_name (qw/baaz
+                        bar
                     	baz
                     	floob
-                    	blah		
-                    	bling
-                    	bang	
+                    	blah
+                    	bang
                     	evaled_foo/) {
     isa_ok($Foo->get_method($method_name), 'Class::MOP::Method');
     {
         no strict 'refs';
         is($Foo->get_method($method_name)->body, \&{'Foo::' . $method_name}, '... body matches CODE ref in package for ' . $method_name);
+    }
+}
+
+for my $method_name (qw/
+                    FOO_CONSTANT
+                    bling
+                    /) {
+    is(ref($Foo->get_package_symbol('&' . $method_name)), 'CODE', '... got the __ANON__ methods');
+    {
+        no strict 'refs';
+        is($Foo->get_package_symbol('&' . $method_name), \&{'Foo::' . $method_name}, '... symbol matches CODE ref in package for ' . $method_name);
     }
 }
 
@@ -139,7 +157,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT bang bar baz blah bling evaled_foo floob foo) ],
+    [ qw(baaz bang bar baz blah evaled_foo floob foo) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -152,12 +170,11 @@ is_deeply(
             code  => $Foo->get_method($_)
             }
         } qw(
-            FOO_CONSTANT
+            baaz            
             bang 
             bar 
             baz 
             blah 
-            bling 
             evaled_foo 
             floob 
             foo
@@ -171,16 +188,12 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT bang bar baz blah bling evaled_foo floob) ],
+    [ qw(baaz bang bar baz blah evaled_foo floob) ],
     '... got the right method list for Foo');
-
-ok($Foo->remove_method('FOO_CONSTANT'), '... removed the FOO_CONSTANT method');
-ok(!$Foo->has_method('FOO_CONSTANT'), '... !Foo->has_method(FOO_CONSTANT) we just removed it');
-dies_ok { Foo->FOO_CONSTANT } '... cannot call Foo->FOO_CONSTANT because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(bang bar baz blah bling evaled_foo floob) ],
+    [ qw(baaz bang bar baz blah evaled_foo floob) ],
     '... got the right method list for Foo');
 
 # ... test our class creator 
@@ -217,6 +230,11 @@ is_deeply(
     [ sort { $a->{name} cmp $b->{name} } $Bar->compute_all_applicable_methods() ],
     [
         {
+            name  => 'baaz',
+            class => 'Foo',
+            code  => $Foo->get_method('baaz')
+        },
+        {
             name  => 'bang',
             class => 'Foo',
             code  => $Foo->get_method('bang')
@@ -235,7 +253,6 @@ is_deeply(
         } qw(        
             baz 
             blah 
-            bling 
             evaled_foo 
             floob 
         )),

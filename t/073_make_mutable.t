@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 108;
+use Test::More tests => 112;
 use Test::Exception;
 
 use Scalar::Util;
@@ -52,12 +52,14 @@ BEGIN {
     ok($meta->is_immutable,             '... our class is now immutable');
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
     ok($meta->get_method_map->{new},    '... inlined constructor created');
+    ok($meta->has_method('new'),        '... inlined constructor created for sure');    
 
     lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
     ok($meta->is_mutable,               '... our class is mutable');
     ok(!$meta->is_immutable,            '... our class is not immutable');
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
     ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
+    ok(!$meta->has_method('new'),        '... inlined constructor removed for sure');    
 
     my @new_keys = sort keys %$meta;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
@@ -66,7 +68,10 @@ BEGIN {
 
     ok( $meta->add_method('xyz', sub{'xxx'}), '... added method');
     is( Baz->xyz, 'xxx',                      '... method xyz works');
+
+    ok(! $meta->has_method('zxy')             ,'...  we dont have the aliased method yet');    
     ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
+    ok(! $meta->has_method('zxy')             ,'...  the aliased method does not register (correctly)');    
     is( Baz->zxy, 'xxx',                      '... method zxy works');
     ok( $meta->remove_method('xyz'),          '... removed method');
     ok(! $meta->remove_method('zxy'),          '... removed aliased method');

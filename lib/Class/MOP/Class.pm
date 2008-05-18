@@ -321,8 +321,11 @@ sub get_method_map {
                         $map->{$symbol}->body == $code;
 
         my ($pkg, $name) = Class::MOP::get_code_info($code);
-        next if ($pkg  || '') ne $class_name &&
-                ($name || '') ne '__ANON__';
+        
+        next if ($pkg  || '') ne $class_name ||
+                (($name || '') ne '__ANON__' && ($pkg  || '') ne $class_name);
+
+        #warn "Checking $pkg against $class_name && $name against __ANON__";
 
         $map->{$symbol} = $method_metaclass->wrap($code);
     }
