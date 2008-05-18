@@ -8,6 +8,7 @@ use MRO::Compat;
 
 use Carp         'confess';
 use Scalar::Util 'weaken';
+use Sub::Identify 'sub_name', 'stash_name';
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -31,6 +32,10 @@ BEGIN {
     else {
         *IS_RUNNING_ON_5_10 = sub () { 0 };        
     }
+}
+
+sub get_code_info {
+    (&stash_name, &sub_name)
 }
 
 # sub subname { $_[1] }
