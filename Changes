@@ -13,7 +13,7 @@ Revision history for Perl extension Class-MOP.
         making the class immutable
         
     * Class::MOP::Class
-      - now handling the edge case of ->meta->indentifier
+      - now handling the edge case of ->meta->identifier
         dying by wrapping add_package_symbol to specifically 
         allow for it to work.
         - added tests for this
