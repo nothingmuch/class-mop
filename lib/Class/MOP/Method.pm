@@ -20,12 +20,14 @@ use overload '&{}' => sub { $_[0]->body }, fallback => 1;
 # construction
 
 sub wrap { 
-    my $class = shift;
-    my $code  = shift;
+    my ( $class, $code, %params ) = @_;
+
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
     bless { 
-        '&!body' => $code 
+        '&!body' => $code,
+        '$!package_name' => $params{package_name} || (Class::MOP::get_code_info($code))[0],
+        '$!name' => $params{name} || (Class::MOP::get_code_info($code))[1],
     } => blessed($class) || $class;
 }
 
@@ -40,11 +42,11 @@ sub body { (shift)->{'&!body'} }
 # NOTE: 
 # this may not be the same name 
 # as the class you got it from
-# This gets the package stash name 
+# This is the package stash name 
 # associated with the actual CODE-ref
-sub package_name { 
-	my $code = (shift)->body;
-	(Class::MOP::get_code_info($code))[0];
+# meaning the package it was defined in
+sub package_name {
+    (shift)->{'$!package_name'};
 }
 
 # NOTE: 
@@ -53,8 +55,7 @@ sub package_name {
 # with. This gets the name associated
 # with the actual CODE-ref
 sub name { 
-	my $code = (shift)->body;
-	(Class::MOP::get_code_info($code))[1];
+    (shift)->{'$!name'};
 }
 
 sub fully_qualified_name {

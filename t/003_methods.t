@@ -8,6 +8,8 @@ use Test::Exception;
 
 use Scalar::Util qw/reftype/;
 
+use Sub::Name ();
+
 BEGIN {
     use_ok('Class::MOP');   
     use_ok('Class::MOP::Class');        
@@ -50,8 +52,8 @@ BEGIN {
     {
         no strict 'refs';
         *{'Foo::bling'} = sub { '$$Bling$$' };
-        *{'Foo::bang'} = Sub::Name::subname 'Foo::bang' => sub { '!BANG!' }; 
-        *{'Foo::boom'} = Sub::Name::subname 'boom' => sub { '!BOOM!' };     
+        *{'Foo::bang'} = Sub::Name::subname('Foo::bang' => sub { '!BANG!' });
+        *{'Foo::boom'} = Sub::Name::subname('boom' => sub { '!BOOM!' });
         
         eval "package Foo; sub evaled_foo { 'Foo::evaled_foo' }";           
     }

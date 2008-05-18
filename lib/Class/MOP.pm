@@ -33,6 +33,17 @@ BEGIN {
     }
 }
 
+# sub subname { $_[1] }
+
+BEGIN {
+    local $@;
+    if ( eval { require Sub::Name } ) {
+        *subname = \&Sub::Name::subname;
+    } else {
+        *subname = sub { $_[1] };
+    }
+}
+
 {
     # Metaclasses are singletons, so we cache them here.
     # there is no need to worry about destruction though
@@ -781,6 +792,10 @@ to determine if a module's symbol table has been altered.
 In Perl 5.10 or greater, this flag is package specific. However in 
 versions prior to 5.10, this will use the C<PL_sub_generation> variable
 which is not package specific. 
+
+=item B<subname ($name, $code)>
+
+If L<Sub::Name> is available uses that, if not it just returns C<$code>.
 
 =item B<get_code_info ($code)>
 

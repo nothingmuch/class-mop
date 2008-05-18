@@ -10,7 +10,6 @@ use Class::MOP::Method::Wrapped;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken', 'refaddr';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.31';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -315,26 +314,30 @@ sub get_method_map {
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
 
-    %$map = map {
-        my $symbol = $_;
+    my %map;
 
+    foreach my $symbol ( $self->list_all_package_symbols('CODE') ) {
         my $code = $self->get_package_symbol('&' . $symbol);
 
         my $method = $map->{$symbol};
 
         my ($pkg, $name) = Class::MOP::get_code_info($code);
-      
-        if ( !$method and ($pkg  || '') ne $class_name && ($name || '') ne '__ANON__' ) {
-            ();
-        } else {
-            if ( !$method or refaddr($method->body) != refaddr($code) ) {
-                $method = $method_metaclass->wrap($code);
-            }
 
-            $symbol => $method;
+        no warnings 'uninitialized';
+
+        next if ($pkg  || '') ne $class_name &&
+                ($name || '') ne '__ANON__';
+
+        if ( !$method or refaddr($method->body) != refaddr($code) ) {
+            #warn "Regenerating $method" if $method;
+            # FIXME preserve name if $method, doesn't seem like it ever happens
+            $method = $method_metaclass->wrap($code);
         }
-    } $self->list_all_package_symbols('CODE');
 
+        $map{$symbol} = $method;
+    };
+
+    %$map = %map;
 
     return $map;
 }
@@ -558,22 +561,23 @@ sub class_precedence_list {
 sub add_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
-        || confess "You must define a method name";
+        || confess "You must define a method name"; # FIXME default to $method->name ?
 
     my $body;
     if (blessed($method)) {
         $body = $method->body;
+        # FIXME clone method and change package_name/name
     }
     else {
         $body = $method;
         ('CODE' eq (reftype($body) || ''))
             || confess "Your code block must be a CODE reference";
-        $method = $self->method_metaclass->wrap($body);
+        $method = $self->method_metaclass->wrap($body, package_name => $self->name, name => $method_name);
     }
     $self->get_method_map->{$method_name} = $method;
 
     my $full_method_name = ($self->name . '::' . $method_name);
-    $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
+    $self->add_package_symbol("&${method_name}" => Class::MOP::subname($full_method_name => $body) );
     $self->update_package_cache_flag;    
 }
 
@@ -608,7 +612,7 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_before_modifier(subname ':before' => $method_modifier);
+        $method->add_before_modifier(Class::MOP::subname(':before' => $method_modifier));
     }
 
     sub add_after_method_modifier {
@@ -616,7 +620,7 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_after_modifier(subname ':after' => $method_modifier);
+        $method->add_after_modifier(Class::MOP::subname(':after' => $method_modifier));
     }
 
     sub add_around_method_modifier {
@@ -624,7 +628,7 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_around_modifier(subname ':around' => $method_modifier);
+        $method->add_around_modifier(Class::MOP::subname(':around' => $method_modifier));
     }
 
     # NOTE:

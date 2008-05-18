@@ -6,7 +6,6 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';

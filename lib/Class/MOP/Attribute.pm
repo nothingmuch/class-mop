@@ -304,7 +304,7 @@ sub process_accessors {
         (reftype($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
-        $method = $self->accessor_metaclass->wrap($method);
+        $method = $self->accessor_metaclass->wrap($method, name => $name, package_name => $self->associated_class->name );
         $self->associate_method($method);
         return ($name, $method);
     }
@@ -316,6 +316,8 @@ sub process_accessors {
                 attribute     => $self,
                 is_inline     => $inline_me,
                 accessor_type => $type,
+                package_name  => $self->associated_class->name,
+                name          => $accessor,
             );
         };
         confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;

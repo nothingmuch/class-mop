@@ -8,7 +8,6 @@ use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
 use Scalar::Util 'blessed';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.06';
 our $AUTHORITY = 'cpan:STEVAN';

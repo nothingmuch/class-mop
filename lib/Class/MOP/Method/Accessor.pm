@@ -32,6 +32,8 @@ sub new {
         '$!attribute'     => $options{attribute},
         '$!is_inline'     => ($options{is_inline} || 0),
         '$!accessor_type' => $options{accessor_type},
+        '$!package_name'  => $options{package_name},
+        '$!name'          => $options{name},
     } => $class;
 
     # we don't want this creating
