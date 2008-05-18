@@ -28,6 +28,8 @@ sub new {
     my $self = bless {
         # from our superclass
         '&!body'          => undef,
+        '$!package_name' => $options{package_name},
+        '$!name'         => $options{name},        
         # specific to this subclass
         '$!attribute'     => $options{attribute},
         '$!is_inline'     => ($options{is_inline} || 0),

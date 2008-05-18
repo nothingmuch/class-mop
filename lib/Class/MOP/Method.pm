@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
 
-our $VERSION   = '0.06';
+our $VERSION   = '0.07';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -20,12 +20,15 @@ use overload '&{}' => sub { $_[0]->body }, fallback => 1;
 # construction
 
 sub wrap { 
-    my $class = shift;
-    my $code  = shift;
+    my ( $class, $code, %params ) = @_;
+    
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+    
     bless { 
-        '&!body' => $code 
+        '&!body'         => $code,
+        '$!package_name' => $params{package_name},
+        '$!name'         => $params{name}, 
     } => blessed($class) || $class;
 }
 
@@ -37,30 +40,26 @@ sub body { (shift)->{'&!body'} }
 
 # informational
 
-# NOTE: 
-# this may not be the same name 
-# as the class you got it from
-# This gets the package stash name 
-# associated with the actual CODE-ref
 sub package_name { 
-	my $code = (shift)->body;
-	(Class::MOP::get_code_info($code))[0];
+    my $self = shift;
+    $self->{'$!package_name'} ||= (Class::MOP::get_code_info($self->body))[0];
 }
 
-# NOTE: 
-# this may not be the same name 
-# as the method name it is stored
-# with. This gets the name associated
-# with the actual CODE-ref
 sub name { 
-	my $code = (shift)->body;
-	(Class::MOP::get_code_info($code))[1];
+    my $self = shift;
+    $self->{'$!name'} ||= (Class::MOP::get_code_info($self->body))[1];
 }
 
 sub fully_qualified_name {
-	my $code = shift;
-	$code->package_name . '::' . $code->name;		
+    my $code = shift;
+    $code->package_name . '::' . $code->name;
 }
+
+# NOTE:
+# the Class::MOP bootstrap
+# will create this for us
+# - SL
+# sub clone { ... }
 
 1;
 
@@ -95,10 +94,18 @@ to this class.
 
 =over 4
 
-=item B<wrap ($code)>
+=item B<wrap ($code, %params)>
 
 This is the basic constructor, it returns a B<Class::MOP::Method> 
-instance which wraps the given C<$code> reference.
+instance which wraps the given C<$code> reference. You can also 
+set the C<package_name> and C<name> attributes using the C<%params>.
+If these are not set, then thier accessors will attempt to figure 
+it out using the C<Class::MOP::get_code_info> function.
+
+=item B<clone (%params)>
+
+This will make a copy of the object, allowing you to override 
+any values by stuffing them in C<%params>.
 
 =back
 

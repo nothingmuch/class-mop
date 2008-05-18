@@ -6,8 +6,8 @@ use warnings;
 
 use MRO::Compat;
 
-use Carp         'confess';
-use Scalar::Util 'weaken';
+use Carp          'confess';
+use Scalar::Util  'weaken';
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -19,19 +19,77 @@ BEGIN {
     our $VERSION   = '0.56';
     our $AUTHORITY = 'cpan:STEVAN';    
     
-    use XSLoader;
-    XSLoader::load( 'Class::MOP', $VERSION );    
-    
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005) 
         ? sub () { 0 }
-        : sub () { 1 };        
-    
-    # get it from MRO::Compat now ...
-    *check_package_cache_flag = \&mro::get_pkg_gen;    
+        : sub () { 1 };    
 
-    # UNCOMMENT ME TO TEST WITHOUT XS
-    #no warnings 'prototype', 'redefine';
-    #*check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp
+    # NOTE:
+    # we may not use this yet, but once 
+    # the get_code_info XS gets merged 
+    # upstream to it, we will always use 
+    # it. But for now it is just kinda 
+    # extra overhead.
+    # - SL
+    require Sub::Identify;
+        
+    # stash these for a sec, and see how things go
+    my $_PP_subname       = sub { $_[1] };
+    my $_PP_get_code_info = sub ($) { 
+        return (            
+            Sub::Identify::stash_name($_[0]), 
+            Sub::Identify::sub_name($_[0])
+        ) 
+    };    
+    
+    if ($ENV{CLASS_MOP_NO_XS} == 1) {
+        # NOTE:
+        # this is if you really want things
+        # to be slow, then you can force the
+        # no-XS rule this way, otherwise we 
+        # make an effort to load as much of 
+        # the XS as possible.
+        # - SL
+        no warnings 'prototype', 'redefine';
+        # get this from MRO::Compat ...
+        *check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp;
+        # our own version of Sub::Name
+        *subname       = $_PP_subname;
+        # and the Sub::Identify version of the get_code_info
+        *get_code_info = $_PP_get_code_info;        
+    }
+    else {
+        # now try our best to get as much 
+        # of the XS loaded as possible
+        {
+            local $@;
+            eval {
+                require XSLoader;
+                XSLoader::load( 'Class::MOP', $VERSION );            
+            };
+            die $@ if $@ && $@ !~ /object version|loadable object/;
+            
+            # okay, so the XS failed to load, so 
+            # use the pure perl one instead.
+            *get_code_info = $_PP_get_code_info if $@; 
+        }        
+        
+        # get it from MRO::Compat
+        *check_package_cache_flag = \&mro::get_pkg_gen;        
+        
+        # now try and load the Sub::Name 
+        # module and use that as a means
+        # for naming our CVs, if not, we 
+        # use the workaround instead.
+        if ( eval { require Sub::Name } ) {
+            *subname = sub {
+                #warn "Class::MOP::subname called with @_";
+                Sub::Name::subname(@_);
+            };
+        } 
+        else {
+            *subname = $_PP_subname;
+        }     
+    }
 }
 
 {
@@ -448,6 +506,37 @@ Class::MOP::Method->meta->add_attribute(
     ))
 );
 
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('$!package_name' => (
+        init_arg => 'package_name',
+        reader   => { 'package_name' => \&Class::MOP::Method::package_name },
+    ))
+);
+
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('$!name' => (
+        init_arg => 'name',
+        reader   => { 'name' => \&Class::MOP::Method::name },
+    ))
+);
+
+Class::MOP::Method->meta->add_method('wrap' => sub {
+    my $class   = shift;
+    my $code    = shift;
+    my %options = @_;
+
+    ('CODE' eq (Scalar::Util::reftype($code) || ''))
+        || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+
+    # return the new object
+    $class->meta->new_object(body => $code, %options);
+});
+
+Class::MOP::Method->meta->add_method('clone' => sub {
+    my $self  = shift;
+    $self->meta->clone_object($self, @_);
+});
+
 ## --------------------------------------------------------
 ## Class::MOP::Method::Wrapped
 
@@ -467,8 +556,16 @@ Class::MOP::Method::Generated->meta->add_attribute(
     Class::MOP::Attribute->new('$!is_inline' => (
         init_arg => 'is_inline',
         reader   => { 'is_inline' => \&Class::MOP::Method::Generated::is_inline },
+        default  => 0, 
     ))
 );
+
+Class::MOP::Method::Generated->meta->add_method('new' => sub {
+    my ($class, %options) = @_;
+    my $self = $class->meta->new_object(%options);
+    $self->initialize_body;  
+    $self;
+});
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
@@ -489,6 +586,32 @@ Class::MOP::Method::Accessor->meta->add_attribute(
     ))
 );
 
+Class::MOP::Method::Accessor->meta->add_method('new' => sub {
+    my $class   = shift;
+    my %options = @_;
+
+    (exists $options{attribute})
+        || confess "You must supply an attribute to construct with";
+
+    (exists $options{accessor_type})
+        || confess "You must supply an accessor_type to construct with";
+
+    (Scalar::Util::blessed($options{attribute}) && $options{attribute}->isa('Class::MOP::Attribute'))
+        || confess "You must supply an attribute which is a 'Class::MOP::Attribute' instance";
+
+    # return the new object
+    my $self = $class->meta->new_object(%options);
+    
+    # we don't want this creating
+    # a cycle in the code, if not
+    # needed
+    Scalar::Util::weaken($self->{'$!attribute'});
+
+    $self->initialize_body;  
+    
+    $self;
+});
+
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Constructor
@@ -499,6 +622,7 @@ Class::MOP::Method::Constructor->meta->add_attribute(
         reader   => {
             'options' => \&Class::MOP::Method::Constructor::options
         },
+        default  => sub { +{} }
     ))
 );
 
@@ -510,6 +634,27 @@ Class::MOP::Method::Constructor->meta->add_attribute(
         },
     ))
 );
+
+Class::MOP::Method::Constructor->meta->add_method('new' => sub {
+    my $class   = shift;
+    my %options = @_;
+
+    (Scalar::Util::blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
+        || confess "You must pass a metaclass instance if you want to inline"
+            if $options{is_inline};
+
+    # return the new object
+    my $self = $class->meta->new_object(%options);
+    
+    # we don't want this creating
+    # a cycle in the code, if not
+    # needed
+    Scalar::Util::weaken($self->{'$!associated_metaclass'});
+
+    $self->initialize_body;  
+    
+    $self;
+});
 
 ## --------------------------------------------------------
 ## Class::MOP::Instance
@@ -788,6 +933,14 @@ which is not package specific.
 This function returns two values, the name of the package the C<$code> 
 is from and the name of the C<$code> itself. This is used by several 
 elements of the MOP to detemine where a given C<$code> reference is from.
+
+=item B<subname ($name, $code)>
+
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
+
+If possible, we will load the L<Sub::Name> module and this will function 
+as C<Sub::Name::subname> does, otherwise it will just return the C<$code>
+argument.
 
 =back
 

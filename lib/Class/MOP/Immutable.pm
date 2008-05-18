@@ -8,7 +8,6 @@ use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
 use Scalar::Util 'blessed';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.06';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -99,9 +98,11 @@ sub make_metaclass_immutable {
         $metaclass->add_method(
             $options{constructor_name},
             $constructor_class->new(
-                options   => \%options,
-                metaclass => $metaclass,
-                is_inline => 1,
+                options      => \%options,
+                metaclass    => $metaclass,
+                is_inline    => 1,
+                package_name => $metaclass->name,
+                name         => $options{constructor_name}
             )
         ) unless $metaclass->has_method($options{constructor_name});
     }
@@ -114,8 +115,10 @@ sub make_metaclass_immutable {
         my $destructor_class = $options{destructor_class};
 
         my $destructor = $destructor_class->new(
-            options   => \%options,
-            metaclass => $metaclass,
+            options      => \%options,
+            metaclass    => $metaclass,
+            package_name => $metaclass->name,
+            name         => 'DESTROY'            
         );
 
         $metaclass->add_method('DESTROY' => $destructor)

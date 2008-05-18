@@ -22,7 +22,9 @@ sub new {
 
     my $self = bless {
         # from our superclass
-        '&!body'          => undef,
+        '&!body'                 => undef,
+        '$!package_name'         => $options{package_name},
+        '$!name'                 => $options{name},        
         # specific to this subclass
         '%!options'              => $options{options} || {},
         '$!associated_metaclass' => $options{metaclass},

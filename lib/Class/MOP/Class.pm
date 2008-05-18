@@ -10,7 +10,6 @@ use Class::MOP::Method::Wrapped;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.31';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -557,17 +556,34 @@ sub add_method {
     my $body;
     if (blessed($method)) {
         $body = $method->body;
+        if ($method->package_name ne $self->name && 
+            $method->name         ne $method_name) {
+            warn "Hello there, got somethig for you." 
+                . " Method says " . $method->package_name . " " . $method->name
+                . " Class says " . $self->name . " " . $method_name;
+            $method = $method->clone(
+                package_name => $self->name,
+                name         => $method_name            
+            ) if $method->can('clone');
+        }
     }
     else {
         $body = $method;
         ('CODE' eq (reftype($body) || ''))
             || confess "Your code block must be a CODE reference";
-        $method = $self->method_metaclass->wrap($body);
+        $method = $self->method_metaclass->wrap(
+            $body => (
+                package_name => $self->name,
+                name         => $method_name
+            )
+        );
     }
     $self->get_method_map->{$method_name} = $method;
-
-    my $full_method_name = ($self->name . '::' . $method_name);
-    $self->add_package_symbol("&${method_name}" => subname $full_method_name => $body);
+    
+    my $full_method_name = ($self->name . '::' . $method_name);    
+    $self->add_package_symbol("&${method_name}" => 
+        Class::MOP::subname($full_method_name => $body)
+    );
     $self->update_package_cache_flag;    
 }
 
@@ -602,7 +618,9 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_before_modifier(subname ':before' => $method_modifier);
+        $method->add_before_modifier(
+            Class::MOP::subname(':before' => $method_modifier)
+        );
     }
 
     sub add_after_method_modifier {
@@ -610,7 +628,9 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_after_modifier(subname ':after' => $method_modifier);
+        $method->add_after_modifier(
+            Class::MOP::subname(':after' => $method_modifier)
+        );
     }
 
     sub add_around_method_modifier {
@@ -618,7 +638,9 @@ sub add_method {
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
-        $method->add_around_modifier(subname ':around' => $method_modifier);
+        $method->add_around_modifier(
+            Class::MOP::subname(':around' => $method_modifier)
+        );
     }
 
     # NOTE:

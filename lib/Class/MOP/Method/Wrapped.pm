@@ -6,7 +6,6 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
-use Sub::Name    'subname';
 
 our $VERSION   = '0.02';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -69,10 +68,11 @@ my $_build_wrapped_method = sub {
 };
 
 sub wrap {
-    my $class = shift;
-    my $code  = shift;
+    my ( $class, $code, %params ) = @_;
+    
     (blessed($code) && $code->isa('Class::MOP::Method'))
         || confess "Can only wrap blessed CODE";
+        
     my $modifier_table = {
         cache  => undef,
         orig   => $code,
@@ -84,7 +84,13 @@ sub wrap {
         },
     };
     $_build_wrapped_method->($modifier_table);
-    my $method = $class->SUPER::wrap(sub { $modifier_table->{cache}->(@_) });
+    my $method = $class->SUPER::wrap(
+        sub { $modifier_table->{cache}->(@_) },
+        # get these from the original 
+        # unless explicitly overriden
+        package_name => $params{package_name} || $code->package_name,
+        name         => $params{name}         || $code->name,
+    );
     $method->{'%!modifier_table'} = $modifier_table;
     $method;
 }
