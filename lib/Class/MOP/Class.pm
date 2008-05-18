@@ -9,7 +9,7 @@ use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken';
+use Scalar::Util 'blessed', 'reftype', 'weaken', 'refaddr';
 use Sub::Name    'subname';
 
 our $VERSION   = '0.31';
@@ -302,30 +302,39 @@ sub instance_metaclass  { $_[0]->{'$!instance_metaclass'}  }
 # this is a prime canidate for conversion to XS
 sub get_method_map {
     my $self = shift;
+
+    my $map  = $self->{'%!methods'};
+
     
     if (defined $self->{'$!_package_cache_flag'} && 
                 $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name)) {
-        return $self->{'%!methods'};
+
+        return $map;
     }
     
-    my $map  = $self->{'%!methods'};
-
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
 
-    foreach my $symbol ($self->list_all_package_symbols('CODE')) {
+    %$map = map {
+        my $symbol = $_;
+
         my $code = $self->get_package_symbol('&' . $symbol);
 
-        next if exists  $map->{$symbol} &&
-                defined $map->{$symbol} &&
-                        $map->{$symbol}->body == $code;
+        my $method = $map->{$symbol};
 
         my ($pkg, $name) = Class::MOP::get_code_info($code);
-        next if ($pkg  || '') ne $class_name &&
-                ($name || '') ne '__ANON__';
+      
+        if ( !$method and ($pkg  || '') ne $class_name && ($name || '') ne '__ANON__' ) {
+            ();
+        } else {
+            if ( !$method or refaddr($method->body) != refaddr($code) ) {
+                $method = $method_metaclass->wrap($code);
+            }
 
-        $map->{$symbol} = $method_metaclass->wrap($code);
-    }
+            $symbol => $method;
+        }
+    } $self->list_all_package_symbols('CODE');
+
 
     return $map;
 }
