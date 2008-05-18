@@ -20,13 +20,7 @@ BEGIN {
     our $VERSION   = '0.56';
     our $AUTHORITY = 'cpan:STEVAN';    
     
-    use XSLoader;
-    XSLoader::load( 'Class::MOP', $VERSION );    
-    
     unless ($] < 5.009_005) {
-        require mro;
-        no warnings 'redefine', 'prototype';
-        *check_package_cache_flag = \&mro::get_pkg_gen;
         *IS_RUNNING_ON_5_10 = sub () { 1 };
     }
     else {
@@ -37,6 +31,9 @@ BEGIN {
 sub get_code_info {
     (&stash_name, &sub_name)
 }
+
+# { my $counter = 0; sub check_package_cache_flag { ++$counter }
+*check_package_cache_flag = \&mro::get_pkg_gen;
 
 # sub subname { $_[1] }
 
