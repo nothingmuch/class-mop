@@ -324,8 +324,6 @@ sub get_method_map {
         next if ($pkg  || '') ne $class_name ||
                 (($name || '') ne '__ANON__' && ($pkg  || '') ne $class_name);
 
-        #warn "Checking $pkg against $class_name && $name against __ANON__";
-
         $map->{$symbol} = $method_metaclass->wrap(
             $code,
             package_name => $class_name,
