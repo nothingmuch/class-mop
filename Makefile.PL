@@ -7,10 +7,12 @@ all_from 'lib/Class/MOP.pm';
 license 'perl';
 
 requires 'Scalar::Util'  => '1.18';
-requires 'Sub::Name'     => '0.02';
 requires 'MRO::Compat'   => '0.05';
 requires 'Carp'          => '0';
 requires 'Sub::Identify' => '0.02';
+
+recommends 'Sub::Name'     => '0.02';
+recommends 'Class::C3::XS';
 
 build_requires 'Test::More'      => '0.62';
 build_requires 'Test::Exception' => '0.21';
