@@ -41,7 +41,7 @@ BEGIN {
         ) 
     };    
     
-    if ($ENV{CLASS_MOP_NO_XS} == 1) {
+    if ($ENV{CLASS_MOP_NO_XS}) {
         # NOTE:
         # this is if you really want things
         # to be slow, then you can force the
