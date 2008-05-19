@@ -165,6 +165,68 @@ sub is_class_loaded {
 
 # ... nothing yet actually ;)
 
+use Storable;
+
+my $MOP_CACHE_FILE = 'Class_MOP.cache';
+
+#warn ((stat $INC{'Class/MOP.pm'})[9]);
+#warn ((stat $MOP_CACHE_FILE)[9]);
+
+if (-e $MOP_CACHE_FILE && (stat $INC{'Class/MOP.pm'})[9] < (stat $MOP_CACHE_FILE)[9]) {
+    $Storable::Eval = 1;    
+    my $cache = Storable::retrieve($MOP_CACHE_FILE);
+    
+    # now we do 2 things, first is to grab 
+    # the cached metaclass, and second is 
+    # to make sure that we reinstall any 
+    # methods we installed in the bootstrap
+    # process, this is typically constructors
+    # and clone methods 
+    
+    my %methods;    
+    
+    foreach my $meta_name (keys %{$cache->{metas}}) {
+        my $metaclass = $cache->{metas}->{$meta_name};        
+        
+        # before we do anything to the 
+        # metaclasses, we need to grab the 
+        # methods we added in the bootstrap
+        # because any calls to get_method_map
+        # will cause it to grab the ones 
+        # that are on disk, and not in the 
+        # bootstrap.
+        $methods{$meta_name} = [];
+        
+        foreach my $method_to_reinstall (@{$cache->{methods_to_reinstall}->{$meta_name}}) {
+            #use Data::Dumper;
+            #$Data::Dumper::Deparse = 1;
+            #warn Dumper $metaclass->{'%!methods'}->{$method_to_reinstall};
+            push @{ $methods{$meta_name} } => {
+                name   => $method_to_reinstall,
+                method => $metaclass->{'%!methods'}->{$method_to_reinstall},
+            };
+        } 
+               
+        store_metaclass_by_name($meta_name, $metaclass);        
+    }
+    
+    # now we can start adding methods
+    # so that we get the properly 
+    # bootstrapped versions of them
+    foreach my $meta_name (keys %methods) {
+        my $metaclass = $cache->{metas}->{$meta_name};
+        foreach my $method_to_install (@{ $methods{$meta_name} }) {
+            $metaclass->add_method(
+                $method_to_install->{name},
+                $method_to_install->{method}
+            );        
+        }
+    }
+}
+else {
+    
+my %methods_to_reinstall;
+
 ## ----------------------------------------------------------------------------
 ## Bootstrapping
 ## ----------------------------------------------------------------------------
@@ -219,6 +281,8 @@ Class::MOP::Package->meta->add_method('initialize' => sub {
     my $package_name = shift;
     $class->meta->new_object('package' => $package_name, @_);
 });
+
+$methods_to_reinstall{'Class::MOP::Package'} = [qw[initialize]];
 
 ## --------------------------------------------------------
 ## Class::MOP::Module
@@ -506,6 +570,8 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
     $self->meta->clone_object($self, @_);
 });
 
+$methods_to_reinstall{'Class::MOP::Attribute'} = [qw[new clone]];
+
 ## --------------------------------------------------------
 ## Class::MOP::Method
 
@@ -550,6 +616,8 @@ Class::MOP::Method->meta->add_method('clone' => sub {
     $self->meta->clone_object($self, @_);
 });
 
+$methods_to_reinstall{'Class::MOP::Method'} = [qw[wrap clone]];
+
 ## --------------------------------------------------------
 ## Class::MOP::Method::Wrapped
 
@@ -581,6 +649,8 @@ Class::MOP::Method::Generated->meta->add_method('new' => sub {
     $self->initialize_body;  
     $self;
 });
+
+$methods_to_reinstall{'Class::MOP::Method::Generated'} = [qw[new]];
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
@@ -630,6 +700,7 @@ Class::MOP::Method::Accessor->meta->add_method('new' => sub {
     $self;
 });
 
+$methods_to_reinstall{'Class::MOP::Method::Accessor'} = [qw[new]];
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Constructor
@@ -677,6 +748,8 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
     $self;
 });
 
+$methods_to_reinstall{'Class::MOP::Method::Constructor'} = [qw[new]];
+
 ## --------------------------------------------------------
 ## Class::MOP::Instance
 
@@ -701,6 +774,28 @@ Class::MOP::Instance->meta->add_attribute(
 # this only lengthens the compile
 # time of the MOP, and gives us
 # no actual benefits.
+
+unless ($ENV{CLASS_MOP_NO_CACHE}) {
+    my %metaclasses_to_store = get_all_metaclasses();
+    $Storable::Deparse = 1;
+    Storable::nstore({
+        metas                => \%metaclasses_to_store,
+        methods_to_reinstall => \%methods_to_reinstall
+    }, $MOP_CACHE_FILE);
+    
+    #foreach my $meta_name (keys %metaclasses_to_store) {
+    #    my $metaclass = $metaclasses_to_store{$meta_name};
+    #    foreach my $method_to_reinstall (@{$methods_to_reinstall{$meta_name}}) {
+    #        warn "CHECKING $method_to_reinstall";
+    #
+    #        use Data::Dumper;
+    #        $Data::Dumper::Deparse = 1;
+    #        warn Dumper $metaclass->{'%!methods'}->{$method_to_reinstall};
+    #    }    
+    #}
+}
+
+}
 
 $_->meta->make_immutable(
     inline_constructor => 0,
