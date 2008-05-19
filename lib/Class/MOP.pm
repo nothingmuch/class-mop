@@ -34,12 +34,7 @@ BEGIN {
         
     # stash these for a sec, and see how things go
     my $_PP_subname       = sub { $_[1] };
-    my $_PP_get_code_info = sub ($) { 
-        return (            
-            Sub::Identify::stash_name($_[0]), 
-            Sub::Identify::sub_name($_[0])
-        ) 
-    };    
+    my $_PP_get_code_info = \&Sub::Identify::get_code_info;    
     
     if ($ENV{CLASS_MOP_NO_XS}) {
         # NOTE:
