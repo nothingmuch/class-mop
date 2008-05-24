@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util 'reftype', 'blessed';
 
-use Test::More tests => 97;
+use Test::More tests => 101;
 use Test::Exception;
 
 BEGIN {
@@ -27,6 +27,17 @@ BEGIN {
     ok(!$attr->has_default, '... $attr does not have an default');
     ok(!$attr->has_builder, '... $attr does not have a builder');
 
+    {
+        my $reader = $attr->get_read_method_ref;
+        my $writer = $attr->get_write_method_ref;        
+        
+        ok(!blessed($reader), '... it is a plain old sub');
+        ok(!blessed($writer), '... it is a plain old sub');        
+        
+        is(reftype($reader), 'CODE', '... it is a plain old sub');
+        is(reftype($writer), 'CODE', '... it is a plain old sub');                
+    }
+
     my $class = Class::MOP::Class->initialize('Foo');
     isa_ok($class, 'Class::MOP::Class');
 
@@ -43,11 +54,11 @@ BEGIN {
         my $reader = $attr->get_read_method_ref;
         my $writer = $attr->get_write_method_ref;        
         
-        ok(!blessed($reader), '... it is a plain old sub');
-        ok(!blessed($writer), '... it is a plain old sub');        
+        ok(blessed($reader), '... it is a plain old sub');
+        ok(blessed($writer), '... it is a plain old sub');        
         
-        is(reftype($reader), 'CODE', '... it is a plain old sub');
-        is(reftype($writer), 'CODE', '... it is a plain old sub');                
+        isa_ok($reader, 'Class::MOP::Method');
+        isa_ok($writer, 'Class::MOP::Method');        
     }
 
     my $attr_clone = $attr->clone();

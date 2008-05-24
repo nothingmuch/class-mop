@@ -12,6 +12,10 @@ Revision history for Perl extension Class-MOP.
 
     * Class::MOP::Attribute
       - add has_read_method and has_write_method
+      - get_{read,write}_method_ref now wraps the 
+        anon-sub ref in the method metaclass when
+        possible
+        - added tests for this
      
     * Class::MOP::Immutable
       - added the ability to "wrap" methods when 

@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util 'blessed', 'reftype';
 
-use Test::More tests => 35;
+use Test::More tests => 37;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -108,7 +108,9 @@ ok(!$gorch_attr->get_write_method, '... $attr does not have an write method');
     my $writer = $gorch_attr->get_write_method_ref;        
     
     isa_ok($reader, 'Class::MOP::Method');
-    ok(!blessed($writer), '... it is not a plain old sub'); 
+    ok(blessed($writer), '... it is not a plain old sub'); 
+    isa_ok($writer, 'Class::MOP::Method');    
     
     is($reader->fully_qualified_name, 'Foo::get_gorch', '... it is the sub we are looking for');
+    is($writer->fully_qualified_name, 'Foo::__ANON__', '... it is the sub we are looking for');    
 }

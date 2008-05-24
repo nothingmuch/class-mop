@@ -196,7 +196,17 @@ sub get_read_method_ref {
         return $self->associated_class->get_method($reader);
     }
     else {
-        return sub { $self->get_value(@_) };
+        my $code = sub { $self->get_value(@_) };
+        if (my $class = $self->associated_class) {
+            return $class->method_metaclass->wrap(
+                $code,
+                package_name => $class->name,
+                name         => '__ANON__'
+            );
+        }
+        else {
+            return $code;
+        }
     }
 }
 
@@ -206,7 +216,17 @@ sub get_write_method_ref {
         return $self->associated_class->get_method($writer);
     }
     else {
-        return sub { $self->set_value(@_) };
+        my $code = sub { $self->set_value(@_) };
+        if (my $class = $self->associated_class) {
+            return $class->method_metaclass->wrap(
+                $code,
+                package_name => $class->name,
+                name         => '__ANON__'
+            );
+        }
+        else {
+            return $code;
+        }
     }
 }
 
