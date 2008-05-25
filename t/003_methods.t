@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 66;
+use Test::More tests => 65;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -91,8 +91,8 @@ is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
 
-ok(!$Foo->has_method('FOO_CONSTANT'), '... Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
-ok(!$Foo->has_method('bling'), '... Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
+ok($Foo->has_method('FOO_CONSTANT'), '... not Foo->has_method(FOO_CONSTANT) (defined w/ use constant)');
+ok(!$Foo->has_method('bling'), '... not Foo->has_method(bling) (defined in main:: using symbol tables (no Sub::Name))');
 
 ok($Foo->has_method('bar'), '... Foo->has_method(bar) (defined in Foo)');
 ok($Foo->has_method('baz'), '... Foo->has_method(baz) (typeglob aliased within Foo)');
@@ -120,7 +120,8 @@ for my $method_name (qw/baaz
                     	floob
                     	blah
                     	bang
-                    	evaled_foo/) {
+                    	evaled_foo
+                    	FOO_CONSTANT/) {
     isa_ok($Foo->get_method($method_name), 'Class::MOP::Method');
     {
         no strict 'refs';
@@ -129,7 +130,6 @@ for my $method_name (qw/baaz
 }
 
 for my $method_name (qw/
-                    FOO_CONSTANT
                     bling
                     /) {
     is(ref($Foo->get_package_symbol('&' . $method_name)), 'CODE', '... got the __ANON__ methods');
@@ -158,7 +158,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(baaz bang bar baz blah evaled_foo floob foo) ],
+    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob foo) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -171,6 +171,7 @@ is_deeply(
             code  => $Foo->get_method($_)
             }
         } qw(
+            FOO_CONSTANT
             baaz            
             bang 
             bar 
@@ -189,13 +190,9 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(baaz bang bar baz blah evaled_foo floob) ],
+    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob) ],
     '... got the right method list for Foo');
 
-is_deeply(
-    [ sort $Foo->get_method_list ],
-    [ qw(baaz bang bar baz blah evaled_foo floob) ],
-    '... got the right method list for Foo');
 
 # ... test our class creator 
 
@@ -230,6 +227,11 @@ is_deeply(
 is_deeply(
     [ sort { $a->{name} cmp $b->{name} } $Bar->compute_all_applicable_methods() ],
     [
+        {
+            name  => 'FOO_CONSTANT',
+            class => 'Foo',
+            code  => $Foo->get_method('FOO_CONSTANT')
+        },    
         {
             name  => 'baaz',
             class => 'Foo',
