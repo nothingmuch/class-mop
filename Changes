@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.56 
+0.56 Saturday, May 24, 2008
     * Class::MOP
       - we now get the &check_package_cache_flag
         function from MRO::Compat
