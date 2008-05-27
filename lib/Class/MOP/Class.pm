@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 
-our $VERSION   = '0.31';
+our $VERSION   = '0.32';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -312,8 +312,10 @@ sub get_method_map {
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
 
-    foreach my $symbol ($self->list_all_package_symbols('CODE')) {
-        my $code = $self->get_package_symbol('&' . $symbol);
+    my %all_code = $self->get_all_package_symbols('CODE');
+
+    foreach my $symbol (keys %all_code) {
+        my $code = $all_code{$symbol};
 
         next if exists  $map->{$symbol} &&
                 defined $map->{$symbol} &&

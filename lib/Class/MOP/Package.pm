@@ -7,7 +7,7 @@ use warnings;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.08';
+our $VERSION   = '0.09';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -107,7 +107,9 @@ sub has_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
     
-    return 0 unless exists $self->namespace->{$name};   
+    my $namespace = $self->namespace;
+    
+    return 0 unless exists $namespace->{$name};   
     
     # FIXME:
     # For some really stupid reason 
@@ -118,15 +120,15 @@ sub has_package_symbol {
     # if you put \undef in your scalar
     # then this is broken.
 
-    if (ref($self->namespace->{$name}) eq 'SCALAR') {
+    if (ref($namespace->{$name}) eq 'SCALAR') {
         return ($type eq 'CODE' ? 1 : 0);
     }
     elsif ($type eq 'SCALAR') {    
-        my $val = *{$self->namespace->{$name}}{$type};
+        my $val = *{$namespace->{$name}}{$type};
         return defined(${$val}) ? 1 : 0;        
     }
     else {
-        defined(*{$self->namespace->{$name}}{$type}) ? 1 : 0;
+        defined(*{$namespace->{$name}}{$type}) ? 1 : 0;
     }
 }
 
@@ -135,10 +137,12 @@ sub get_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
-    $self->add_package_symbol($variable)
-        unless exists $self->namespace->{$name};
+    my $namespace = $self->namespace;
 
-    if (ref($self->namespace->{$name}) eq 'SCALAR') {
+    $self->add_package_symbol($variable)
+        unless exists $namespace->{$name};
+
+    if (ref($namespace->{$name}) eq 'SCALAR') {
         if ($type eq 'CODE') {
             no strict 'refs';
             return \&{$self->name.'::'.$name};
@@ -148,7 +152,7 @@ sub get_package_symbol {
         }
     }
     else {
-        return *{$self->namespace->{$name}}{$type};
+        return *{$namespace->{$name}}{$type};
     }
 }
 
@@ -202,6 +206,26 @@ sub list_all_package_symbols {
     # type (SCALAR|ARRAY|HASH|CODE)
     my $namespace = $self->namespace;
     return grep { 
+        (ref($namespace->{$_})
+            ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
+            : (ref(\$namespace->{$_}) eq 'GLOB'
+               && defined(*{$namespace->{$_}}{$type_filter})));
+    } keys %{$namespace};
+}
+
+sub get_all_package_symbols {
+    my ($self, $type_filter) = @_;
+    return %{$self->namespace} unless defined $type_filter;
+    # NOTE:
+    # or we can filter based on 
+    # type (SCALAR|ARRAY|HASH|CODE)
+    my $namespace = $self->namespace;
+    no strict 'refs';
+    return map { 
+        $_ => (ref($namespace->{$_}) eq 'SCALAR'
+                    ? ($type_filter eq 'CODE' ? \&{$self->name . '::' . $_} : undef)
+                    : *{$namespace->{$_}}{$type_filter})
+    } grep { 
         (ref($namespace->{$_})
             ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
             : (ref(\$namespace->{$_}) eq 'GLOB'
@@ -283,6 +307,11 @@ the package.
 
 By passing a C<$type_filter>, you can limit the list to only those 
 which match the filter (either SCALAR, ARRAY, HASH or CODE).
+
+=item B<get_all_package_symbols (?$type_filter)>
+
+Works exactly like C<list_all_package_symbols> but returns a HASH of 
+name => thing mapping instead of just an ARRAY of names.
 
 =back
 
