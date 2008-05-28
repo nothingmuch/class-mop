@@ -6,7 +6,7 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION   = '0.02';
+our $VERSION   = '0.03';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
@@ -16,7 +16,7 @@ sub new {
     my %options = @_;  
         
     ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";     
+        || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
         
     my $self = bless {
         # from our superclass

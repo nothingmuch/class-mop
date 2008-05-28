@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.03';
+our $VERSION   = '0.04';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Generated';
@@ -26,7 +26,7 @@ sub new {
         || confess "You must supply an attribute which is a 'Class::MOP::Attribute' instance";
 
     ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";
+        || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";
 
     my $self = bless {
         # from our superclass

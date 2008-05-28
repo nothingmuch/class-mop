@@ -7,31 +7,40 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'reftype', 'blessed';
 
-our $VERSION   = '0.07';
+our $VERSION   = '0.08';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
 
 # NOTE:
-# if poked in the right way, 
+# if poked in the right way,
 # they should act like CODE refs.
 use overload '&{}' => sub { $_[0]->body }, fallback => 1;
 
+our $UPGRADE_ERROR_TEXT = q{
+---------------------------------------------------------
+NOTE: this error is likely not an error, but a regression
+caused by the latest upgrade to Moose/Class::MOP. Consider
+upgrading any MooseX::* modules to their latest versions
+before spending too much time chasing this one down.
+---------------------------------------------------------
+};
+
 # construction
 
-sub wrap { 
+sub wrap {
     my ( $class, $code, %params ) = @_;
-    
+
     ('CODE' eq (reftype($code) || ''))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
-    
+
     ($params{package_name} && $params{name})
-        || confess "You must supply the package_name and name parameters";
-    
-    bless { 
+        || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
+
+    bless {
         '&!body'         => $code,
         '$!package_name' => $params{package_name},
-        '$!name'         => $params{name}, 
+        '$!name'         => $params{name},
     } => blessed($class) || $class;
 }
 
@@ -43,12 +52,12 @@ sub body { (shift)->{'&!body'} }
 
 # informational
 
-sub package_name { 
+sub package_name {
     my $self = shift;
     $self->{'$!package_name'} ||= (Class::MOP::get_code_info($self->body))[0];
 }
 
-sub name { 
+sub name {
     my $self = shift;
     $self->{'$!name'} ||= (Class::MOP::get_code_info($self->body))[1];
 }
@@ -70,14 +79,14 @@ __END__
 
 =pod
 
-=head1 NAME 
+=head1 NAME
 
 Class::MOP::Method - Method Meta Object
 
 =head1 DESCRIPTION
 
-The Method Protocol is very small, since methods in Perl 5 are just 
-subroutines within the particular package. We provide a very basic 
+The Method Protocol is very small, since methods in Perl 5 are just
+subroutines within the particular package. We provide a very basic
 introspection interface.
 
 =head1 METHODS
@@ -88,7 +97,7 @@ introspection interface.
 
 =item B<meta>
 
-This will return a B<Class::MOP::Class> instance which is related 
+This will return a B<Class::MOP::Class> instance which is related
 to this class.
 
 =back
@@ -99,15 +108,15 @@ to this class.
 
 =item B<wrap ($code, %params)>
 
-This is the basic constructor, it returns a B<Class::MOP::Method> 
-instance which wraps the given C<$code> reference. You can also 
+This is the basic constructor, it returns a B<Class::MOP::Method>
+instance which wraps the given C<$code> reference. You can also
 set the C<package_name> and C<name> attributes using the C<%params>.
-If these are not set, then thier accessors will attempt to figure 
+If these are not set, then thier accessors will attempt to figure
 it out using the C<Class::MOP::get_code_info> function.
 
 =item B<clone (%params)>
 
-This will make a copy of the object, allowing you to override 
+This will make a copy of the object, allowing you to override
 any values by stuffing them in C<%params>.
 
 =back
@@ -145,7 +154,7 @@ Copyright 2006-2008 by Infinity Interactive, Inc.
 L<http://www.iinteractive.com>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
+it under the same terms as Perl itself.
 
 =cut
 
