@@ -1,13 +1,20 @@
 Revision history for Perl extension Class-MOP.
 
-0.57
+0.57 Wed. May 28, 2008
+    !! Seveal speedups resulting in 20-25% speedups !!
+    || (thanks to konobi, groditi, mst & CataMoose) !!
+
     * Class::MOP::Class
       - made get_method_map use list_all_package_symbols
         instead of manually grabbing each symbol
+      - streamlining &initialize somewhat, since it gets
+        called so much
         
     * Class::MOP::Package
       - made {get, has}_package_symbol not call 
         &namespace so much 
+      - inlining a few calls to &name with 
+        direct HASH access key access
       - added get_all_package_symbols to fetch 
         a HASH of items based on a type filter
         similar to list_all_package_symbols
