@@ -26,7 +26,7 @@ Revision history for Perl extension Class-MOP.
       Class::MOP::Method::Accessor
       - added more descriptive error message to help 
         keep people from wasting time tracking an error
-        that is easily fixed by upgrading.      - 
+        that is easily fixed by upgrading.
 
 0.56 Saturday, May 24, 2008
     * Class::MOP
