@@ -202,11 +202,13 @@ sub remove_package_symbol {
 
 sub list_all_package_symbols {
     my ($self, $type_filter) = @_;
-    return keys %{$self->namespace} unless defined $type_filter;
+
+    my $namespace = $self->namespace;
+    return keys %{$namespace} unless defined $type_filter;
+    
     # NOTE:
     # or we can filter based on 
     # type (SCALAR|ARRAY|HASH|CODE)
-    my $namespace = $self->namespace;
     return grep { 
         (ref($namespace->{$_})
             ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
@@ -217,11 +219,12 @@ sub list_all_package_symbols {
 
 sub get_all_package_symbols {
     my ($self, $type_filter) = @_;
-    return %{$self->namespace} unless defined $type_filter;
+    my $namespace = $self->namespace;
+    return %{$namespace} unless defined $type_filter;
+    
     # NOTE:
     # or we can filter based on 
     # type (SCALAR|ARRAY|HASH|CODE)
-    my $namespace = $self->namespace;
     no strict 'refs';
     return map { 
         $_ => (ref($namespace->{$_}) eq 'SCALAR'
