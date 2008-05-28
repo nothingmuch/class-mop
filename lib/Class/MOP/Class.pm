@@ -23,10 +23,8 @@ sub initialize {
     my $package_name = shift;
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";
-    if (defined(my $meta = Class::MOP::get_metaclass_by_name($package_name))) {
-        return $meta;
-    }
-    $class->construct_class_instance('package' => $package_name, @_);
+    return Class::MOP::get_metaclass_by_name($package_name)
+        || $class->construct_class_instance('package' => $package_name, @_);
 }
 
 sub reinitialize {
@@ -151,8 +149,6 @@ sub check_metaclass_compatability {
     my @class_list = $self->linearized_isa;
     shift @class_list; # shift off $self->name
 
-    my $name = $self->name;
-    
     foreach my $class_name (@class_list) {
         my $meta = Class::MOP::get_metaclass_by_name($class_name) || next;
 
@@ -165,14 +161,14 @@ sub check_metaclass_compatability {
                             : blessed($meta));
 
         ($self->isa($meta_type))
-            || confess $name . "->meta => (" . (blessed($self)) . ")" .
+            || confess $self->name . "->meta => (" . (blessed($self)) . ")" .
                        " is not compatible with the " .
                        $class_name . "->meta => (" . ($meta_type)     . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatabile in the same the class.
         ($self->instance_metaclass->isa($meta->instance_metaclass))
-            || confess $name . "->meta => (" . ($self->instance_metaclass) . ")" .
+            || confess $self->name . "->meta => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
                        $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";
     }
@@ -215,9 +211,8 @@ sub check_metaclass_compatability {
     sub DESTROY {
         my $self = shift;
         no warnings 'uninitialized';
-        my $name = $self->name;
-        return unless $name =~ /^$ANON_CLASS_PREFIX/;
-        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';
         foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
             delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
@@ -395,11 +390,8 @@ sub get_meta_instance {
 sub clone_object {
     my $class    = shift;
     my $instance = shift;
-
-    my $name = $class->name;
-    
-    (blessed($instance) && $instance->isa($name))
-        || confess "You must pass an instance ($instance) of the metaclass (" . $name . ")";
+    (blessed($instance) && $instance->isa($class->name))
+        || confess "You must pass an instance ($instance) of the metaclass (" . $class->name . ")";
     # NOTE:
     # we need to protect the integrity of the
     # Class::MOP::Class singletons here, they
@@ -427,7 +419,6 @@ sub clone_instance {
 sub rebless_instance {
     my ($self, $instance, %params) = @_;
 
-    
     my $old_metaclass;
     if ($instance->can('meta')) {
         ($instance->meta->isa('Class::MOP::Class'))
@@ -439,11 +430,9 @@ sub rebless_instance {
     }
 
     my $meta_instance = $self->get_meta_instance();
-    my $name = $self->name;
-    my $old_name = $old_metaclass->name;
-    
-    $name->isa($old_name)
-        || confess "You may rebless only into a subclass of (". $old_name ."), of which (". $name .") isn't.";
+
+    $self->name->isa($old_metaclass->name)
+        || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
     $meta_instance->rebless_instance_structure($instance, $self);
@@ -575,17 +564,16 @@ sub add_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    my $name = $self->name;
     my $body;
     if (blessed($method)) {
         $body = $method->body;
-        if ($method->package_name ne $name && 
+        if ($method->package_name ne $self->name && 
             $method->name         ne $method_name) {
             warn "Hello there, got somethig for you." 
                 . " Method says " . $method->package_name . " " . $method->name
-                . " Class says " . $name . " " . $method_name;
+                . " Class says " . $self->name . " " . $method_name;
             $method = $method->clone(
-                package_name => $name,
+                package_name => $self->name,
                 name         => $method_name            
             ) if $method->can('clone');
         }
@@ -596,14 +584,14 @@ sub add_method {
             || confess "Your code block must be a CODE reference";
         $method = $self->method_metaclass->wrap(
             $body => (
-                package_name => $name,
+                package_name => $self->name,
                 name         => $method_name
             )
         );
     }
     $self->get_method_map->{$method_name} = $method;
     
-    my $full_method_name = ($name . '::' . $method_name);    
+    my $full_method_name = ($self->name . '::' . $method_name);    
     $self->add_package_symbol("&${method_name}" => 
         Class::MOP::subname($full_method_name => $body)
     );
@@ -819,13 +807,12 @@ sub add_attribute {
     # name here so that we can properly detach
     # the old attr object, and remove any
     # accessors it would have generated
-    my $attr_name = $attribute->name;
-    $self->remove_attribute($attr_name)
-        if $self->has_attribute($attr_name);
+    $self->remove_attribute($attribute->name)
+        if $self->has_attribute($attribute->name);
 
     # then onto installing the new accessors
     $attribute->install_accessors();
-    $self->get_attribute_map->{$attr_name} = $attribute;
+    $self->get_attribute_map->{$attribute->name} = $attribute;
 }
 
 sub has_attribute {
