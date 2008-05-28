@@ -89,9 +89,11 @@ sub add_package_symbol {
 
     my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
 
+    my $pkg = $self->{'$!package'};
+
     no strict 'refs';
     no warnings 'redefine', 'misc';    
-    *{$self->{'$!package'} . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
+    *{$pkg . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
 }
 
 sub remove_package_glob {
