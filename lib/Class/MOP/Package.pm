@@ -39,7 +39,7 @@ sub initialize {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name      { $_[0]->{'$!package'}   }
+sub name      { $_[0]->{'$!package'} }
 sub namespace { 
     # NOTE:
     # because of issues with the Perl API 
@@ -49,7 +49,7 @@ sub namespace {
     # we could just store a ref and it would
     # Just Work, but oh well :\    
     no strict 'refs';    
-    \%{$_[0]->name . '::'} 
+    \%{$_[0]->{'$!package'} . '::'} 
 }
 
 # utility methods
@@ -91,7 +91,7 @@ sub add_package_symbol {
 
     no strict 'refs';
     no warnings 'redefine', 'misc';    
-    *{$self->name . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
+    *{$self->{'$!package'} . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
 }
 
 sub remove_package_glob {

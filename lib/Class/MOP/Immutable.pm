@@ -114,20 +114,27 @@ sub make_metaclass_immutable {
 
         my $destructor_class = $options{destructor_class};
 
-        my $destructor = $destructor_class->new(
-            options      => \%options,
-            metaclass    => $metaclass,
-            package_name => $metaclass->name,
-            name         => 'DESTROY'            
-        );
+        # NOTE:
+        # we allow the destructor to determine
+        # if it is needed or not before we actually 
+        # create the destructor too
+        # - SL
+        if ($destructor_class->is_needed($metaclass)) {
+            my $destructor = $destructor_class->new(
+                options      => \%options,
+                metaclass    => $metaclass,
+                package_name => $metaclass->name,
+                name         => 'DESTROY'            
+            );
 
-        $metaclass->add_method('DESTROY' => $destructor)
-            # NOTE:
-            # we allow the destructor to determine
-            # if it is needed or not, it can perform
-            # all sorts of checks because it has the
-            # metaclass instance
-            if $destructor->is_needed;
+            $metaclass->add_method('DESTROY' => $destructor)
+                # NOTE:
+                # we allow the destructor to determine
+                # if it is needed or not, it can perform
+                # all sorts of checks because it has the
+                # metaclass instance
+                if $destructor->is_needed;
+        }
     }
 
     my $memoized_methods = $self->options->{memoize};
