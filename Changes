@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.58
+    (late night release engineering)--
+    
+    - fixing the version is META.yml, no functional 
+      changes in this release
+
 0.57 Wed. May 28, 2008
     !! Seveal speedups resulting in 20-25% speedups !!
     || (thanks to konobi, groditi, mst & CataMoose) !!
