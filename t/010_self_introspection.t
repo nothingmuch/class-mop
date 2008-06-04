@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 201;
+use Test::More tests => 200;
 use Test::Exception;
 
 BEGIN {
@@ -125,7 +125,7 @@ foreach my $method_name (@class_mop_module_methods) {
 
 foreach my $non_method_name (qw(
     confess
-    blessed reftype
+    blessed
     subname
     svref_2object
     )) {

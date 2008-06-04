@@ -5,9 +5,9 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'reftype', 'blessed';
+use Scalar::Util 'blessed';
 
-our $VERSION   = '0.08';
+our $VERSION   = '0.09';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -31,7 +31,7 @@ before spending too much time chasing this one down.
 sub wrap {
     my ( $class, $code, %params ) = @_;
 
-    ('CODE' eq (reftype($code) || ''))
+    ('CODE' eq ref($code))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
 
     ($params{package_name} && $params{name})

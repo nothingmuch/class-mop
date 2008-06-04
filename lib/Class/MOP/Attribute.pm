@@ -7,9 +7,9 @@ use warnings;
 use Class::MOP::Method::Accessor;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken';
+use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.25';
+our $VERSION   = '0.26';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
@@ -231,7 +231,7 @@ sub get_write_method_ref {
 }
 
 sub is_default_a_coderef {
-    ('CODE' eq (reftype($_[0]->{'$!default'} || $_[0]->{default}) || ''))
+    ('CODE' eq ref($_[0]->{'$!default'} || $_[0]->{default}))
 }
 
 sub default {
@@ -320,8 +320,8 @@ sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 
 sub process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
-    if (reftype($accessor)) {
-        (reftype($accessor) eq 'HASH')
+    if (ref($accessor)) {
+        (ref($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
         $method = $self->accessor_metaclass->wrap(
@@ -381,7 +381,7 @@ sub install_accessors {
 {
     my $_remove_accessor = sub {
         my ($accessor, $class) = @_;
-        if (reftype($accessor) && reftype($accessor) eq 'HASH') {
+        if (ref($accessor) && ref($accessor) eq 'HASH') {
             ($accessor) = keys %{$accessor};
         }
         my $method = $class->get_method($accessor);

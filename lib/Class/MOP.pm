@@ -16,7 +16,7 @@ use Class::MOP::Method;
 use Class::MOP::Immutable;
 
 BEGIN {
-    our $VERSION   = '0.58';
+    our $VERSION   = '0.59';
     our $AUTHORITY = 'cpan:STEVAN';    
     
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005) 
@@ -530,7 +530,7 @@ Class::MOP::Method->meta->add_method('wrap' => sub {
     my $code    = shift;
     my %options = @_;
 
-    ('CODE' eq (Scalar::Util::reftype($code) || ''))
+    ('CODE' eq ref($code))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
 
     ($options{package_name} && $options{name})

@@ -9,9 +9,9 @@ use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken';
+use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.32';
+our $VERSION   = '0.33';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';
@@ -103,7 +103,8 @@ sub construct_class_instance {
             # we can tell the first time the 
             # methods are fetched
             # - SL
-            '$!_package_cache_flag'       => undef,            
+            '$!_package_cache_flag'       => undef,  
+            '$!_meta_instance'            => undef,          
         } => $class;
     }
     else {
@@ -367,7 +368,7 @@ sub construct_instance {
     # NOTE:
     # this will only work for a HASH instance type
     if ($class->is_anon_class) {
-        (reftype($instance) eq 'HASH')
+        (Scalar::Util::reftype($instance) eq 'HASH')
             || confess "Currently only HASH based instances are supported with instance of anon-classes";
         # NOTE:
         # At some point we should make this official
@@ -379,11 +380,26 @@ sub construct_instance {
     return $instance;
 }
 
+
 sub get_meta_instance {
-    my $class = shift;
-    return $class->instance_metaclass->new(
-        $class,
-        $class->compute_all_applicable_attributes()
+    my $self = shift;
+    # NOTE:
+    # just about any fiddling with @ISA or 
+    # any fiddling with attributes will 
+    # also fiddle with the symbol table 
+    # and therefore invalidate the package 
+    # cache, in which case we should blow 
+    # away the meta-instance cache. Of course
+    # this will invalidate it more often then 
+    # is probably needed, but better safe 
+    # then sorry.
+    # - SL
+    $self->{'$!_meta_instance'} = undef
+        if defined $self->{'$!_package_cache_flag'} && 
+                   $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name);
+    $self->{'$!_meta_instance'} ||= $self->instance_metaclass->new(
+        $self,
+        $self->compute_all_applicable_attributes()
     );
 }
 
@@ -580,7 +596,7 @@ sub add_method {
     }
     else {
         $body = $method;
-        ('CODE' eq (reftype($body) || ''))
+        ('CODE' eq ref($body))
             || confess "Your code block must be a CODE reference";
         $method = $self->method_metaclass->wrap(
             $body => (
@@ -674,7 +690,7 @@ sub alias_method {
         || confess "You must define a method name";
 
     my $body = (blessed($method) ? $method->body : $method);
-    ('CODE' eq (reftype($body) || ''))
+    ('CODE' eq ref($body))
         || confess "Your code block must be a CODE reference";
 
     $self->add_package_symbol("&${method_name}" => $body);

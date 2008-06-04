@@ -1,5 +1,19 @@
 Revision history for Perl extension Class-MOP.
 
+0.59
+
+    * Class::MOP::Class
+      - now stores the instance of the instance 
+        metaclass to avoid needless recomputation
+    
+    * Class::MOP
+      Class::MOP::Class      
+      Class::MOP::Method
+      Class::MOP::Method::Wrapped
+      Class::MOP::Attribute
+      - switched usage of reftype to ref because 
+        it is much faster
+
 0.58 Thurs. May 29, 2008
     (late night release engineering)--
     
