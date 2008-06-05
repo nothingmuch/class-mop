@@ -28,13 +28,17 @@ get_code_info(coderef)
          we hit it without the guard, we segfault. The slightly odd return
          value strikes me as an improvement (mst)
       */
-      //if (isGV_with_GP(CvGV(coderef))) {
+#ifdef isGV_with_GP
+      if ( isGV_with_GP(CvGV(coderef))) {
+#endif
         pkg     = HvNAME( GvSTASH(CvGV(coderef)) );
         name    = GvNAME( CvGV(coderef) );
-      //} else {
-      //  pkg     = "__UNKNOWN__";
-      //  name    = "__ANON__";
-      //}
+#ifdef isGV_with_GP
+      } else {
+        pkg     = "__UNKNOWN__";
+        name    = "__ANON__";
+      }
+#endif
 
       EXTEND(SP, 2);
       PUSHs(newSVpvn(pkg, strlen(pkg)));
