@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP
+      - MOP.xs does sanity checks on the coderef to avoid a segfault
+
 0.59
 
     * Class::MOP::Class
