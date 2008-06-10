@@ -5,6 +5,13 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - now stores the instance of the instance 
         metaclass to avoid needless recomputation
+        and deletes it when the cache is blown
+
+    * Class::MOP::Package
+      - {add, has, get, remove}_package_symbol all 
+        now accept a HASH ref argument as well as the
+        string. All internal usages now use the HASH
+        ref version.
 
     * Class::MOP
       - MOP.xs does sanity checks on the coderef 

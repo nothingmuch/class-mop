@@ -13,12 +13,12 @@ use base 'Class::MOP::Package';
 
 sub version {  
     my $self = shift;
-    ${$self->get_package_symbol('$VERSION')};
+    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'VERSION' })};
 }
 
 sub authority {  
     my $self = shift;
-    ${$self->get_package_symbol('$AUTHORITY')};
+    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'AUTHORITY' })};
 }
 
 sub identifier {

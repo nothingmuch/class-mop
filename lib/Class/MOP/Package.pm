@@ -87,7 +87,9 @@ sub namespace {
 sub add_package_symbol {
     my ($self, $variable, $initial_value) = @_;
 
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+        ? @{$variable}{qw[name sigil type]}
+        : $self->_deconstruct_variable_name($variable); 
 
     my $pkg = $self->{'$!package'};
 
@@ -107,7 +109,9 @@ sub remove_package_glob {
 sub has_package_symbol {
     my ($self, $variable) = @_;
 
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+        ? @{$variable}{qw[name sigil type]}
+        : $self->_deconstruct_variable_name($variable);
     
     my $namespace = $self->namespace;
     
@@ -137,7 +141,9 @@ sub has_package_symbol {
 sub get_package_symbol {
     my ($self, $variable) = @_;    
 
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+        ? @{$variable}{qw[name sigil type]}
+        : $self->_deconstruct_variable_name($variable);
 
     my $namespace = $self->namespace;
 
@@ -161,32 +167,41 @@ sub get_package_symbol {
 sub remove_package_symbol {
     my ($self, $variable) = @_;
 
-    my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable); 
+    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+        ? @{$variable}{qw[name sigil type]}
+        : $self->_deconstruct_variable_name($variable);
 
     # FIXME:
     # no doubt this is grossly inefficient and 
     # could be done much easier and faster in XS
 
+    my ($scalar_desc, $array_desc, $hash_desc, $code_desc) = (
+        { sigil => '$', type => 'SCALAR', name => $name },
+        { sigil => '@', type => 'ARRAY',  name => $name },
+        { sigil => '%', type => 'HASH',   name => $name },
+        { sigil => '&', type => 'CODE',   name => $name },
+    );
+
     my ($scalar, $array, $hash, $code);
     if ($type eq 'SCALAR') {
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);     
+        $array  = $self->get_package_symbol($array_desc)  if $self->has_package_symbol($array_desc);
+        $hash   = $self->get_package_symbol($hash_desc)   if $self->has_package_symbol($hash_desc);     
+        $code   = $self->get_package_symbol($code_desc)   if $self->has_package_symbol($code_desc);     
     }
     elsif ($type eq 'ARRAY') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);     
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);
+        $scalar = $self->get_package_symbol($scalar_desc) if $self->has_package_symbol($scalar_desc);
+        $hash   = $self->get_package_symbol($hash_desc)   if $self->has_package_symbol($hash_desc);     
+        $code   = $self->get_package_symbol($code_desc)   if $self->has_package_symbol($code_desc);
     }
     elsif ($type eq 'HASH') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
-        $code   = $self->get_package_symbol('&' . $name) if $self->has_package_symbol('&' . $name);      
+        $scalar = $self->get_package_symbol($scalar_desc) if $self->has_package_symbol($scalar_desc);
+        $array  = $self->get_package_symbol($array_desc)  if $self->has_package_symbol($array_desc);        
+        $code   = $self->get_package_symbol($code_desc)   if $self->has_package_symbol($code_desc);      
     }
     elsif ($type eq 'CODE') {
-        $scalar = $self->get_package_symbol('$' . $name) if $self->has_package_symbol('$' . $name);
-        $array  = $self->get_package_symbol('@' . $name) if $self->has_package_symbol('@' . $name);        
-        $hash   = $self->get_package_symbol('%' . $name) if $self->has_package_symbol('%' . $name);        
+        $scalar = $self->get_package_symbol($scalar_desc) if $self->has_package_symbol($scalar_desc);
+        $array  = $self->get_package_symbol($array_desc)  if $self->has_package_symbol($array_desc);        
+        $hash   = $self->get_package_symbol($hash_desc)   if $self->has_package_symbol($hash_desc);        
     }    
     else {
         confess "This should never ever ever happen";
@@ -194,10 +209,10 @@ sub remove_package_symbol {
         
     $self->remove_package_glob($name);
     
-    $self->add_package_symbol(('$' . $name) => $scalar) if defined $scalar;      
-    $self->add_package_symbol(('@' . $name) => $array)  if defined $array;    
-    $self->add_package_symbol(('%' . $name) => $hash)   if defined $hash;
-    $self->add_package_symbol(('&' . $name) => $code)   if defined $code;            
+    $self->add_package_symbol($scalar_desc => $scalar) if defined $scalar;      
+    $self->add_package_symbol($array_desc  => $array)  if defined $array;    
+    $self->add_package_symbol($hash_desc   => $hash)   if defined $hash;
+    $self->add_package_symbol($code_desc   => $code)   if defined $code;            
 }
 
 sub list_all_package_symbols {

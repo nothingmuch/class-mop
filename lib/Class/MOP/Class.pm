@@ -475,10 +475,11 @@ sub rebless_instance {
 # Inheritance
 
 sub superclasses {
-    my $self = shift;
+    my $self     = shift;
+    my $var_spec = { sigil => '@', type => 'ARRAY', name => 'ISA' };
     if (@_) {
         my @supers = @_;
-        @{$self->get_package_symbol('@ISA')} = @supers;
+        @{$self->get_package_symbol($var_spec)} = @supers;
         # NOTE:
         # we need to check the metaclass
         # compatibility here so that we can
@@ -487,7 +488,7 @@ sub superclasses {
         # we don't know about
         $self->check_metaclass_compatability();
     }
-    @{$self->get_package_symbol('@ISA')};
+    @{$self->get_package_symbol($var_spec)};
 }
 
 sub subclasses {
@@ -608,7 +609,8 @@ sub add_method {
     $self->get_method_map->{$method_name} = $method;
     
     my $full_method_name = ($self->name . '::' . $method_name);    
-    $self->add_package_symbol("&${method_name}" => 
+    $self->add_package_symbol(
+        { sigil => '&', type => 'CODE', name => $method_name }, 
         Class::MOP::subname($full_method_name => $body)
     );
     $self->update_package_cache_flag;    
@@ -693,7 +695,9 @@ sub alias_method {
     ('CODE' eq ref($body))
         || confess "Your code block must be a CODE reference";
 
-    $self->add_package_symbol("&${method_name}" => $body);
+    $self->add_package_symbol(
+        { sigil => '&', type => 'CODE', name => $method_name } => $body
+    );
     $self->update_package_cache_flag;     
 }
 
@@ -727,7 +731,9 @@ sub remove_method {
 
     my $removed_method = delete $self->get_method_map->{$method_name};
     
-    $self->remove_package_symbol("&${method_name}");
+    $self->remove_package_symbol(
+        { sigil => '&', type => 'CODE', name => $method_name }
+    );
     
     $self->update_package_cache_flag;        
 
