@@ -22,6 +22,8 @@ Revision history for Perl extension Class-MOP.
       - nonsensical (undef, empty, reference) class
         names now throw a more direct error in
         load_class (Sartak)
+        - tests for this and other aspects of
+          load_class (Sartak)
     
     * Class::MOP
       Class::MOP::Class      
