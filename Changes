@@ -16,6 +16,9 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP
       - MOP.xs does sanity checks on the coderef 
         to avoid a segfault
+      - is_class_loaded check now uses code that
+        was improved in Moose's ClassName type
+        check
     
     * Class::MOP
       Class::MOP::Class      
