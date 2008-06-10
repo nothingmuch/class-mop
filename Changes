@@ -18,7 +18,10 @@ Revision history for Perl extension Class-MOP.
         to avoid a segfault
       - is_class_loaded check now uses code that
         was improved in Moose's ClassName type
-        check
+        check (Sartak)
+      - nonsensical (undef, empty, reference) class
+        names now throw a more direct error in
+        load_class (Sartak)
     
     * Class::MOP
       Class::MOP::Class      

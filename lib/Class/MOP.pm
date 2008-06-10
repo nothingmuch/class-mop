@@ -124,6 +124,12 @@ BEGIN {
 
 sub load_class {
     my $class = shift;
+
+    if (ref($class) || !defined($class) || !length($class)) {
+        my $display = defined($class) ? $class : 'undef';
+        confess "Invalid class name ($display)";
+    }
+
     # see if this is already
     # loaded in the symbol table
     return 1 if is_class_loaded($class);
