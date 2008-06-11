@@ -80,5 +80,5 @@ is_deeply([splice @calls], [
     'Parent::method',
     'after Parent::method',
     'after Child::method',
-]);
+], "cache is correctly invalidated when the parent method is wrapped");
 
