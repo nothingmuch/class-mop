@@ -6,6 +6,9 @@ Revision history for Perl extension Class-MOP.
       - now stores the instance of the instance 
         metaclass to avoid needless recomputation
         and deletes it when the cache is blown
+      - introduce methods to query Class::MOP::Class for 
+        the options used to make it immutable as well as
+        the proper immutable transformer. (groditi)        
 
     * Class::MOP::Package
       - {add, has, get, remove}_package_symbol all 

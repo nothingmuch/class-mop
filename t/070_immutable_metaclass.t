@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 84;
+use Test::More tests => 85;
 use Test::Exception;
 
 BEGIN {
@@ -76,10 +76,13 @@ BEGIN {
     ok($meta->is_mutable, '... our class is mutable');
     ok(!$meta->is_immutable, '... our class is not immutable');
 
+    my $transformer = $meta->get_immutable_transformer;
+
     lives_ok {
         $meta->make_immutable();
     } '... changed Foo to be immutable';
 
+    is($transformer, $meta->get_immutable_transformer, '... immutable transformer cache works');
     ok(!$meta->make_immutable, '... make immutable now returns nothing');
 
     ok(!$meta->is_mutable, '... our class is no longer mutable');
@@ -96,7 +99,7 @@ BEGIN {
 
     dies_ok { $meta->add_package_symbol()    } '... exception thrown as expected';
     dies_ok { $meta->remove_package_symbol() } '... exception thrown as expected';
-    
+
     lives_ok { $meta->identifier() } '... no exception for get_package_symbol special case';
 
     my @supers;

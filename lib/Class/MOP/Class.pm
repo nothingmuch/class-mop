@@ -922,16 +922,36 @@ sub is_immutable { 0 }
 #      the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
 
 {
+
     my %IMMUTABLE_TRANSFORMERS;
     my %IMMUTABLE_OPTIONS;
+
+    sub get_immutable_options {
+        my $self = shift;
+        return if $self->is_mutable;
+        confess "unable to find immutabilizing options"
+            unless exists $IMMUTABLE_OPTIONS{$self->name};
+        my %options = %{$IMMUTABLE_OPTIONS{$self->name}};
+        delete $options{IMMUTABLE_TRANSFORMER};
+        return \%options;
+    }
+
+    sub get_immutable_transformer {
+        my $self = shift;
+        if( $self->is_mutable ){
+            my $class = blessed $self || $self;
+            return $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
+        }
+        confess "unable to find transformer for immutable class"
+            unless exists $IMMUTABLE_OPTIONS{$self->name};
+        return $IMMUTABLE_OPTIONS{$self->name}->{IMMUTABLE_TRANSFORMER};
+    }
+
     sub make_immutable {
         my $self = shift;
         my %options = @_;
-        my $class = blessed $self || $self;
 
-        $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
-        my $transformer = $IMMUTABLE_TRANSFORMERS{$class};
-
+        my $transformer = $self->get_immutable_transformer;
         $transformer->make_metaclass_immutable($self, \%options);
         $IMMUTABLE_OPTIONS{$self->name} =
             { %options,  IMMUTABLE_TRANSFORMER => $transformer };
@@ -940,7 +960,7 @@ sub is_immutable { 0 }
             print STDERR "# of Metaclass options:      ", keys %IMMUTABLE_OPTIONS;
             print STDERR "# of Immutable transformers: ", keys %IMMUTABLE_TRANSFORMERS;
         }
-        
+
         1;
     }
 
@@ -1585,6 +1605,15 @@ the L<Class::MOP::Immutable> documentation.
 
 This method will reverse tranforamtion upon the class which
 made it immutable.
+
+=item B<get_immutable_transformer>
+
+Return a transformer suitable for making this class immutable or, if this
+class is immutable, the transformer used to make it immutable.
+
+=item B<get_immutable_options>
+
+If the class is immutable, return the options used to make it immutable.
 
 =item B<create_immutable_transformer>
 
