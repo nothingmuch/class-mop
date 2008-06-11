@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use Test::More tests => 20;
+use Test::Exception;
+
+BEGIN {
+    use_ok('Class::MOP');
+}
+
+my @calls;
+
+{
+    package Parent;
+
+    use strict;
+    use warnings;
+    use metaclass;
+
+    use Carp 'confess';
+
+    sub method { push @calls, 'Parent::method' }
+
+	package Child;
+
+	use strict;
+	use warnings;
+    use metaclass;
+
+	use base 'Parent';
+
+	Child->meta->add_around_method_modifier('method' => sub {
+        my $orig = shift;
+        push @calls, 'before Child::method';
+        $orig->(@_);
+        push @calls, 'after Child::method';
+	});
+}
+
+Parent->method;
+
+is_deeply([splice @calls], [
+    'Parent::method',
+]);
+
+Child->method;
+
+is_deeply([splice @calls], [
+    'before Child::method',
+    'Parent::method',
+    'after Child::method',
+]);
+
+{
+    package Parent;
+
+	Parent->meta->add_around_method_modifier('method' => sub {
+        my $orig = shift;
+        push @calls, 'before Parent::method';
+        $orig->(@_);
+        push @calls, 'after Parent::method';
+	});
+}
+
+Parent->method;
+
+is_deeply([splice @calls], [
+    'before Parent::method',
+    'Parent::method',
+    'after Parent::method',
+]);
+
+Child->method;
+
+is_deeply([splice @calls], [
+    'before Child::method',
+    'before Parent::method',
+    'Parent::method',
+    'after Parent::method',
+    'after Child::method',
+]);
+
