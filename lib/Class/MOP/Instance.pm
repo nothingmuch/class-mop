@@ -182,9 +182,9 @@ Class::MOP::Instance - Instance Meta Object
 The meta instance is used by attributes for low level storage.
 
 Using this API generally violates attribute encapsulation and is not
-reccomended, instead look at L<Class::MOP::Attribute/get_value>,
-L<Class::MOP::Attribute/set_value> for the reccomended way to fiddle with
-attribute values in a generic way, independant of how/whether accessors have
+recommended, instead look at L<Class::MOP::Attribute/get_value>,
+L<Class::MOP::Attribute/set_value> for the recommended way to fiddle with
+attribute values in a generic way, independent of how/whether accessors have
 been defined. Accessors can be found using L<Class::MOP::Class/get_attribute>.
 
 This may seem like over-abstraction, but by abstracting
@@ -230,7 +230,7 @@ This too does just exactly what it says it does.
 
 =back
 
-=head2 Instrospection
+=head2 Introspection
 
 NOTE: There might be more methods added to this part of the API,
 we will add then when we need them basically.
