@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.60';
+our $VERSION   = '0.61';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Generated';
