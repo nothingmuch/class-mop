@@ -16,7 +16,7 @@ use Class::MOP::Method;
 use Class::MOP::Immutable;
 
 BEGIN {
-    our $VERSION   = '0.59';
+    our $VERSION   = '0.60';
     our $AUTHORITY = 'cpan:STEVAN';    
     
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005) 
