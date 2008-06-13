@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.33';
+our $VERSION   = '0.60';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Module';

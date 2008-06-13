@@ -1,6 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
 0.60
+    - Fixed a version number issue by bumping all modules
+      to 0.60.
 
 0.59 Thurs. Jun 12, 2008
     !! Several fixes resulting in yet another 25-30% speedup !!

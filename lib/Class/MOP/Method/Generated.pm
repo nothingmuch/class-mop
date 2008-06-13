@@ -6,7 +6,7 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION   = '0.03';
+our $VERSION   = '0.60';
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
