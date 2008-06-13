@@ -79,6 +79,7 @@ t/073_make_mutable.t
 t/080_meta_package.t
 t/081_meta_package_extension.t
 t/082_get_code_info.t
+t/083_load_class.t
 t/100_BinaryTree_test.t
 t/101_InstanceCountingClass_test.t
 t/102_InsideOutClass_test.t
@@ -91,10 +92,12 @@ t/108_ArrayBasedStorage_test.t
 t/200_Class_C3_compatibility.t
 t/300_random_eval_bug.t
 t/301_RT_27329_fix.t
+t/302_modify_parent_method.t
 t/lib/BinaryTree.pm
 t/lib/MyMetaClass.pm
 t/lib/MyMetaClass/Attribute.pm
 t/lib/MyMetaClass/Instance.pm
 t/lib/MyMetaClass/Method.pm
+t/lib/SyntaxError.pm
 t/pod.t
 t/pod_coverage.t
