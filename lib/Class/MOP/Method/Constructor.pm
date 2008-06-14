@@ -160,8 +160,6 @@ sub _generate_slot_initializer {
 
 1;
 
-1;
-
 __END__
 
 =pod

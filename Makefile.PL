@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use inc::Module::Install 0.65;
+use inc::Module::Install;
 
 name 'Class-MOP';
 all_from 'lib/Class/MOP.pm';
