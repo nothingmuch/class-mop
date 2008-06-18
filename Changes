@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.62
+0.62 Wed June 18, 2008
     - in is_class_loaded, recognize scalar references (as opposed to globs) in
       the symbol table as methods (these are optimized constant subs)
 
