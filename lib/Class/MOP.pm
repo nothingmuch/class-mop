@@ -172,6 +172,7 @@ sub is_class_loaded {
 
         my $glob = ${$$pack}{$_} || next;
 
+        # constant subs
         if ( IS_RUNNING_ON_5_10 ) {
             return 1 if ref $glob eq 'SCALAR';
         }

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Test::Exception;
 
 require Class::MOP;
@@ -33,3 +33,9 @@ throws_ok {
     Class::MOP::load_class('SyntaxError');
 } qr/Missing right curly/;
 
+{
+    package Other;
+    use constant foo => "bar";
+}
+
+lives_ok { ok(Class::MOP::is_class_loaded("Other")) } "a class with just constants is still a class";
