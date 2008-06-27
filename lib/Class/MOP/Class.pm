@@ -420,7 +420,7 @@ sub clone_object {
 sub clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
-        || confess "You can only clone instances, \$self is not a blessed instance";
+        || confess "You can only clone instances, ($instance) is not a blessed instance";
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);
     foreach my $attr ($class->compute_all_applicable_attributes()) {
