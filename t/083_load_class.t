@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 13;
+use Test::More tests => 14;
 use Test::Exception;
 
 require Class::MOP;
@@ -15,7 +15,9 @@ throws_ok { Class::MOP::load_class()       } qr/Invalid class name \(undef\)/;
 throws_ok { Class::MOP::load_class('')     } qr/Invalid class name \(\)/;
 throws_ok { Class::MOP::load_class(\"foo") } qr/Invalid class name \(SCALAR\(\w+\)\)/;
 
-ok(Class::MOP::load_class('BinaryTree'));
+my $meta = Class::MOP::load_class('BinaryTree');
+ok($meta, "successfully loaded the class BinaryTree");
+is($meta->name, "BinaryTree", "load_class returns the metaclass");
 can_ok('BinaryTree' => 'traverse');
 
 do {

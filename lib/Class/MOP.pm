@@ -131,19 +131,22 @@ sub load_class {
         confess "Invalid class name ($display)";
     }
 
-    # see if this is already
-    # loaded in the symbol table
-    return 1 if is_class_loaded($class);
-    # otherwise require it ...
-    my $file = $class . '.pm';
-    $file =~ s{::}{/}g;
-    eval { CORE::require($file) };
-    confess "Could not load class ($class) because : $@" if $@;
+    # if the class is not already loaded in the symbol table..
+    unless (is_class_loaded($class)) {
+        # require it
+        my $file = $class . '.pm';
+        $file =~ s{::}{/}g;
+        eval { CORE::require($file) };
+        confess "Could not load class ($class) because : $@" if $@;
+    }
+
+    # initialize a metaclass if necessary
     unless (does_metaclass_exist($class)) {
         eval { Class::MOP::Class->initialize($class) };
         confess "Could not initialize class ($class) because : $@" if $@;
     }
-    1; # return true if it worked
+
+    return get_metaclass_by_name($class);
 }
 
 sub is_class_loaded {
