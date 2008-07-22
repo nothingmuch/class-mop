@@ -73,17 +73,16 @@ my %DEFAULT_METHODS = (
 sub make_metaclass_immutable {
     my ($self, $metaclass, $options) = @_;
 
-    foreach my $pair (
-            [ inline_accessors   => 1     ],
-            [ inline_constructor => 1     ],
-            [ inline_destructor  => 0     ],
-            [ constructor_name   => 'new' ],
-            [ debug              => 0     ],
-        ) {
-        $options->{$pair->[0]} = $pair->[1] unless exists $options->{$pair->[0]};
-    }
+    my %options = (
+        inline_accessors   => 1,
+        inline_constructor => 1,
+        inline_destructor  => 0,
+        constructor_name   => 'new',
+        debug              => 0,
+        %$options,
+    );
 
-    my %options = %$options;
+    %$options = %options; # FIXME who the hell is relying on this?!? tests fail =(
 
     if ($options{inline_accessors}) {
         foreach my $attr_name ($metaclass->get_attribute_list) {
