@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.64
+    * Class::MOP::Immutable
+      - fixing subtle edge case in immutable when you 
+        call ->meta (stevan)
+
 0.63 Mon July 7, 2008
     * Class::MOP
       - load_class will initialize a metaclass even if

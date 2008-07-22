@@ -59,7 +59,15 @@ my %DEFAULT_METHODS = (
         return Class::MOP::Class->initialize($self) unless blessed($self);
         # otherwise, they are asking for the metaclass
         # which has been made immutable, which is itself
-        return $self;
+        # except in the cases where it is a metaclass itself
+        # that has been made immutable and for that we need 
+        # to dig a bit ...
+        if ($self->isa('Class::MOP::Class')) {
+            return $self->{'___original_class'}->meta;
+        }
+        else {
+            return $self;
+        }
     },
     is_mutable     => sub { 0  },
     is_immutable   => sub { 1  },
