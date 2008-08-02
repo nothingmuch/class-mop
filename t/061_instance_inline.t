@@ -26,7 +26,7 @@ my $C = 'Class::MOP::Instance';
       '... got the right code for set_slot_value');
 
     is($C->inline_initialize_slot($instance, $slot_name),
-      '$self->{"foo"} = undef',
+      '',
       '... got the right code for initialize_slot');
 
     is($C->inline_is_slot_initialized($instance, $slot_name),
@@ -56,7 +56,7 @@ my $C = 'Class::MOP::Instance';
       '... got the right code for set_slot_value');
 
     is($C->inline_initialize_slot($instance, $slot_name),
-      '$_[0]->{$attr_name} = undef',
+      '',
       '... got the right code for initialize_slot');
 
     is($C->inline_is_slot_initialized($instance, $slot_name),
