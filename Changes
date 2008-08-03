@@ -1,9 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
-0.64
+0.64 Sun August 3, 2008
     * Class::MOP::Immutable
-      - fixing subtle edge case in immutable when you 
+      - fixing subtle edge case in immutable when you
         call ->meta (stevan)
+      - clean up option processing (nothingmuch)
+
+    * Class::MOP::Instance
+      - inlined initialize slot didn't match
+        non-inlined (nothingmuch)
 
 0.63 Mon July 7, 2008
     * Class::MOP
