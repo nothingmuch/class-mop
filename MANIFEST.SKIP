@@ -18,3 +18,4 @@ bench
 ^#.*#$
 ^\.#
 ^TODO$
+^MOP.(bs|c|o)$
