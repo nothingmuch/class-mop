@@ -15,8 +15,23 @@ our $AUTHORITY = 'cpan:STEVAN';
 use base 'Class::MOP::Object';
 
 sub new {
-    my ($class, $metaclass, $options) = @_;
+    my ($class, @args) = @_;
 
+    my ( $metaclass, $options );
+
+    if ( @args == 2 ) {
+        # compatibility args
+        ( $metaclass, $options ) = @args;
+    } else {
+        unshift @args, "metaclass" if @args % 2 == 1;
+
+        # default named args
+        my %options = @args;
+        $options = \%options;
+        $metaclass = $options{metaclass};
+    }
+
+    # FIXME make a proper constructor using ->meta->new_object
     my $self = bless {
         'metaclass'           => $metaclass,
         'options'             => $options,
@@ -26,6 +41,7 @@ sub new {
     # NOTE:
     # we initialize the immutable
     # version of the metaclass here
+    # FIXME lazify
     $self->create_immutable_metaclass;
 
     return $self;
