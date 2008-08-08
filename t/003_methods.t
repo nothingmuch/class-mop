@@ -9,7 +9,7 @@ use Test::Exception;
 use Scalar::Util qw/reftype/;
 
 BEGIN {
-    if ( eval 'use Sub::Name ();' ) {
+    if ( eval 'use Sub::Name (); 1;' ) {
         plan tests => 65;
     }
     else {

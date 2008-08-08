@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    if ( eval 'use Sub::Name qw(subname);' ) {
+    if ( eval 'use Sub::Name qw(subname); 1;' ) {
         plan tests => 5;
     }
     else {
