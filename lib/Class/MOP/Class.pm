@@ -398,8 +398,8 @@ sub get_meta_instance {
         if defined $self->{'_package_cache_flag'} && 
                    $self->{'_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name);
     $self->{'_meta_instance'} ||= $self->instance_metaclass->new(
-        $self,
-        $self->compute_all_applicable_attributes()
+        associated_metaclass => $self,
+        attributes => [ $self->compute_all_applicable_attributes() ],
     );
 }
 
