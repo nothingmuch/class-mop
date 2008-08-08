@@ -24,7 +24,7 @@ sub new {
 
     my %options = @args;
 
-    # fixme lazy_build
+    # FIXME lazy_build
     $options{slots} ||= [ map { $_->slots } @{ $options{attributes} || [] } ];
 
     # FIXME replace with a proper constructor
@@ -40,7 +40,8 @@ sub new {
         # assumption,.. but you can
         # never tell <:)
         'meta'  => $options{metaclass}, # FIXME rename to associated metaclass with a compat alias?
-        'slots' => { map { $_ => undef } @{ $options{slots} } },
+        'slots' => $options{slots},
+        'slot_hash' => { map { $_ => undef } @{ $options{slots} } }, # FIXME lazy_build
     } => $class;
 
     # FIXME weak_ref => 1,
@@ -70,12 +71,12 @@ sub clone_instance {
 
 sub get_all_slots {
     my $self = shift;
-    return keys %{$self->{'slots'}};
+    return @{$self->{'slots'}};
 }
 
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{'slots'}->{$slot_name};
+    exists $self->{'slot_hash'}->{$slot_name};
 }
 
 # operations on created instances
