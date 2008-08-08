@@ -74,7 +74,7 @@ sub construct_class_instance {
         no strict 'refs';
         $meta = bless {
             # inherited from Class::MOP::Package
-            '$!package'             => $package_name,
+            'package'             => $package_name,
 
             # NOTE:
             # since the following attributes will
@@ -84,18 +84,18 @@ sub construct_class_instance {
             # listed here for reference, because they
             # should not actually have a value associated
             # with the slot.
-            '%!namespace'           => \undef,
+            'namespace'           => \undef,
             # inherited from Class::MOP::Module
-            '$!version'             => \undef,
-            '$!authority'           => \undef,
+            'version'             => \undef,
+            'authority'           => \undef,
             # defined in Class::MOP::Class
-            '@!superclasses'        => \undef,
+            'superclasses'        => \undef,
 
-            '%!methods'             => {},
-            '%!attributes'          => {},
-            '$!attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
-            '$!method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
-            '$!instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
+            'methods'             => {},
+            'attributes'          => {},
+            'attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
+            'method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
+            'instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
             
             ## uber-private variables
             # NOTE:
@@ -103,8 +103,8 @@ sub construct_class_instance {
             # we can tell the first time the 
             # methods are fetched
             # - SL
-            '$!_package_cache_flag'       => undef,  
-            '$!_meta_instance'            => undef,          
+            '_package_cache_flag'       => undef,  
+            '_meta_instance'            => undef,          
         } => $class;
     }
     else {
@@ -128,7 +128,7 @@ sub construct_class_instance {
     $meta;
 }
 
-sub reset_package_cache_flag  { (shift)->{'$!_package_cache_flag'} = undef } 
+sub reset_package_cache_flag  { (shift)->{'_package_cache_flag'} = undef } 
 sub update_package_cache_flag {
     my $self = shift;
     # NOTE:
@@ -137,7 +137,7 @@ sub update_package_cache_flag {
     # to our cache as well. This avoids us 
     # having to regenerate the method_map.
     # - SL    
-    $self->{'$!_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
+    $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
 sub check_metaclass_compatability {
@@ -291,22 +291,22 @@ sub create {
 # all these attribute readers will be bootstrapped
 # away in the Class::MOP bootstrap section
 
-sub get_attribute_map   { $_[0]->{'%!attributes'}          }
-sub attribute_metaclass { $_[0]->{'$!attribute_metaclass'} }
-sub method_metaclass    { $_[0]->{'$!method_metaclass'}    }
-sub instance_metaclass  { $_[0]->{'$!instance_metaclass'}  }
+sub get_attribute_map   { $_[0]->{'attributes'}          }
+sub attribute_metaclass { $_[0]->{'attribute_metaclass'} }
+sub method_metaclass    { $_[0]->{'method_metaclass'}    }
+sub instance_metaclass  { $_[0]->{'instance_metaclass'}  }
 
 # FIXME:
 # this is a prime canidate for conversion to XS
 sub get_method_map {
     my $self = shift;
     
-    if (defined $self->{'$!_package_cache_flag'} && 
-                $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name)) {
-        return $self->{'%!methods'};
+    if (defined $self->{'_package_cache_flag'} && 
+                $self->{'_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name)) {
+        return $self->{'methods'};
     }
     
-    my $map  = $self->{'%!methods'};
+    my $map  = $self->{'methods'};
 
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
@@ -348,6 +348,7 @@ sub get_method_map {
 
 sub new_object {
     my $class = shift;
+
     # NOTE:
     # we need to protect the integrity of the
     # Class::MOP::Class singletons here, so we
@@ -394,10 +395,10 @@ sub get_meta_instance {
     # is probably needed, but better safe 
     # then sorry.
     # - SL
-    $self->{'$!_meta_instance'} = undef
-        if defined $self->{'$!_package_cache_flag'} && 
-                   $self->{'$!_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name);
-    $self->{'$!_meta_instance'} ||= $self->instance_metaclass->new(
+    $self->{'_meta_instance'} = undef
+        if defined $self->{'_package_cache_flag'} && 
+                   $self->{'_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name);
+    $self->{'_meta_instance'} ||= $self->instance_metaclass->new(
         $self,
         $self->compute_all_applicable_attributes()
     );

@@ -70,18 +70,18 @@ BEGIN {
     }
 
     my @attributes = (
-        '$!name',
-        '$!accessor',
-        '$!reader',
-        '$!writer',
-        '$!predicate',
-        '$!clearer',
-        '$!builder',
-        '$!init_arg',
-        '$!initializer',
-        '$!default',
-        '$!associated_class',
-        '@!associated_methods',
+        'name',
+        'accessor',
+        'reader',
+        'writer',
+        'predicate',
+        'clearer',
+        'builder',
+        'init_arg',
+        'initializer',
+        'default',
+        'associated_class',
+        'associated_methods',
     );
 
     is_deeply(

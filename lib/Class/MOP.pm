@@ -216,7 +216,7 @@ sub is_class_loaded {
 ## Class::MOP::Package
 
 Class::MOP::Package->meta->add_attribute(
-    Class::MOP::Attribute->new('$!package' => (
+    Class::MOP::Attribute->new('package' => (
         reader   => {
             # NOTE: we need to do this in order
             # for the instance meta-object to
@@ -231,7 +231,7 @@ Class::MOP::Package->meta->add_attribute(
 );
 
 Class::MOP::Package->meta->add_attribute(
-    Class::MOP::Attribute->new('%!namespace' => (
+    Class::MOP::Attribute->new('namespace' => (
         reader => {
             # NOTE:
             # we just alias the original method
@@ -266,7 +266,7 @@ Class::MOP::Package->meta->add_method('initialize' => sub {
 # the metaclass, isn't abstraction great :)
 
 Class::MOP::Module->meta->add_attribute(
-    Class::MOP::Attribute->new('$!version' => (
+    Class::MOP::Attribute->new('version' => (
         reader => {
             # NOTE:
             # we just alias the original method
@@ -285,7 +285,7 @@ Class::MOP::Module->meta->add_attribute(
 # well.
 
 Class::MOP::Module->meta->add_attribute(
-    Class::MOP::Attribute->new('$!authority' => (
+    Class::MOP::Attribute->new('authority' => (
         reader => {
             # NOTE:
             # we just alias the original method
@@ -301,7 +301,7 @@ Class::MOP::Module->meta->add_attribute(
 ## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('%!attributes' => (
+    Class::MOP::Attribute->new('attributes' => (
         reader   => {
             # NOTE: we need to do this in order
             # for the instance meta-object to
@@ -317,7 +317,7 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('%!methods' => (
+    Class::MOP::Attribute->new('methods' => (
         init_arg => 'methods',
         reader   => {
             # NOTE:
@@ -330,7 +330,7 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('@!superclasses' => (
+    Class::MOP::Attribute->new('superclasses' => (
         accessor => {
             # NOTE:
             # we just alias the original method
@@ -343,7 +343,7 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('$!attribute_metaclass' => (
+    Class::MOP::Attribute->new('attribute_metaclass' => (
         reader   => {
             # NOTE:
             # we just alias the original method
@@ -356,7 +356,7 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('$!method_metaclass' => (
+    Class::MOP::Attribute->new('method_metaclass' => (
         reader   => {
             # NOTE:
             # we just alias the original method
@@ -369,7 +369,7 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('$!instance_metaclass' => (
+    Class::MOP::Attribute->new('instance_metaclass' => (
         reader   => {
             # NOTE: we need to do this in order
             # for the instance meta-object to
@@ -394,7 +394,7 @@ Class::MOP::Class->meta->add_attribute(
 ## Class::MOP::Attribute
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!name' => (
+    Class::MOP::Attribute->new('name' => (
         init_arg => 'name',
         reader   => {
             # NOTE: we need to do this in order
@@ -409,7 +409,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!associated_class' => (
+    Class::MOP::Attribute->new('associated_class' => (
         init_arg => 'associated_class',
         reader   => {
             # NOTE: we need to do this in order
@@ -424,7 +424,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!accessor' => (
+    Class::MOP::Attribute->new('accessor' => (
         init_arg  => 'accessor',
         reader    => { 'accessor'     => \&Class::MOP::Attribute::accessor     },
         predicate => { 'has_accessor' => \&Class::MOP::Attribute::has_accessor },
@@ -432,7 +432,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!reader' => (
+    Class::MOP::Attribute->new('reader' => (
         init_arg  => 'reader',
         reader    => { 'reader'     => \&Class::MOP::Attribute::reader     },
         predicate => { 'has_reader' => \&Class::MOP::Attribute::has_reader },
@@ -440,7 +440,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!initializer' => (
+    Class::MOP::Attribute->new('initializer' => (
         init_arg  => 'initializer',
         reader    => { 'initializer'     => \&Class::MOP::Attribute::initializer     },
         predicate => { 'has_initializer' => \&Class::MOP::Attribute::has_initializer },
@@ -448,7 +448,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!writer' => (
+    Class::MOP::Attribute->new('writer' => (
         init_arg  => 'writer',
         reader    => { 'writer'     => \&Class::MOP::Attribute::writer     },
         predicate => { 'has_writer' => \&Class::MOP::Attribute::has_writer },
@@ -456,7 +456,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!predicate' => (
+    Class::MOP::Attribute->new('predicate' => (
         init_arg  => 'predicate',
         reader    => { 'predicate'     => \&Class::MOP::Attribute::predicate     },
         predicate => { 'has_predicate' => \&Class::MOP::Attribute::has_predicate },
@@ -464,7 +464,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!clearer' => (
+    Class::MOP::Attribute->new('clearer' => (
         init_arg  => 'clearer',
         reader    => { 'clearer'     => \&Class::MOP::Attribute::clearer     },
         predicate => { 'has_clearer' => \&Class::MOP::Attribute::has_clearer },
@@ -472,7 +472,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!builder' => (
+    Class::MOP::Attribute->new('builder' => (
         init_arg  => 'builder',
         reader    => { 'builder'     => \&Class::MOP::Attribute::builder     },
         predicate => { 'has_builder' => \&Class::MOP::Attribute::has_builder },
@@ -480,7 +480,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!init_arg' => (
+    Class::MOP::Attribute->new('init_arg' => (
         init_arg  => 'init_arg',
         reader    => { 'init_arg'     => \&Class::MOP::Attribute::init_arg     },
         predicate => { 'has_init_arg' => \&Class::MOP::Attribute::has_init_arg },
@@ -488,7 +488,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('$!default' => (
+    Class::MOP::Attribute->new('default' => (
         init_arg  => 'default',
         # default has a custom 'reader' method ...
         predicate => { 'has_default' => \&Class::MOP::Attribute::has_default },
@@ -496,7 +496,7 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('@!associated_methods' => (
+    Class::MOP::Attribute->new('associated_methods' => (
         init_arg => 'associated_methods',
         reader   => { 'associated_methods' => \&Class::MOP::Attribute::associated_methods },
         default  => sub { [] }
@@ -529,6 +529,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
                        "wrap the default of '$name' in a CODE reference (ex: sub { [] } and not [])")
                 if exists $options{default} && ref $options{default};
     }
+
     # return the new object
     $class->meta->new_object(name => $name, %options);
 });
@@ -540,23 +541,22 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
 
 ## --------------------------------------------------------
 ## Class::MOP::Method
-
 Class::MOP::Method->meta->add_attribute(
-    Class::MOP::Attribute->new('&!body' => (
+    Class::MOP::Attribute->new('body' => (
         init_arg => 'body',
         reader   => { 'body' => \&Class::MOP::Method::body },
     ))
 );
 
 Class::MOP::Method->meta->add_attribute(
-    Class::MOP::Attribute->new('$!package_name' => (
+    Class::MOP::Attribute->new('package_name' => (
         init_arg => 'package_name',
         reader   => { 'package_name' => \&Class::MOP::Method::package_name },
     ))
 );
 
 Class::MOP::Method->meta->add_attribute(
-    Class::MOP::Attribute->new('$!name' => (
+    Class::MOP::Attribute->new('name' => (
         init_arg => 'name',
         reader   => { 'name' => \&Class::MOP::Method::name },
     ))
@@ -591,14 +591,14 @@ Class::MOP::Method->meta->add_method('clone' => sub {
 # practices of attributes, but we put
 # it here for completeness
 Class::MOP::Method::Wrapped->meta->add_attribute(
-    Class::MOP::Attribute->new('%!modifier_table')
+    Class::MOP::Attribute->new('modifier_table')
 );
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Generated
 
 Class::MOP::Method::Generated->meta->add_attribute(
-    Class::MOP::Attribute->new('$!is_inline' => (
+    Class::MOP::Attribute->new('is_inline' => (
         init_arg => 'is_inline',
         reader   => { 'is_inline' => \&Class::MOP::Method::Generated::is_inline },
         default  => 0, 
@@ -618,7 +618,7 @@ Class::MOP::Method::Generated->meta->add_method('new' => sub {
 ## Class::MOP::Method::Accessor
 
 Class::MOP::Method::Accessor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!attribute' => (
+    Class::MOP::Attribute->new('attribute' => (
         init_arg => 'attribute',
         reader   => {
             'associated_attribute' => \&Class::MOP::Method::Accessor::associated_attribute
@@ -627,7 +627,7 @@ Class::MOP::Method::Accessor->meta->add_attribute(
 );
 
 Class::MOP::Method::Accessor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!accessor_type' => (
+    Class::MOP::Attribute->new('accessor_type' => (
         init_arg => 'accessor_type',
         reader   => { 'accessor_type' => \&Class::MOP::Method::Accessor::accessor_type },
     ))
@@ -655,7 +655,7 @@ Class::MOP::Method::Accessor->meta->add_method('new' => sub {
     # we don't want this creating
     # a cycle in the code, if not
     # needed
-    Scalar::Util::weaken($self->{'$!attribute'});
+    Scalar::Util::weaken($self->{'attribute'});
 
     $self->initialize_body;  
     
@@ -667,7 +667,7 @@ Class::MOP::Method::Accessor->meta->add_method('new' => sub {
 ## Class::MOP::Method::Constructor
 
 Class::MOP::Method::Constructor->meta->add_attribute(
-    Class::MOP::Attribute->new('%!options' => (
+    Class::MOP::Attribute->new('options' => (
         init_arg => 'options',
         reader   => {
             'options' => \&Class::MOP::Method::Constructor::options
@@ -677,7 +677,7 @@ Class::MOP::Method::Constructor->meta->add_attribute(
 );
 
 Class::MOP::Method::Constructor->meta->add_attribute(
-    Class::MOP::Attribute->new('$!associated_metaclass' => (
+    Class::MOP::Attribute->new('associated_metaclass' => (
         init_arg => 'metaclass',
         reader   => {
             'associated_metaclass' => \&Class::MOP::Method::Constructor::associated_metaclass
@@ -702,7 +702,7 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
     # we don't want this creating
     # a cycle in the code, if not
     # needed
-    Scalar::Util::weaken($self->{'$!associated_metaclass'});
+    Scalar::Util::weaken($self->{'associated_metaclass'});
 
     $self->initialize_body;  
     
@@ -717,11 +717,11 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
 # included for completeness
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('$!meta')
+    Class::MOP::Attribute->new('meta')
 );
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('@!slots')
+    Class::MOP::Attribute->new('slots')
 );
 
 ## --------------------------------------------------------

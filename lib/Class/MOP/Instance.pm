@@ -25,16 +25,16 @@ sub new {
         # which is *probably* a safe
         # assumption,.. but you can
         # never tell <:)
-        '$!meta'  => $meta,
-        '@!slots' => { map { $_ => undef } @slots },
+        'meta'  => $meta,
+        'slots' => { map { $_ => undef } @slots },
     } => $class;
 
-    weaken($instance->{'$!meta'});
+    weaken($instance->{'meta'});
 
     return $instance;
 }
 
-sub associated_metaclass { (shift)->{'$!meta'} }
+sub associated_metaclass { (shift)->{'meta'} }
 
 sub create_instance {
     my $self = shift;
@@ -55,12 +55,12 @@ sub clone_instance {
 
 sub get_all_slots {
     my $self = shift;
-    return keys %{$self->{'@!slots'}};
+    return keys %{$self->{'slots'}};
 }
 
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{'@!slots'}->{$slot_name};
+    exists $self->{'slots'}->{$slot_name};
 }
 
 # operations on created instances

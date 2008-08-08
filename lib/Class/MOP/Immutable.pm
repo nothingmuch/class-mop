@@ -18,9 +18,9 @@ sub new {
     my ($class, $metaclass, $options) = @_;
 
     my $self = bless {
-        '$!metaclass'           => $metaclass,
-        '%!options'             => $options,
-        '$!immutable_metaclass' => undef,
+        'metaclass'           => $metaclass,
+        'options'             => $options,
+        'immutable_metaclass' => undef,
     } => $class;
 
     # NOTE:
@@ -31,9 +31,9 @@ sub new {
     return $self;
 }
 
-sub immutable_metaclass { (shift)->{'$!immutable_metaclass'} }
-sub metaclass           { (shift)->{'$!metaclass'}           }
-sub options             { (shift)->{'%!options'}             }
+sub immutable_metaclass { (shift)->{'immutable_metaclass'} }
+sub metaclass           { (shift)->{'metaclass'}           }
+sub options             { (shift)->{'options'}             }
 
 sub create_immutable_metaclass {
     my $self = shift;
@@ -43,7 +43,7 @@ sub create_immutable_metaclass {
     # metaclass is just a anon-class
     # which shadows the methods
     # appropriately
-    $self->{'$!immutable_metaclass'} = Class::MOP::Class->create_anon_class(
+    $self->{'immutable_metaclass'} = Class::MOP::Class->create_anon_class(
         superclasses => [ blessed($self->metaclass) ],
         methods      => $self->create_methods_for_immutable_metaclass,
     );

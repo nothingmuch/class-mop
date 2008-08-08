@@ -25,19 +25,19 @@ sub new {
 
     my $self = bless {
         # from our superclass
-        '&!body'                 => undef,
-        '$!package_name'         => $options{package_name},
-        '$!name'                 => $options{name},        
+        'body'                 => undef,
+        'package_name'         => $options{package_name},
+        'name'                 => $options{name},        
         # specific to this subclass
-        '%!options'              => $options{options} || {},
-        '$!associated_metaclass' => $options{metaclass},
-        '$!is_inline'            => ($options{is_inline} || 0),
+        'options'              => $options{options} || {},
+        'associated_metaclass' => $options{metaclass},
+        'is_inline'            => ($options{is_inline} || 0),
     } => $class;
 
     # we don't want this creating
     # a cycle in the code, if not
     # needed
-    weaken($self->{'$!associated_metaclass'});
+    weaken($self->{'associated_metaclass'});
 
     $self->initialize_body;
 
@@ -46,19 +46,19 @@ sub new {
 
 ## accessors
 
-sub options              { (shift)->{'%!options'}              }
-sub associated_metaclass { (shift)->{'$!associated_metaclass'} }
+sub options              { (shift)->{'options'}              }
+sub associated_metaclass { (shift)->{'associated_metaclass'} }
 
 ## cached values ...
 
 sub meta_instance {
     my $self = shift;
-    $self->{'$!meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
+    $self->{'meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
 }
 
 sub attributes {
     my $self = shift;
-    $self->{'@!attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
+    $self->{'attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
 }
 
 ## method
@@ -69,7 +69,7 @@ sub initialize_body {
 
     $method_name .= '_inline' if $self->is_inline;
 
-    $self->{'&!body'} = $self->$method_name;
+    $self->{'body'} = $self->$method_name;
 }
 
 sub generate_constructor_method {

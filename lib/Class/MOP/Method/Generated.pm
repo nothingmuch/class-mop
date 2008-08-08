@@ -20,11 +20,11 @@ sub new {
         
     my $self = bless {
         # from our superclass
-        '&!body'          => undef,
-        '$!package_name'  => $options{package_name},
-        '$!name'          => $options{name},        
+        'body'          => undef,
+        'package_name'  => $options{package_name},
+        'name'          => $options{name},        
         # specific to this subclass
-        '$!is_inline'     => ($options{is_inline} || 0),
+        'is_inline'     => ($options{is_inline} || 0),
     } => $class;
     
     $self->initialize_body;
@@ -34,7 +34,7 @@ sub new {
 
 ## accessors
 
-sub is_inline { (shift)->{'$!is_inline'} }
+sub is_inline { (shift)->{'is_inline'} }
 
 sub initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";

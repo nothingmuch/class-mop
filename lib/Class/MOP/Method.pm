@@ -38,15 +38,15 @@ sub wrap {
         || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
 
     bless {
-        '&!body'         => $code,
-        '$!package_name' => $params{package_name},
-        '$!name'         => $params{name},
+        'body'         => $code,
+        'package_name' => $params{package_name},
+        'name'         => $params{name},
     } => blessed($class) || $class;
 }
 
 ## accessors
 
-sub body { (shift)->{'&!body'} }
+sub body { (shift)->{'body'} }
 
 # TODO - add associated_class
 
@@ -54,12 +54,12 @@ sub body { (shift)->{'&!body'} }
 
 sub package_name {
     my $self = shift;
-    $self->{'$!package_name'} ||= (Class::MOP::get_code_info($self->body))[0];
+    $self->{'package_name'} ||= (Class::MOP::get_code_info($self->body))[0];
 }
 
 sub name {
     my $self = shift;
-    $self->{'$!name'} ||= (Class::MOP::get_code_info($self->body))[1];
+    $self->{'name'} ||= (Class::MOP::get_code_info($self->body))[1];
 }
 
 sub fully_qualified_name {
