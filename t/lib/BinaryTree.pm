@@ -9,7 +9,7 @@ use metaclass;
 
 our $VERSION = '0.02';
 
-BinaryTree->meta->add_attribute('$:uid' => (
+BinaryTree->meta->add_attribute('uid' => (
     reader  => 'getUID',
     writer  => 'setUID',
     default => sub {
@@ -18,21 +18,21 @@ BinaryTree->meta->add_attribute('$:uid' => (
     }
 ));
 
-BinaryTree->meta->add_attribute('$:node' => (
+BinaryTree->meta->add_attribute('node' => (
     reader   => 'getNodeValue',
     writer   => 'setNodeValue',
     clearer  => 'clearNodeValue',
     init_arg => ':node'
 ));
 
-BinaryTree->meta->add_attribute('$:parent' => (
+BinaryTree->meta->add_attribute('parent' => (
     predicate => 'hasParent',
     reader    => 'getParent',
     writer    => 'setParent',
     clearer   => 'clearParent',
 ));
 
-BinaryTree->meta->add_attribute('$:left' => (
+BinaryTree->meta->add_attribute('left' => (
     predicate => 'hasLeft',
     clearer   => 'clearLeft',
     reader    => 'getLeft',
@@ -41,13 +41,13 @@ BinaryTree->meta->add_attribute('$:left' => (
             my ($self, $tree) = @_;
             confess "undef left" unless defined $tree;
                 $tree->setParent($self) if defined $tree;
-            $self->{'$:left'} = $tree;
+            $self->{'left'} = $tree;
             $self;
         }
    },
 ));
 
-BinaryTree->meta->add_attribute('$:right' => (
+BinaryTree->meta->add_attribute('right' => (
     predicate => 'hasRight',
     clearer   => 'clearRight',
     reader    => 'getRight',
@@ -56,7 +56,7 @@ BinaryTree->meta->add_attribute('$:right' => (
             my ($self, $tree) = @_;
             confess "undef right" unless defined $tree;
                 $tree->setParent($self) if defined $tree;
-            $self->{'$:right'} = $tree;
+            $self->{'right'} = $tree;
             $self;
         }
     }

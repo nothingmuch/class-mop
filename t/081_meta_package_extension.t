@@ -22,7 +22,7 @@ BEGIN {
     use base 'Class::MOP::Package';
     
     __PACKAGE__->meta->add_attribute(
-        '%:namespace' => (
+        'namespace' => (
             reader  => 'namespace',
             default => sub { {} }
         )

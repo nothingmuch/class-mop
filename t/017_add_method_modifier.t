@@ -19,7 +19,7 @@ BEGIN {
         
     use Carp 'confess';
     
-    BankAccount->meta->add_attribute('$:balance' => (
+    BankAccount->meta->add_attribute('balance' => (
         accessor => 'balance',
 		init_arg => 'balance',
         default  => 0
@@ -48,7 +48,7 @@ BEGIN {
 
 	use base 'BankAccount';
 	
-    CheckingAccount->meta->add_attribute('$:overdraft_account' => (
+    CheckingAccount->meta->add_attribute('overdraft_account' => (
         accessor => 'overdraft_account',
 		init_arg => 'overdraft',
     ));	

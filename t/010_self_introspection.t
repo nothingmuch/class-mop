@@ -255,7 +255,7 @@ is_deeply($class_mop_class_meta->get_attribute('method_metaclass')->reader,
 ok($class_mop_class_meta->get_attribute('method_metaclass')->has_init_arg, '... Class::MOP::Class method_metaclass has a init_arg');
 is($class_mop_class_meta->get_attribute('method_metaclass')->init_arg,
   'method_metaclass',
-  '... Class::MOP::Class $:method_metaclass\'s init_arg is method_metaclass');
+  '... Class::MOP::Class method_metaclass\'s init_arg is method_metaclass');
 
 ok($class_mop_class_meta->get_attribute('method_metaclass')->has_default, '... Class::MOP::Class method_metaclass has a default');
 is($class_mop_class_meta->get_attribute('method_metaclass')->default,

@@ -108,17 +108,17 @@ LazyClass - An example metaclass with lazy initialization
       ':instance_metaclass'  => 'LazyClass::Instance',      
   );
   
-  BinaryTree->meta->add_attribute('$:node' => (
+  BinaryTree->meta->add_attribute('node' => (
       accessor => 'node',
       init_arg => ':node'
   ));
   
-  BinaryTree->meta->add_attribute('$:left' => (
+  BinaryTree->meta->add_attribute('left' => (
       reader  => 'left',
       default => sub { BinaryTree->new() }
   ));
   
-  BinaryTree->meta->add_attribute('$:right' => (
+  BinaryTree->meta->add_attribute('right' => (
       reader  => 'right',
       default => sub { BinaryTree->new() }    
   ));    
