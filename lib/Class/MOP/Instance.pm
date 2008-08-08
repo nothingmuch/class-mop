@@ -11,21 +11,28 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Object';
 
-sub new {
+sub BUILDARGS {
     my ($class, @args) = @_;
 
     if ( @args == 1 ) {
-        unshift @args, "metaclass";
+        unshift @args, "associated_metaclass";
     } elsif ( @args >= 2 && blessed($args[0]) && $args[0]->isa("Class::MOP::Class") ) {
         # compat mode
         my ( $meta, @attrs ) = @args;
-        @args = ( metaclass => $meta, attributes => \@attrs );
+        @args = ( associated_metaclass => $meta, attributes => \@attrs );
     }
 
     my %options = @args;
-
     # FIXME lazy_build
     $options{slots} ||= [ map { $_->slots } @{ $options{attributes} || [] } ];
+    $options{slot_hash} = { map { $_ => undef } @{ $options{slots} } }; # FIXME lazy_build
+
+    return \%options;
+}
+
+sub new {
+    my $class = shift;
+    my $options = $class->BUILDARGS(@_);
 
     # FIXME replace with a proper constructor
     my $instance = bless {
@@ -39,18 +46,18 @@ sub new {
         # which is *probably* a safe
         # assumption,.. but you can
         # never tell <:)
-        'meta'  => $options{metaclass}, # FIXME rename to associated metaclass with a compat alias?
-        'slots' => $options{slots},
-        'slot_hash' => { map { $_ => undef } @{ $options{slots} } }, # FIXME lazy_build
+        'associated_metaclass' => $options->{associated_metaclass},
+        'slots'     => $options->{slots},
+        'slot_hash' => $options->{slot_hash},
     } => $class;
 
     # FIXME weak_ref => 1,
-    weaken($instance->{'meta'});
+    weaken($instance->{'associated_metaclass'});
 
     return $instance;
 }
 
-sub associated_metaclass { (shift)->{'meta'} }
+sub associated_metaclass { (shift)->{'associated_metaclass'} }
 
 sub create_instance {
     my $self = shift;
@@ -215,15 +222,18 @@ F<examples/InsideOutClass.pod> for details).
 
 =over 4
 
-=item B<new ($meta, @attrs)>
+=item B<new %args>
 
 Creates a new instance meta-object and gathers all the slots from
 the list of C<@attrs> given.
 
+=item B<BUILDARGS>
+
+Processes arguments for compatibility.
+
 =item B<meta>
 
-This will return a B<Class::MOP::Class> instance which is related
-to this class.
+Returns the metaclass of L<Class::MOP::Instance>.
 
 =back
 

@@ -722,13 +722,35 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
 # these don't yet do much of anything, but are just
 # included for completeness
 
+#Class::MOP::Instance->meta->add_method('new' => sub {
+#    my $class   = shift;
+#    my $options = $class->BUILDARGS($class);
+#
+#    # return the new object
+#    my $self = $class->meta->new_object(%$options);
+#    
+#    # we don't want this creating
+#    # a cycle in the code, if not
+#    # needed
+#    Scalar::Util::weaken($self->{'associated_metaclass'});
+#
+#    $self->initialize_body;  
+#    
+#    $self;
+#});
+
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('meta')
+    Class::MOP::Attribute->new('associated_metaclass')
 );
 
 Class::MOP::Instance->meta->add_attribute(
     Class::MOP::Attribute->new('slots')
 );
+
+Class::MOP::Instance->meta->add_attribute(
+    Class::MOP::Attribute->new('slot_hash')
+);
+
 
 ## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
