@@ -205,13 +205,13 @@ is_deeply(
 # ... test our class creator 
 
 my $Bar = Class::MOP::Class->create(
-            'Bar' => (
-                superclasses => [ 'Foo' ],
-                methods => {
-                    foo => sub { 'Bar::foo' },
-                    bar => sub { 'Bar::bar' },                    
-                }
-            ));
+    name         => 'Bar',
+    superclasses => [ 'Foo' ],
+    methods      => {
+        foo => sub { 'Bar::foo' },
+        bar => sub { 'Bar::bar' },                    
+    }
+);
 isa_ok($Bar, 'Class::MOP::Class');
 
 ok($Bar->has_method('foo'), '... Bar->has_method(foo)');

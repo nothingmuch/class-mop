@@ -226,17 +226,15 @@ sub check_metaclass_compatability {
 # creating classes with MOP ...
 
 sub create {
-    my $class        = shift;
-    my $package_name = shift;
+    my ( $class, @args ) = @_;
+
+    unshift @args, 'name' if @args % 2 == 1;
+
+    my (%options) = @args;
+    my $package_name = $options{name};
 
     (defined $package_name && $package_name)
         || confess "You must pass a package name";
-
-    (scalar @_ % 2 == 0)
-        || confess "You much pass all parameters as name => value pairs " .
-                   "(I found an uneven number of params in \@_)";
-
-    my (%options) = @_;
     
     (ref $options{superclasses} eq 'ARRAY')
         || confess "You must pass an ARRAY ref of superclasses"
@@ -261,6 +259,7 @@ sub create {
 
     my $meta = $class->initialize($package_name);
 
+    # FIXME totally lame
     $meta->add_method('meta' => sub {
         $class->initialize(blessed($_[0]) || $_[0]);
     });
