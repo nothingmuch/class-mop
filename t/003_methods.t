@@ -3,11 +3,19 @@
 use strict;
 use warnings;
 
-use Test::More tests => 65;
+use Test::More;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
-use Sub::Name ();
+
+BEGIN {
+    if ( eval 'use Sub::Name ();' ) {
+        plan tests => 65;
+    }
+    else {
+        plan skip_all => 'These tests require Sub::Name';
+    }
+}
 
 BEGIN {
     use_ok('Class::MOP');   

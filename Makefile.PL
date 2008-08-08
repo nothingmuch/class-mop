@@ -22,21 +22,26 @@ unless ( defined $force_xs ) {
         or no_cc();
 }
 
+my %prereqs = (
+    'Scalar::Util'  => '1.18',
+    'Sub::Name'     => '0.02',
+    'Sub::Identify' => '0.03',
+    'MRO::Compat'   => '0.05',
+    'Carp'          => 0,
+);
+
+delete $prereqs{'Sub::Name'}
+    unless $has_compiler;
+
 write_makefile();
 
 sub write_makefile {
     my $ccflags = -d '.svn' || $ENV{MAINTAINER_MODE} ? '-Wall' : '';
 
     WriteMakefile(
-        VERSION_FROM => 'lib/Class/MOP.pm',
-        NAME         => 'Class::MOP',
-        PREREQ_PM    => {
-            'Scalar::Util'  => '1.18',
-            'Sub::Name'     => '0.02',
-            'Sub::Identify' => '0.03',
-            'MRO::Compat'   => '0.05',
-            'Carp'          => 0,
-        },
+        VERSION_FROM  => 'lib/Class/MOP.pm',
+        NAME          => 'Class::MOP',
+        PREREQ_PM     => \%prereqs,
         CONFIGURE     => \&init,
         CCFLAGS       => $ccflags,
         clean         => { FILES => 'test.c test.o' },

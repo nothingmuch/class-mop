@@ -3,11 +3,19 @@
 use strict;
 use warnings;
 
-use Test::More 'no_plan';
+use Test::More;
+
+BEGIN {
+    if ( eval 'use Sub::Name qw(subname);' ) {
+        plan tests => 5;
+    }
+    else {
+        plan skip_all => 'These tests require Sub::Name';
+    }
+}
 
 BEGIN { use_ok("Class::MOP") }
 
-use Sub::Name qw(subname);
 
 sub code_name_is ($$$;$) {
     my ( $code, $stash, $name, $desc ) = @_;
