@@ -12,8 +12,22 @@ our $AUTHORITY = 'cpan:STEVAN';
 use base 'Class::MOP::Object';
 
 sub new {
-    my ($class, $meta, @attrs) = @_;
-    my @slots = map { $_->slots } @attrs;
+    my ($class, @args) = @_;
+
+    if ( @args == 1 ) {
+        unshift @args, "metaclass";
+    } elsif ( @args >= 2 && blessed($args[0]) && $args[0]->isa("Class::MOP::Class") ) {
+        # compat mode
+        my ( $meta, @attrs ) = @args;
+        @args = ( metaclass => $meta, attributes => \@attrs );
+    }
+
+    my %options = @args;
+
+    # fixme lazy_build
+    $options{slots} ||= [ map { $_->slots } @{ $options{attributes} || [] } ];
+
+    # FIXME replace with a proper constructor
     my $instance = bless {
         # NOTE:
         # I am not sure that it makes
@@ -25,10 +39,11 @@ sub new {
         # which is *probably* a safe
         # assumption,.. but you can
         # never tell <:)
-        'meta'  => $meta,
-        'slots' => { map { $_ => undef } @slots },
+        'meta'  => $options{metaclass}, # FIXME rename to associated metaclass with a compat alias?
+        'slots' => { map { $_ => undef } @{ $options{slots} } },
     } => $class;
 
+    # FIXME weak_ref => 1,
     weaken($instance->{'meta'});
 
     return $instance;
