@@ -16,7 +16,7 @@ BEGIN {
 	my $trace = '';
 
 	my $method = Class::MOP::Method->wrap(
-	    sub { $trace .= 'primary' },
+	    body         => sub { $trace .= 'primary' },
 	    package_name => 'main',
 	    name         => '__ANON__',
 	);

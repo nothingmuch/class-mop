@@ -29,7 +29,12 @@ before spending too much time chasing this one down.
 # construction
 
 sub wrap {
-    my ( $class, $code, %params ) = @_;
+    my ( $class, @args ) = @_;
+
+    unshift @args, 'body' if @args % 2 == 1;
+
+    my %params = @args;
+    my $code = $params{body};
 
     ('CODE' eq ref($code))
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
