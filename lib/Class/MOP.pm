@@ -727,6 +727,10 @@ Class::MOP::Instance->meta->add_attribute(
 );
 
 Class::MOP::Instance->meta->add_attribute(
+    Class::MOP::Attribute->new('attributes')
+);
+
+Class::MOP::Instance->meta->add_attribute(
     Class::MOP::Attribute->new('slots')
 );
 

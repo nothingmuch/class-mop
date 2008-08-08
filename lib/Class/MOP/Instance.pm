@@ -47,8 +47,9 @@ sub new {
         # assumption,.. but you can
         # never tell <:)
         'associated_metaclass' => $options->{associated_metaclass},
-        'slots'     => $options->{slots},
-        'slot_hash' => $options->{slot_hash},
+        'attributes' => $options->{attributes},
+        'slots'      => $options->{slots},
+        'slot_hash'  => $options->{slot_hash},
     } => $class;
 
     # FIXME weak_ref => 1,
