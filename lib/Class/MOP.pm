@@ -722,23 +722,6 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
 # these don't yet do much of anything, but are just
 # included for completeness
 
-#Class::MOP::Instance->meta->add_method('new' => sub {
-#    my $class   = shift;
-#    my $options = $class->BUILDARGS($class);
-#
-#    # return the new object
-#    my $self = $class->meta->new_object(%$options);
-#    
-#    # we don't want this creating
-#    # a cycle in the code, if not
-#    # needed
-#    Scalar::Util::weaken($self->{'associated_metaclass'});
-#
-#    $self->initialize_body;  
-#    
-#    $self;
-#});
-
 Class::MOP::Instance->meta->add_attribute(
     Class::MOP::Attribute->new('associated_metaclass')
 );
@@ -751,6 +734,24 @@ Class::MOP::Instance->meta->add_attribute(
     Class::MOP::Attribute->new('slot_hash')
 );
 
+
+# we need the meta instance of the meta instance to be created now, in order
+# for the constructor to be able to use it
+Class::MOP::Instance->meta->get_meta_instance;
+
+Class::MOP::Instance->meta->add_method('new' => sub {
+    my $class   = shift;
+    my $options = $class->BUILDARGS(@_);
+
+    my $self = $class->meta->new_object(%$options);
+    
+    Scalar::Util::weaken($self->{'associated_metaclass'});
+
+    $self;
+});
+
+# pretend the add_method never happenned. it hasn't yet affected anything
+undef Class::MOP::Instance->meta->{_package_cache_flag};
 
 ## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
