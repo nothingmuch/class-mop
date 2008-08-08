@@ -509,9 +509,12 @@ Class::MOP::Attribute->meta->add_attribute(
 # so that it uses the attributes meta-objects
 # to construct itself.
 Class::MOP::Attribute->meta->add_method('new' => sub {
-    my $class   = shift;
-    my $name    = shift;
-    my %options = @_;
+    my ( $class, @args ) = @_;
+
+    unshift @args, "name" if @args % 2 == 1;
+    my %options = @args;
+
+    my $name = $options{name};
 
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
@@ -531,7 +534,7 @@ Class::MOP::Attribute->meta->add_method('new' => sub {
     }
 
     # return the new object
-    $class->meta->new_object(name => $name, %options);
+    $class->meta->new_object(%options);
 });
 
 Class::MOP::Attribute->meta->add_method('clone' => sub {

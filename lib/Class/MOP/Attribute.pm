@@ -24,9 +24,12 @@ use base 'Class::MOP::Object';
 # meta-objects.
 #     - Ain't meta-circularity grand? :)
 sub new {
-    my $class   = shift;
-    my $name    = shift;
-    my %options = @_;
+    my ( $class, @args ) = @_;
+
+    unshift @args, "name" if @args % 2 == 1;
+    my %options = @args;
+
+    my $name = $options{name};
 
     (defined $name && $name)
         || confess "You must provide a name for the attribute";
