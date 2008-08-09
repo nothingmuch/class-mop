@@ -47,20 +47,9 @@ BEGIN {
         # - SL
         no warnings 'prototype', 'redefine';
         
-        unless (IS_RUNNING_ON_5_10()) {
-            # get this from MRO::Compat ...
-            *check_package_cache_flag = \&MRO::Compat::__get_pkg_gen_pp;
-        }
-        else {
-            # NOTE:
-            # but if we are running 5.10 
-            # there is no need to use the 
-            # Pure Perl version since we 
-            # can use the built in mro 
-            # version instead.
-            # - SL
-            *check_package_cache_flag = \&mro::get_pkg_gen; 
-        }
+        # this is either part of core or set up appropriately by MRO::Compat
+        *check_package_cache_flag = \&mro::get_pkg_gen; 
+
         # our own version of Sub::Name
         *subname       = $_PP_subname;
         # and the Sub::Identify version of the get_code_info
