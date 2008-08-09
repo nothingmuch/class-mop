@@ -496,44 +496,49 @@ sub subclasses {
     my $self = shift;
 
     my $super_class = $self->name;
-    my @derived_classes;
-    
-    my $find_derived_classes;
-    $find_derived_classes = sub {
-        my ($outer_class) = @_;
 
-        my $symbol_table_hashref = do { no strict 'refs'; \%{"${outer_class}::"} };
+    if ( Class::MOP::HAVE_ISAREV() ) {
+        return @{ $super_class->mro::get_isarev() };
+    } else {
+        my @derived_classes;
 
-        SYMBOL:
-        for my $symbol ( keys %$symbol_table_hashref ) {
-            next SYMBOL if $symbol !~ /\A (\w+):: \z/x;
-            my $inner_class = $1;
+        my $find_derived_classes;
+        $find_derived_classes = sub {
+            my ($outer_class) = @_;
 
-            next SYMBOL if $inner_class eq 'SUPER';    # skip '*::SUPER'
+            my $symbol_table_hashref = do { no strict 'refs'; \%{"${outer_class}::"} };
 
-            my $class =
-              $outer_class
-              ? "${outer_class}::$inner_class"
-              : $inner_class;
+            SYMBOL:
+            for my $symbol ( keys %$symbol_table_hashref ) {
+                next SYMBOL if $symbol !~ /\A (\w+):: \z/x;
+                my $inner_class = $1;
 
-            if ( $class->isa($super_class) and $class ne $super_class ) {
-                push @derived_classes, $class;
+                next SYMBOL if $inner_class eq 'SUPER';    # skip '*::SUPER'
+
+                my $class =
+                $outer_class
+                ? "${outer_class}::$inner_class"
+                : $inner_class;
+
+                if ( $class->isa($super_class) and $class ne $super_class ) {
+                    push @derived_classes, $class;
+                }
+
+                next SYMBOL if $class eq 'main';           # skip 'main::*'
+
+                $find_derived_classes->($class);
             }
+        };
 
-            next SYMBOL if $class eq 'main';           # skip 'main::*'
+        my $root_class = q{};
+        $find_derived_classes->($root_class);
 
-            $find_derived_classes->($class);
-        }
-    };
+        undef $find_derived_classes;
 
-    my $root_class = q{};
-    $find_derived_classes->($root_class);
+        @derived_classes = sort { $a->isa($b) ? 1 : $b->isa($a) ? -1 : 0 } @derived_classes;
 
-    undef $find_derived_classes;
-
-    @derived_classes = sort { $a->isa($b) ? 1 : $b->isa($a) ? -1 : 0 } @derived_classes;
-
-    return @derived_classes;
+        return @derived_classes;
+    }
 }
 
 

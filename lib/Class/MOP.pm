@@ -24,6 +24,10 @@ BEGIN {
         ? sub () { 0 }
         : sub () { 1 };    
 
+    *HAVE_ISAREV = defined(&mro::get_isarev)
+        ? sub () { 1 }
+        : sub () { 1 };
+
     # NOTE:
     # we may not use this yet, but once 
     # the get_code_info XS gets merged 
@@ -971,6 +975,11 @@ See L<Class::MOP::Instance> for more details.
 We set this constant depending on what version perl we are on, this 
 allows us to take advantage of new 5.10 features and stay backwards 
 compat.
+
+=item I<HAVE_ISAREV>
+
+Whether or not C<mro> provides C<get_isarev>, a much faster way to get all the
+subclasses of a certain class.
 
 =back
 
