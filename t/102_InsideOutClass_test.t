@@ -40,6 +40,10 @@ BEGIN {
     }
     
     package Bar;
+    use metaclass (
+        'attribute_metaclass' => 'InsideOutClass::Attribute',
+        'instance_metaclass'  => 'InsideOutClass::Instance'
+    );
     
     use strict;
     use warnings;
@@ -66,6 +70,10 @@ BEGIN {
     ));     
     
     package Bar::Baz;
+    use metaclass (
+        'attribute_metaclass' => 'InsideOutClass::Attribute',
+        'instance_metaclass'  => 'InsideOutClass::Instance'
+    );
     
     use strict;
     use warnings;

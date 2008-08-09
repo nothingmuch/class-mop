@@ -383,20 +383,6 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $self = shift;
-    # NOTE:
-    # just about any fiddling with @ISA or 
-    # any fiddling with attributes will 
-    # also fiddle with the symbol table 
-    # and therefore invalidate the package 
-    # cache, in which case we should blow 
-    # away the meta-instance cache. Of course
-    # this will invalidate it more often then 
-    # is probably needed, but better safe 
-    # then sorry.
-    # - SL
-    $self->{'_meta_instance'} = undef
-        if defined $self->{'_package_cache_flag'} && 
-                   $self->{'_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name);
     $self->{'_meta_instance'} ||= $self->instance_metaclass->new(
         associated_metaclass => $self,
         attributes => [ $self->compute_all_applicable_attributes() ],
@@ -835,12 +821,32 @@ sub add_attribute {
     # name here so that we can properly detach
     # the old attr object, and remove any
     # accessors it would have generated
-    $self->remove_attribute($attribute->name)
-        if $self->has_attribute($attribute->name);
+    if ( $self->has_attribute($attribute->name) ) {
+        $self->remove_attribute($attribute->name);
+    } else {
+        $self->invalidate_meta_instances();
+    }
 
     # then onto installing the new accessors
-    $attribute->install_accessors();
     $self->get_attribute_map->{$attribute->name} = $attribute;
+
+    # invalidate package flag here
+    $attribute->install_accessors();
+
+    return $attribute;
+}
+
+sub invalidate_meta_instances {
+    my $self = shift;
+    
+    my @metas = ( $self, map { Class::MOP::Class->initialize($_) } $self->subclasses );
+
+    $_->invalidate_meta_instance() for @metas;
+}
+
+sub invalidate_meta_instance {
+    my $self = shift;
+    undef $self->{_meta_instance};
 }
 
 sub has_attribute {
@@ -868,6 +874,7 @@ sub remove_attribute {
     my $removed_attribute = $self->get_attribute_map->{$attribute_name};
     return unless defined $removed_attribute;
     delete $self->get_attribute_map->{$attribute_name};
+    $self->invalidate_meta_instances();
     $removed_attribute->remove_accessors();
     $removed_attribute->detach_from_class();
     return $removed_attribute;
@@ -1165,6 +1172,17 @@ but in some cases you might want to use it, so it is here.
 
 Clears the package cache flag to announce to the internals that we need 
 to rebuild the method map.
+
+=item B<invalidate_meta_instances>
+
+Clears the cached meta instance for this metaclass and all of its subclasses.
+
+Called by C<add_attribute> and C<remove_attribute> to recalculate the attribute
+slots.
+
+=item B<invalidate_meta_instance>
+
+Used by C<invalidate_meta_instances>.
 
 =back
 

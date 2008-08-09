@@ -39,6 +39,9 @@ BEGIN {
     }
 
     package Bar;
+    use metaclass (
+        'instance_metaclass'  => 'ArrayBasedStorage::Instance',
+    );
 
     use strict;
     use warnings;
@@ -51,6 +54,9 @@ BEGIN {
     ));
 
     package Baz;
+    use metaclass (
+        'instance_metaclass'  => 'ArrayBasedStorage::Instance',
+    );
 
     use strict;
     use warnings;
@@ -64,6 +70,9 @@ BEGIN {
     ));
 
     package Bar::Baz;
+    use metaclass (
+        'instance_metaclass'  => 'ArrayBasedStorage::Instance',
+    );
 
     use strict;
     use warnings;
