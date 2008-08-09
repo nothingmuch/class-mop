@@ -19,12 +19,18 @@ use base 'Class::MOP::Module';
 # Creation
 
 sub initialize {
-    my $class        = shift;
-    my $package_name = shift;
+    my ( $class, @args ) = @_;
+
+    unshift @args, 'package' if @args % 2 == 1;
+
+    my (%options) = @args;
+    my $package_name = $options{package};
+
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";
+
     return Class::MOP::get_metaclass_by_name($package_name)
-        || $class->construct_class_instance('package' => $package_name, @_);
+        || $class->construct_class_instance(%options);
 }
 
 sub reinitialize {
@@ -228,10 +234,10 @@ sub check_metaclass_compatability {
 sub create {
     my ( $class, @args ) = @_;
 
-    unshift @args, 'name' if @args % 2 == 1;
+    unshift @args, 'package' if @args % 2 == 1;
 
     my (%options) = @args;
-    my $package_name = $options{name};
+    my $package_name = $options{package};
 
     (defined $package_name && $package_name)
         || confess "You must pass a package name";
