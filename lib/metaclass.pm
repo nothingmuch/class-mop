@@ -13,20 +13,22 @@ our $AUTHORITY = 'cpan:STEVAN';
 use Class::MOP;
 
 sub import {
-    shift;
-    my $metaclass;
-    if (!defined($_[0]) || $_[0] =~ /^(attribute|method|instance)_metaclass/) {
-        $metaclass = 'Class::MOP::Class';
-    }
-    else {
-        $metaclass = shift;
-        #make sure the custom metaclass gets loaded
+    my ( $class, @args ) = @_;
+
+    unshift @args, "metaclass" if @args % 2 == 1;
+    my %options = @args;
+
+    my $metaclass = delete $options{metaclass};
+
+    unless ( defined $metaclass ) {
+        $metaclass = "Class::MOP::Class";
+    } else {
         Class::MOP::load_class($metaclass);
-        ($metaclass->isa('Class::MOP::Class'))
-            || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
     }
-    my %options = @_;
-    
+
+    ($metaclass->isa('Class::MOP::Class'))
+        || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
+
     # make sure the custom metaclasses get loaded
     foreach my $class (grep { 
                             /^(attribute|method|instance)_metaclass/ 
