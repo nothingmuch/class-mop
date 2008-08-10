@@ -47,9 +47,9 @@ sub new {
         # assumption,.. but you can
         # never tell <:)
         'associated_metaclass' => $options->{associated_metaclass},
-        'attributes' => $options->{attributes},
-        'slots'      => $options->{slots},
-        'slot_hash'  => $options->{slot_hash},
+        'attributes'           => $options->{attributes},
+        'slots'                => $options->{slots},
+        'slot_hash'            => $options->{slot_hash},
     } => $class;
 
     # FIXME weak_ref => 1,
@@ -58,7 +58,9 @@ sub new {
     return $instance;
 }
 
-sub associated_metaclass { (shift)->{'associated_metaclass'} }
+sub _class_name { $_[0]->{_class_name} ||= $_[0]->associated_metaclass->name }
+
+sub associated_metaclass { $_[0]{'associated_metaclass'} }
 
 sub create_instance {
     my $self = shift;
@@ -67,7 +69,7 @@ sub create_instance {
 
 sub bless_instance_structure {
     my ($self, $instance_structure) = @_;
-    bless $instance_structure, $self->associated_metaclass->name;
+    bless $instance_structure, $self->_class_name;
 }
 
 sub clone_instance {

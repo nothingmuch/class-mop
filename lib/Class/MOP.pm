@@ -699,19 +699,36 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
 # included for completeness
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('associated_metaclass')
+    Class::MOP::Attribute->new('associated_metaclass',
+        reader   => { associated_metaclass => \&Class::MOP::Instance::associated_metaclass },
+    ),
 );
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('attributes')
+    Class::MOP::Attribute->new('_class_name',
+        init_arg => undef,
+        reader   => { _class_name => \&Class::MOP::Instance::_class_name },
+        #lazy     => 1, # not yet supported by Class::MOP but out our version does it anyway
+        #default  => sub { $_[0]->associated_metaclass->name },
+    ),
 );
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('slots')
+    Class::MOP::Attribute->new('attributes',
+        reader   => { attributes => \&Class::MOP::Instance::attributes },
+    ),
 );
 
 Class::MOP::Instance->meta->add_attribute(
-    Class::MOP::Attribute->new('slot_hash')
+    Class::MOP::Attribute->new('slots',
+        reader   => { slots => \&Class::MOP::Instance::slots },
+    ),
+);
+
+Class::MOP::Instance->meta->add_attribute(
+    Class::MOP::Attribute->new('slot_hash',
+        reader   => { slot_hash => \&Class::MOP::Instance::slot_hash },
+    ),
 );
 
 
