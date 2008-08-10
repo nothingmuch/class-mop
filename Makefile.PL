@@ -28,9 +28,10 @@ my %prereqs = (
     'Sub::Identify' => '0.03',
     'MRO::Compat'   => '0.05',
     'Carp'          => 0,
+    'Devel::GlobalDestruction' => 0,
 );
 
-delete $prereqs{'Sub::Name'}
+delete @prereqs{qw(Sub::Name Devel::GlobalDestruction)}
     unless $has_compiler;
 
 write_makefile();
