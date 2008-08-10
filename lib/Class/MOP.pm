@@ -566,6 +566,7 @@ Class::MOP::Method->meta->add_attribute(
     ))
 );
 
+# FIMXE prime candidate for immutablization
 Class::MOP::Method->meta->add_method('wrap' => sub {
     my ( $class, @args ) = @_;
 
