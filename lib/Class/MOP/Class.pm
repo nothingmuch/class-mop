@@ -800,7 +800,7 @@ sub compute_all_applicable_methods {
     return map {
         {
             name  => $_->name,
-            class => $_->associated_metaclass->name,
+            class => $_->package_name,
             code  => $_, # sigh, overloading
         },
     } values %methods;
