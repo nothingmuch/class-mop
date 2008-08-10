@@ -545,6 +545,13 @@ Class::MOP::Method->meta->add_attribute(
 );
 
 Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('associated_metaclass' => (
+        init_arg => 'associated_metaclass',
+        reader   => { 'associated_metaclass' => \&Class::MOP::Method::associated_metaclass },
+    ))
+);
+
+Class::MOP::Method->meta->add_attribute(
     Class::MOP::Attribute->new('package_name' => (
         init_arg => 'package_name',
         reader   => { 'package_name' => \&Class::MOP::Method::package_name },

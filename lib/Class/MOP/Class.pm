@@ -360,8 +360,9 @@ sub get_method_map {
 
         $map->{$symbol} = $method_metaclass->wrap(
             $code,
-            package_name => $class_name,
-            name         => $symbol,
+            associated_metaclass => $self,
+            package_name         => $class_name,
+            name                 => $symbol,
         );
     }
 
@@ -635,6 +636,9 @@ sub add_method {
             )
         );
     }
+
+    $method->attach_to_class($self);
+
     $self->get_method_map->{$method_name} = $method;
     
     my $full_method_name = ($self->name . '::' . $method_name);    
@@ -763,6 +767,8 @@ sub remove_method {
     $self->remove_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }
     );
+
+    $removed_method->detach_from_class if $removed_method;
 
     $self->update_package_cache_flag; # still valid, since we just removed the method from the map
 

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'blessed';
+use Scalar::Util 'weaken';
 
 our $VERSION   = '0.65';
 our $AUTHORITY = 'cpan:STEVAN';
@@ -42,20 +42,34 @@ sub wrap {
     ($params{package_name} && $params{name})
         || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
 
-    bless {
-        'body'         => $code,
-        'package_name' => $params{package_name},
-        'name'         => $params{name},
-    } => blessed($class) || $class;
+    my $self = bless {
+        'body'                 => $code,
+        'associated_metaclass' => $params{associated_metaclass},
+        'package_name'         => $params{package_name},
+        'name'                 => $params{name},
+    } => ref($class) || $class;
+
+    weaken($self->{associated_metaclass}) if $self->{associated_metaclass};
+
+    return $self;
 }
 
 ## accessors
 
 sub body { (shift)->{'body'} }
 
-# TODO - add associated_class
+sub associated_metaclass { shift->{'associated_metaclass'} }
 
-# informational
+sub attach_to_class {
+    my ( $self, $class ) = @_;
+    $self->{associated_metaclass} = $class;
+    weaken($self->{associated_metaclass});
+}
+
+sub detach_from_class {
+    my $self = shift;
+    delete $self->{associated_metaclass};
+}
 
 sub package_name {
     my $self = shift;
@@ -138,6 +152,10 @@ This returns the actual CODE reference of the particular instance.
 
 This returns the name of the CODE reference.
 
+=item B<associated_metaclass>
+
+The metaclass of the method
+
 =item B<package_name>
 
 This returns the package name that the CODE reference is attached to.
@@ -145,6 +163,20 @@ This returns the package name that the CODE reference is attached to.
 =item B<fully_qualified_name>
 
 This returns the fully qualified name of the CODE reference.
+
+=back
+
+=head2 Metaclass
+
+=over 4
+
+=item B<attach_to_class>
+
+Sets the associated metaclass
+
+=item B<detach_from_class>
+
+Disassociates the method from the metaclass
 
 =back
 
