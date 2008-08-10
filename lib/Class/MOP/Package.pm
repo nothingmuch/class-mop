@@ -235,22 +235,35 @@ sub list_all_package_symbols {
 sub get_all_package_symbols {
     my ($self, $type_filter) = @_;
     my $namespace = $self->namespace;
-    return %{$namespace} unless defined $type_filter;
-    
-    # NOTE:
-    # or we can filter based on 
-    # type (SCALAR|ARRAY|HASH|CODE)
-    no strict 'refs';
-    return map { 
-        $_ => (ref($namespace->{$_}) eq 'SCALAR'
-                    ? ($type_filter eq 'CODE' ? \&{$self->name . '::' . $_} : undef)
-                    : *{$namespace->{$_}}{$type_filter})
-    } grep { 
-        (ref($namespace->{$_})
-            ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
-            : (ref(\$namespace->{$_}) eq 'GLOB'
-               && defined(*{$namespace->{$_}}{$type_filter})));
-    } keys %{$namespace};
+    return %$namespace unless defined $type_filter;
+
+    my @ret;
+
+    if ( $type_filter eq 'CODE' ) {
+        my $pkg = $self->name;
+        foreach my $key ( keys %$namespace ) {
+            my $value = $namespace->{$key};
+            if ( ref $value ) {
+                no strict 'refs';
+                push @ret, $key => \&{"${pkg}::$key"};
+            } elsif ( ref(\$value) eq 'GLOB' ) {
+                if ( my $ref = *{$value}{CODE} ) {
+                    push @ret, $key, $ref;
+                }
+            }
+        }
+    } else {
+        foreach my $key ( keys %$namespace ) {
+            my $value = $namespace->{$key};
+            if ( ref(\$value) eq 'GLOB' ) {
+                if ( my $ref = *{$value}{$type_filter} ) {
+                    push @ret, $key => $ref;
+                }
+            }
+        }
+    }
+
+    return @ret;
 }
 
 1;
