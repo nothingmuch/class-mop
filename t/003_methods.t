@@ -170,15 +170,9 @@ is_deeply(
     '... got the right method list for Foo');
 
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } $Foo->compute_all_applicable_methods() ],
+    [ sort { $a->name cmp $b->name } $Foo->get_all_methods() ],
     [
-        map {
-            {
-            name  => $_,
-            class => 'Foo',
-            code  => $Foo->get_method($_)
-            }
-        } qw(
+        map { $Foo->get_method($_) } qw(
             FOO_CONSTANT
             baaz            
             bang 
@@ -233,50 +227,20 @@ is_deeply(
     '... got the right method list for Bar');  
     
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } $Bar->compute_all_applicable_methods() ],
+    [ sort { $a->name cmp $b->name } $Bar->get_all_methods() ],
     [
-        {
-            name  => 'FOO_CONSTANT',
-            class => 'Foo',
-            code  => $Foo->get_method('FOO_CONSTANT')
-        },    
-        {
-            name  => 'baaz',
-            class => 'Foo',
-            code  => $Foo->get_method('baaz')
-        },
-        {
-            name  => 'bang',
-            class => 'Foo',
-            code  => $Foo->get_method('bang')
-        },
-        {
-            name  => 'bar',
-            class => 'Bar',
-            code  => $Bar->get_method('bar') 
-        },
-        (map {
-            {
-                name  => $_,
-                class => 'Foo',
-                code  => $Foo->get_method($_)
-            }
-        } qw(        
+        $Foo->get_method('FOO_CONSTANT'),
+        $Foo->get_method('baaz'),
+        $Foo->get_method('bang'),
+        $Bar->get_method('bar'),
+        (map { $Foo->get_method($_) } qw(        
             baz 
             blah 
             evaled_foo 
             floob 
         )),
-        {
-            name  => 'foo',
-            class => 'Bar',
-            code  => $Bar->get_method('foo')
-        },        
-        {
-            name  => 'meta',
-            class => 'Bar',
-            code  => $Bar->get_method('meta')
-        }        
+        $Bar->get_method('foo'),
+        $Bar->get_method('meta'),
     ],
     '... got the right list of applicable methods for Bar');
 

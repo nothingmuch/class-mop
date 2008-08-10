@@ -73,95 +73,44 @@ is(Class::MOP::Class->initialize('Foo::Bar::Baz')->find_next_method_by_name('BUI
    '... Foo::Bar::Baz->BUILD does have a next method');   
 
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo')->compute_all_applicable_methods() ],
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo')->get_all_methods() ],
     [
-        {
-            name  => 'BUILD',
-            class => 'Foo',
-            code  => Class::MOP::Class->initialize('Foo')->get_method('BUILD') 
-        },    
-        {
-            name  => 'foo',
-            class => 'Foo',
-            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
-        },             
+        Class::MOP::Class->initialize('Foo')->get_method('BUILD') ,
+        Class::MOP::Class->initialize('Foo')->get_method('foo'),
     ],
     '... got the right list of applicable methods for Foo');
     
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Bar')->compute_all_applicable_methods() ],
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Bar')->get_all_methods() ],
     [
-        {
-            name  => 'BUILD',
-            class => 'Bar',
-            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD') 
-        },    
-        {
-            name  => 'bar',
-            class => 'Bar',
-            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')
-        },
-        {
-            name  => 'foo',
-            class => 'Foo',
-            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
-        },       
+        Class::MOP::Class->initialize('Bar')->get_method('BUILD'),
+        Class::MOP::Class->initialize('Bar')->get_method('bar'),
+        Class::MOP::Class->initialize('Foo')->get_method('foo'),
     ],
     '... got the right list of applicable methods for Bar');
     
 
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Baz')->compute_all_applicable_methods() ],
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Baz')->get_all_methods() ],
     [   
-        {
-            name  => 'BUILD',
-            class => 'Bar',
-            code  => Class::MOP::Class->initialize('Bar')->get_method('BUILD') 
-        },    
-        {
-            name  => 'bar',
-            class => 'Bar',
-            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')   
-        },
-        {
-            name  => 'baz',
-            class => 'Baz',
-            code  => Class::MOP::Class->initialize('Baz')->get_method('baz')  
-        },        
-        {
-            name  => 'foo',
-            class => 'Baz',
-            code  => Class::MOP::Class->initialize('Baz')->get_method('foo') 
-        },       
+        Class::MOP::Class->initialize('Bar')->get_method('BUILD'),
+        Class::MOP::Class->initialize('Bar')->get_method('bar'),
+        Class::MOP::Class->initialize('Baz')->get_method('baz'),
+        Class::MOP::Class->initialize('Baz')->get_method('foo'),
     ],
     '... got the right list of applicable methods for Baz');
 
 is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar')->compute_all_applicable_methods() ],
+    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar')->get_all_methods() ],
     [
-        {
-            name  => 'BUILD',
-            class => 'Foo::Bar',
-            code  => Class::MOP::Class->initialize('Foo::Bar')->get_method('BUILD')  
-        },    
-        {
-            name  => 'bar',
-            class => 'Bar',
-            code  => Class::MOP::Class->initialize('Bar')->get_method('bar')   
-        },
-        {
-            name  => 'foo',
-            class => 'Foo',
-            code  => Class::MOP::Class->initialize('Foo')->get_method('foo') 
-        },       
-        {
-            name  => 'foobar',
-            class => 'Foo::Bar',
-            code  => Class::MOP::Class->initialize('Foo::Bar')->get_method('foobar')   
-        },        
+        Class::MOP::Class->initialize('Foo::Bar')->get_method('BUILD'),
+        Class::MOP::Class->initialize('Bar')->get_method('bar'),
+        Class::MOP::Class->initialize('Foo')->get_method('foo'),
+        Class::MOP::Class->initialize('Foo::Bar')->get_method('foobar'),
     ],
     '... got the right list of applicable methods for Foo::Bar');
 
+# test compute_all_applicable_methods once for compat
 is_deeply(
     [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar::Baz')->compute_all_applicable_methods() ],
     [

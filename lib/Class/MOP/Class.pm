@@ -793,17 +793,21 @@ sub find_method_by_name {
     return;
 }
 
-sub compute_all_applicable_methods {
+sub get_all_methods {
     my $self = shift;
     my %methods = map { %{ $self->initialize($_)->get_method_map } } reverse $self->linearized_isa;
-    # return values %methods # TODO make some new API that does this
+    return values %methods;
+}
+
+# compatibility
+sub compute_all_applicable_methods {
     return map {
         {
             name  => $_->name,
             class => $_->package_name,
             code  => $_, # sigh, overloading
         },
-    } values %methods;
+    } shift->get_all_methods(@_);
 }
 
 sub find_all_methods_by_name {
@@ -972,6 +976,10 @@ sub remove_attribute {
 sub get_attribute_list {
     my $self = shift;
     keys %{$self->get_attribute_map};
+}
+
+sub get_all_attributes {
+    shift->compute_all_applicable_attributes(@_);
 }
 
 sub compute_all_applicable_attributes {
@@ -1507,13 +1515,20 @@ methods. It does B<not> provide a list of all applicable methods,
 including any inherited ones. If you want a list of all applicable
 methods, use the C<compute_all_applicable_methods> method.
 
+=item B<get_all_methods>
+
+This will traverse the inheritance heirachy and return a list of all
+the applicable L<Class::MOP::Method> objects for this class.
+
 =item B<compute_all_applicable_methods>
 
-This will return a list of all the methods names this class will
-respond to, taking into account inheritance. The list will be a list of
-HASH references, each one containing the following information; method
-name, the name of the class in which the method lives and a CODE
-reference for the actual method.
+Deprecated.
+
+This method returns a list of hashes describing the all the methods of the
+class.
+
+Use L<get_all_methods>, which is easier/better/faster. This method predates
+L<Class::MOP::Method>.
 
 =item B<find_all_methods_by_name ($method_name)>
 
@@ -1708,11 +1723,12 @@ use the C<compute_all_applicable_attributes> method.
 
 =item B<compute_all_applicable_attributes>
 
+=item B<get_all_attributes>
+
 This will traverse the inheritance heirachy and return a list of all
-the applicable attributes for this class. It does not construct a
-HASH reference like C<compute_all_applicable_methods> because all
-that same information is discoverable through the attribute
-meta-object itself.
+the applicable L<Class::MOP::Attribute> objects for this class.
+
+C<get_all_attributes> is an alias for consistency with C<get_all_methods>.
 
 =item B<find_attribute_by_name ($attr_name)>
 
