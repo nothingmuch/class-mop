@@ -64,9 +64,10 @@ sub associated_metaclass { $_[0]{'associated_metaclass'} }
 
 sub create_instance {
     my $self = shift;
-    $self->bless_instance_structure({});
+    bless {}, $self->_class_name;
 }
 
+# for compatibility
 sub bless_instance_structure {
     my ($self, $instance_structure) = @_;
     bless $instance_structure, $self->_class_name;
@@ -74,7 +75,7 @@ sub bless_instance_structure {
 
 sub clone_instance {
     my ($self, $instance) = @_;
-    $self->bless_instance_structure({ %$instance });
+    bless { %$instance }, $self->_class_name;
 }
 
 # operations on meta instance
@@ -250,16 +251,19 @@ Returns the metaclass of L<Class::MOP::Instance>.
 
 =item B<create_instance>
 
-This creates the appropriate structure needed for the instance and
-then calls C<bless_instance_structure> to bless it into the class.
+This creates the appropriate structure needed for the instance and blesses it.
 
 =item B<bless_instance_structure ($instance_structure)>
 
 This does just exactly what it says it does.
 
+This method has been deprecated but remains for compatibility reasons. None of
+the subclasses of L<Class::MOP::Instance> ever bothered to actually make use of
+it, so it was deemed unnecessary fluff.
+
 =item B<clone_instance ($instance_structure)>
 
-This too does just exactly what it says it does.
+Creates a shallow clone of $instance_structure.
 
 =back
 
