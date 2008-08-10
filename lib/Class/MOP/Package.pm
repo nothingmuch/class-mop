@@ -243,11 +243,11 @@ sub get_all_package_symbols {
 
     # for some reason this nasty impl is orders of magnitude aster than a clean version
     if ( $type_filter eq 'CODE' ) {
-        my $pkg = $self->name;
+        my $pkg;
         no strict 'refs';
         return map {
             (ref($namespace->{$_})
-                 ? ( $_ => \&{"${pkg}::$_"} )
+                 ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
                  : ( *{$namespace->{$_}}{CODE}
                     ? ( $_ => *{$namespace->{$_}}{$type_filter} )
                     : ()))
