@@ -795,21 +795,15 @@ sub find_method_by_name {
 
 sub compute_all_applicable_methods {
     my $self = shift;
-    my (@methods, %seen_method);
-    foreach my $class ($self->linearized_isa) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        foreach my $method_name ($meta->get_method_list()) {
-            next if exists $seen_method{$method_name};
-            $seen_method{$method_name}++;
-            push @methods => {
-                name  => $method_name,
-                class => $class,
-                code  => $meta->get_method($method_name)
-            };
-        }
-    }
-    return @methods;
+    my %methods = map { %{ $self->initialize($_)->get_method_map } } reverse $self->linearized_isa;
+    # return values %methods # TODO make some new API that does this
+    return map {
+        {
+            name  => $_->name,
+            class => $_->associated_metaclass->name,
+            code  => $_, # sigh, overloading
+        },
+    } values %methods;
 }
 
 sub find_all_methods_by_name {
