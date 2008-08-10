@@ -224,12 +224,16 @@ sub list_all_package_symbols {
     # NOTE:
     # or we can filter based on 
     # type (SCALAR|ARRAY|HASH|CODE)
-    return grep { 
+    if ( $type_filter eq 'CODE' ) {
+        return grep { 
         (ref($namespace->{$_})
-            ? (ref($namespace->{$_}) eq 'SCALAR' && $type_filter eq 'CODE')
-            : (ref(\$namespace->{$_}) eq 'GLOB'
-               && defined(*{$namespace->{$_}}{$type_filter})));
-    } keys %{$namespace};
+                ? (ref($namespace->{$_}) eq 'SCALAR')
+                : (ref(\$namespace->{$_}) eq 'GLOB'
+                   && defined(*{$namespace->{$_}}{CODE})));
+        } keys %{$namespace};
+    } else {
+        return grep { *{$namespace->{$_}}{$type_filter} } keys %{$namespace};
+    }
 }
 
 sub get_all_package_symbols {
@@ -237,33 +241,24 @@ sub get_all_package_symbols {
     my $namespace = $self->namespace;
     return %$namespace unless defined $type_filter;
 
-    my @ret;
-
+    # for some reason this nasty impl is orders of magnitude aster than a clean version
     if ( $type_filter eq 'CODE' ) {
         my $pkg = $self->name;
-        foreach my $key ( keys %$namespace ) {
-            my $value = $namespace->{$key};
-            if ( ref $value ) {
-                no strict 'refs';
-                push @ret, $key => \&{"${pkg}::$key"};
-            } elsif ( ref(\$value) eq 'GLOB' ) {
-                if ( my $ref = *{$value}{CODE} ) {
-                    push @ret, $key, $ref;
-                }
-            }
-        }
+        no strict 'refs';
+        return map {
+            (ref($namespace->{$_})
+                 ? ( $_ => \&{"${pkg}::$_"} )
+                 : ( *{$namespace->{$_}}{CODE}
+                    ? ( $_ => *{$namespace->{$_}}{$type_filter} )
+                    : ()))
+        } keys %$namespace;
     } else {
-        foreach my $key ( keys %$namespace ) {
-            my $value = $namespace->{$key};
-            if ( ref(\$value) eq 'GLOB' ) {
-                if ( my $ref = *{$value}{$type_filter} ) {
-                    push @ret, $key => $ref;
-                }
-            }
-        }
+        return map {
+            $_ => *{$namespace->{$_}}{$type_filter}
+        } grep {
+            !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
+        } keys %$namespace;
     }
-
-    return @ret;
 }
 
 1;

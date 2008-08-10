@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 92;
+use Test::More tests => 97;
 use Test::Exception;
 
 BEGIN {
@@ -13,6 +13,8 @@ BEGIN {
 
 {
     package Foo;
+
+    use constant SOME_CONSTANT => 1;
     
     sub meta { Class::MOP::Package->initialize('Foo') }
 }
@@ -22,6 +24,7 @@ BEGIN {
 
 ok(!defined($Foo::{foo}), '... the %foo slot has not been created yet');
 ok(!Foo->meta->has_package_symbol('%foo'), '... the meta agrees');
+ok(!defined($Foo::{foo}), '... checking doesn\' vivify');
 
 lives_ok {
     Foo->meta->add_package_symbol('%foo' => { one => 1 });
@@ -252,6 +255,28 @@ is(Foo->meta->get_package_symbol('@foo'), $ARRAY, '... got the right values for 
     } 
 }
 
+{
+    Foo->meta->add_package_symbol('%zork');
+
+    my %syms = Foo->meta->get_all_package_symbols('HASH');
+
+    is_deeply(
+        [ sort keys %syms ],
+        [ sort Foo->meta->list_all_package_symbols('HASH') ],
+        '... the fetched symbols are the same as the listed ones'
+    );
+
+    foreach my $symbol (keys %syms) {
+        is($syms{$symbol}, Foo->meta->get_package_symbol('%' . $symbol), '... got the right symbol');
+    }
+
+    no warnings 'once';
+    is_deeply(
+        \%syms,
+        { zork => \%Foo::zork },
+        "got the right ones",
+    );
+}
 # check some errors
 
 dies_ok {
