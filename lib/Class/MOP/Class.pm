@@ -976,17 +976,8 @@ sub get_attribute_list {
 
 sub compute_all_applicable_attributes {
     my $self = shift;
-    my (@attrs, %seen_attr);
-    foreach my $class ($self->linearized_isa) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        foreach my $attr_name ($meta->get_attribute_list()) {
-            next if exists $seen_attr{$attr_name};
-            $seen_attr{$attr_name}++;
-            push @attrs => $meta->get_attribute($attr_name);
-        }
-    }
-    return @attrs;
+    my %attrs = map { %{ $self->initialize($_)->get_attribute_map } } reverse $self->linearized_isa;
+    return values %attrs;
 }
 
 sub find_attribute_by_name {
