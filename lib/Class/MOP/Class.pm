@@ -401,10 +401,21 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $self = shift;
-    $self->{'_meta_instance'} ||= $self->instance_metaclass->new(
+    $self->{'_meta_instance'} ||= $self->create_meta_instance();
+}
+
+sub create_meta_instance {
+    my $self = shift;
+    
+    my $instance = $self->instance_metaclass->new(
         associated_metaclass => $self,
         attributes => [ $self->compute_all_applicable_attributes() ],
     );
+
+    $self->add_meta_instance_dependencies()
+        if $instance->is_dependent_on_superclasses();
+
+    return $instance;
 }
 
 sub clone_object {
@@ -492,6 +503,7 @@ sub superclasses {
         # not potentially creating an issues
         # we don't know about
         $self->check_metaclass_compatability();
+        $self->update_meta_instance_dependencies();
     }
     @{$self->get_package_symbol($var_spec)};
 }
@@ -858,12 +870,60 @@ sub add_attribute {
     return $attribute;
 }
 
+sub update_meta_instance_dependencies {
+    my $self = shift;
+
+    if ( $self->{meta_instance_dependencies} ) {
+        return $self->add_meta_instance_dependencies;
+    }
+}
+
+sub add_meta_instance_dependencies {
+    my $self = shift;
+
+    $self->remove_meta_instance_depdendencies;
+
+    my @attrs = $self->compute_all_applicable_attributes();
+
+    my %seen;
+    my @classes = grep { not $seen{$_->name}++ } map { $_->associated_class } @attrs;
+
+    foreach my $class ( @classes ) { 
+        $class->add_dependent_meta_instance($self);
+    }
+
+    $self->{meta_instance_dependencies} = \@classes;
+}
+
+sub remove_meta_instance_depdendencies {
+    my $self = shift;
+
+    if ( my $classes = delete $self->{meta_instance_dependencies} ) {
+        foreach my $class ( @$classes ) {
+            $class->remove_dependent_meta_instance($self);
+        }
+
+        return $classes;
+    }
+
+    return;
+
+}
+
+sub add_dependent_meta_instance {
+    my ( $self, $metaclass ) = @_;
+    push @{ $self->{dependent_meta_instances} }, $metaclass;
+}
+
+sub remove_dependent_meta_instance {
+    my ( $self, $metaclass ) = @_;
+    my $name = $metaclass->name;
+    @$_ = grep { $_->name ne $name } @$_ for $self->{dependent_meta_instances};
+}
+
 sub invalidate_meta_instances {
     my $self = shift;
-    
-    my @metas = ( $self, map { Class::MOP::Class->initialize($_) } $self->subclasses );
-
-    $_->invalidate_meta_instance() for @metas;
+    $_->invalidate_meta_instance() for $self, @{ $self->{dependent_meta_instances} };
 }
 
 sub invalidate_meta_instance {
@@ -1195,9 +1255,32 @@ but in some cases you might want to use it, so it is here.
 Clears the package cache flag to announce to the internals that we need 
 to rebuild the method map.
 
+=item B<add_meta_instance_dependencies>
+
+Registers this class as dependent on its superclasses.
+
+Only superclasses from which this class inherits attributes will be added.
+
+=item B<remove_meta_instance_depdendencies>
+
+Unregisters this class from its superclasses.
+
+=item B<update_meta_instance_dependencies>
+
+Reregisters if necessary.
+
+=item B<add_dependent_meta_instance> $metaclass
+
+Registers the class as having a meta instance dependent on this class.
+
+=item B<remove_dependent_meta_instance> $metaclass
+
+Remove the class from the list of dependent classes.
+
 =item B<invalidate_meta_instances>
 
-Clears the cached meta instance for this metaclass and all of its subclasses.
+Clears the cached meta instance for this metaclass and all of the registered
+classes with dependent meta instances.
 
 Called by C<add_attribute> and C<remove_attribute> to recalculate the attribute
 slots.
@@ -1224,6 +1307,10 @@ for more information on the instance metaclasses.
 
 Returns an instance of L<Class::MOP::Instance> to be used in the construction 
 of a new instance of the class. 
+
+=item B<create_meta_instance>
+
+Called by C<get_meta_instance> if necessary.
 
 =item B<new_object (%params)>
 

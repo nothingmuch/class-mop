@@ -143,6 +143,10 @@ sub rebless_instance_structure {
     bless $instance, $metaclass->name;
 }
 
+sub is_dependent_on_superclasses {
+    return; # for meta instances that require updates on inherited slot changes
+}
+
 # inlinable operation snippets
 
 sub is_inlinable { 1 }
@@ -276,6 +280,13 @@ given to this object in C<new>.
 =item B<is_valid_slot ($slot_name)>
 
 This will return true if C<$slot_name> is a valid slot name.
+
+=item B<is_dependent_on_superclasses>
+
+This method returns true when the meta instance must be recreated on any
+superclass changes.
+
+Defaults to false.
 
 =back
 

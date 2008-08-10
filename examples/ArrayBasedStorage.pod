@@ -72,6 +72,8 @@ sub is_slot_initialized {
     refaddr $value eq refaddr $unbound ? 0 : 1;
 }
 
+sub is_dependent_on_superclasses { 1 }
+
 1;
 
 __END__

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 208;
+use Test::More tests => 220;
 use Test::Exception;
 
 BEGIN {
@@ -54,12 +54,14 @@ my @class_mop_class_methods = qw(
 
     create_anon_class is_anon_class
 
-    instance_metaclass get_meta_instance
+    instance_metaclass get_meta_instance create_meta_instance
     new_object clone_object
     construct_instance construct_class_instance clone_instance
     rebless_instance
     check_metaclass_compatability
 
+    add_meta_instance_dependencies remove_meta_instance_depdendencies update_meta_instance_dependencies
+    add_dependent_meta_instance remove_dependent_meta_instance
     invalidate_meta_instances invalidate_meta_instance
 
     attribute_metaclass method_metaclass
