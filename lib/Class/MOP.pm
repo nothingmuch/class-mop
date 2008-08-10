@@ -82,6 +82,7 @@ BEGIN {
         # module and use that as a means
         # for naming our CVs, if not, we 
         # use the workaround instead.
+        local $@;
         if ( eval { require Sub::Name } ) {
             *subname = \&Sub::Name::subname;
         } 
@@ -129,17 +130,17 @@ sub load_class {
         # require it
         my $file = $class . '.pm';
         $file =~ s{::}{/}g;
-        eval { CORE::require($file) };
-        confess "Could not load class ($class) because : $@" if $@;
+        my $e = do { local $@; eval { require($file) }; $@ };
+        confess "Could not load class ($class) because : $e" if $e;
     }
 
     # initialize a metaclass if necessary
     unless (does_metaclass_exist($class)) {
-        eval { Class::MOP::Class->initialize($class) };
-        confess "Could not initialize class ($class) because : $@" if $@;
+        my $e = do { local $@; eval { Class::MOP::Class->initialize($class) }; $@ };
+        confess "Could not initialize class ($class) because : $e" if $e;
     }
 
-    return get_metaclass_by_name($class);
+    return get_metaclass_by_name($class) if defined wantarray;
 }
 
 sub is_class_loaded {
