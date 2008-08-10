@@ -318,11 +318,14 @@ sub instance_metaclass  { $_[0]->{'instance_metaclass'}  }
 sub get_method_map {
     my $self = shift;
     
-    if (defined $self->{'_package_cache_flag'} && 
-                $self->{'_package_cache_flag'} == Class::MOP::check_package_cache_flag($self->name)) {
+    my $current = Class::MOP::check_package_cache_flag($self->name);
+
+    if (defined $self->{'_package_cache_flag'} && $self->{'_package_cache_flag'} == $current) {
         return $self->{'methods'};
     }
-    
+
+    $self->{_package_cache_flag} = $current;
+
     my $map  = $self->{'methods'};
 
     my $class_name       = $self->name;
@@ -635,7 +638,8 @@ sub add_method {
         { sigil => '&', type => 'CODE', name => $method_name }, 
         Class::MOP::subname($full_method_name => $body)
     );
-    $self->update_package_cache_flag;    
+
+    $self->update_package_cache_flag; # still valid, since we just added the method to the map, and if it was invalid before that then get_method_map updated it
 }
 
 {
@@ -720,7 +724,6 @@ sub alias_method {
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name } => $body
     );
-    $self->update_package_cache_flag;     
 }
 
 sub has_method {
@@ -756,8 +759,8 @@ sub remove_method {
     $self->remove_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }
     );
-    
-    $self->update_package_cache_flag;        
+
+    $self->update_package_cache_flag; # still valid, since we just removed the method from the map
 
     return $removed_method;
 }
