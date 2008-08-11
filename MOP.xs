@@ -136,14 +136,10 @@ get_all_package_symbols(package, ...)
                 EXTEND(SP, HvKEYS(stash) * 2);
 
                 while ((entry = hv_iternext(stash))) {
-                    SV *sv;
+                    SV *key = hv_iterkeysv(entry);
+                    SV *sv = hv_iterval(stash, entry);
                     SPAGAIN;
-                    sv = hv_iterkeysv(entry);
-                    SPAGAIN;
-                    PUSHs(sv);
-                    PUTBACK;
-                    sv = hv_iterval(stash, entry);
-                    SPAGAIN;
+                    PUSHs(key);
                     PUSHs(sv);
                     PUTBACK;
                 }
