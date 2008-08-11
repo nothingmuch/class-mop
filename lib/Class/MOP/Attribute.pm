@@ -81,7 +81,7 @@ sub clone {
     my %options = @_;
     (blessed($self))
         || confess "Can only clone an instance";
-    return bless { %{$self}, %options } => blessed($self);
+    return bless { %{$self}, %options } => ref($self);
 }
 
 sub initialize_instance_slot {
@@ -115,7 +115,7 @@ sub initialize_instance_slot {
             );
         } 
         else {
-            confess(blessed($instance)." does not support builder method '". $self->{'builder'} ."' for attribute '" . $self->name . "'");
+            confess(ref($instance)." does not support builder method '". $self->{'builder'} ."' for attribute '" . $self->name . "'");
         }
     }
 }
@@ -147,15 +147,15 @@ sub name { $_[0]->{'name'} }
 sub associated_class   { $_[0]->{'associated_class'}   }
 sub associated_methods { $_[0]->{'associated_methods'} }
 
-sub has_accessor    { defined($_[0]->{'accessor'})     ? 1 : 0 }
-sub has_reader      { defined($_[0]->{'reader'})       ? 1 : 0 }
-sub has_writer      { defined($_[0]->{'writer'})       ? 1 : 0 }
-sub has_predicate   { defined($_[0]->{'predicate'})    ? 1 : 0 }
-sub has_clearer     { defined($_[0]->{'clearer'})      ? 1 : 0 }
-sub has_builder     { defined($_[0]->{'builder'})      ? 1 : 0 }
-sub has_init_arg    { defined($_[0]->{'init_arg'})     ? 1 : 0 }
-sub has_default     { defined($_[0]->{'default'})      ? 1 : 0 }
-sub has_initializer { defined($_[0]->{'initializer'})  ? 1 : 0 }
+sub has_accessor    { defined($_[0]->{'accessor'}) }
+sub has_reader      { defined($_[0]->{'reader'}) }
+sub has_writer      { defined($_[0]->{'writer'}) }
+sub has_predicate   { defined($_[0]->{'predicate'}) }
+sub has_clearer     { defined($_[0]->{'clearer'}) }
+sub has_builder     { defined($_[0]->{'builder'}) }
+sub has_init_arg    { defined($_[0]->{'init_arg'}) }
+sub has_default     { defined($_[0]->{'default'}) }
+sub has_initializer { defined($_[0]->{'initializer'}) }
 
 sub accessor    { $_[0]->{'accessor'}    }
 sub reader      { $_[0]->{'reader'}      }
@@ -278,7 +278,7 @@ sub associate_method {
 sub set_initial_value {
     my ($self, $instance, $value) = @_;
     $self->_set_initial_slot_value(
-        Class::MOP::Class->initialize(blessed($instance))->get_meta_instance,
+        Class::MOP::Class->initialize(ref($instance))->get_meta_instance,
         $instance,
         $value
     );
@@ -287,7 +287,7 @@ sub set_initial_value {
 sub set_value {
     my ($self, $instance, $value) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
+    Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->set_slot_value($instance, $self->name, $value);
 }
@@ -295,7 +295,7 @@ sub set_value {
 sub get_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
+    Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->get_slot_value($instance, $self->name);
 }
@@ -303,7 +303,7 @@ sub get_value {
 sub has_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
+    Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->is_slot_initialized($instance, $self->name);
 }
@@ -311,7 +311,7 @@ sub has_value {
 sub clear_value {
     my ($self, $instance) = @_;
 
-    Class::MOP::Class->initialize(blessed($instance))
+    Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->deinitialize_slot($instance, $self->name);
 }
@@ -388,7 +388,7 @@ sub install_accessors {
         }
         my $method = $class->get_method($accessor);
         $class->remove_method($accessor)
-            if (blessed($method) && $method->isa('Class::MOP::Method::Accessor'));
+            if (ref($method) && $method->isa('Class::MOP::Method::Accessor'));
     };
 
     sub remove_accessors {

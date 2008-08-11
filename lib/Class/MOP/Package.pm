@@ -127,14 +127,14 @@ sub has_package_symbol {
     # then this is broken.
 
     if (ref($namespace->{$name}) eq 'SCALAR') {
-        return ($type eq 'CODE' ? 1 : 0);
+        return ($type eq 'CODE');
     }
     elsif ($type eq 'SCALAR') {    
         my $val = *{$namespace->{$name}}{$type};
-        return defined(${$val}) ? 1 : 0;        
+        return defined(${$val});
     }
     else {
-        defined(*{$namespace->{$name}}{$type}) ? 1 : 0;
+        defined(*{$namespace->{$name}}{$type});
     }
 }
 

@@ -72,10 +72,10 @@ sub construct_class_instance {
     # we need to deal with the possibility
     # of class immutability here, and then
     # get the name of the class appropriately
-    $class = (blessed($class)
+    $class = (ref($class)
                     ? ($class->is_immutable
                         ? $class->get_mutable_metaclass_name()
-                        : blessed($class))
+                        : ref($class))
                     : $class);
 
     # now create the metaclass
@@ -154,7 +154,7 @@ sub check_metaclass_compatability {
     my $self = shift;
 
     # this is always okay ...
-    return if blessed($self)            eq 'Class::MOP::Class'   &&
+    return if ref($self)                eq 'Class::MOP::Class'   &&
               $self->instance_metaclass eq 'Class::MOP::Instance';
 
     my @class_list = $self->linearized_isa;
@@ -169,10 +169,10 @@ sub check_metaclass_compatability {
         # get the name of the class appropriately
         my $meta_type = ($meta->is_immutable
                             ? $meta->get_mutable_metaclass_name()
-                            : blessed($meta));
+                            : ref($meta));
 
         ($self->isa($meta_type))
-            || confess $self->name . "->meta => (" . (blessed($self)) . ")" .
+            || confess $self->name . "->meta => (" . (ref($self)) . ")" .
                        " is not compatible with the " .
                        $class_name . "->meta => (" . ($meta_type)     . ")";
         # NOTE:
@@ -204,7 +204,7 @@ sub check_metaclass_compatability {
     sub is_anon_class {
         my $self = shift;
         no warnings 'uninitialized';
-        $self->name =~ /^$ANON_CLASS_PREFIX/ ? 1 : 0;
+        $self->name =~ /^$ANON_CLASS_PREFIX/;
     }
 
     sub create_anon_class {
@@ -283,7 +283,7 @@ sub create {
 
     # FIXME totally lame
     $meta->add_method('meta' => sub {
-        $class->initialize(blessed($_[0]) || $_[0]);
+        $class->initialize(ref($_[0]) || $_[0]);
     });
 
     $meta->superclasses(@{$options{superclasses}})
@@ -430,7 +430,7 @@ sub clone_object {
     my $class    = shift;
     my $instance = shift;
     (blessed($instance) && $instance->isa($class->name))
-        || confess "You must pass an instance of the metaclass (" . $class->name . "), not ($instance)";
+        || confess "You must pass an instance of the metaclass (" . (ref $class ? $class->name : $class) . "), not ($instance)";
 
     # NOTE:
     # we need to protect the integrity of the
@@ -466,7 +466,7 @@ sub rebless_instance {
         $old_metaclass = $instance->meta;
     }
     else {
-        $old_metaclass = $self->initialize(blessed($instance));
+        $old_metaclass = $self->initialize(ref($instance));
     }
 
     my $meta_instance = $self->get_meta_instance();
@@ -946,7 +946,7 @@ sub has_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name && $attribute_name)
         || confess "You must define an attribute name";
-    exists $self->get_attribute_map->{$attribute_name} ? 1 : 0;
+    exists $self->get_attribute_map->{$attribute_name};
 }
 
 sub get_attribute {
@@ -1040,7 +1040,7 @@ sub is_immutable { 0 }
     sub get_immutable_transformer {
         my $self = shift;
         if( $self->is_mutable ){
-            my $class = blessed $self || $self;
+            my $class = ref $self || $self;
             return $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
         }
         confess "unable to find transformer for immutable class"
