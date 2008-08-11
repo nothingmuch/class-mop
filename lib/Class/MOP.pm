@@ -11,6 +11,19 @@ use Scalar::Util  'weaken';
 
 use Sub::Identify 'get_code_info';
 
+BEGIN {
+    local $@;
+    eval {
+        require Sub::Name;
+        Sub::Name->import(qw(subname));
+        1
+    } or eval 'sub subname { $_[1] }';
+
+    # this is either part of core or set up appropriately by MRO::Compat
+    *check_package_cache_flag = \&mro::get_pkg_gen;
+}
+
+
 use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
@@ -18,10 +31,6 @@ use Class::MOP::Method;
 use Class::MOP::Immutable;
 
 BEGIN {
-    
-    our $VERSION   = '0.65';
-    our $AUTHORITY = 'cpan:STEVAN';    
-    
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005) 
         ? sub () { 0 }
         : sub () { 1 };    
@@ -29,16 +38,11 @@ BEGIN {
     *HAVE_ISAREV = defined(&mro::get_isarev)
         ? sub () { 1 }
         : sub () { 1 };
-
-    {
-        local $@;
-        eval 'use Sub::Name qw(subname); 1' || eval 'sub subname { $_[1] }';
-    }
-
-    # this is either part of core or set up appropriately by MRO::Compat
-    *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
+our $VERSION   = '0.65';
+our $AUTHORITY = 'cpan:STEVAN';    
+    
 # after that everything is loaded, if we're allowed try to load faster XS
 # versions of various things
 unless ($ENV{CLASS_MOP_NO_XS}) {
@@ -46,7 +50,7 @@ unless ($ENV{CLASS_MOP_NO_XS}) {
         local $@;
         eval {
             require XSLoader;
-            __PACKAGE__->XSLoader::load(our $VERSION);
+            __PACKAGE__->XSLoader::load($VERSION);
         };
         $@;
     };
