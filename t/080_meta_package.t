@@ -233,7 +233,6 @@ is(Foo->meta->get_package_symbol('@foo'), $ARRAY, '... got the right values for 
 
 {
     my %syms = Foo->meta->get_all_package_symbols;
-
     is_deeply(
         [ sort keys %syms ],
         [ sort Foo->meta->list_all_package_symbols ],

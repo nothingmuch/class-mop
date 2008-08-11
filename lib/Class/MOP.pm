@@ -9,12 +9,6 @@ use MRO::Compat;
 use Carp          'confess';
 use Scalar::Util  'weaken';
 
-use Class::MOP::Class;
-use Class::MOP::Attribute;
-use Class::MOP::Method;
-
-use Class::MOP::Immutable;
-
 BEGIN {
     
     our $VERSION   = '0.65';
@@ -63,16 +57,20 @@ BEGIN {
         # now try our best to get as much 
         # of the XS loaded as possible
         {
-            local $@;
-            eval {
-                require XSLoader;
-                XSLoader::load( 'Class::MOP', $VERSION );            
+            my $e = do {
+                local $@;
+                eval {
+                    require XSLoader;
+                    __PACKAGE__->XSLoader::load($VERSION);
+                };
+                $@;
             };
-            die $@ if $@ && $@ !~ /object version|loadable object/;
+
+            die $e if $e && $e !~ /object version|loadable object/;
             
             # okay, so the XS failed to load, so 
             # use the pure perl one instead.
-            *get_code_info = $_PP_get_code_info if $@; 
+            *get_code_info = $_PP_get_code_info if $e; 
         }        
         
         # get it from MRO::Compat
@@ -91,6 +89,12 @@ BEGIN {
         }     
     }
 }
+
+use Class::MOP::Class;
+use Class::MOP::Attribute;
+use Class::MOP::Method;
+
+use Class::MOP::Immutable;
 
 {
     # Metaclasses are singletons, so we cache them here.
