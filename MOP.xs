@@ -6,6 +6,15 @@
 #define NEED_sv_2pv_nolen
 #include "ppport.h"
 
+SV *key_name;
+U32 hash_name;
+
+SV *key_package;
+U32 hash_package;
+
+SV *key_body;
+U32 hash_body;
+
 /*
 get_code_info:
   Pass in a coderef, returns:
@@ -15,7 +24,18 @@ get_code_info:
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
+BOOT:
+    key_name = newSVpvs("name");
+    key_body = newSVpvs("body");
+    key_package = newSVpvs("package");
+
+    PERL_HASH(hash_name, "name", 4);
+    PERL_HASH(hash_body, "body", 4);
+    PERL_HASH(hash_package, "package", 7);
+
+
 PROTOTYPES: ENABLE
+
 
 void
 get_code_info(coderef)
@@ -51,11 +71,11 @@ get_code_info(coderef)
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
 
 void
-get_all_package_symbols(package, ...)
-    SV *package
+get_all_package_symbols(self, ...)
+    SV *self
     PROTOTYPE: $;$
     PREINIT:
-        HV *stash;
+        HV *stash = NULL;
         SV *type_filter = NULL;
     PPCODE:
 
@@ -68,18 +88,12 @@ get_all_package_symbols(package, ...)
 
         PUTBACK;
 
-        ENTER;
-        SAVETMPS;
-        PUSHMARK(SP);
-        XPUSHs(package);
-        PUTBACK;
-        call_method("name", 0);
-        SPAGAIN;
-        stash = gv_stashsv(POPs, 0);
-        FREETMPS;
-        LEAVE;
-
-        PUTBACK;
+        if ( SvROK(self) ) {
+            SV **val = hv_fetchs((HV *)SvRV(self), "package", 0);
+            if ( val ) {
+                stash = gv_stashsv(*val, 0);
+            }
+        }
 
         if ( stash ) {
             register HE *entry;
@@ -118,7 +132,7 @@ get_all_package_symbols(package, ...)
                             fqlen = pkglen + SvCUR(key) + 3;
                             fq = (char *)alloca(fqlen);
                             snprintf(fq, fqlen, "%s::%s", package, SvPV_nolen(key));
-                            sv = get_cv(fq, 0);
+                            sv = (SV*)get_cv(fq, 0);
                             break;
                         default:
                             continue;
@@ -147,3 +161,50 @@ get_all_package_symbols(package, ...)
 
         }
 
+SV *
+name(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
+
+MODULE = Class::MOP   PACKAGE = Class::Attribute
+
+SV *
+name(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
+
+MODULE = Class::MOP   PACKAGE = Class::Method
+
+SV *
+name(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
+
+SV *
+body(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
