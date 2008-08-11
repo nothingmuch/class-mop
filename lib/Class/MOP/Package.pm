@@ -236,37 +236,30 @@ sub list_all_package_symbols {
     }
 }
 
-unless ( defined &get_all_package_symbols ) {
-    local $@;
-    eval q/
-    sub get_all_package_symbols {
-        my ($self, $type_filter) = @_;
-        my $namespace = $self->namespace;
+sub get_all_package_symbols {
+    my ($self, $type_filter) = @_;
+    my $namespace = $self->namespace;
 
-        return %$namespace unless defined $type_filter;
+    return %$namespace unless defined $type_filter;
 
-        # for some reason this nasty impl is orders of magnitude aster than a clean version
-        if ( $type_filter eq 'CODE' ) {
-            my $pkg;
-            no strict 'refs';
-            return map {
-                (ref($namespace->{$_})
-                     ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
-                     : ( *{$namespace->{$_}}{CODE}
-                        ? ( $_ => *{$namespace->{$_}}{$type_filter} )
-                        : ()))
-            } keys %$namespace;
-        } else {
-            return map {
-                $_ => *{$namespace->{$_}}{$type_filter}
-            } grep {
-                !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
-            } keys %$namespace;
-        }
+    # for some reason this nasty impl is orders of magnitude aster than a clean version
+    if ( $type_filter eq 'CODE' ) {
+        my $pkg;
+        no strict 'refs';
+        return map {
+            (ref($namespace->{$_})
+                ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
+                : ( *{$namespace->{$_}}{CODE}
+                    ? ( $_ => *{$namespace->{$_}}{$type_filter} )
+                    : ()))
+        } keys %$namespace;
+    } else {
+        return map {
+            $_ => *{$namespace->{$_}}{$type_filter}
+        } grep {
+            !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
+        } keys %$namespace;
     }
-
-    1;
-    / || warn $@;
 }
 
 1;

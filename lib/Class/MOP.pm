@@ -9,6 +9,14 @@ use MRO::Compat;
 use Carp          'confess';
 use Scalar::Util  'weaken';
 
+use Sub::Identify 'get_code_info';
+
+use Class::MOP::Class;
+use Class::MOP::Attribute;
+use Class::MOP::Method;
+
+use Class::MOP::Immutable;
+
 BEGIN {
     
     our $VERSION   = '0.65';
@@ -22,79 +30,29 @@ BEGIN {
         ? sub () { 1 }
         : sub () { 1 };
 
-    # NOTE:
-    # we may not use this yet, but once 
-    # the get_code_info XS gets merged 
-    # upstream to it, we will always use 
-    # it. But for now it is just kinda 
-    # extra overhead.
-    # - SL
-    require Sub::Identify;
-        
-    # stash these for a sec, and see how things go
-    my $_PP_subname       = sub { $_[1] };
-    my $_PP_get_code_info = \&Sub::Identify::get_code_info;    
-    
-    if ($ENV{CLASS_MOP_NO_XS}) {
-        # NOTE:
-        # this is if you really want things
-        # to be slow, then you can force the
-        # no-XS rule this way, otherwise we 
-        # make an effort to load as much of 
-        # the XS as possible.
-        # - SL
-        no warnings 'prototype', 'redefine';
-        
-        # this is either part of core or set up appropriately by MRO::Compat
-        *check_package_cache_flag = \&mro::get_pkg_gen; 
-
-        # our own version of Sub::Name
-        *subname       = $_PP_subname;
-        # and the Sub::Identify version of the get_code_info
-        *get_code_info = $_PP_get_code_info;        
-    }
-    else {
-        # now try our best to get as much 
-        # of the XS loaded as possible
-        {
-            my $e = do {
-                local $@;
-                eval {
-                    require XSLoader;
-                    __PACKAGE__->XSLoader::load($VERSION);
-                };
-                $@;
-            };
-
-            die $e if $e && $e !~ /object version|loadable object/;
-            
-            # okay, so the XS failed to load, so 
-            # use the pure perl one instead.
-            *get_code_info = $_PP_get_code_info if $e; 
-        }        
-        
-        # get it from MRO::Compat
-        *check_package_cache_flag = \&mro::get_pkg_gen;        
-        
-        # now try and load the Sub::Name 
-        # module and use that as a means
-        # for naming our CVs, if not, we 
-        # use the workaround instead.
+    {
         local $@;
-        if ( eval { require Sub::Name } ) {
-            *subname = \&Sub::Name::subname;
-        } 
-        else {
-            *subname = $_PP_subname;
-        }     
+        eval 'use Sub::Name qw(subname); 1' || eval 'sub subname { $_[1] }';
     }
+
+    # this is either part of core or set up appropriately by MRO::Compat
+    *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-use Class::MOP::Class;
-use Class::MOP::Attribute;
-use Class::MOP::Method;
+# after that everything is loaded, if we're allowed try to load faster XS
+# versions of various things
+unless ($ENV{CLASS_MOP_NO_XS}) {
+    my $e = do {
+        local $@;
+        eval {
+            require XSLoader;
+            __PACKAGE__->XSLoader::load(our $VERSION);
+        };
+        $@;
+    };
 
-use Class::MOP::Immutable;
+    die $e if $e && $e !~ /object version|loadable object/;
+}
 
 {
     # Metaclasses are singletons, so we cache them here.
