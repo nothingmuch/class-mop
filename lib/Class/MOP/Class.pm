@@ -213,15 +213,6 @@ sub check_metaclass_compatability {
         return $class->create($package_name, %options);
     }
 
-    BEGIN {
-        local $@;
-        eval {
-            require Devel::GlobalDestruction;
-            Devel::GlobalDestruction->import("in_global_destruction");
-            1;
-        } or *in_global_destruction = sub () { '' };
-    }
-
     # NOTE:
     # this will only get called for
     # anon-classes, all other calls
@@ -231,7 +222,7 @@ sub check_metaclass_compatability {
     sub DESTROY {
         my $self = shift;
 
-        return if in_global_destruction; # it'll happen soon anyway and this just makes things more complicated
+        return if Class::MOP::in_global_destruction; # it'll happen soon anyway and this just makes things more complicated
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;

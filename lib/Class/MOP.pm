@@ -21,6 +21,12 @@ BEGIN {
 
     # this is either part of core or set up appropriately by MRO::Compat
     *check_package_cache_flag = \&mro::get_pkg_gen;
+
+    eval {
+        require Devel::GlobalDestruction;
+        Devel::GlobalDestruction->import("in_global_destruction");
+        1;
+    } or *in_global_destruction = sub () { '' };
 }
 
 
