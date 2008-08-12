@@ -77,6 +77,7 @@ get_all_package_symbols(self, ...)
     PREINIT:
         HV *stash = NULL;
         SV *type_filter = NULL;
+        register HE *he;
     PPCODE:
 
         switch ( GIMME_V ) {
@@ -88,15 +89,10 @@ get_all_package_symbols(self, ...)
 
         PUTBACK;
 
-        if ( SvROK(self) ) {
-            SV **val = hv_fetchs((HV *)SvRV(self), "package", 0);
-            if ( val ) {
-                stash = gv_stashsv(*val, 0);
-            }
-        }
+        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+            stash = gv_stashsv(HeVAL(he),0);
 
         if ( stash ) {
-            register HE *entry;
 
             (void)hv_iterinit(stash);
 
@@ -104,16 +100,15 @@ get_all_package_symbols(self, ...)
                 const char *const type = SvPV_nolen(type_filter);
 
 
-                while ((entry = hv_iternext(stash))) {
-                    SV *const gv = hv_iterval(stash, entry);
-                    SV *const key = hv_iterkeysv(entry);
+                while ((he = hv_iternext(stash))) {
+                    SV *const gv = HeVAL(he);
                     SV *sv;
                     char *package = HvNAME(stash);
                     STRLEN pkglen = strlen(package);
+                    char *key;
+                    STRLEN keylen;
                     char *fq;
                     STRLEN fqlen;
-
-                    SPAGAIN;
 
                     switch( SvTYPE(gv) ) {
                         case SVt_PVGV:
@@ -129,16 +124,19 @@ get_all_package_symbols(self, ...)
                             break;
                         case SVt_RV:
                             /* BAH! constants are horrible */
-                            fqlen = pkglen + SvCUR(key) + 3;
+                            key = HePV(he, keylen);
+                            fqlen = pkglen + keylen + 3;
                             fq = (char *)alloca(fqlen);
-                            snprintf(fq, fqlen, "%s::%s", package, SvPV_nolen(key));
+                            snprintf(fq, fqlen, "%s::%s", package, key);
                             sv = (SV*)get_cv(fq, 0);
+                            sv_2mortal(sv);
                             break;
                         default:
                             continue;
                     }
 
                     if ( sv ) {
+                        SV *key = hv_iterkeysv(he);
                         SPAGAIN;
                         EXTEND(SP, 2);
                         PUSHs(key);
@@ -149,9 +147,9 @@ get_all_package_symbols(self, ...)
             } else {
                 EXTEND(SP, HvKEYS(stash) * 2);
 
-                while ((entry = hv_iternext(stash))) {
-                    SV *key = hv_iterkeysv(entry);
-                    SV *sv = hv_iterval(stash, entry);
+                while ((he = hv_iternext(stash))) {
+                    SV *key = hv_iterkeysv(he);
+                    SV *sv = hv_iterval(stash, he);
                     SPAGAIN;
                     PUSHs(key);
                     PUSHs(sv);
