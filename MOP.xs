@@ -142,7 +142,7 @@ get_all_package_symbols(self, ...)
                         SPAGAIN;
                         EXTEND(SP, 2);
                         PUSHs(key);
-                        PUSHs(newRV_noinc(sv));
+                        PUSHs(sv_2mortal(newRV_inc(sv)));
                         PUTBACK;
                     }
                 }
