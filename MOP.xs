@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#define NEED_sv_2pv_flags
 #define NEED_sv_2pv_nolen
 #include "ppport.h"
 
@@ -149,7 +150,7 @@ get_all_package_symbols(self, ...)
 
                 while ((he = hv_iternext(stash))) {
                     SV *key = hv_iterkeysv(he);
-                    SV *sv = hv_iterval(stash, he);
+                    SV *sv = HeVAL(he);
                     SPAGAIN;
                     PUSHs(key);
                     PUSHs(sv);
