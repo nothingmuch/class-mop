@@ -18,18 +18,20 @@ sub new {
     ($options{package_name} && $options{name})
         || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
         
-    my $self = bless {
-        # from our superclass
-        'body'          => undef,
-        'package_name'  => $options{package_name},
-        'name'          => $options{name},        
-        # specific to this subclass
-        'is_inline'     => ($options{is_inline} || 0),
-    } => $class;
+    my $self = $self->_new(%options);
     
     $self->initialize_body;
     
     return $self;
+}
+
+sub _new {
+    my ( $self, %options ) = @_;
+
+    $options{is_inline} ||= 0;
+    $options{body} ||= undef;
+
+    bless \%options, $class;
 }
 
 ## accessors
