@@ -208,15 +208,6 @@ Class::MOP::Package->meta->add_attribute(
     ))
 );
 
-# NOTE:
-# use the metaclass to construct the meta-package
-# which is a superclass of the metaclass itself :P
-Class::MOP::Package->meta->add_method('initialize' => sub {
-    my $class        = shift;
-    my $package_name = shift;
-    $class->meta->new_object('package' => $package_name, @_);
-});
-
 ## --------------------------------------------------------
 ## Class::MOP::Module
 

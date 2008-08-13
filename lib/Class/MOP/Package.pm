@@ -19,9 +19,15 @@ sub initialize {
     my $package_name = shift;
     # we hand-construct the class 
     # until we can bootstrap it
-    no strict 'refs';
-    return bless { 
+    $class->_new(
         'package'   => $package_name,
+    );
+}
+
+sub _new {
+    my ( $class, @args ) = @_;
+
+    bless {
         # NOTE:
         # because of issues with the Perl API 
         # to the typeglob in some versions, we 
@@ -30,7 +36,8 @@ sub initialize {
         # Ideally we could just store a ref and 
         # it would Just Work, but oh well :\
         'namespace' => \undef,
-    } => $class;
+        @args,
+    }, $class;
 }
 
 # Attributes
