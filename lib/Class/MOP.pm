@@ -500,15 +500,6 @@ Class::MOP::Method::Generated->meta->add_attribute(
     ))
 );
 
-Class::MOP::Method::Generated->meta->add_method('new' => sub {
-    my ($class, %options) = @_;
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";    
-    my $self = $class->_new(%options);
-    $self->initialize_body;  
-    $self;
-});
-
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
 
@@ -525,36 +516,6 @@ Class::MOP::Method::Accessor->meta->add_attribute(
         reader   => { 'accessor_type' => \&Class::MOP::Method::Accessor::accessor_type },
     ))
 );
-
-Class::MOP::Method::Accessor->meta->add_method('new' => sub {
-    my $class   = shift;
-    my %options = @_;
-
-    (exists $options{attribute})
-        || confess "You must supply an attribute to construct with";
-
-    (exists $options{accessor_type})
-        || confess "You must supply an accessor_type to construct with";
-
-    (Scalar::Util::blessed($options{attribute}) && $options{attribute}->isa('Class::MOP::Attribute'))
-        || confess "You must supply an attribute which is a 'Class::MOP::Attribute' instance";
-
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";
-
-    # return the new object
-    my $self = $class->_new(%options);
-    
-    # we don't want this creating
-    # a cycle in the code, if not
-    # needed
-    Scalar::Util::weaken($self->{'attribute'});
-
-    $self->initialize_body;  
-    
-    $self;
-});
-
 
 ## --------------------------------------------------------
 ## Class::MOP::Method::Constructor
@@ -576,30 +537,6 @@ Class::MOP::Method::Constructor->meta->add_attribute(
         },
     ))
 );
-
-Class::MOP::Method::Constructor->meta->add_method('new' => sub {
-    my $class   = shift;
-    my %options = @_;
-
-    (Scalar::Util::blessed $options{metaclass} && $options{metaclass}->isa('Class::MOP::Class'))
-        || confess "You must pass a metaclass instance if you want to inline"
-            if $options{is_inline};
-
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";
-
-    # return the new object
-    my $self = $class->_new(%options);
-    
-    # we don't want this creating
-    # a cycle in the code, if not
-    # needed
-    Scalar::Util::weaken($self->{'associated_metaclass'});
-
-    $self->initialize_body;  
-    
-    $self;
-});
 
 ## --------------------------------------------------------
 ## Class::MOP::Instance
@@ -645,17 +582,6 @@ Class::MOP::Instance->meta->add_attribute(
 # we need the meta instance of the meta instance to be created now, in order
 # for the constructor to be able to use it
 Class::MOP::Instance->meta->get_meta_instance;
-
-Class::MOP::Instance->meta->add_method('new' => sub {
-    my $class   = shift;
-    my $options = $class->BUILDARGS(@_);
-
-    my $self = $class->_new(%$options);
-    
-    Scalar::Util::weaken($self->{'associated_metaclass'});
-
-    $self;
-});
 
 # pretend the add_method never happenned. it hasn't yet affected anything
 undef Class::MOP::Instance->meta->{_package_cache_flag};
