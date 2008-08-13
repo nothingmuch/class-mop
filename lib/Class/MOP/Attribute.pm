@@ -51,7 +51,7 @@ sub new {
         confess("A required attribute must have either 'init_arg', 'builder', or 'default'");
     }
 
-    $class->_new(%options);
+    $class->_new(\%options);
 }
 
 sub _new {
