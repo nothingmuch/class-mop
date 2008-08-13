@@ -28,16 +28,7 @@ sub new {
     ($options{package_name} && $options{name})
         || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";
 
-    my $self = bless {
-        # from our superclass
-        'body'          => undef,
-        'package_name' => $options{package_name},
-        'name'         => $options{name},        
-        # specific to this subclass
-        'attribute'     => $options{attribute},
-        'is_inline'     => ($options{is_inline} || 0),
-        'accessor_type' => $options{accessor_type},
-    } => $class;
+    my $self = $class->_new(%options);
 
     # we don't want this creating
     # a cycle in the code, if not
@@ -47,6 +38,14 @@ sub new {
     $self->initialize_body;
 
     return $self;
+}
+
+sub _new {
+    my ( $class, %options ) = @_;
+
+    $options{is_inline} ||= 0;
+
+    return bless \%options, $class;
 }
 
 ## accessors
