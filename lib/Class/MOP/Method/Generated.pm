@@ -18,7 +18,7 @@ sub new {
     ($options{package_name} && $options{name})
         || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
         
-    my $self = $self->_new(%options);
+    my $self = $class->_new(%options);
     
     $self->initialize_body;
     
@@ -26,7 +26,7 @@ sub new {
 }
 
 sub _new {
-    my ( $self, %options ) = @_;
+    my ( $class, %options ) = @_;
 
     $options{is_inline} ||= 0;
     $options{body} ||= undef;

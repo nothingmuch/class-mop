@@ -45,7 +45,7 @@ BEGIN {
 {
     my $meta = Baz->meta;
     is($meta->name, 'Baz', '... checking the Baz metaclass');
-    my @orig_keys = sort keys %$meta;
+    my @orig_keys = sort grep { !/^_/ } keys %$meta;
 
     lives_ok {$meta->make_immutable; } '... changed Baz to be immutable';
     ok(!$meta->is_mutable,              '... our class is no longer mutable');
@@ -61,7 +61,7 @@ BEGIN {
     ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
     ok(!$meta->has_method('new'),        '... inlined constructor removed for sure');    
 
-    my @new_keys = sort keys %$meta;
+    my @new_keys = sort grep { !/^_/ } keys %$meta;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
 
     isa_ok($meta, 'Class::MOP::Class', '... Baz->meta isa Class::MOP::Class');
@@ -132,7 +132,7 @@ BEGIN {
 
     ok(Baz->meta->is_immutable,  'Superclass is immutable');
     my $meta = Baz->meta->create_anon_class(superclasses => ['Baz']);
-    my @orig_keys  = sort keys %$meta;
+    my @orig_keys  = sort grep { !/^_/ } keys %$meta;
     my @orig_meths = sort { $a->{name} cmp $b->{name} }
       $meta->compute_all_applicable_methods;
     ok($meta->is_anon_class,                  'We have an anon metaclass');
@@ -156,7 +156,7 @@ BEGIN {
     ok($meta->is_anon_class,          '... still marked as an anon class');
     my $instance = $meta->new_object;
 
-    my @new_keys  = sort keys %$meta;
+    my @new_keys  = sort grep { !/^_/ } keys %$meta;
     my @new_meths = sort { $a->{name} cmp $b->{name} }
       $meta->compute_all_applicable_methods;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');

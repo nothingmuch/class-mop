@@ -82,40 +82,7 @@ sub construct_class_instance {
     my $meta;
     if ($class eq 'Class::MOP::Class') {
         no strict 'refs';
-        $meta = bless {
-            # inherited from Class::MOP::Package
-            'package'             => $package_name,
-
-            # NOTE:
-            # since the following attributes will
-            # actually be loaded from the symbol
-            # table, and actually bypass the instance
-            # entirely, we can just leave these things
-            # listed here for reference, because they
-            # should not actually have a value associated
-            # with the slot.
-            'namespace'           => \undef,
-            # inherited from Class::MOP::Module
-            'version'             => \undef,
-            'authority'           => \undef,
-            # defined in Class::MOP::Class
-            'superclasses'        => \undef,
-
-            'methods'             => {},
-            'attributes'          => {},
-            'attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
-            'method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
-            'instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
-            
-            ## uber-private variables
-            # NOTE:
-            # this starts out as undef so that 
-            # we can tell the first time the 
-            # methods are fetched
-            # - SL
-            '_package_cache_flag'       => undef,  
-            '_meta_instance'            => undef,          
-        } => $class;
+        $meta = $class->_new(%options)
     }
     else {
         # NOTE:
@@ -136,6 +103,35 @@ sub construct_class_instance {
     Class::MOP::weaken_metaclass($package_name) if $meta->is_anon_class;
 
     $meta;
+}
+
+sub _new {
+    my ( $class, %options ) = @_;
+    bless {
+        # inherited from Class::MOP::Package
+        'package'             => $options{package},
+
+        # NOTE:
+        # since the following attributes will
+        # actually be loaded from the symbol
+        # table, and actually bypass the instance
+        # entirely, we can just leave these things
+        # listed here for reference, because they
+        # should not actually have a value associated
+        # with the slot.
+        'namespace'           => \undef,
+        # inherited from Class::MOP::Module
+        'version'             => \undef,
+        'authority'           => \undef,
+        # defined in Class::MOP::Class
+        'superclasses'        => \undef,
+
+        'methods'             => {},
+        'attributes'          => {},
+        'attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
+        'method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
+        'instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
+    }, $class;
 }
 
 sub reset_package_cache_flag  { (shift)->{'_package_cache_flag'} = undef } 
