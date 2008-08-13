@@ -86,10 +86,12 @@ sub generate_constructor_method_inline {
     my $self = shift;
 
     my $source = 'sub {';
-    $source .= "\n" . 'my ($class, %params) = @_;';
+    $source .= "\n" . 'my $class = shift;';
 
-    $source .= "\n" . 'return Class::MOP::Class->initialize($class)->new_object(%params)';
+    $source .= "\n" . 'return Class::MOP::Class->initialize($class)->new_object(@_)';
     $source .= "\n" . '    if $class ne \'' . $self->associated_metaclass->name . '\';';
+
+    $source .= "\n" . 'my $params = @_ == 1 ? $_[0] : {@_};';
 
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
@@ -142,11 +144,11 @@ sub _generate_slot_initializer {
 
     if ( defined $attr->init_arg ) {
       return (
-          'if(exists $params{\'' . $attr->init_arg . '\'}){' . "\n" .
+          'if(exists $params->{\'' . $attr->init_arg . '\'}){' . "\n" .
                 $self->meta_instance->inline_set_slot_value(
                     '$instance',
                     ("'" . $attr->name . "'"),
-                    '$params{\'' . $attr->init_arg . '\'}' ) . "\n" .
+                    '$params->{\'' . $attr->init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
                 $self->meta_instance->inline_set_slot_value(
                     '$instance',
