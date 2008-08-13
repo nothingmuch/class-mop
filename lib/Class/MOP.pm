@@ -516,25 +516,6 @@ Class::MOP::Method->meta->add_attribute(
     ))
 );
 
-# FIMXE prime candidate for immutablization
-Class::MOP::Method->meta->add_method('wrap' => sub {
-    my ( $class, @args ) = @_;
-
-    unshift @args, 'body' if @args % 2 == 1;
-
-    my %options = @args;
-    my $code = $options{body};
-
-    ('CODE' eq ref($code))
-        || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
-
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters";
-
-    # return the new object
-    $class->meta->new_object(%options);
-});
-
 Class::MOP::Method->meta->add_method('clone' => sub {
     my $self  = shift;
     $self->meta->clone_object($self, @_);

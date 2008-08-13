@@ -42,16 +42,22 @@ sub wrap {
     ($params{package_name} && $params{name})
         || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
 
-    my $self = bless {
-        'body'                 => $code,
-        'associated_metaclass' => $params{associated_metaclass},
-        'package_name'         => $params{package_name},
-        'name'                 => $params{name},
-    } => ref($class) || $class;
+    my $self = (ref($class) || $class)->_new(%params);
 
     weaken($self->{associated_metaclass}) if $self->{associated_metaclass};
 
     return $self;
+}
+
+sub _new {
+    my ( $class, %params ) = @_;
+
+    my $self = bless {
+        'body'                 => $params{body},
+        'associated_metaclass' => $params{associated_metaclass},
+        'package_name'         => $params{package_name},
+        'name'                 => $params{name},
+    } => $class;
 }
 
 ## accessors
