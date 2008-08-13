@@ -998,6 +998,13 @@ If possible, we will load the L<Sub::Name> module and this will function
 as C<Sub::Name::subname> does, otherwise it will just return the C<$code>
 argument.
 
+=item B<in_global_destruction>
+
+If L<Devel::GlobalDestruction> is available, this returns true under global
+destruction.
+
+Otherwise it's a constant returning false.
+
 =back
 
 =head2 Metaclass cache functions
