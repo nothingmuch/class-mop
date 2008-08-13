@@ -24,7 +24,7 @@ unless ( defined $force_xs ) {
 
 my %prereqs = (
     'Scalar::Util'  => '1.18',
-    'Sub::Name'     => '0.02',
+    'Sub::Name'     => '0.04',
     'Sub::Identify' => '0.03',
     'MRO::Compat'   => '0.05',
     'Carp'          => 0,
