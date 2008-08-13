@@ -31,12 +31,11 @@ sub new {
         $metaclass = $options{metaclass};
     }
 
-    # FIXME make a proper constructor using ->meta->new_object
-    my $self = bless {
+    my $self = $class->_new(
         'metaclass'           => $metaclass,
         'options'             => $options,
         'immutable_metaclass' => undef,
-    } => $class;
+    );
 
     # NOTE:
     # we initialize the immutable
@@ -45,6 +44,13 @@ sub new {
     $self->create_immutable_metaclass;
 
     return $self;
+}
+
+sub _new {
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
+
+    bless $options, $class;
 }
 
 sub immutable_metaclass { (shift)->{'immutable_metaclass'} }

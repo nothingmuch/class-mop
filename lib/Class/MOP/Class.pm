@@ -54,8 +54,8 @@ sub reinitialize {
 # normal &construct_instance.
 sub construct_class_instance {
     my $class        = shift;
-    my %options      = @_;
-    my $package_name = $options{'package'};
+    my $options      = @_ == 1 ? $_[0] : {@_};
+    my $package_name = $options->{package};
     (defined $package_name && $package_name)
         || confess "You must pass a package name";
     # NOTE:
@@ -82,14 +82,14 @@ sub construct_class_instance {
     my $meta;
     if ($class eq 'Class::MOP::Class') {
         no strict 'refs';
-        $meta = $class->_new(%options)
+        $meta = $class->_new($options)
     }
     else {
         # NOTE:
         # it is safe to use meta here because
         # class will always be a subclass of
         # Class::MOP::Class, which defines meta
-        $meta = $class->meta->construct_instance(%options)
+        $meta = $class->meta->construct_instance($options)
     }
 
     # and check the metaclass compatibility
@@ -106,10 +106,12 @@ sub construct_class_instance {
 }
 
 sub _new {
-    my ( $class, %options ) = @_;
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
+
     bless {
         # inherited from Class::MOP::Package
-        'package'             => $options{package},
+        'package'             => $options->{package},
 
         # NOTE:
         # since the following attributes will
@@ -128,9 +130,9 @@ sub _new {
 
         'methods'             => {},
         'attributes'          => {},
-        'attribute_metaclass' => $options{'attribute_metaclass'} || 'Class::MOP::Attribute',
-        'method_metaclass'    => $options{'method_metaclass'}    || 'Class::MOP::Method',
-        'instance_metaclass'  => $options{'instance_metaclass'}  || 'Class::MOP::Instance',
+        'attribute_metaclass' => $options->{'attribute_metaclass'} || 'Class::MOP::Attribute',
+        'method_metaclass'    => $options->{'method_metaclass'}    || 'Class::MOP::Method',
+        'instance_metaclass'  => $options->{'instance_metaclass'}  || 'Class::MOP::Instance',
     }, $class;
 }
 
@@ -372,11 +374,12 @@ sub new_object {
 }
 
 sub construct_instance {
-    my ($class, %params) = @_;
+    my $class = shift;
+    my $params = @_ == 1 ? $_[0] : {@_};
     my $meta_instance = $class->get_meta_instance();
     my $instance = $meta_instance->create_instance();
     foreach my $attr ($class->compute_all_applicable_attributes()) {
-        $attr->initialize_instance_slot($meta_instance, $instance, \%params);
+        $attr->initialize_instance_slot($meta_instance, $instance, $params);
     }
     # NOTE:
     # this will only work for a HASH instance type

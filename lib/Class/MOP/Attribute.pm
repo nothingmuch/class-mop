@@ -55,26 +55,27 @@ sub new {
 }
 
 sub _new {
-    my ( $class, %options ) = @_;
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
 
     bless {
-        'name'        => $options{name},
-        'accessor'    => $options{accessor},
-        'reader'      => $options{reader},
-        'writer'      => $options{writer},
-        'predicate'   => $options{predicate},
-        'clearer'     => $options{clearer},
-        'builder'     => $options{builder},
-        'init_arg'    => $options{init_arg},
-        'default'     => $options{default},
-        'initializer' => $options{initializer},        
+        'name'        => $options->{name},
+        'accessor'    => $options->{accessor},
+        'reader'      => $options->{reader},
+        'writer'      => $options->{writer},
+        'predicate'   => $options->{predicate},
+        'clearer'     => $options->{clearer},
+        'builder'     => $options->{builder},
+        'init_arg'    => $options->{init_arg},
+        'default'     => $options->{default},
+        'initializer' => $options->{initializer},        
         # keep a weakened link to the
         # class we are associated with
         'associated_class' => undef,
         # and a list of the methods
         # associated with this attr
         'associated_methods' => [],
-    } => $class;
+    }, $class;
 }
 
 # NOTE:

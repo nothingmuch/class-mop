@@ -18,7 +18,7 @@ sub new {
     ($options{package_name} && $options{name})
         || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
         
-    my $self = $class->_new(%options);
+    my $self = $class->_new(\%options);
     
     $self->initialize_body;
     
@@ -26,12 +26,13 @@ sub new {
 }
 
 sub _new {
-    my ( $class, %options ) = @_;
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
 
-    $options{is_inline} ||= 0;
-    $options{body} ||= undef;
+    $options->{is_inline} ||= 0;
+    $options->{body} ||= undef;
 
-    bless \%options, $class;
+    bless $options, $class;
 }
 
 ## accessors

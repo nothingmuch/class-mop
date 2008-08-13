@@ -19,25 +19,25 @@ sub initialize {
     my $package_name = shift;
     # we hand-construct the class 
     # until we can bootstrap it
-    $class->_new(
+    $class->_new({
         'package'   => $package_name,
-    );
+    });
 }
 
 sub _new {
-    my ( $class, @args ) = @_;
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
 
-    bless {
-        # NOTE:
-        # because of issues with the Perl API 
-        # to the typeglob in some versions, we 
-        # need to just always grab a new 
-        # reference to the hash in the accessor. 
-        # Ideally we could just store a ref and 
-        # it would Just Work, but oh well :\
-        'namespace' => \undef,
-        @args,
-    }, $class;
+    # NOTE:
+    # because of issues with the Perl API 
+    # to the typeglob in some versions, we 
+    # need to just always grab a new 
+    # reference to the hash in the accessor. 
+    # Ideally we could just store a ref and 
+    # it would Just Work, but oh well :\
+    $options->{namespace} ||= \undef;
+
+    bless $options, $class;
 }
 
 # Attributes
