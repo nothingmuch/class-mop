@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 224;
+use Test::More tests => 230;
 use Test::Exception;
 
 BEGIN {
@@ -28,6 +28,7 @@ my $class_mop_module_meta = Class::MOP::Module->meta();
 isa_ok($class_mop_module_meta, 'Class::MOP::Module');
 
 my @class_mop_package_methods = qw(
+    _new
 
     initialize
 
@@ -41,11 +42,13 @@ my @class_mop_package_methods = qw(
 );
 
 my @class_mop_module_methods = qw(
+    _new
 
     version authority identifier
 );
 
 my @class_mop_class_methods = qw(
+    _new
 
     initialize reinitialize create
     

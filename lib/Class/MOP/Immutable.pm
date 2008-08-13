@@ -127,7 +127,7 @@ sub make_metaclass_immutable {
                 package_name => $metaclass->name,
                 name         => $options{constructor_name}
             )
-        ) unless $metaclass->has_method($options{constructor_name});
+        ) if $options{replace_constructor} or !$metaclass->has_method($options{constructor_name});
     }
 
     if ($options{inline_destructor}) {
