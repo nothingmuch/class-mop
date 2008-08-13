@@ -733,8 +733,13 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # no actual benefits.
 
 $_->meta->make_immutable(
-    inline_constructor => 0,
-    inline_accessors   => 0,
+    ( $_->can("_new") ? (
+        inline_constructor => 1,
+        constructor_name   => "_new",
+    ) : (
+        inline_constructor => 0,
+    ) ),
+    inline_accessors => 0,
 ) for qw/
     Class::MOP::Package
     Class::MOP::Module
