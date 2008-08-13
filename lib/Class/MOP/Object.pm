@@ -16,6 +16,10 @@ sub meta {
     Class::MOP::Class->initialize(blessed($_[0]) || $_[0]);
 }
 
+sub _new {
+    shift->meta->new_object(@_);
+}
+
 # RANT:
 # Cmon, how many times have you written 
 # the following code while debugging:
