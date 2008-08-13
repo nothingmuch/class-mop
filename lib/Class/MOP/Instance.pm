@@ -35,7 +35,17 @@ sub new {
     my $options = $class->BUILDARGS(@_);
 
     # FIXME replace with a proper constructor
-    my $instance = bless {
+    my $instance = $class->_new(%$options);
+
+    # FIXME weak_ref => 1,
+    weaken($instance->{'associated_metaclass'});
+
+    return $instance;
+}
+
+sub _new {
+    my ( $class, %options ) = @_;
+    bless {
         # NOTE:
         # I am not sure that it makes
         # sense to pass in the meta
@@ -46,16 +56,11 @@ sub new {
         # which is *probably* a safe
         # assumption,.. but you can
         # never tell <:)
-        'associated_metaclass' => $options->{associated_metaclass},
-        'attributes'           => $options->{attributes},
-        'slots'                => $options->{slots},
-        'slot_hash'            => $options->{slot_hash},
+        'associated_metaclass' => $options{associated_metaclass},
+        'attributes'           => $options{attributes},
+        'slots'                => $options{slots},
+        'slot_hash'            => $options{slot_hash},
     } => $class;
-
-    # FIXME weak_ref => 1,
-    weaken($instance->{'associated_metaclass'});
-
-    return $instance;
 }
 
 sub _class_name { $_[0]->{_class_name} ||= $_[0]->associated_metaclass->name }
