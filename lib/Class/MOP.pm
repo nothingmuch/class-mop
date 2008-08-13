@@ -504,7 +504,7 @@ Class::MOP::Method::Generated->meta->add_method('new' => sub {
     my ($class, %options) = @_;
     ($options{package_name} && $options{name})
         || confess "You must supply the package_name and name parameters";    
-    my $self = $class->meta->new_object(%options);
+    my $self = $class->_new(%options);
     $self->initialize_body;  
     $self;
 });
@@ -543,7 +543,7 @@ Class::MOP::Method::Accessor->meta->add_method('new' => sub {
         || confess "You must supply the package_name and name parameters";
 
     # return the new object
-    my $self = $class->meta->new_object(%options);
+    my $self = $class->_new(%options);
     
     # we don't want this creating
     # a cycle in the code, if not
@@ -589,7 +589,7 @@ Class::MOP::Method::Constructor->meta->add_method('new' => sub {
         || confess "You must supply the package_name and name parameters";
 
     # return the new object
-    my $self = $class->meta->new_object(%options);
+    my $self = $class->_new(%options);
     
     # we don't want this creating
     # a cycle in the code, if not
@@ -650,7 +650,7 @@ Class::MOP::Instance->meta->add_method('new' => sub {
     my $class   = shift;
     my $options = $class->BUILDARGS(@_);
 
-    my $self = $class->meta->new_object(%$options);
+    my $self = $class->_new(%$options);
     
     Scalar::Util::weaken($self->{'associated_metaclass'});
 
