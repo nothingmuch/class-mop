@@ -451,40 +451,6 @@ Class::MOP::Attribute->meta->add_attribute(
     ))
 );
 
-# NOTE: (meta-circularity)
-# This should be one of the last things done
-# it will "tie the knot" with Class::MOP::Attribute
-# so that it uses the attributes meta-objects
-# to construct itself.
-Class::MOP::Attribute->meta->add_method('new' => sub {
-    my ( $class, @args ) = @_;
-
-    unshift @args, "name" if @args % 2 == 1;
-    my %options = @args;
-
-    my $name = $options{name};
-
-    (defined $name && $name)
-        || confess "You must provide a name for the attribute";
-    $options{init_arg} = $name
-        if not exists $options{init_arg};
-
-    if(exists $options{builder}){
-        confess("builder must be a defined scalar value which is a method name")
-            if ref $options{builder} || !(defined $options{builder});
-        confess("Setting both default and builder is not allowed.")
-            if exists $options{default};
-    } else {
-        (Class::MOP::Attribute::is_default_a_coderef(\%options))
-            || confess("References are not allowed as default values, you must ".
-                       "wrap the default of '$name' in a CODE reference (ex: sub { [] } and not [])")
-                if exists $options{default} && ref $options{default};
-    }
-
-    # return the new object
-    $class->meta->new_object(%options);
-});
-
 Class::MOP::Attribute->meta->add_method('clone' => sub {
     my $self  = shift;
     $self->meta->clone_object($self, @_);

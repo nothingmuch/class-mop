@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 62;
+use Test::More tests => 63;
 use Test::Exception;
 
 BEGIN {
@@ -58,6 +58,8 @@ BEGIN {
         process_accessors
         install_accessors
         remove_accessors
+
+        _new
         );
 
     is_deeply(

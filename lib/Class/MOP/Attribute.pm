@@ -51,10 +51,16 @@ sub new {
         confess("A required attribute must have either 'init_arg', 'builder', or 'default'");
     }
 
+    $class->_new(%options);
+}
+
+sub _new {
+    my ( $class, %options ) = @_;
+
     bless {
-        'name'      => $name,
-        'accessor'  => $options{accessor},
-        'reader'    => $options{reader},
+        'name'        => $options{name},
+        'accessor'    => $options{accessor},
+        'reader'      => $options{reader},
         'writer'      => $options{writer},
         'predicate'   => $options{predicate},
         'clearer'     => $options{clearer},
