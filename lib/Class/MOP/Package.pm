@@ -15,14 +15,20 @@ use base 'Class::MOP::Object';
 # creation ...
 
 sub initialize {
-    my $class        = shift;
-    my $package_name = shift;
+    my ( $class, @args ) = @_;
+
+    unshift @args, "package" if @args % 2;
+
+    my %options = @args;
+    my $package_name = $options{package};
+
+
     # we hand-construct the class 
     # until we can bootstrap it
     if ( my $meta = Class::MOP::get_metaclass_by_name($package_name) ) {
        return $meta;
     } else {
-       my $meta = $class->_new({
+       my $meta = ( ref $class || $class )->_new({
            'package'   => $package_name,
        });
 
@@ -33,11 +39,18 @@ sub initialize {
 }
 
 sub reinitialize {
-    my $class        = shift;
-    my $package_name = shift;
+    my ( $class, @args ) = @_;
+
+    unshift @args, "package" if @args % 2;
+
+    my %options = @args;
+    my $package_name = $options{package};
+
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";
+
     Class::MOP::remove_metaclass_by_name($package_name);
+
     $class->initialize('package' => $package_name, @_);
 }
 
