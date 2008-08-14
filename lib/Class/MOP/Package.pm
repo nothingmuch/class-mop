@@ -19,10 +19,26 @@ sub initialize {
     my $package_name = shift;
     # we hand-construct the class 
     # until we can bootstrap it
-    return Class::MOP::get_metaclass_by_name($package_name) ||
-        $class->_new({
-        'package'   => $package_name,
-    });
+    if ( my $meta = Class::MOP::get_metaclass_by_name($package_name) ) {
+       return $meta;
+    } else {
+       my $meta = $class->_new({
+           'package'   => $package_name,
+       });
+
+       Class::MOP::store_metaclass_by_name($package_name, $meta);
+
+       return $meta;
+    }
+}
+
+sub reinitialize {
+    my $class        = shift;
+    my $package_name = shift;
+    (defined $package_name && $package_name && !blessed($package_name))
+        || confess "You must pass a package name and it cannot be blessed";
+    Class::MOP::remove_metaclass_by_name($package_name);
+    $class->initialize('package' => $package_name, @_);
 }
 
 sub _new {
@@ -298,6 +314,12 @@ Returns a metaclass for this package.
 
 This will initialize a Class::MOP::Package instance which represents 
 the package of C<$package_name>.
+
+=item B<reinitialize ($package_name, %options)>
+
+This removes the old metaclass, and creates a new one in it's place.
+Do B<not> use this unless you really know what you are doing, it could
+very easily make a very large mess of your program.
 
 =item B<name>
 

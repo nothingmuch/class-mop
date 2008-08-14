@@ -37,15 +37,6 @@ sub initialize {
         || $class->construct_class_instance(package => $package_name, @_);
 }
 
-sub reinitialize {
-    my $class        = shift;
-    my $package_name = shift;
-    (defined $package_name && $package_name && !blessed($package_name))
-        || confess "You must pass a package name and it cannot be blessed";
-    Class::MOP::remove_metaclass_by_name($package_name);
-    $class->construct_class_instance('package' => $package_name, @_);
-}
-
 # NOTE: (meta-circularity)
 # this is a special form of &construct_instance
 # (see below), which is used to construct class
@@ -1216,12 +1207,6 @@ as we use a special reserved slot (C<__MOP__>) to store this.
 
 This initializes and returns returns a B<Class::MOP::Class> object
 for a given a C<$package_name>.
-
-=item B<reinitialize ($package_name, %options)>
-
-This removes the old metaclass, and creates a new one in it's place.
-Do B<not> use this unless you really know what you are doing, it could
-very easily make a very large mess of your program.
 
 =item B<construct_class_instance (%options)>
 

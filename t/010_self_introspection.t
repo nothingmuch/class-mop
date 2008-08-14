@@ -30,7 +30,7 @@ isa_ok($class_mop_module_meta, 'Class::MOP::Module');
 my @class_mop_package_methods = qw(
     _new
 
-    initialize
+    initialize reinitialize
 
     name
     namespace
@@ -50,7 +50,7 @@ my @class_mop_module_methods = qw(
 my @class_mop_class_methods = qw(
     _new
 
-    initialize reinitialize create
+    initialize create
     
     update_package_cache_flag
     reset_package_cache_flag
