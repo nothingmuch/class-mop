@@ -19,7 +19,8 @@ sub initialize {
     my $package_name = shift;
     # we hand-construct the class 
     # until we can bootstrap it
-    $class->_new({
+    return Class::MOP::get_metaclass_by_name($package_name) ||
+        $class->_new({
         'package'   => $package_name,
     });
 }
