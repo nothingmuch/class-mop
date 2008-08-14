@@ -314,12 +314,12 @@ sub get_method_map {
     my $current = Class::MOP::check_package_cache_flag($self->name);
 
     if (defined $self->{'_package_cache_flag'} && $self->{'_package_cache_flag'} == $current) {
-        return $self->{'methods'};
+        return $self->{'methods'} ||= {};
     }
 
     $self->{_package_cache_flag} = $current;
 
-    my $map  = $self->{'methods'};
+    my $map  = $self->{'methods'} ||= {};
 
     my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
