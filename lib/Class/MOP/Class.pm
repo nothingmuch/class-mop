@@ -720,8 +720,7 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    return 0 unless exists $self->get_method_map->{$method_name};
-    return 1;
+    exists $self->get_method_map->{$method_name};
 }
 
 sub get_method {
