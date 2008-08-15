@@ -44,14 +44,14 @@ sub reinitialize {
     unshift @args, "package" if @args % 2;
 
     my %options = @args;
-    my $package_name = $options{package};
+    my $package_name = delete $options{package};
 
     (defined $package_name && $package_name && !blessed($package_name))
         || confess "You must pass a package name and it cannot be blessed";
 
     Class::MOP::remove_metaclass_by_name($package_name);
 
-    $class->initialize('package' => $package_name, @_);
+    $class->initialize($package_name, %options); # call with first arg form for compat
 }
 
 sub _new {
