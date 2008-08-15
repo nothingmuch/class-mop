@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 230;
+use Test::More tests => 232;
 use Test::Exception;
 
 BEGIN {
@@ -49,6 +49,8 @@ my @class_mop_module_methods = qw(
 
 my @class_mop_class_methods = qw(
     _new
+
+    is_pristine
 
     initialize create
     

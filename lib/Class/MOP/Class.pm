@@ -980,6 +980,25 @@ sub find_attribute_by_name {
     return;
 }
 
+# check if we can reinitialize
+sub is_pristine {
+    my $self = shift;
+
+    # if any local attr is defined
+    return if $self->get_attribute_list;
+
+    # or any non-declared methods
+    if ( my @methods = values %{ $self->get_method_map } ) {
+        my $metaclass = $self->method_metaclass;
+        foreach my $method ( @methods ) {
+            return if $method->isa("Class::MOP::Method::Generated");
+            # FIXME do we need to enforce this too? return unless $method->isa($metaclass);
+        }
+    }
+
+    return 1;
+}
+
 ## Class closing
 
 sub is_mutable   { 1 }
@@ -1374,6 +1393,11 @@ This returns true if the class is still mutable.
 =item B<is_immutable>
 
 This returns true if the class has been made immutable.
+
+=item B<is_pristine>
+
+Checks whether the class has any data that will be lost if C<reinitialize> is
+called.
 
 =back
 
