@@ -587,6 +587,20 @@ sub class_precedence_list {
 
 ## Methods
 
+sub wrap_method_body {
+    my ( $self, %args ) = @_;
+
+    my $body = delete $args{body}; # delete is for compat
+
+    ('CODE' eq ref($body))
+        || confess "Your code block must be a CODE reference";
+
+    $self->method_metaclass->wrap( $body => (
+        package_name => $self->name,
+        %args,
+    ));
+}
+
 sub add_method {
     my ($self, $method_name, $method) = @_;
     (defined $method_name && $method_name)
@@ -608,14 +622,7 @@ sub add_method {
     }
     else {
         $body = $method;
-        ('CODE' eq ref($body))
-            || confess "Your code block must be a CODE reference";
-        $method = $self->method_metaclass->wrap(
-            $body => (
-                package_name => $self->name,
-                name         => $method_name
-            )
-        );
+        $method = $self->wrap_method_body( body => $body, name => $method_name );
     }
 
     $method->attach_to_class($self);
@@ -1442,7 +1449,11 @@ Returns a HASH ref of name to CODE reference mapping for this class.
 Returns the class name of the method metaclass, see L<Class::MOP::Method> 
 for more information on the method metaclasses.
 
-=item B<add_method ($method_name, $method)>
+=item B<wrap_method_body(%attrs)>
+
+Wrap a code ref (C<$attrs{body>) with C<method_metaclass>.
+
+=item B<add_method ($method_name, $method, %attrs)>
 
 This will take a C<$method_name> and CODE reference to that
 C<$method> and install it into the class's package.

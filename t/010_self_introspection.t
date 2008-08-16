@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 232;
+use Test::More tests => 234;
 use Test::Exception;
 
 BEGIN {
@@ -73,7 +73,7 @@ my @class_mop_class_methods = qw(
 
     superclasses subclasses class_precedence_list linearized_isa
 
-    has_method get_method add_method remove_method alias_method
+    has_method get_method add_method remove_method alias_method wrap_method_body
     get_method_list get_method_map get_all_methods compute_all_applicable_methods
         find_method_by_name find_all_methods_by_name find_next_method_by_name
 
