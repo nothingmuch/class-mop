@@ -46,7 +46,8 @@ BEGIN {
         : sub () { 1 };
 }
 
-our $VERSION   = '0.65';
+our $VERSION   = '0.64_01';
+$VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
     
 # after that everything is loaded, if we're allowed try to load faster XS
