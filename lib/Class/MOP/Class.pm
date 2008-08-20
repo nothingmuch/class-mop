@@ -720,6 +720,8 @@ sub alias_method {
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name } => $body
     );
+
+    $self->update_package_cache_flag; # the method map will not list aliased methods
 }
 
 sub has_method {
