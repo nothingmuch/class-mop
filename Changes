@@ -8,17 +8,33 @@ Revision history for Perl extension Class-MOP.
         without a compiler (like Windows). (Dave Rolsky)
 
     * many modules
+      - Perl 6 style attribute naming replaced with sane style ('methods', not
+        '%!methods'). These changes should not impact any existing API uses.
+        (nothingmuch).
+
+    * many modules
       - Quite a number of optimizations based on profiling, including
         allowing constructors to take hash references instead of
         hashes, duplicating some frequently used code in XS, and
         making constructors immutable. These changes should not impact
         any existing API uses. (nothingmuch)
 
+    * Many modules
+      - Constructors now respect the meta attributes of their subclasses,
+        facilitating MOP extensibility. More related changes will happen in the
+        next several releases. (nothingmuch)
+
     * Class::MOP::Class
-       - New method - get_all_methods (nothingmuch)
-       - New method - wrap_method was refactored out of get_method_map
-         (nothingmuch)
-       - New method - invalidate_meta_instance (nothingmuch)
+      - New method - get_all_methods, replaces the deprecated
+        compute_all_applicable_methods. get_all_attributes provided for
+        consistency (nothingmuch)
+      - New method - wrap_method was refactored out of get_method_map
+        (nothingmuch)
+      - New API for meta instance invalidation - invalidate_meta_instance,
+        invalidate_meta_instances, add_dependent_meta_instance,
+        remove_dependent_meta_instance, called automatically when attribute
+        definitions change and allows notification of dependent subclasses.
+        (nothingmuch)
 
 0.64 Sun August 3, 2008
     * Class::MOP::Immutable
