@@ -4,6 +4,8 @@ package Class::MOP;
 use strict;
 use warnings;
 
+use 5.008;
+
 use MRO::Compat;
 
 use Carp          'confess';
