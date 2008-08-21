@@ -305,6 +305,12 @@ superclass changes.
 
 Defaults to false.
 
+=item B<get_all_attributes>
+
+This will return the current list of attributes (as
+Class::MOP::Attribute objects) based on what was given to this object
+in C<new>.
+
 =back
 
 =head2 Operations on Instance Structures
