@@ -7,6 +7,8 @@ use ExtUtils::MakeMaker;
 use Config qw(%Config);
 use File::Spec;
 
+use 5.008;
+
 # If undefined, try our best, if true, require XS, if false, never do
 # XS
 my $force_xs;
@@ -23,13 +25,15 @@ unless ( defined $force_xs ) {
 }
 
 my %prereqs = (
-    'perl'          => '5.008',
-    'Scalar::Util'  => '1.18',
-    'Sub::Name'     => '0.04',
-    'Sub::Identify' => '0.03',
-    'MRO::Compat'   => '0.05',
-    'Carp'          => 0,
-    'Devel::GlobalDestruction' => 0,
+    'Scalar::Util'             => '1.18',
+    'Sub::Name'                => '0.04',
+    'Sub::Identify'            => '0.03',
+    'MRO::Compat'              => '0.05',
+    'Test::More'               => '0',
+    'Test::Exception'          => '0',
+    'File::Spec'               => '0',
+    'Carp'                     => '0',
+    'Devel::GlobalDestruction' => '0',
 );
 
 delete @prereqs{qw(Sub::Name Devel::GlobalDestruction)}
