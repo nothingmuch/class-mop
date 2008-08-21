@@ -23,6 +23,7 @@ unless ( defined $force_xs ) {
 }
 
 my %prereqs = (
+    'perl'          => '5.008',
     'Scalar::Util'  => '1.18',
     'Sub::Name'     => '0.04',
     'Sub::Identify' => '0.03',
