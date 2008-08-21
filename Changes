@@ -2,7 +2,11 @@ Revision history for Perl extension Class-MOP.
 
 0.65
     * Makefile.PL and Class::MOP
-      - explicitly require Perl 5.8.0+ (Dave Rolsky)
+      - Explicitly require Perl 5.8.0+ (Dave Rolsky)
+
+    * Makefile.PL
+      - Add missing prereqs that got lost in the switch away from
+        Module::Install.
 
 0.64_01
     * Makefile.PL
