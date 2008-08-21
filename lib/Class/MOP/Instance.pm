@@ -91,6 +91,11 @@ sub get_all_slots {
     return @{$self->{'slots'}};
 }
 
+sub get_all_attributes {
+    my $self = shift;
+    return @{$self->{attributes}};
+}
+
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
     exists $self->{'slot_hash'}->{$slot_name};

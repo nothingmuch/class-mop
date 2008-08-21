@@ -565,7 +565,7 @@ Class::MOP::Instance->meta->add_attribute(
 
 Class::MOP::Instance->meta->add_attribute(
     Class::MOP::Attribute->new('attributes',
-        reader   => { attributes => \&Class::MOP::Instance::attributes },
+        reader   => { attributes => \&Class::MOP::Instance::get_all_attributes },
     ),
 );
 
