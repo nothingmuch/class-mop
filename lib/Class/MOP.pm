@@ -28,7 +28,7 @@ BEGIN {
         require Devel::GlobalDestruction;
         Devel::GlobalDestruction->import("in_global_destruction");
         1;
-    } or *in_global_destruction = sub () { '' };
+    } or *in_global_destruction = sub () { !1 };
 }
 
 
