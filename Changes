@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.64_03 Thu August 21, 2008
+    * Class::MOP::Package
+      - Some (legit) code was misparsed by earlier 5.8.x
+        releases. (nothingmuch)
+
+    * Class::MOP
+      - Fix a constant in void context warning (nothingmuch)
+
 0.64_02 Thu August 21, 2008
     * Makefile.PL and Class::MOP
       - Explicitly require Perl 5.8.0+ (Dave Rolsky)
