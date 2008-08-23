@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.64_04
+    * Class::MOP::Class
+      - Workaround a bug in 5.8.1's goto sub
+
 0.64_03 Thu August 21, 2008
     * Class::MOP::Package
       - Some (legit) code was misparsed by earlier 5.8.x
