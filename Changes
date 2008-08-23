@@ -1,8 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
-0.64_04
+0.64_04 Sat August 23, 2008
     * Class::MOP::Class
-      - Workaround a bug in 5.8.1's goto sub
+      - Workaround a bug in 5.8.1's goto sub (nothingmuch)
+
+    * pod.t and pod_coveraget.t
+      - These are no longer shipped with the tarball because of bogus
+        failures from CPAN testers. (Dave Rolsky)
 
 0.64_03 Thu August 21, 2008
     * Class::MOP::Package

@@ -90,5 +90,3 @@ t/lib/MyMetaClass/Attribute.pm
 t/lib/MyMetaClass/Instance.pm
 t/lib/MyMetaClass/Method.pm
 t/lib/SyntaxError.pm
-t/pod.t
-t/pod_coverage.t
