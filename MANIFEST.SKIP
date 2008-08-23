@@ -20,3 +20,5 @@ bench
 ^TODO$
 ^MOP.(bs|c|o)$
 \.shipit
+t/pod\.t$
+t/pod_coverage\.t$
