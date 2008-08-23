@@ -1115,7 +1115,12 @@ sub create_immutable_transformer {
                 my $original = shift;
                 confess "Cannot add package symbols to an immutable metaclass" 
                     unless (caller(2))[3] eq 'Class::MOP::Package::get_package_symbol'; 
-                goto $original->body;
+
+                # This is a workaround for a bug in 5.8.1 which thinks that
+                # goto $original->body
+                # is trying to go to a label
+                my $body = $original->body;
+                goto $body;
             },
         },
     });
