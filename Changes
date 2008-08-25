@@ -1,5 +1,15 @@
 Revision history for Perl extension Class-MOP.
 
+0.64_05 Sat August 23, 2008
+    * Class::MOP
+      - None of the dev releases actually loaded the XS properly, but
+        we silently fell back to the pure Perl version of the
+        code. (Dave Rolsky)
+
+    * Class::MOP (MOP.xs)
+      - Replaced some code that used functions not available on Visual
+        C++ with some Perl XS API bits (Dave Rolsky).
+
 0.64_04 Sat August 23, 2008
     * Class::MOP::Class
       - Workaround a bug in 5.8.1's goto sub (nothingmuch)
