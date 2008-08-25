@@ -100,16 +100,12 @@ get_all_package_symbols(self, ...)
             if ( type_filter && SvPOK(type_filter) ) {
                 const char *const type = SvPV_nolen(type_filter);
 
-
                 while ((he = hv_iternext(stash))) {
                     SV *const gv = HeVAL(he);
                     SV *sv;
-                    char *package = HvNAME(stash);
-                    STRLEN pkglen = strlen(package);
                     char *key;
                     STRLEN keylen;
-                    char *fq;
-                    STRLEN fqlen;
+                    SV *fq;
 
                     switch( SvTYPE(gv) ) {
                         case SVt_PVGV:
@@ -125,12 +121,13 @@ get_all_package_symbols(self, ...)
                             break;
                         case SVt_RV:
                             /* BAH! constants are horrible */
+
+                            /* we don't really care about the length,
+                               but that's the API */
                             key = HePV(he, keylen);
-                            fqlen = pkglen + keylen + 3;
-                            fq = (char *)alloca(fqlen);
-                            snprintf(fq, fqlen, "%s::%s", package, key);
-                            sv = (SV*)get_cv(fq, 0);
-                            sv_2mortal(sv);
+                            char *package = HvNAME(stash);
+                            fq = newSVpvf("%s::%s", package, key);
+                            sv = sv_2mortal((SV*)get_cv(SvPV_nolen(fq), 0));
                             break;
                         default:
                             continue;
