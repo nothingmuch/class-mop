@@ -49,6 +49,7 @@ BEGIN {
 }
 
 our $VERSION   = '0.64_04';
+our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
     
@@ -59,7 +60,7 @@ unless ($ENV{CLASS_MOP_NO_XS}) {
         local $@;
         eval {
             require XSLoader;
-            __PACKAGE__->XSLoader::load($VERSION);
+            __PACKAGE__->XSLoader::load($XS_VERSION);
         };
         $@;
     };
