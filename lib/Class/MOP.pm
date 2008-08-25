@@ -48,7 +48,7 @@ BEGIN {
         : sub () { 1 };
 }
 
-our $VERSION   = '0.64_05';
+our $VERSION   = '0.64_06';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    

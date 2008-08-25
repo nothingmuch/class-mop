@@ -105,6 +105,7 @@ get_all_package_symbols(self, ...)
                     SV *sv;
                     char *key;
                     STRLEN keylen;
+                    char *package;
                     SV *fq;
 
                     switch( SvTYPE(gv) ) {
@@ -125,7 +126,7 @@ get_all_package_symbols(self, ...)
                             /* we don't really care about the length,
                                but that's the API */
                             key = HePV(he, keylen);
-                            char *package = HvNAME(stash);
+                            package = HvNAME(stash);
                             fq = newSVpvf("%s::%s", package, key);
                             sv = sv_2mortal((SV*)get_cv(SvPV_nolen(fq), 0));
                             break;

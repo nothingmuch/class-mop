@@ -1,6 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
-0.64_05 Sat August 23, 2008
+0.64_06 Mon August 25, 2008
+    * Class::MOP (MOP.xs)
+      - Another MS VC++ fix, cannot declare a variable in the middle
+        of a scope (Taro Nishino).
+
+0.64_05 Sun August 24, 2008
     * Class::MOP
       - None of the dev releases actually loaded the XS properly, but
         we silently fell back to the pure Perl version of the
