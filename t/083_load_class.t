@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 14;
+use Test::More tests => 15;
 use Test::Exception;
 
 require Class::MOP;
@@ -14,6 +14,7 @@ ok(!Class::MOP::is_class_loaded(\"foo"), "can't load a class name reference??");
 throws_ok { Class::MOP::load_class()       } qr/Invalid class name \(undef\)/;
 throws_ok { Class::MOP::load_class('')     } qr/Invalid class name \(\)/;
 throws_ok { Class::MOP::load_class(\"foo") } qr/Invalid class name \(SCALAR\(\w+\)\)/;
+throws_ok { Class::MOP::load_class('bogus name') } qr/Invalid class name \(bogus name\)/;
 
 my $meta = Class::MOP::load_class('BinaryTree');
 ok($meta, "successfully loaded the class BinaryTree");
@@ -40,4 +41,7 @@ throws_ok {
     use constant foo => "bar";
 }
 
-lives_ok { ok(Class::MOP::is_class_loaded("Other")) } "a class with just constants is still a class";
+lives_ok {
+    ok( Class::MOP::is_class_loaded("Other"), 'is_class_loaded(Other)' );
+}
+"a class with just constants is still a class";

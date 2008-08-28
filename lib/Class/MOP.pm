@@ -96,7 +96,10 @@ unless ($ENV{CLASS_MOP_NO_XS}) {
 sub load_class {
     my $class = shift;
 
-    if (ref($class) || !defined($class) || !length($class)) {
+    if (   ref($class)
+        || !defined($class)
+        || !length($class)
+        || $class !~ /^\w+(?::\w+)*$/ ) {
         my $display = defined($class) ? $class : 'undef';
         confess "Invalid class name ($display)";
     }
