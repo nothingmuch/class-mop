@@ -96,10 +96,7 @@ unless ($ENV{CLASS_MOP_NO_XS}) {
 sub load_class {
     my $class = shift;
 
-    if (   ref($class)
-        || !defined($class)
-        || !length($class)
-        || $class !~ /^\w+(?::\w+)*$/ ) {
+    unless ( _is_valid_class_name($class) ) {
         my $display = defined($class) ? $class : 'undef';
         confess "Invalid class name ($display)";
     }
@@ -118,6 +115,18 @@ sub load_class {
     }
 
     return get_metaclass_by_name($class) if defined wantarray;
+}
+
+sub _is_valid_class_name {
+    my $class = shift;
+
+    return 0 if ref($class);
+    return 0 unless defined($class);
+    return 0 unless length($class);
+
+    return 1 if $class =~ /^\w+(?:::\w+)*$/;
+
+    return 0;
 }
 
 sub is_class_loaded {

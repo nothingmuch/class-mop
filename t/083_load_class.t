@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 15;
+use Test::More tests => 19;
 use Test::Exception;
 
 require Class::MOP;
@@ -11,9 +11,13 @@ ok(!Class::MOP::is_class_loaded(), "is_class_loaded with no argument returns fal
 ok(!Class::MOP::is_class_loaded(''), "can't load the empty class");
 ok(!Class::MOP::is_class_loaded(\"foo"), "can't load a class name reference??");
 
-throws_ok { Class::MOP::load_class()       } qr/Invalid class name \(undef\)/;
-throws_ok { Class::MOP::load_class('')     } qr/Invalid class name \(\)/;
-throws_ok { Class::MOP::load_class(\"foo") } qr/Invalid class name \(SCALAR\(\w+\)\)/;
+ok(!Class::MOP::_is_valid_class_name(undef), 'undef is not a valid class name');
+ok(!Class::MOP::_is_valid_class_name(''), 'empty string is not a valid class name');
+ok(!Class::MOP::_is_valid_class_name(\"foo"), 'a reference is not a valid class name');
+ok(!Class::MOP::_is_valid_class_name('bogus name'), q{'bogus name' is not a valid class name});
+ok(Class::MOP::_is_valid_class_name('Foo'), q{'Foo' is a valid class name});
+ok(Class::MOP::_is_valid_class_name('Foo::Bar'), q{'Foo::Bar' is a valid class name});
+ok(Class::MOP::_is_valid_class_name('Foo_::Bar2'), q{'Foo_::Bar2' is a valid class name});
 throws_ok { Class::MOP::load_class('bogus name') } qr/Invalid class name \(bogus name\)/;
 
 my $meta = Class::MOP::load_class('BinaryTree');
@@ -42,6 +46,6 @@ throws_ok {
 }
 
 lives_ok {
-    ok( Class::MOP::is_class_loaded("Other"), 'is_class_loaded(Other)' );
+    ok(Class::MOP::is_class_loaded("Other"), 'is_class_loaded(Other)');
 }
 "a class with just constants is still a class";
