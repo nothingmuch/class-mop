@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+0.6?
+    * Class::MOP
+      - Class::MOP::load_class loaded modules by turning them into
+        paths, now we just use eval "require $module". This appears to
+        fix some subtle bugs related to load order in Moose. (Dave
+        Rolsky)
+
 0.64_06 Mon August 25, 2008
     * Class::MOP (MOP.xs)
       - Another MS VC++ fix, cannot declare a variable in the middle
