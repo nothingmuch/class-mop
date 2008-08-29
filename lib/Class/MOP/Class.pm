@@ -169,9 +169,9 @@ sub check_metaclass_compatability {
         # we also need to check that instance metaclasses
         # are compatabile in the same the class.
         ($self->instance_metaclass->isa($meta->instance_metaclass))
-            || confess $self->name . "->meta => (" . ($self->instance_metaclass) . ")" .
+            || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $class_name . "->meta => (" . ($meta->instance_metaclass) . ")";
+                       $class_name . "->meta->instance_metaclass => (" . ($meta->instance_metaclass) . ")";
     }
 }
 
