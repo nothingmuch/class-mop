@@ -7,7 +7,7 @@ Revision history for Perl extension Class-MOP.
         fix some subtle bugs related to load order in Moose. (Dave
         Rolsky)
 
-0.64_06 Mon August 25, 2008
+0.64_07 Mon August 25, 2008
     * Class::MOP (MOP.xs)
       - Another MS VC++ fix, cannot declare a variable in the middle
         of a scope (Taro Nishino).
