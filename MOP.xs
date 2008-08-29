@@ -169,7 +169,7 @@ name(self)
         else
             ST(0) = &PL_sv_undef;
 
-MODULE = Class::MOP   PACKAGE = Class::Attribute
+MODULE = Class::MOP   PACKAGE = Class::MOP::Attribute
 
 SV *
 name(self)
@@ -182,18 +182,7 @@ name(self)
         else
             ST(0) = &PL_sv_undef;
 
-MODULE = Class::MOP   PACKAGE = Class::Method
-
-SV *
-name(self)
-    SV *self
-    PREINIT:
-        register HE *he;
-    PPCODE:
-        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
-            XPUSHs(HeVAL(he));
-        else
-            ST(0) = &PL_sv_undef;
+MODULE = Class::MOP   PACKAGE = Class::MOP::Method
 
 SV *
 body(self)
