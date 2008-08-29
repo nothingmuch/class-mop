@@ -11,8 +11,6 @@ use MRO::Compat;
 use Carp          'confess';
 use Scalar::Util  'weaken';
 
-use Sub::Identify 'get_code_info';
-
 BEGIN {
     local $@;
     eval {
@@ -55,18 +53,33 @@ our $AUTHORITY = 'cpan:STEVAN';
     
 # after that everything is loaded, if we're allowed try to load faster XS
 # versions of various things
-unless ($ENV{CLASS_MOP_NO_XS}) {
+_try_load_xs() or _load_pure_perl();
+
+sub _try_load_xs {
+    return if $ENV{CLASS_MOP_NO_XS};
+
     my $e = do {
         local $@;
         eval {
             require XSLoader;
+            # just doing this - no warnings 'redefine' - doesn't work
+            # for some reason
+            local $^W = 0;
             __PACKAGE__->XSLoader::load($XS_VERSION);
         };
         $@;
     };
 
     die $e if $e && $e !~ /object version|loadable object/;
+
+    return $e ? 0 : 1;
 }
+
+sub _load_pure_perl {
+    require Sub::Identify;
+    Sub::Identify->import('get_code_info');
+}
+
 
 {
     # Metaclasses are singletons, so we cache them here.
