@@ -13,6 +13,9 @@ U32 hash_name;
 SV *key_package;
 U32 hash_package;
 
+SV *key_package_name;
+U32 hash_package_name;
+
 SV *key_body;
 U32 hash_body;
 
@@ -29,10 +32,12 @@ BOOT:
     key_name = newSVpvs("name");
     key_body = newSVpvs("body");
     key_package = newSVpvs("package");
+    key_package_name = newSVpvs("package_name");
 
     PERL_HASH(hash_name, "name", 4);
     PERL_HASH(hash_body, "body", 4);
     PERL_HASH(hash_package, "package", 7);
+    PERL_HASH(hash_package_name, "package_name", 12);
 
 
 PROTOTYPES: ENABLE
@@ -185,12 +190,46 @@ name(self)
 MODULE = Class::MOP   PACKAGE = Class::MOP::Method
 
 SV *
+name(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (! SvROK(self)) {
+            die("Cannot call name as a class method");
+        }
+
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
+
+SV *
+package_name(self)
+    SV *self
+    PREINIT:
+        register HE *he;
+    PPCODE:
+        if (! SvROK(self)) {
+            die("Cannot call package_name as a class method");
+        }
+
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name))
+            XPUSHs(HeVAL(he));
+        else
+            ST(0) = &PL_sv_undef;
+
+SV *
 body(self)
     SV *self
     PREINIT:
         register HE *he;
     PPCODE:
-        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)))
+        if (! SvROK(self)) {
+            die("Cannot call body as a class method");
+        }
+
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
