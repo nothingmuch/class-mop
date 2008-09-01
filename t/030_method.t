@@ -22,13 +22,13 @@ is($method->package_name, 'main', '... our package is main::');
 is($method->name, '__ANON__', '... our sub name is __ANON__');
 is($method->fully_qualified_name, 'main::__ANON__', '... our subs full name is main::__ANON__');
 
-dies_ok { Class::MOP::Method->wrap } '... cant call wrap() without some code';
-dies_ok { Class::MOP::Method->wrap([]) } '... cant call wrap() without some code';
-dies_ok { Class::MOP::Method->wrap(bless {} => 'Fail') } '... cant call wrap() without some code';
+dies_ok { Class::MOP::Method->wrap } q{... can't call wrap() without some code};
+dies_ok { Class::MOP::Method->wrap([]) } q{... can't call wrap() without some code};
+dies_ok { Class::MOP::Method->wrap(bless {} => 'Fail') } q{... can't call wrap() without some code};
 
-dies_ok { Class::MOP::Method->name } '... cant call name() with a class';
-dies_ok { Class::MOP::Method->package_name } '... cant call package_name() with a class';
-dies_ok { Class::MOP::Method->fully_qualified_name } '... cant call fully_qualified_name() with a class';
+dies_ok { Class::MOP::Method->name } q{... can't call name() with a class};
+dies_ok { Class::MOP::Method->package_name } q{... can't call package_name() with a class};
+dies_ok { Class::MOP::Method->fully_qualified_name } q{... can't call fully_qualified_name() with a class};
 
 my $meta = Class::MOP::Method->meta;
 isa_ok($meta, 'Class::MOP::Class');
