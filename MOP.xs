@@ -85,6 +85,9 @@ get_all_package_symbols(self, ...)
         SV *type_filter = NULL;
         register HE *he;
     PPCODE:
+        if (! SvROK(self)) {
+            die("Cannot call get_all_package_symbols as a class method");
+        }
 
         switch ( GIMME_V ) {
             case G_VOID: return; break;
@@ -95,7 +98,7 @@ get_all_package_symbols(self, ...)
 
         PUTBACK;
 
-        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package))
             stash = gv_stashsv(HeVAL(he),0);
 
         if ( stash ) {
@@ -169,7 +172,11 @@ name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+        if (! SvROK(self)) {
+            die("Cannot call name as a class method");
+        }
+
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -182,7 +189,11 @@ name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (SvROK(self) && (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
+        if (! SvROK(self)) {
+            die("Cannot call name as a class method");
+        }
+
+        if (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;

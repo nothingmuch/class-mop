@@ -5,13 +5,15 @@ use warnings;
 
 use Scalar::Util 'reftype', 'blessed';
 
-use Test::More tests => 101;
+use Test::More tests => 100;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-    use_ok('Class::MOP::Attribute');
-}
+use Class::MOP;
+use Class::MOP::Attribute;
+
+
+dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class method};
+
 
 {
     my $attr = Class::MOP::Attribute->new('$foo');

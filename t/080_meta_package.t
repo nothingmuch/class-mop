@@ -6,10 +6,12 @@ use warnings;
 use Test::More tests => 97;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');        
-    use_ok('Class::MOP::Package');            
-}
+use Class::MOP;
+use Class::MOP::Package;
+
+
+dies_ok { Class::MOP::Package->get_all_package_symbols } q{... can't call get_all_package_symbols() as a class method};
+dies_ok { Class::MOP::Package->name } q{... can't call name() as a class method};
 
 {
     package Foo;
