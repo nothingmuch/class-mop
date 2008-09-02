@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 19;
+use Test::More tests => 22;
 use Test::Exception;
 
 require Class::MOP;
@@ -30,7 +30,12 @@ do {
     sub method {}
 };
 
-ok(Class::MOP::load_class('Class'), "this should not die!");
+
+my $ret = Class::MOP::load_class('Class');
+ok($ret, "this should not die!");
+is( $ret, "Class", "class name returned" );
+
+ok( !Class::MOP::does_metaclass_exist("Class"), "no metaclass for non MOP class" );
 
 throws_ok {
     Class::MOP::load_class('FakeClassOhNo');
@@ -49,3 +54,10 @@ lives_ok {
     ok(Class::MOP::is_class_loaded("Other"), 'is_class_loaded(Other)');
 }
 "a class with just constants is still a class";
+
+{
+    package Lala;
+    use metaclass;
+}
+
+isa_ok( Class::MOP::load_class("Lala"), "Class::MOP::Class", "when an object has a metaclass it is returned" );

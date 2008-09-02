@@ -121,13 +121,7 @@ sub load_class {
         confess "Could not load class ($class) because : $e" if $e;
     }
 
-    # initialize a metaclass if necessary
-    unless (does_metaclass_exist($class)) {
-        my $e = do { local $@; eval { Class::MOP::Class->initialize($class) }; $@ };
-        confess "Could not initialize class ($class) because : $e" if $e;
-    }
-
-    return get_metaclass_by_name($class) if defined wantarray;
+    get_metaclass_by_name($class) || $class if defined wantarray;
 }
 
 sub _is_valid_class_name {
