@@ -844,7 +844,10 @@ subclasses of a certain class.
 
 =head2 Utility functions
 
-Note that these are all called as B<functions, not methods>.
+Note that these are all called as B<functions, not methods>. They are
+"public" in the sense that they're documented for use by other
+Class::MOP and Moose modules, but they're not really intended for use
+in end-user code.
 
 =over 4
 
