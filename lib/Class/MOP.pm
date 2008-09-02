@@ -844,6 +844,8 @@ subclasses of a certain class.
 
 =head2 Utility functions
 
+Note that these are all called as B<functions, not methods>.
+
 =over 4
 
 =item B<load_class ($class_name)>
