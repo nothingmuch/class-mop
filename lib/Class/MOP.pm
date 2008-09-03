@@ -11,24 +11,6 @@ use MRO::Compat;
 use Carp          'confess';
 use Scalar::Util  'weaken';
 
-BEGIN {
-    local $@;
-    eval {
-        require Sub::Name;
-        Sub::Name->import(qw(subname));
-        1
-    } or eval 'sub subname { $_[1] }';
-
-    # this is either part of core or set up appropriately by MRO::Compat
-    *check_package_cache_flag = \&mro::get_pkg_gen;
-
-    eval {
-        require Devel::GlobalDestruction;
-        Devel::GlobalDestruction->import("in_global_destruction");
-        1;
-    } or *in_global_destruction = sub () { !1 };
-}
-
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -44,6 +26,9 @@ BEGIN {
     *HAVE_ISAREV = defined(&mro::get_isarev)
         ? sub () { 1 }
         : sub () { 1 };
+
+    # this is either part of core or set up appropriately by MRO::Compat
+    *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
 our $VERSION   = '0.65';
@@ -66,6 +51,12 @@ sub _try_load_xs {
             # for some reason
             local $^W = 0;
             __PACKAGE__->XSLoader::load($XS_VERSION);
+
+            require Sub::Name;
+            Sub::Name->import(qw(subname));
+
+            require Devel::GlobalDestruction;
+            Devel::GlobalDestruction->import("in_global_destruction");
         };
         $@;
     };
@@ -78,6 +69,9 @@ sub _try_load_xs {
 sub _load_pure_perl {
     require Sub::Identify;
     Sub::Identify->import('get_code_info');
+
+    *subname = sub { $_[1] };
+    *in_global_destruction = sub () { !1 }
 }
 
 
