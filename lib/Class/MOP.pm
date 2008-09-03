@@ -844,10 +844,7 @@ subclasses of a certain class.
 
 =head2 Utility functions
 
-Note that these are all called as B<functions, not methods>. They are
-"public" in the sense that they're documented for use by other
-Class::MOP and Moose modules, but they're not really intended for use
-in end-user code.
+Note that these are all called as B<functions, not methods>.
 
 =over 4
 
@@ -869,6 +866,8 @@ is probably correct about 99% of the time.
 
 =item B<check_package_cache_flag ($pkg)>
 
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
+
 This will return an integer that is managed by C<Class::MOP::Class>
 to determine if a module's symbol table has been altered. 
 
@@ -877,6 +876,8 @@ versions prior to 5.10, this will use the C<PL_sub_generation> variable
 which is not package specific. 
 
 =item B<get_code_info ($code)>
+
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
 This function returns two values, the name of the package the C<$code> 
 is from and the name of the C<$code> itself. This is used by several 
@@ -891,6 +892,8 @@ as C<Sub::Name::subname> does, otherwise it will just return the C<$code>
 argument.
 
 =item B<in_global_destruction>
+
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
 If L<Devel::GlobalDestruction> is available, this returns true under global
 destruction.
