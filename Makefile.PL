@@ -39,6 +39,10 @@ my %prereqs = (
 delete @prereqs{qw(Sub::Name Devel::GlobalDestruction)}
     unless $has_compiler;
 
+if ($has_compiler && is_maintainer()) {
+    create_pp_tests();
+}
+
 write_makefile();
 
 sub write_makefile {
@@ -50,7 +54,7 @@ sub write_makefile {
         PREREQ_PM     => \%prereqs,
         CONFIGURE     => \&init,
         CCFLAGS       => $ccflags,
-        clean         => { FILES => 'test.c test.o' },
+        clean         => { FILES => 'test.c test.o t/pp*' },
         ABSTRACT_FROM => 'lib/Class/MOP.pm',
         AUTHOR        => 'Stevan Little <stevan@iinteractive.com>',
         LICENSE       => 'perl',
@@ -114,6 +118,43 @@ EOF
     unlink $_ for grep {-f} 'test.c', "test$Config{obj_ext}";
 
     return 1;
+}
+
+# This sucks, but it's the best guess we can make. Since we just use
+# it to run two sets of tests, it's not big deal if it ends up true
+# for a non-maintainer.
+sub is_maintainer {
+    return 0 if $ENV{PERL5_CPAN_IS_RUNNING} || $ENV{PERL5_CPANPLUS_IS_RUNNING};
+
+    return 1;
+}
+
+sub create_pp_tests {
+    opendir my $dh, 't' or die "Cannot read t: $!";
+
+    foreach my $file ( grep {/^\d.+\.t$/} readdir $dh ) {
+        next if $file =~ /^99/;
+
+        my $real_file = File::Spec->catfile( 't', $file );
+
+        open my $fh, '<', $real_file
+            or die "Cannot read $real_file: $!";
+
+        my $shbang = <$fh>;
+        my $test = do { local $/; <$fh> };
+
+        close $fh;
+
+        $test = "$shbang\nBEGIN { \$ENV{CLASS_MOP_NO_XS} = 1 }\n\n$test";
+
+        my $new_file = File::Spec->catfile( 't', "pp_$file" );
+        open my $new_fh, '>', $new_file
+            or die "Cannot write to $new_file: $!";
+
+        print $new_fh $test;
+
+        close $new_fh;
+    }
 }
 
 # This is EUMM voodoo
