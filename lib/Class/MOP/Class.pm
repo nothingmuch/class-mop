@@ -212,7 +212,7 @@ sub check_metaclass_compatability {
     sub DESTROY {
         my $self = shift;
 
-        return if Class::MOP::in_global_destruction; # it'll happen soon anyway and this just makes things more complicated
+        return if Class::MOP::in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
