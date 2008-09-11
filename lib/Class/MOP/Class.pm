@@ -710,19 +710,9 @@ sub add_method {
 }
 
 sub alias_method {
-    my ($self, $method_name, $method) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
+    my $self = shift;
 
-    my $body = (blessed($method) ? $method->body : $method);
-    ('CODE' eq ref($body))
-        || confess "Your code block must be a CODE reference";
-
-    $self->add_package_symbol(
-        { sigil => '&', type => 'CODE', name => $method_name } => $body
-    );
-
-    $self->update_package_cache_flag; # the method map will not list aliased methods
+    $self->add_method(@_);
 }
 
 sub has_method {
@@ -1463,24 +1453,19 @@ Wrap a code ref (C<$attrs{body>) with C<method_metaclass>.
 
 =item B<add_method ($method_name, $method, %attrs)>
 
-This will take a C<$method_name> and CODE reference to that
-C<$method> and install it into the class's package.
+This will take a C<$method_name> and CODE reference or meta method
+objectand install it into the class's package.
+
+You are strongly encouraged to pass a meta method object instead of a
+code reference. If you do so, that object gets stored as part of the
+class's method map, providing more useful information about the method
+for introspection.
 
 B<NOTE>:
 This does absolutely nothing special to C<$method>
 other than use B<Sub::Name> to make sure it is tagged with the
 correct name, and therefore show up correctly in stack traces and
 such.
-
-=item B<alias_method ($method_name, $method)>
-
-This will take a C<$method_name> and CODE reference to that
-C<$method> and alias the method into the class's package.
-
-B<NOTE>:
-Unlike C<add_method>, this will B<not> try to name the
-C<$method> using B<Sub::Name>, it only aliases the method in
-the class's package.
 
 =item B<has_method ($method_name)>
 
@@ -1568,6 +1553,11 @@ once, and in the correct order.
 This will return the first method to match a given C<$method_name> in
 the superclasses, this is basically equivalent to calling
 C<SUPER::$method_name>, but it can be dispatched at runtime.
+
+=item B<alias_method ($method_name, $method)>
+
+B<NOTE>: This method is now deprecated. Just use C<add_method>
+instead.
 
 =back
 

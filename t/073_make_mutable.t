@@ -71,10 +71,10 @@ BEGIN {
 
     ok(! $meta->has_method('zxy')             ,'...  we dont have the aliased method yet');    
     ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
-    ok(! $meta->has_method('zxy')             ,'...  the aliased method does not register (correctly)');    
+    ok( $meta->has_method('zxy')             ,'...  the aliased method does register');    
     is( Baz->zxy, 'xxx',                      '... method zxy works');
     ok( $meta->remove_method('xyz'),          '... removed method');
-    ok(! $meta->remove_method('zxy'),          '... removed aliased method');
+    ok( $meta->remove_method('zxy'),          '... removed aliased method');
 
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok(Baz->can('fickle'),                '... Baz can fickle');
@@ -169,7 +169,7 @@ BEGIN {
     ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
     is( $instance->zxy, 'xxx',                '... method zxy works');
     ok( $meta->remove_method('xyz'),          '... removed method');
-    ok( !$meta->remove_method('zxy'),          '... removed aliased method');
+    ok( $meta->remove_method('zxy'),          '... removed aliased method');
 
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok($instance->can('fickle'),          '... instance can fickle');

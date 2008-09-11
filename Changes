@@ -6,6 +6,11 @@ Revision history for Perl extension Class-MOP.
         XS, which should help us catch skew between the XS/pure Perl
         code (Dave Rolsky)
 
+    * Class::MOP::Class
+      - The alias_method method has been deprecated. It now simply
+        calls add_method instead. This means there is no distinction
+        between aliased methods and "real" methods. (Dave Rolsky)
+
 0.65 Mon September 1, 2008
     For those not following the series of dev releases, the changes
     from 0.64 from 0.65 can mostly be summed up as a lot performance

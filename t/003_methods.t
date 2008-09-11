@@ -155,7 +155,7 @@ for my $method_name (qw/
 
 $Foo->alias_method('alias_me' => Foo::Aliasing->meta->get_method('alias_me'));
 
-ok(!$Foo->has_method('alias_me'), '... !Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
+ok($Foo->has_method('alias_me'), '... Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
 ok(defined &Foo::alias_me, '... Foo does have a symbol table slow for alias_me though');
 
 ok(!$Foo->has_method('blessed'), '... !Foo->has_method(blessed) (imported into Foo)');
@@ -166,7 +166,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob foo) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob foo) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -174,6 +174,7 @@ is_deeply(
     [
         map { $Foo->get_method($_) } qw(
             FOO_CONSTANT
+            alias_me
             baaz            
             bang 
             bar 
@@ -192,7 +193,7 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob) ],
     '... got the right method list for Foo');
 
 
@@ -230,6 +231,7 @@ is_deeply(
     [ sort { $a->name cmp $b->name } $Bar->get_all_methods() ],
     [
         $Foo->get_method('FOO_CONSTANT'),
+        $Foo->get_method('alias_me'),
         $Foo->get_method('baaz'),
         $Foo->get_method('bang'),
         $Bar->get_method('bar'),
