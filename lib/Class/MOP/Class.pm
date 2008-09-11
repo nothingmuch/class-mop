@@ -591,15 +591,13 @@ sub class_precedence_list {
 sub wrap_method_body {
     my ( $self, %args ) = @_;
 
-    my $body = delete $args{body}; # delete is for compat
-
-    ('CODE' eq ref($body))
+    ('CODE' eq ref $args{body})
         || confess "Your code block must be a CODE reference";
 
-    $self->method_metaclass->wrap( $body => (
+    $self->method_metaclass->wrap(
         package_name => $self->name,
         %args,
-    ));
+    );
 }
 
 sub add_method {
