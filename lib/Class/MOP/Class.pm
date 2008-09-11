@@ -612,9 +612,7 @@ sub add_method {
         $body = $method->body;
         if ($method->package_name ne $self->name && 
             $method->name         ne $method_name) {
-            warn "Hello there, got something for you." 
-                . " Method says " . $method->package_name . " " . $method->name
-                . " Class says " . $self->name . " " . $method_name;
+            warn "CLONING method\n";
             $method = $method->clone(
                 package_name => $self->name,
                 name         => $method_name            

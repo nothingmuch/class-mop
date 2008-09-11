@@ -488,9 +488,18 @@ Class::MOP::Method->meta->add_attribute(
     ))
 );
 
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('original_method' => (
+        reader   => { 'original_method'      => \&Class::MOP::Method::original_method },
+        writer   => { '_set_original_method' => \&Class::MOP::Method::_set_original_method },
+    ))
+);
+
 Class::MOP::Method->meta->add_method('clone' => sub {
     my $self  = shift;
-    $self->meta->clone_object($self, @_);
+    my $clone = $self->meta->clone_object($self, @_);
+    $clone->_set_original_method($self);
+    return $clone;
 });
 
 ## --------------------------------------------------------

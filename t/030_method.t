@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 39;
 use Test::Exception;
 
 use Class::MOP;
@@ -20,6 +20,10 @@ is($method->meta, Class::MOP::Method->meta, '... instance and class both lead to
 is($method->package_name, 'main', '... our package is main::');
 is($method->name, '__ANON__', '... our sub name is __ANON__');
 is($method->fully_qualified_name, 'main::__ANON__', '... our subs full name is main::__ANON__');
+is($method->original_method, undef, '... no original_method ');
+is($method->original_package_name, 'main', '... the original_package_name is the same as package_name');
+is($method->original_name, '__ANON__', '... the original_name is the same as name');
+is($method->original_fully_qualified_name, 'main::__ANON__', '... the original_fully_qualified_name is the same as fully_qualified_name');
 
 dies_ok { Class::MOP::Method->wrap } q{... can't call wrap() without some code};
 dies_ok { Class::MOP::Method->wrap([]) } q{... can't call wrap() without some code};
@@ -68,7 +72,16 @@ dies_ok {
     Class::MOP::Method->wrap(sub { 'FAIL' }, name => '__ANON__')
 } '... bad args for &wrap';
 
+my $clone = $method->clone(
+    package_name => 'NewPackage',
+    name         => 'new_name',
+);
 
-
-
-
+isa_ok($clone, 'Class::MOP::Method');
+is($clone->package_name, 'NewPackage', '... cloned method has new pckage name');
+is($clone->name, 'new_name', '... cloned method has new sub name');
+is($clone->fully_qualified_name, 'NewPackage::new_name', '... cloned method has new fq name');
+is($clone->original_method, $method, '... cloned method has correct original_method');
+is($clone->original_package_name, 'main', '... cloned method has correct original_package_name');
+is($clone->original_name, '__ANON__', '... cloned method has correct original_name');
+is($clone->original_fully_qualified_name, 'main::__ANON__', '... cloned method has correct original_fully_qualified_name');
