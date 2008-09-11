@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 39;
+use Test::More tests => 46;
 use Test::Exception;
 
 use Class::MOP;
@@ -78,10 +78,23 @@ my $clone = $method->clone(
 );
 
 isa_ok($clone, 'Class::MOP::Method');
-is($clone->package_name, 'NewPackage', '... cloned method has new pckage name');
+is($clone->package_name, 'NewPackage', '... cloned method has new package name');
 is($clone->name, 'new_name', '... cloned method has new sub name');
 is($clone->fully_qualified_name, 'NewPackage::new_name', '... cloned method has new fq name');
 is($clone->original_method, $method, '... cloned method has correct original_method');
 is($clone->original_package_name, 'main', '... cloned method has correct original_package_name');
 is($clone->original_name, '__ANON__', '... cloned method has correct original_name');
 is($clone->original_fully_qualified_name, 'main::__ANON__', '... cloned method has correct original_fully_qualified_name');
+
+my $clone2 = $clone->clone(
+    package_name => 'NewerPackage',
+    name         => 'newer_name',
+);
+
+is($clone2->package_name, 'NewerPackage', '... clone of clone has new package name');
+is($clone2->name, 'newer_name', '... clone of clone has new sub name');
+is($clone2->fully_qualified_name, 'NewerPackage::newer_name', '... clone of clone new fq name');
+is($clone2->original_method, $clone, '... cloned method has correct original_method');
+is($clone2->original_package_name, 'main', '... original_package_name follows clone chain');
+is($clone2->original_name, '__ANON__', '... original_name follows clone chain');
+is($clone2->original_fully_qualified_name, 'main::__ANON__', '... original_fully_qualified_name follows clone chain');
