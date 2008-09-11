@@ -1457,6 +1457,11 @@ code reference. If you do so, that object gets stored as part of the
 class's method map, providing more useful information about the method
 for introspection.
 
+When you provide a method object, this method will clone that object
+if the object's package name does not match the class name. This lets
+us track the original source of any methods added from other classes
+(notably Moose roles).
+
 B<NOTE>:
 This does absolutely nothing special to C<$method>
 other than use B<Sub::Name> to make sure it is tagged with the
