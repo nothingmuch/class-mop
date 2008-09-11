@@ -209,15 +209,26 @@ object, this returns the object that was cloned.
 This returns the original name of the CODE reference, wherever it was
 first defined.
 
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the name from the I<first> method in the chain of clones.
+
 =item B<original_package_name>
 
 This returns the original package name that the CODE reference is
 attached to, wherever it was first defined.
 
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the package name from the I<first> method in the chain of
+clones.
+
 =item B<original_fully_qualified_name>
 
 This returns the original fully qualified name of the CODE reference,
 wherever it was first defined.
+
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the fully qualified name from the I<first> method in the chain
+of clones.
 
 =back
 
