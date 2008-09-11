@@ -17,10 +17,9 @@ BEGIN {
     }
 }
 
-BEGIN {
-    use_ok('Class::MOP');   
-    use_ok('Class::MOP::Class');        
-}
+use Class::MOP;
+use Class::MOP::Class;
+use Class::MOP::Method;
 
 {   # This package tries to test &has_method 
     # as exhaustively as possible. More corner
@@ -246,4 +245,15 @@ is_deeply(
     ],
     '... got the right list of applicable methods for Bar');
 
+my $method = Class::MOP::Method->wrap(
+    name         => 'objecty',
+    package_name => 'Whatever',
+    body         => sub {q{I am an object, and I feel an object's pain}},
+);
 
+Bar->meta->add_method( $method->name, $method );
+
+my $new_method = Bar->meta->get_method('objecty');
+
+isnt( $method, $new_method, 'add_method clones method objects as they are added' );
+is( $new_method->original_method, $method, '... the cloned method has the correct original method' );

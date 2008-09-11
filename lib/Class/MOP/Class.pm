@@ -610,9 +610,7 @@ sub add_method {
     my $body;
     if (blessed($method)) {
         $body = $method->body;
-        if ($method->package_name ne $self->name && 
-            $method->name         ne $method_name) {
-            warn "CLONING method\n";
+        if ($method->package_name ne $self->name) {
             $method = $method->clone(
                 package_name => $self->name,
                 name         => $method_name            
