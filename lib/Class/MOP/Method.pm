@@ -84,8 +84,8 @@ sub package_name { (shift)->{'package_name'} }
 sub name { (shift)->{'name'} }
 
 sub fully_qualified_name {
-    my $self = shift;
-    $self->package_name . '::' . $self->name;
+    my $code = shift;
+    $code->package_name . '::' . $code->name;
 }
 
 # NOTE:
