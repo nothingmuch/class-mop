@@ -1,15 +1,23 @@
 Revision history for Perl extension Class-MOP.
 
 0.66
+    !! This release has an incompatible change regarding !!
+       introspection of a class's method with Class::MOP::Class !!
+
     * Tests and XS
       - We (us maintainers) now run all tests with XS and then without
         XS, which should help us catch skew between the XS/pure Perl
         code (Dave Rolsky)
 
     * Class::MOP::Class
-      - The alias_method method has been deprecated. It now simply
+      ! The alias_method method has been deprecated. It now simply
         calls add_method instead. This means there is no distinction
-        between aliased methods and "real" methods. (Dave Rolsky)
+        between aliased methods and "real" methods.
+
+        This means that methods added via alias_method now show up as
+        part of the class's method list/map. This is backwards
+        incompatible change, but seems unlikely to break any
+        code. Famous last words. (Dave Rolsky)
 
 0.65 Mon September 1, 2008
     For those not following the series of dev releases, the changes
