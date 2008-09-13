@@ -19,6 +19,11 @@ Revision history for Perl extension Class-MOP.
         incompatible change, but seems unlikely to break any
         code. Famous last words. (Dave Rolsky)
 
+    * Class::MOP::Class
+      - Fixed the spelling of "compatibility", but we still have a
+        "check_metaclass_compatability" method for backwards
+        compatibility.
+
 0.65 Mon September 1, 2008
     For those not following the series of dev releases, the changes
     from 0.64 from 0.65 can mostly be summed up as a lot performance

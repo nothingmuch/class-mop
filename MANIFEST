@@ -53,7 +53,7 @@ t/024_attribute_initializer.t
 t/030_method.t
 t/031_method_modifiers.t
 t/040_metaclass.t
-t/041_metaclass_incompatability.t
+t/041_metaclass_incompatibility.t
 t/042_metaclass_incompatibility_dyn.t
 t/043_instance_metaclass_incompat.t
 t/044_instance_metaclass_incompat_dyn.t
