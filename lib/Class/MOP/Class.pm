@@ -85,7 +85,7 @@ sub construct_class_instance {
     }
 
     # and check the metaclass compatibility
-    $meta->check_metaclass_compatability();  
+    $meta->check_metaclass_compatibility();  
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -140,7 +140,7 @@ sub update_package_cache_flag {
     $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
-sub check_metaclass_compatability {
+sub check_metaclass_compatibility {
     my $self = shift;
 
     # this is always okay ...
@@ -167,12 +167,18 @@ sub check_metaclass_compatability {
                        $class_name . "->meta => (" . ($meta_type)     . ")";
         # NOTE:
         # we also need to check that instance metaclasses
-        # are compatabile in the same the class.
+        # are compatibile in the same the class.
         ($self->instance_metaclass->isa($meta->instance_metaclass))
             || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
                        $class_name . "->meta->instance_metaclass => (" . ($meta->instance_metaclass) . ")";
     }
+}
+
+# backwards compat for stevan's inability to spell ;)
+sub check_metaclass_compatability {
+    my $self = shift;
+    $self->check_metaclass_compatibility(@_);
 }
 
 ## ANON classes
@@ -492,7 +498,8 @@ sub superclasses {
         # be sure that the superclass is
         # not potentially creating an issues
         # we don't know about
-        $self->check_metaclass_compatability();
+
+        $self->check_metaclass_compatibility();
         $self->update_meta_instance_dependencies();
     }
     @{$self->get_package_symbol($var_spec)};
@@ -1235,7 +1242,7 @@ to use C<construct_instance> once all the bootstrapping is done. This
 method is used internally by C<initialize> and should never be called
 from outside of that method really.
 
-=item B<check_metaclass_compatability>
+=item B<check_metaclass_compatibility>
 
 This method is called as the very last thing in the
 C<construct_class_instance> method. This will check that the

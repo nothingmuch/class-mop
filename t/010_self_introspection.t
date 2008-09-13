@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 234;
+use Test::More tests => 236;
 use Test::Exception;
 
 BEGIN {
@@ -63,6 +63,7 @@ my @class_mop_class_methods = qw(
     new_object clone_object
     construct_instance construct_class_instance clone_instance
     rebless_instance
+    check_metaclass_compatibility
     check_metaclass_compatability
 
     add_meta_instance_dependencies remove_meta_instance_depdendencies update_meta_instance_dependencies
