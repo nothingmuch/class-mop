@@ -27,15 +27,15 @@ sub initialize {
     # we hand-construct the class 
     # until we can bootstrap it
     if ( my $meta = Class::MOP::get_metaclass_by_name($package_name) ) {
-       return $meta;
+        return $meta;
     } else {
-       my $meta = ( ref $class || $class )->_new({
-           'package'   => $package_name,
-       });
+        my $meta = ( ref $class || $class )->_new({
+            'package'   => $package_name,
+        });
 
-       Class::MOP::store_metaclass_by_name($package_name, $meta);
+        Class::MOP::store_metaclass_by_name($package_name, $meta);
 
-       return $meta;
+        return $meta;
     }
 }
 
