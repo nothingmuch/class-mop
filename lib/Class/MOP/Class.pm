@@ -222,6 +222,13 @@ sub check_metaclass_compatability {
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        # Moose does a weird thing where it replaces the metaclass for
+        # class when fixing metaclass incompatibility. In that case,
+        # we don't want to clean out the namespace now. We can detect
+        # that because Moose will explicitly update the singleton
+        # cache in Class::MOP.
+        return if Class::MOP::does_metaclass_exist($self->name);
+
         my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';
         foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
