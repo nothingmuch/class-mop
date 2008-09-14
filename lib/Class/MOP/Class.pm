@@ -227,7 +227,8 @@ sub check_metaclass_compatability {
         # we don't want to clean out the namespace now. We can detect
         # that because Moose will explicitly update the singleton
         # cache in Class::MOP.
-        return if Class::MOP::does_metaclass_exist($self->name);
+        my $current_meta = Class::MOP::get_metaclass_by_name($self->name);
+        return if $current_meta ne $self;
 
         my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';
