@@ -85,7 +85,7 @@ sub construct_class_instance {
     }
 
     # and check the metaclass compatibility
-    $meta->check_metaclass_compatability();  
+    $meta->check_metaclass_compatibility();  
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -140,7 +140,7 @@ sub update_package_cache_flag {
     $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
-sub check_metaclass_compatability {
+sub check_metaclass_compatibility {
     my $self = shift;
 
     # this is always okay ...
@@ -167,12 +167,18 @@ sub check_metaclass_compatability {
                        $class_name . "->meta => (" . ($meta_type)     . ")";
         # NOTE:
         # we also need to check that instance metaclasses
-        # are compatabile in the same the class.
+        # are compatibile in the same the class.
         ($self->instance_metaclass->isa($meta->instance_metaclass))
             || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
                        $class_name . "->meta->instance_metaclass => (" . ($meta->instance_metaclass) . ")";
     }
+}
+
+# backwards compat for stevan's inability to spell ;)
+sub check_metaclass_compatability {
+    my $self = shift;
+    $self->check_metaclass_compatibility(@_);
 }
 
 ## ANON classes
@@ -216,6 +222,14 @@ sub check_metaclass_compatability {
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        # Moose does a weird thing where it replaces the metaclass for
+        # class when fixing metaclass incompatibility. In that case,
+        # we don't want to clean out the namespace now. We can detect
+        # that because Moose will explicitly update the singleton
+        # cache in Class::MOP.
+        my $current_meta = Class::MOP::get_metaclass_by_name($self->name);
+        return if $current_meta ne $self;
+
         my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';
         foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
@@ -492,7 +506,8 @@ sub superclasses {
         # be sure that the superclass is
         # not potentially creating an issues
         # we don't know about
-        $self->check_metaclass_compatability();
+
+        $self->check_metaclass_compatibility();
         $self->update_meta_instance_dependencies();
     }
     @{$self->get_package_symbol($var_spec)};
@@ -591,15 +606,13 @@ sub class_precedence_list {
 sub wrap_method_body {
     my ( $self, %args ) = @_;
 
-    my $body = delete $args{body}; # delete is for compat
-
-    ('CODE' eq ref($body))
+    ('CODE' eq ref $args{body})
         || confess "Your code block must be a CODE reference";
 
-    $self->method_metaclass->wrap( $body => (
+    $self->method_metaclass->wrap(
         package_name => $self->name,
         %args,
-    ));
+    );
 }
 
 sub add_method {
@@ -610,11 +623,7 @@ sub add_method {
     my $body;
     if (blessed($method)) {
         $body = $method->body;
-        if ($method->package_name ne $self->name && 
-            $method->name         ne $method_name) {
-            warn "Hello there, got something for you." 
-                . " Method says " . $method->package_name . " " . $method->name
-                . " Class says " . $self->name . " " . $method_name;
+        if ($method->package_name ne $self->name) {
             $method = $method->clone(
                 package_name => $self->name,
                 name         => $method_name            
@@ -710,19 +719,9 @@ sub add_method {
 }
 
 sub alias_method {
-    my ($self, $method_name, $method) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
+    my $self = shift;
 
-    my $body = (blessed($method) ? $method->body : $method);
-    ('CODE' eq ref($body))
-        || confess "Your code block must be a CODE reference";
-
-    $self->add_package_symbol(
-        { sigil => '&', type => 'CODE', name => $method_name } => $body
-    );
-
-    $self->update_package_cache_flag; # the method map will not list aliased methods
+    $self->add_method(@_);
 }
 
 sub has_method {
@@ -1251,7 +1250,7 @@ to use C<construct_instance> once all the bootstrapping is done. This
 method is used internally by C<initialize> and should never be called
 from outside of that method really.
 
-=item B<check_metaclass_compatability>
+=item B<check_metaclass_compatibility>
 
 This method is called as the very last thing in the
 C<construct_class_instance> method. This will check that the
@@ -1463,24 +1462,24 @@ Wrap a code ref (C<$attrs{body>) with C<method_metaclass>.
 
 =item B<add_method ($method_name, $method, %attrs)>
 
-This will take a C<$method_name> and CODE reference to that
-C<$method> and install it into the class's package.
+This will take a C<$method_name> and CODE reference or meta method
+objectand install it into the class's package.
+
+You are strongly encouraged to pass a meta method object instead of a
+code reference. If you do so, that object gets stored as part of the
+class's method map, providing more useful information about the method
+for introspection.
+
+When you provide a method object, this method will clone that object
+if the object's package name does not match the class name. This lets
+us track the original source of any methods added from other classes
+(notably Moose roles).
 
 B<NOTE>:
 This does absolutely nothing special to C<$method>
 other than use B<Sub::Name> to make sure it is tagged with the
 correct name, and therefore show up correctly in stack traces and
 such.
-
-=item B<alias_method ($method_name, $method)>
-
-This will take a C<$method_name> and CODE reference to that
-C<$method> and alias the method into the class's package.
-
-B<NOTE>:
-Unlike C<add_method>, this will B<not> try to name the
-C<$method> using B<Sub::Name>, it only aliases the method in
-the class's package.
 
 =item B<has_method ($method_name)>
 
@@ -1568,6 +1567,11 @@ once, and in the correct order.
 This will return the first method to match a given C<$method_name> in
 the superclasses, this is basically equivalent to calling
 C<SUPER::$method_name>, but it can be dispatched at runtime.
+
+=item B<alias_method ($method_name, $method)>
+
+B<NOTE>: This method is now deprecated. Just use C<add_method>
+instead.
 
 =back
 

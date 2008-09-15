@@ -31,7 +31,7 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.65';
+our $VERSION   = '0.66';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
@@ -488,9 +488,18 @@ Class::MOP::Method->meta->add_attribute(
     ))
 );
 
+Class::MOP::Method->meta->add_attribute(
+    Class::MOP::Attribute->new('original_method' => (
+        reader   => { 'original_method'      => \&Class::MOP::Method::original_method },
+        writer   => { '_set_original_method' => \&Class::MOP::Method::_set_original_method },
+    ))
+);
+
 Class::MOP::Method->meta->add_method('clone' => sub {
     my $self  = shift;
-    $self->meta->clone_object($self, @_);
+    my $clone = $self->meta->clone_object($self, @_);
+    $clone->_set_original_method($self);
+    return $clone;
 });
 
 ## --------------------------------------------------------

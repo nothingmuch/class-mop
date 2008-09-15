@@ -17,10 +17,9 @@ BEGIN {
     }
 }
 
-BEGIN {
-    use_ok('Class::MOP');   
-    use_ok('Class::MOP::Class');        
-}
+use Class::MOP;
+use Class::MOP::Class;
+use Class::MOP::Method;
 
 {   # This package tries to test &has_method 
     # as exhaustively as possible. More corner
@@ -155,7 +154,7 @@ for my $method_name (qw/
 
 $Foo->alias_method('alias_me' => Foo::Aliasing->meta->get_method('alias_me'));
 
-ok(!$Foo->has_method('alias_me'), '... !Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
+ok($Foo->has_method('alias_me'), '... Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
 ok(defined &Foo::alias_me, '... Foo does have a symbol table slow for alias_me though');
 
 ok(!$Foo->has_method('blessed'), '... !Foo->has_method(blessed) (imported into Foo)');
@@ -166,7 +165,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob foo) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob foo) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -174,6 +173,7 @@ is_deeply(
     [
         map { $Foo->get_method($_) } qw(
             FOO_CONSTANT
+            alias_me
             baaz            
             bang 
             bar 
@@ -192,7 +192,7 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT baaz bang bar baz blah evaled_foo floob) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob) ],
     '... got the right method list for Foo');
 
 
@@ -230,6 +230,7 @@ is_deeply(
     [ sort { $a->name cmp $b->name } $Bar->get_all_methods() ],
     [
         $Foo->get_method('FOO_CONSTANT'),
+        $Foo->get_method('alias_me'),
         $Foo->get_method('baaz'),
         $Foo->get_method('bang'),
         $Bar->get_method('bar'),
@@ -244,4 +245,15 @@ is_deeply(
     ],
     '... got the right list of applicable methods for Bar');
 
+my $method = Class::MOP::Method->wrap(
+    name         => 'objecty',
+    package_name => 'Whatever',
+    body         => sub {q{I am an object, and I feel an object's pain}},
+);
 
+Bar->meta->add_method( $method->name, $method );
+
+my $new_method = Bar->meta->get_method('objecty');
+
+isnt( $method, $new_method, 'add_method clones method objects as they are added' );
+is( $new_method->original_method, $method, '... the cloned method has the correct original method' );

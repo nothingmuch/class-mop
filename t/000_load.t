@@ -26,17 +26,18 @@ BEGIN {
 my $CLASS_MOP_CLASS_IMMUTABLE_CLASS = 'Class::MOP::Class::__ANON__::SERIAL::1';
 
 my %METAS = (
-    'Class::MOP::Attribute'           => Class::MOP::Attribute->meta, 
-    'Class::MOP::Method::Generated'   => Class::MOP::Method::Generated->meta,
-    'Class::MOP::Method::Accessor'    => Class::MOP::Method::Accessor->meta,  
-    'Class::MOP::Method::Constructor' => Class::MOP::Method::Constructor->meta,         
-    'Class::MOP::Package'             => Class::MOP::Package->meta, 
-    'Class::MOP::Module'              => Class::MOP::Module->meta,     
-    'Class::MOP::Class'               => Class::MOP::Class->meta,      
-    'Class::MOP::Method'              => Class::MOP::Method->meta,  
-    'Class::MOP::Method::Wrapped'     => Class::MOP::Method::Wrapped->meta,      
-    'Class::MOP::Instance'            => Class::MOP::Instance->meta,   
-    'Class::MOP::Object'              => Class::MOP::Object->meta,  
+    'Class::MOP::Attribute'         => Class::MOP::Attribute->meta,
+    'Class::MOP::Method::Generated' => Class::MOP::Method::Generated->meta,
+    'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
+    'Class::MOP::Method::Constructor' =>
+        Class::MOP::Method::Constructor->meta,
+    'Class::MOP::Package'         => Class::MOP::Package->meta,
+    'Class::MOP::Module'          => Class::MOP::Module->meta,
+    'Class::MOP::Class'           => Class::MOP::Class->meta,
+    'Class::MOP::Method'          => Class::MOP::Method->meta,
+    'Class::MOP::Method::Wrapped' => Class::MOP::Method::Wrapped->meta,
+    'Class::MOP::Instance'        => Class::MOP::Instance->meta,
+    'Class::MOP::Object'          => Class::MOP::Object->meta,
 );
 
 ok(Class::MOP::is_class_loaded($_), '... ' . $_ . ' is loaded') for keys %METAS;

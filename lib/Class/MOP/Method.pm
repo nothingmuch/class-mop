@@ -84,8 +84,41 @@ sub package_name { (shift)->{'package_name'} }
 sub name { (shift)->{'name'} }
 
 sub fully_qualified_name {
-    my $code = shift;
-    $code->package_name . '::' . $code->name;
+    my $self = shift;
+    $self->package_name . '::' . $self->name;
+}
+
+sub original_method { (shift)->{'original_method'} }
+
+sub _set_original_method { $_[0]->{'original_method'} = $_[1] }
+
+# It's possible that this could cause a loop if there is a circular
+# reference in here. That shouldn't ever happen in normal
+# circumstances, since original method only gets set when clone is
+# called. We _could_ check for such a loop, but it'd involve some sort
+# of package-lexical variable, and wouldn't be terribly subclassable.
+sub original_package_name {
+    my $self = shift;
+
+    $self->original_method
+        ? $self->original_method->original_package_name
+        : $self->package_name;
+}
+
+sub original_name {
+    my $self = shift;
+
+    $self->original_method
+        ? $self->original_method->original_name
+        : $self->name;
+}
+
+sub original_fully_qualified_name {
+    my $self = shift;
+
+    $self->original_method
+        ? $self->original_method->original_fully_qualified_name
+        : $self->fully_qualified_name;
 }
 
 # NOTE:
@@ -165,6 +198,37 @@ This returns the package name that the CODE reference is attached to.
 =item B<fully_qualified_name>
 
 This returns the fully qualified name of the CODE reference.
+
+=item B<original_method>
+
+If this method object was created as a clone of some other method
+object, this returns the object that was cloned.
+
+=item B<original_name>
+
+This returns the original name of the CODE reference, wherever it was
+first defined.
+
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the name from the I<first> method in the chain of clones.
+
+=item B<original_package_name>
+
+This returns the original package name that the CODE reference is
+attached to, wherever it was first defined.
+
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the package name from the I<first> method in the chain of
+clones.
+
+=item B<original_fully_qualified_name>
+
+This returns the original fully qualified name of the CODE reference,
+wherever it was first defined.
+
+If this method is a clone of a clone (of a clone, etc.), this method
+returns the fully qualified name from the I<first> method in the chain
+of clones.
 
 =back
 

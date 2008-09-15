@@ -45,7 +45,7 @@ use lib catdir($FindBin::Bin, 'lib');
 
     ::lives_ok {
         Baz->meta->superclasses('Bar');
-    } '... we survive the metaclass incompatability test';
+    } '... we survive the metaclass incompatibility test';
 }
 
 {
