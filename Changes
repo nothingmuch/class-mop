@@ -11,8 +11,8 @@ Revision history for Perl extension Class-MOP.
 
     * Class::MOP::Class
       ! The alias_method method has been deprecated. It now simply
-        calls add_method instead. This means there is no distinction
-        between aliased methods and "real" methods.
+        calls add_method instead. There is no distinction between
+        aliased methods and "real" methods.
 
         This means that methods added via alias_method now show up as
         part of the class's method list/map. This is backwards
