@@ -31,10 +31,10 @@ sub import {
         || confess "The metaclass ($metaclass) must be derived from Class::MOP::Class";
 
     # make sure the custom metaclasses get loaded
-    foreach my $class (grep { 
-                            /^(attribute|method|instance)_metaclass/ 
-                        } keys %options) {
-        Class::MOP::load_class($options{$class})
+    foreach my $key (grep { /_(?:meta)?class$/ } keys %options) {
+        unless ( ref( my $class = $options{$key} ) ) {
+            Class::MOP::load_class($class)
+        }
     }
 
     my $package = caller();
