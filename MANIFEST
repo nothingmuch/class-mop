@@ -89,4 +89,5 @@ t/lib/MyMetaClass.pm
 t/lib/MyMetaClass/Attribute.pm
 t/lib/MyMetaClass/Instance.pm
 t/lib/MyMetaClass/Method.pm
+t/lib/MyMetaClass/Random.pm
 t/lib/SyntaxError.pm
