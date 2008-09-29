@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+0.67
+    * Class::MOP::Class
+      - Call a method on the class after setting the superclass list
+        so that we can get Perl to detect cycles before MRO::Compat
+        spirals into an infinite loop (sartak)
+        - Reported by Schwern, [rt.cpan.org #39001]
+
 0.66
     !! This release has an incompatible change regarding !!
        introspection of a class's method with Class::MOP::Class !!

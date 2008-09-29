@@ -500,6 +500,14 @@ sub superclasses {
     if (@_) {
         my @supers = @_;
         @{$self->get_package_symbol($var_spec)} = @supers;
+
+        # NOTE:
+        # on 5.8 and below, we need to call
+        # a method to get Perl to detect
+        # a cycle in the class hierarchy
+        my $class = $self->name;
+        $class->isa($class);
+
         # NOTE:
         # we need to check the metaclass
         # compatibility here so that we can
