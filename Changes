@@ -22,7 +22,7 @@ Revision history for Perl extension Class-MOP.
         aliased methods and "real" methods.
 
         This means that methods added via alias_method now show up as
-        part of the class's method list/map. This is backwards
+        part of the class's method list/map. This is a backwards
         incompatible change, but seems unlikely to break any
         code. Famous last words. (Dave Rolsky)
 
