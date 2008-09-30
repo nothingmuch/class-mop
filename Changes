@@ -6,8 +6,10 @@ Revision history for Perl extension Class-MOP.
         so that we can get Perl to detect cycles before MRO::Compat
         spirals into an infinite loop (sartak)
         - Reported by Schwern, [rt.cpan.org #39001]
+      - In create(), pass unused options on to initialize()
+        - added test for this
 
-0.66
+0.66 Sat September 20, 2008
     !! This release has an incompatible change regarding !!
        introspection of a class's method with Class::MOP::Class !!
 

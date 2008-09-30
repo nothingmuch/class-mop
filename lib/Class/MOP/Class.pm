@@ -274,7 +274,16 @@ sub create {
     eval $code;
     confess "creation of $package_name failed : $@" if $@;
 
-    my $meta = $class->initialize($package_name);
+    my (%initialize_options) = @args;
+    delete @initialize_options{qw(
+        package
+        superclasses
+        attributes
+        methods
+        version
+        authority
+    )};
+    my $meta = $class->initialize( $package_name => %initialize_options );
 
     # FIXME totally lame
     $meta->add_method('meta' => sub {
