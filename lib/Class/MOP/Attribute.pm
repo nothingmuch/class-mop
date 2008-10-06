@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.65';
+our $VERSION   = '0.67';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
