@@ -111,7 +111,9 @@ sub load_class {
     # if the class is not already loaded in the symbol table..
     unless (is_class_loaded($class)) {
         # require it
-        my $e = do { local $@; eval "require $class"; $@ };
+        my $file = $class . '.pm';
+        $file =~ s{::}{/}g;
+        my $e = do { local $@; eval { require($file) }; $@ };
         confess "Could not load class ($class) because : $e" if $e;
     }
 
