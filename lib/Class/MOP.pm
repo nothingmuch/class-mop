@@ -1060,6 +1060,8 @@ B<with contributions from:>
 
 Brandon (blblack) Black
 
+Florian (rafl) Ragwitz
+
 Guillermo (groditi) Roditi
 
 Matt (mst) Trout
