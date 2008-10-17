@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 22;
+use Test::More tests => 23;
 use Test::Exception;
 
 require Class::MOP;
@@ -19,6 +19,10 @@ ok(Class::MOP::_is_valid_class_name('Foo'), q{'Foo' is a valid class name});
 ok(Class::MOP::_is_valid_class_name('Foo::Bar'), q{'Foo::Bar' is a valid class name});
 ok(Class::MOP::_is_valid_class_name('Foo_::Bar2'), q{'Foo_::Bar2' is a valid class name});
 throws_ok { Class::MOP::load_class('bogus name') } qr/Invalid class name \(bogus name\)/;
+
+throws_ok {
+    Class::MOP::load_class('__PACKAGE__')
+} qr/__PACKAGE__\.pm.*\@INC/, 'errors sanely on __PACKAGE__.pm';
 
 my $meta = Class::MOP::load_class('BinaryTree');
 ok($meta, "successfully loaded the class BinaryTree");
