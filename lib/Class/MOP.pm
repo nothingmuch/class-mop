@@ -100,8 +100,7 @@ sub _load_pure_perl {
     # because I don't yet see a good reason to do so.
 }
 
-sub load_one_class_of {
-    use List::Util qw/first/;
+sub load_first_existing_class {
     my @classes = @_;
 
     foreach my $class (@classes) {
@@ -111,34 +110,52 @@ sub load_one_class_of {
         }
     }
 
+    my $found;
     my %exceptions;
-    my $name = first {
-        return $_ if is_class_loaded($_);
-        # require it
-        my $file = $_ . '.pm';
-        $file =~ s{::}{/}g;
-        my $e = do { local $@; eval { require($file) }; $@ };
+    for my $class (@classes) {
+        my $e = _try_load_one_class($class);
+
         if ($e) {
-            $exceptions{$_} = $e;
-            return;
+            $exceptions{$class} = $e;
         }
         else {
-            return $_;
+            $found = $class;
+            last;
         }
-    } @classes;
-
-    if ($name) {
-         return get_metaclass_by_name($name) || $name;
     }
 
-    # Could load no classes.
-    confess join("\n", 
-        map { sprintf("Could not load class (%s) because : %s", $_, $exceptions{$_}) } @classes 
+    if ($found) {
+        return get_metaclass_by_name($found) || $found;
+    }
+
+    confess join(
+        "\n",
+        map {
+            sprintf(
+                "Could not load class (%s) because : %s", $_,
+                $exceptions{$_}
+                )
+            } @classes
     ) if keys %exceptions;
 }
 
+sub _try_load_one_class {
+    my $class = shift;
+
+    return if is_class_loaded($class);
+
+    my $file = $class . '.pm';
+    $file =~ s{::}{/}g;
+
+    return do {
+        local $@;
+        eval { require($file) };
+        $@;
+    };
+}
+
 sub load_class {
-    load_one_class_of($_[0]);
+    load_first_existing_class($_[0]);
 }
 
 sub _is_valid_class_name {
@@ -881,14 +898,6 @@ already initialized metaclass, then it will intialize one for it.
 This function can be used in place of tricks like 
 C<eval "use $module"> or using C<require>.
 
-=item B<load_one_class_of ($class_name, [$class_name, ...])>
-
-This will attempt to load the list of classes given as parameters.
-The first class successfully found or loaded will have it's metaclass
-initialized (if needed) and returned. Subsequent classes to the first
-loaded class will be ignored, and an exception will be thrown if none
-of the supplied class names can be loaded.
-
 =item B<is_class_loaded ($class_name)>
 
 This will return a boolean depending on if the C<$class_name> has
@@ -933,6 +942,17 @@ If L<Devel::GlobalDestruction> is available, this returns true under global
 destruction.
 
 Otherwise it's a constant returning false.
+
+=item B<load_first_existing_class ($class_name, [$class_name, ...])>
+
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
+
+Given a list of class names, this function will attempt to load each
+one in turn.
+
+If it finds a class it can load, it will return that class's
+metaclass. If none of the classes can be loaded, it will throw an
+exception.
 
 =back
 
