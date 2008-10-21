@@ -101,7 +101,8 @@ sub _load_pure_perl {
 }
 
 sub load_first_existing_class {
-    my @classes = @_;
+    my @classes = @_
+        or return;
 
     foreach my $class (@classes) {
         unless ( _is_valid_class_name($class) ) {
@@ -124,9 +125,8 @@ sub load_first_existing_class {
         }
     }
 
-    if ($found) {
-        return get_metaclass_by_name($found) || $found;
-    }
+    return get_metaclass_by_name($found) || $found
+        if $found;
 
     confess join(
         "\n",
@@ -136,7 +136,7 @@ sub load_first_existing_class {
                 $exceptions{$_}
                 )
             } @classes
-    ) if keys %exceptions;
+    );
 }
 
 sub _try_load_one_class {
