@@ -1,9 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.68
     * Class::MOP
       - Make load_class require by file name instead of module name.
         This stops confusing error messages when loading '__PACKAGE__'.
         (Florian Ragwitz)
+      - Add load_one_class_of function to enable you to load one of a
+        list of classes, rather than having to call load_class multiple
+        times in an eval. (t0m)
 
 0.67 Tue October 14, 2008
     * Class::MOP::Class

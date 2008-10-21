@@ -100,24 +100,45 @@ sub _load_pure_perl {
     # because I don't yet see a good reason to do so.
 }
 
-sub load_class {
-    my $class = shift;
+sub load_one_class_of {
+    use List::Util qw/first/;
+    my @classes = @_;
 
-    unless ( _is_valid_class_name($class) ) {
-        my $display = defined($class) ? $class : 'undef';
-        confess "Invalid class name ($display)";
+    foreach my $class (@classes) {
+        unless ( _is_valid_class_name($class) ) {
+            my $display = defined($class) ? $class : 'undef';
+            confess "Invalid class name ($display)";
+        }
     }
 
-    # if the class is not already loaded in the symbol table..
-    unless (is_class_loaded($class)) {
+    my %exceptions;
+    my $name = first {
+        return $_ if is_class_loaded($_);
         # require it
-        my $file = $class . '.pm';
+        my $file = $_ . '.pm';
         $file =~ s{::}{/}g;
         my $e = do { local $@; eval { require($file) }; $@ };
-        confess "Could not load class ($class) because : $e" if $e;
+        if ($e) {
+            $exceptions{$_} = $e;
+            return;
+        }
+        else {
+            return $_;
+        }
+    } @classes;
+
+    if ($name) {
+         return get_metaclass_by_name($name) || $name;
     }
 
-    get_metaclass_by_name($class) || $class if defined wantarray;
+    # Could load no classes.
+    confess join("\n", 
+        map { sprintf("Could not load class (%s) because : %s", $_, $exceptions{$_}) } @classes 
+    ) if keys %exceptions;
+}
+
+sub load_class {
+    load_one_class_of($_[0]);
 }
 
 sub _is_valid_class_name {
@@ -859,6 +880,14 @@ This will load a given C<$class_name> and if it does not have an
 already initialized metaclass, then it will intialize one for it.
 This function can be used in place of tricks like 
 C<eval "use $module"> or using C<require>.
+
+=item B<load_one_class_of ($class_name, [$class_name, ...])>
+
+This will attempt to load the list of classes given as parameters.
+The first class successfully found or loaded will have it's metaclass
+initialized (if needed) and returned. Subsequent classes to the first
+loaded class will be ignored, and an exception will be thrown if none
+of the supplied class names can be loaded.
 
 =item B<is_class_loaded ($class_name)>
 

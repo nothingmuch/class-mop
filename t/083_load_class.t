@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 23;
+use Test::More tests => 27;
 use Test::Exception;
 
 require Class::MOP;
@@ -65,3 +65,13 @@ lives_ok {
 }
 
 isa_ok( Class::MOP::load_class("Lala"), "Class::MOP::Class", "when an object has a metaclass it is returned" );
+
+lives_ok {
+    isa_ok(Class::MOP::load_one_class_of("Lala", "Does::Not::Exist"), "Class::MOP::Class", 'Load_classes first param ok, metaclass returned');
+    isa_ok(Class::MOP::load_one_class_of("Does::Not::Exist", "Lala"), "Class::MOP::Class", 'Load_classes second param ok, metaclass returned');
+} 'load_classes works';
+throws_ok {
+    Class::MOP::load_one_class_of("Does::Not::Exist", "Also::Does::Not::Exist")
+} qr/Could not load class \(Does::Not::Exist.*Could not load class \(Also::Does::Not::Exist/s, 'Multiple non-existant classes cause exception';
+
+
