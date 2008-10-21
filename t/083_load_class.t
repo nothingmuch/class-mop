@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 27;
+use Test::More tests => 28;
 use Test::Exception;
 
 require Class::MOP;
@@ -48,6 +48,10 @@ throws_ok {
 throws_ok {
     Class::MOP::load_class('SyntaxError');
 } qr/Missing right curly/;
+
+throws_ok {
+    Class::MOP::load_class('This::Does::Not::Exist');
+} qr/Could not load class \(This::Does::Not::Exist\) because :/, 'Moose relies on this behaviour';
 
 {
     package Other;
