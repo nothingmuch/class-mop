@@ -132,7 +132,7 @@ sub load_first_existing_class {
         "\n",
         map {
             sprintf(
-                "Could not load class (%s) because : %s", $_,
+                "Could not load class (%s) because: %s", $_,
                 $exceptions{$_}
                 )
             } @classes
