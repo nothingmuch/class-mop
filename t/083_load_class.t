@@ -43,15 +43,19 @@ ok( !Class::MOP::does_metaclass_exist("Class"), "no metaclass for non MOP class"
 
 throws_ok {
     Class::MOP::load_class('FakeClassOhNo');
-} qr/Can't locate /;
+}
+qr/Can't locate /;
 
 throws_ok {
     Class::MOP::load_class('SyntaxError');
-} qr/Missing right curly/;
+}
+qr/Missing right curly/;
 
 throws_ok {
     Class::MOP::load_class('This::Does::Not::Exist');
-} qr/Could not load class \(This::Does::Not::Exist\) because :/, 'Moose relies on this behaviour';
+}
+qr/Could not load class \(This::Does::Not::Exist\) because :/,
+    'Many Moose tests rely on the exact formatting of this error';
 
 {
     package Other;
