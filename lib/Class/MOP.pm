@@ -125,8 +125,7 @@ sub load_first_existing_class {
         }
     }
 
-    return get_metaclass_by_name($found) || $found
-        if $found;
+    return $found if $found;
 
     confess join(
         "\n",
@@ -155,7 +154,8 @@ sub _try_load_one_class {
 }
 
 sub load_class {
-    load_first_existing_class($_[0]);
+    my $class = load_first_existing_class($_[0]);
+    return get_metaclass_by_name($class) || $class;
 }
 
 sub _is_valid_class_name {
@@ -950,9 +950,8 @@ B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 Given a list of class names, this function will attempt to load each
 one in turn.
 
-If it finds a class it can load, it will return that class's
-metaclass. If none of the classes can be loaded, it will throw an
-exception.
+If it finds a class it can load, it will return that class' name.
+If none of the classes can be loaded, it will throw an exception.
 
 =back
 
