@@ -241,7 +241,7 @@ sub get_write_method_ref {
 }
 
 sub is_default_a_coderef {
-    ('CODE' eq ref($_[0]->{'default'} || $_[0]->{default}))
+    ('CODE' eq ref($_[0]->{'default'}))
 }
 
 sub default {
