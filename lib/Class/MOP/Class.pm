@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.68';
+our $VERSION   = '0.69';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 

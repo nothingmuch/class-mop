@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.69
+0.69 Fri, November 7, 2008
     * Class::MOP::Method::Wrapped
       - Added introspection methods for method modifiers (Dave Rolsky)
 
