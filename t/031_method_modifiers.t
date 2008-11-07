@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 24;
+use Test::More tests => 28;
 use Test::Exception;
 
 use Class::MOP;
@@ -141,5 +141,70 @@ use Class::MOP::Method;
         ],
         '... got the right tracelog from all our before/around/after methods'
     );
+}
+
+# test introspection
+{
+    sub before1 {
+    }
+
+    sub before2 {
+    }
+
+    sub before3 {
+    }
+
+    sub after1 {
+    }
+
+    sub after2 {
+    }
+
+    sub after3 {
+    }
+
+    sub around1 {
+    }
+
+    sub around2 {
+    }
+
+    sub around3 {
+    }
+
+    sub orig {
+    }
+
+    my $method = Class::MOP::Method->wrap(
+        body         => \&orig,
+        package_name => 'main',
+        name         => '__ANON__',
+    );
+
+    my $wrapped = Class::MOP::Method::Wrapped->wrap($method);
+
+    $wrapped->add_before_modifier($_)
+        for \&before1, \&before2, \&before3;
+
+    $wrapped->add_after_modifier($_)
+        for \&after1, \&after2, \&after3;
+
+    $wrapped->add_around_modifier($_)
+        for \&around1, \&around2, \&around3;
+
+    is( $wrapped->get_original_method, $method,
+        'check get_original_method' );
+
+    is_deeply( [ $wrapped->before_modifiers ],
+               [ \&before3, \&before2, \&before1 ],
+               'check before_modifiers' );
+
+    is_deeply( [ $wrapped->after_modifiers ],
+               [ \&after1, \&after2, \&after3 ],
+               'check after_modifiers' );
+
+    is_deeply( [ $wrapped->around_modifiers ],
+               [ \&around3, \&around2, \&around1 ],
+               'check around_modifiers' );
 }
 

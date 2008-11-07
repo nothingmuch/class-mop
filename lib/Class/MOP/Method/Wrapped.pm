@@ -108,11 +108,21 @@ sub add_before_modifier {
     $_build_wrapped_method->($code->{'modifier_table'});
 }
 
+sub before_modifiers {
+    my $code = shift;
+    return @{$code->{'modifier_table'}->{before}};
+}
+
 sub add_after_modifier {
     my $code     = shift;
     my $modifier = shift;
     push @{$code->{'modifier_table'}->{after}} => $modifier;
     $_build_wrapped_method->($code->{'modifier_table'});
+}
+
+sub after_modifiers {
+    my $code = shift;
+    return @{$code->{'modifier_table'}->{after}};
 }
 
 {
@@ -140,6 +150,11 @@ sub add_after_modifier {
         );
         $_build_wrapped_method->($code->{'modifier_table'});
     }
+}
+
+sub around_modifiers {
+    my $code = shift;
+    return @{$code->{'modifier_table'}->{around}->{methods}};
 }
 
 1;
@@ -188,6 +203,19 @@ see the section in L<Class::MOP::Class>.
 =item B<add_after_modifier ($code)>
 
 =item B<add_around_modifier ($code)>
+
+=back
+
+These three methods each returna list of method modifiers I<in the
+order in which they are run>.
+
+=over 4
+
+=item B<before_modifiers>
+
+=item B<after_modifiers>
+
+=item B<around_modifiers>
 
 =back
 

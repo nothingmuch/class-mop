@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.69
+    * Class::MOP::Method::Wrapped
+      - Added introspection methods for method modifiers (Dave Rolsky)
+
+
 0.68 Fri October 24, 2008
     * Class::MOP
       - Make load_class require by file name instead of module name.
