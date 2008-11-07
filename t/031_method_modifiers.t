@@ -3,13 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 26;
+use Test::More tests => 24;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');    
-    use_ok('Class::MOP::Method');
-}
+use Class::MOP;
+use Class::MOP::Method;
 
 # test before and afters
 {
