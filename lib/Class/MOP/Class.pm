@@ -1477,7 +1477,7 @@ for more information on the method metaclasses.
 
 Wrap a code ref (C<$attrs{body>) with C<method_metaclass>.
 
-=item B<add_method ($method_name, $method, %attrs)>
+=item B<add_method ($method_name, $method)>
 
 This will take a C<$method_name> and CODE reference or meta method
 objectand install it into the class's package.
