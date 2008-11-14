@@ -86,6 +86,7 @@ t/300_random_eval_bug.t
 t/301_RT_27329_fix.t
 t/302_modify_parent_method.t
 t/303_RT_39001_fix.t
+t/304_constant_codeinfo.t
 t/lib/BinaryTree.pm
 t/lib/MyMetaClass.pm
 t/lib/MyMetaClass/Attribute.pm
