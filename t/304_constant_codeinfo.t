@@ -2,11 +2,9 @@
 
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 2;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 {
     package Foo;
