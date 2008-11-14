@@ -136,7 +136,7 @@ get_all_package_symbols(self, ...)
                             key = HePV(he, keylen);
                             package = HvNAME(stash);
                             fq = newSVpvf("%s::%s", package, key);
-                            sv = sv_2mortal((SV*)get_cv(SvPV_nolen(fq), 0));
+                            sv = (SV*)get_cv(SvPV_nolen(fq), 0);
                             break;
                         default:
                             continue;
