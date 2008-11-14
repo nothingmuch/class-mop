@@ -5,11 +5,9 @@ use warnings;
 
 use Scalar::Util;
 
-use Test::More tests => 17;
+use Test::More tests => 16;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 =pod
 

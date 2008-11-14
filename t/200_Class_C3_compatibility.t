@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 7;
 
 =pod
 
@@ -13,8 +13,7 @@ approach to method resolution.
 
 =cut
 
-BEGIN {
-    use_ok('Class::MOP');  
+BEGIN {use Class::MOP;  
 }
 
 {

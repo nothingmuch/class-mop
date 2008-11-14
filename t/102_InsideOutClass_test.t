@@ -3,12 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 89;
+use Test::More tests => 88;
 use File::Spec;
 use Scalar::Util 'reftype';
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {use Class::MOP;    
     require_ok(File::Spec->catfile('examples', 'InsideOutClass.pod'));
 }
 

@@ -6,13 +6,11 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 15;
+use Test::More tests => 14;
 use Test::Exception;
 use Scalar::Util;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 use lib catdir($FindBin::Bin, 'lib');
 

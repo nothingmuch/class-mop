@@ -3,12 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 73;
+use Test::More tests => 72;
 use File::Spec;
 use Scalar::Util 'reftype';
 
-BEGIN {
-    use_ok('Class::MOP');
+BEGIN {use Class::MOP;
     require_ok(File::Spec->catfile('examples', 'ArrayBasedStorage.pod'));
 }
 

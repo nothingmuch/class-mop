@@ -3,14 +3,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 112;
+use Test::More tests => 111;
 use Test::Exception;
 
 use Scalar::Util;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 {
     package Foo;

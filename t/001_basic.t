@@ -3,13 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 23;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');   
-    use_ok('Class::MOP::Class');        
-}
+use Class::MOP;
+use Class::MOP::Class;
 
 {   
     package Foo;

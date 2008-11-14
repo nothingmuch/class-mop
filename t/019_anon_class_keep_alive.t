@@ -3,12 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+use Test::More tests => 10;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 my $anon_class_name;
 my $anon_meta_name;

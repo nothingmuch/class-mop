@@ -3,10 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 11;
 
-BEGIN {
-    use_ok('metaclass');    
+BEGIN {use metaclass;    
 }
 
 {

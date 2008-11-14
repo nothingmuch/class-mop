@@ -3,11 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 9;
 use File::Spec;
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {use Class::MOP;    
     require_ok(File::Spec->catfile('examples', 'Perl6Attribute.pod'));
 }
 

@@ -3,11 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 26;
+use Test::More tests => 25;
 use File::Spec;
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {use Class::MOP;    
     require_ok(File::Spec->catfile('examples', 'LazyClass.pod'));
 }
 

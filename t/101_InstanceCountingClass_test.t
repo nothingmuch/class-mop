@@ -3,11 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 11;
 use File::Spec;
 
-BEGIN { 
-    use_ok('Class::MOP');    
+BEGIN {use Class::MOP;    
     require_ok(File::Spec->catfile('examples', 'InstanceCountingClass.pod'));
 }
 

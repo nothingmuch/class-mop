@@ -3,12 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 71;
+use Test::More tests => 70;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 my $FOO_ATTR = Class::MOP::Attribute->new('$foo');
 my $BAR_ATTR = Class::MOP::Attribute->new('$bar' => (

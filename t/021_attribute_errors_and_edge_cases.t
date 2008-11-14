@@ -3,12 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 29;
+use Test::More tests => 27;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-    use_ok('Class::MOP::Attribute');
+BEGIN {use Class::MOP;use Class::MOP::Attribute;
 }
 
 # most values are static

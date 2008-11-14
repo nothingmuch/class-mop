@@ -3,13 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 12;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');   
-    use_ok('Class::MOP::Class');        
-}
+use Class::MOP;
+use Class::MOP::Class;
 
 =pod
 

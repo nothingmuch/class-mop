@@ -3,14 +3,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 46;
+use Test::More tests => 45;
 use Test::Exception;
 
 use Scalar::Util qw/isweak reftype/;
 
-BEGIN {
-    use_ok('Class::MOP::Instance');
-}
+use Class::MOP::Instance;
 
 can_ok( "Class::MOP::Instance", $_ ) for qw/
     new

@@ -3,12 +3,10 @@
 use strict;
 use warnings;
 
-use Test::More tests => 93;
+use Test::More tests => 91;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-    use_ok('Class::MOP::Immutable');
+BEGIN {use Class::MOP;use Class::MOP::Immutable;
 }
 
 {

@@ -3,15 +3,13 @@
 use strict;
 use warnings;
 
-use Test::More tests => 236;
+use Test::More tests => 232;
 use Test::Exception;
 
-BEGIN {
-    use_ok('Class::MOP');
-    use_ok('Class::MOP::Class');
-    use_ok('Class::MOP::Package');
-    use_ok('Class::MOP::Module');
-}
+use Class::MOP;
+use Class::MOP::Class;
+use Class::MOP::Package;
+use Class::MOP::Module;
 
 {
     my $class = Class::MOP::Class->initialize('Foo');

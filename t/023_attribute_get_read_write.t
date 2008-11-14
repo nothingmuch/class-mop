@@ -5,11 +5,9 @@ use warnings;
 
 use Scalar::Util 'blessed', 'reftype';
 
-use Test::More tests => 37;
+use Test::More tests => 36;
 
-BEGIN {
-    use_ok('Class::MOP');
-}
+use Class::MOP;
 
 =pod
 

@@ -9,9 +9,7 @@ use File::Spec;
 BEGIN {
     eval "use Algorithm::C3";
     plan skip_all => "Algorithm::C3 required for this test" if $@;
-    plan tests => 5;    
-
-    use_ok('Class::MOP');    
+    plan tests => 4;use Class::MOP;    
     require_ok(File::Spec->catfile('examples', 'C3MethodDispatchOrder.pod'));
 }
 
