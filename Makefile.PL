@@ -34,6 +34,7 @@ my %prereqs = (
     'File::Spec'               => '0',
     'Carp'                     => '0',
     'Devel::GlobalDestruction' => '0',
+    'Task::Weaken'             => '0',
 );
 
 delete @prereqs{qw(Sub::Name Devel::GlobalDestruction)}
