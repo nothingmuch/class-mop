@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.70 Fri, November 14, 2008
+    * Class::MOP
+      - Fixed an odd corner case where the XS version of
+        get_all_package_symbols could cause a bus error. This only
+        happened with inlined constants in Perl 5.10.0 (Florian
+        Ragwitz)
+
+
 0.69 Fri, November 7, 2008
     * Class::MOP::Method::Wrapped
       - Added introspection methods for method modifiers (Dave Rolsky)
