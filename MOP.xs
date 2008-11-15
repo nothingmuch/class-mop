@@ -170,7 +170,7 @@ get_all_package_symbols(self, ...)
 
         }
 
-SV *
+void
 name(self)
     SV *self
     PREINIT:
@@ -187,7 +187,7 @@ name(self)
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Attribute
 
-SV *
+void
 name(self)
     SV *self
     PREINIT:
@@ -204,7 +204,7 @@ name(self)
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Method
 
-SV *
+void
 name(self)
     SV *self
     PREINIT:
@@ -219,7 +219,7 @@ name(self)
         else
             ST(0) = &PL_sv_undef;
 
-SV *
+void
 package_name(self)
     SV *self
     PREINIT:
@@ -234,7 +234,7 @@ package_name(self)
         else
             ST(0) = &PL_sv_undef;
 
-SV *
+void
 body(self)
     SV *self
     PREINIT:
