@@ -98,7 +98,7 @@ get_all_package_symbols(self, ...)
 
         PUTBACK;
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
             stash = gv_stashsv(HeVAL(he),0);
 
         if ( stash ) {
@@ -180,7 +180,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -197,7 +197,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -214,7 +214,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -229,7 +229,7 @@ package_name(self)
             die("Cannot call package_name as a class method");
         }
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name)))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -244,7 +244,7 @@ body(self)
             die("Cannot call body as a class method");
         }
 
-        if (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body))
+        if ((he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)))
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
