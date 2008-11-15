@@ -131,6 +131,10 @@ get_all_package_symbols(self, ...)
                         case SVt_RV:
                             /* BAH! constants are horrible */
 
+                            if (!SvROK (gv)) {
+                                continue;
+                            }
+
                             /* we don't really care about the length,
                                but that's the API */
                             key = HePV(he, keylen);
