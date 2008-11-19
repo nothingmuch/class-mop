@@ -1,13 +1,16 @@
 Revision history for Perl extension Class-MOP.
 
-0.69_01 Mon, November 18, 2008
+0.70_01 Mon, November 19, 2008
+    * Class::MOP
+      - Fixes for failures with blead (Florian Ragwitz)
+      - Silenced compiler warnings (Florian Ragwitz)
+
+0.70 Fri, November 14, 2008
     * Class::MOP
       - Fixed an odd corner case where the XS version of
         get_all_package_symbols could cause a segfault. This only
         happened with inlined constants in Perl 5.10.0 (Florian
         Ragwitz)
-      - Fixes for failures with blead (Florian Ragwitz)
-      - Silenced compiler warnings (Florian Ragwitz)
 
 0.69 Fri, November 7, 2008
     * Class::MOP::Method::Wrapped
