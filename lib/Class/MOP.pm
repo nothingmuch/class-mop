@@ -173,7 +173,7 @@ sub _is_valid_class_name {
 sub is_class_loaded {
     my $class = shift;
 
-    return 0 if ref($class) || !defined($class) || !length($class);
+    return 0 unless _is_valid_class_name($class);
 
     # walk the symbol table tree to avoid autovififying
     # \*{${main::}{"Foo::"}} == \*main::Foo::
