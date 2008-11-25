@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+0.71
+    * Class::MOP::Class
+    * Class::MOP::Module
+      - Actual package creation has moved upward from
+        Class to Module so that Moose roles can share
+        the code (Sartak)
+
 0.70_01 Mon, November 19, 2008
     * Class::MOP
       - Fixes for failures with blead (Florian Ragwitz)
