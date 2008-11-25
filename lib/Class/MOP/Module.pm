@@ -4,6 +4,7 @@ package Class::MOP::Module;
 use strict;
 use warnings;
 
+use Carp         'confess';
 use Scalar::Util 'blessed';
 
 our $VERSION   = '0.70_01';
@@ -29,6 +30,26 @@ sub identifier {
         ($self->version   || ()),
         ($self->authority || ()),
     );
+}
+
+sub create {
+    my ( $class, %options ) = @_;
+
+    my $package_name = $options{package};
+
+    (defined $package_name && $package_name)
+        || confess "You must pass a package name";
+
+    my $code = "package $package_name;";
+    $code .= "\$$package_name\:\:VERSION = '" . $options{version} . "';"
+        if exists $options{version};
+    $code .= "\$$package_name\:\:AUTHORITY = '" . $options{authority} . "';"
+        if exists $options{authority};
+
+    eval $code;
+    confess "creation of $package_name failed : $@" if $@;
+
+    return; # XXX: should this return some kind of meta object? ~sartak
 }
 
 1;
@@ -73,6 +94,10 @@ package for the given instance.
 =item B<identifier>
 
 This constructs a string of the name, version and authority.
+
+=item B<create>
+
+This creates the module; it does not return a useful result.
 
 =back
 

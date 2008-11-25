@@ -250,9 +250,6 @@ sub create {
     my (%options) = @args;
     my $package_name = $options{package};
 
-    (defined $package_name && $package_name)
-        || confess "You must pass a package name";
-    
     (ref $options{superclasses} eq 'ARRAY')
         || confess "You must pass an ARRAY ref of superclasses"
             if exists $options{superclasses};
@@ -265,14 +262,7 @@ sub create {
         || confess "You must pass an HASH ref of methods"
             if exists $options{methods};                  
 
-    my $code = "package $package_name;";
-    $code .= "\$$package_name\:\:VERSION = '" . $options{version} . "';"
-        if exists $options{version};
-    $code .= "\$$package_name\:\:AUTHORITY = '" . $options{authority} . "';"
-        if exists $options{authority};
-
-    eval $code;
-    confess "creation of $package_name failed : $@" if $@;
+    $class->SUPER::create(%options);
 
     my (%initialize_options) = @args;
     delete @initialize_options{qw(

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 232;
+use Test::More tests => 234;
 use Test::Exception;
 
 use Class::MOP;
@@ -42,7 +42,7 @@ my @class_mop_package_methods = qw(
 my @class_mop_module_methods = qw(
     _new
 
-    version authority identifier
+    version authority identifier create
 );
 
 my @class_mop_class_methods = qw(
