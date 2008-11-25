@@ -259,7 +259,7 @@ sub create {
             if exists $options{attributes};      
             
     (ref $options{methods} eq 'HASH')
-        || confess "You must pass an HASH ref of methods"
+        || confess "You must pass a HASH ref of methods"
             if exists $options{methods};                  
 
     $class->SUPER::create(%options);
