@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.71
+0.71 Wed November 26, 2008
     * Class::MOP::Class
     * Class::MOP::Module
       - Actual package creation has moved upward from
