@@ -121,6 +121,11 @@ sub original_fully_qualified_name {
         : $self->fully_qualified_name;
 }
 
+sub execute {
+    my $self = shift;
+    $self->body->(@_);
+}
+
 # NOTE:
 # the Class::MOP bootstrap
 # will create this for us
@@ -243,6 +248,17 @@ Sets the associated metaclass
 =item B<detach_from_class>
 
 Disassociates the method from the metaclass
+
+=back
+
+=head2 Miscellaneous
+
+=over 4
+
+=item B<execute>
+
+Executes the method. Be sure to pass in the instance, since the
+method expects it.
 
 =back
 

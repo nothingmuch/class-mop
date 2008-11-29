@@ -10,7 +10,7 @@ use Scalar::Util qw/reftype/;
 
 BEGIN {
     if ( eval 'use Sub::Name (); 1;' ) {
-        plan tests => 65;
+        plan tests => 66;
     }
     else {
         plan skip_all => 'These tests require Sub::Name';
@@ -94,6 +94,7 @@ is($foo_method->package_name, 'Foo', '... got the right package name for the met
 ok($Foo->has_method('foo'), '... Foo->has_method(foo) (defined with Sub::Name)');
 
 is($Foo->get_method('foo')->body, $foo, '... Foo->get_method(foo) == \&foo');
+is($Foo->get_method('foo')->execute, 'Foo::foo', '... _method_foo->execute returns "Foo::foo"');
 is(Foo->foo(), 'Foo::foo', '... Foo->foo() returns "Foo::foo"');
 
 # now check all our other items ...
