@@ -201,7 +201,7 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
         accessor_type => 'reader',
     );
 
-    $reader->body->($instance); # call the reader method
+    $reader->body->execute($instance); # call the reader method
 
 =head1 DESCRIPTION
 

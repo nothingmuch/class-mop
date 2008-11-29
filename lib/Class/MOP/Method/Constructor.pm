@@ -190,7 +190,7 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
   );
 
   # calling the constructor ...
-  $constructor->body->($metaclass->name, %params);
+  $constructor->body->execute($metaclass->name, %params);
 
 =head1 DESCRIPTION
 
