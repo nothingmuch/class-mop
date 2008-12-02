@@ -38,12 +38,6 @@ sub new {
         'immutable_metaclass' => undef,
     );
 
-    # NOTE:
-    # we initialize the immutable
-    # version of the metaclass here
-    # FIXME lazify
-    $self->create_immutable_metaclass;
-
     return $self;
 }
 
@@ -54,7 +48,14 @@ sub _new {
     bless $options, $class;
 }
 
-sub immutable_metaclass { (shift)->{'immutable_metaclass'} }
+sub immutable_metaclass {
+    my $self = shift;
+
+    $self->create_immutable_metaclass unless $self->{'immutable_metaclass'};
+
+    return $self->{'immutable_metaclass'};
+}
+
 sub metaclass           { (shift)->{'metaclass'}           }
 sub options             { (shift)->{'options'}             }
 
