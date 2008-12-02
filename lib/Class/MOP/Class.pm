@@ -645,15 +645,16 @@ sub add_method {
 
     $method->attach_to_class($self);
 
-    $self->get_method_map->{$method_name} = $method;
+    # This used to call get_method_map, which meant we would build all
+    # the method objects for the class just because we added one
+    # method. This is hackier, but quicker too.
+    $self->{methods}{$method_name} = $method;
     
     my $full_method_name = ($self->name . '::' . $method_name);    
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }, 
         Class::MOP::subname($full_method_name => $body)
     );
-
-    $self->update_package_cache_flag; # still valid, since we just added the method to the map, and if it was invalid before that then get_method_map updated it
 }
 
 {
@@ -737,7 +738,7 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    exists $self->get_method_map->{$method_name};
+    exists $self->{methods}{$method_name} || exists $self->get_method_map->{$method_name};
 }
 
 sub get_method {
@@ -751,7 +752,7 @@ sub get_method {
     # will just return undef for me now
     # return unless $self->has_method($method_name);
 
-    return $self->get_method_map->{$method_name};
+    return $self->{methods}{$method_name} || $self->get_method_map->{$method_name};
 }
 
 sub remove_method {
