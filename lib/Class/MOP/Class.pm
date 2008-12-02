@@ -315,8 +315,10 @@ sub instance_metaclass  { $_[0]->{'instance_metaclass'}  }
 # this is a prime canidate for conversion to XS
 sub get_method_map {
     my $self = shift;
-    
-    my $current = Class::MOP::check_package_cache_flag($self->name);
+
+    my $class_name = $self->name;
+
+    my $current = Class::MOP::check_package_cache_flag($class_name);
 
     if (defined $self->{'_package_cache_flag'} && $self->{'_package_cache_flag'} == $current) {
         return $self->{'methods'} ||= {};
@@ -324,9 +326,8 @@ sub get_method_map {
 
     $self->{_package_cache_flag} = $current;
 
-    my $map  = $self->{'methods'} ||= {};
+    my $map = $self->{'methods'} ||= {};
 
-    my $class_name       = $self->name;
     my $method_metaclass = $self->method_metaclass;
 
     my %all_code = $self->get_all_package_symbols('CODE');
