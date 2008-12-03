@@ -243,12 +243,14 @@ sub create_methods_for_immutable_metaclass {
     my $self = shift;
 
     my %methods = %DEFAULT_METHODS;
+    my $metaclass = $self->metaclass;
+    my $meta = $metaclass->meta;
 
     foreach my $read_only_method (@{$self->options->{read_only}}) {
-        my $method = $self->metaclass->meta->find_method_by_name($read_only_method);
+        my $method = $meta->find_method_by_name($read_only_method);
 
         (defined $method)
-            || confess "Could not find the method '$read_only_method' in " . $self->metaclass->name;
+            || confess "Could not find the method '$read_only_method' in " . $metaclass->name;
 
         $methods{$read_only_method} = sub {
             confess "This method is read-only" if scalar @_ > 1;
@@ -279,10 +281,10 @@ sub create_methods_for_immutable_metaclass {
     my $wrapped_methods = $self->options->{wrapped};
     
     foreach my $method_name (keys %{ $wrapped_methods }) {
-        my $method = $self->metaclass->meta->find_method_by_name($method_name);
+        my $method = $meta->find_method_by_name($method_name);
 
         (defined $method)
-            || confess "Could not find the method '$method_name' in " . $self->metaclass->name;
+            || confess "Could not find the method '$method_name' in " . $metaclass->name;
 
         my $wrapper = $wrapped_methods->{$method_name};
 
