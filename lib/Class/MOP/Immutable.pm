@@ -174,16 +174,6 @@ sub make_metaclass_immutable {
 
         ($metaclass->can($method_name))
             || confess "Could not find the method '$method_name' in " . $metaclass->name;
-
-        if ($type eq 'ARRAY') {
-            $metaclass->{'___' . $method_name} = [ $metaclass->$method_name ];
-        }
-        elsif ($type eq 'HASH') {
-            $metaclass->{'___' . $method_name} = { $metaclass->$method_name };
-        }
-        elsif ($type eq 'SCALAR') {
-            $metaclass->{'___' . $method_name} = $metaclass->$method_name;
-        }
     }
 
     $metaclass->{'___original_class'} = blessed($metaclass);
@@ -267,14 +257,29 @@ sub create_methods_for_immutable_metaclass {
     my $memoized_methods = $self->options->{memoize};
     foreach my $method_name (keys %{$memoized_methods}) {
         my $type = $memoized_methods->{$method_name};
+        my $key = '___' . $method_name;
+        my $method = $meta->find_method_by_name($method_name);
+
         if ($type eq 'ARRAY') {
-            $methods{$method_name} = sub { @{$_[0]->{'___' . $method_name}} };
+            $methods{$method_name} = sub {
+                @{$_[0]->{$key}} = $method->execute($_[0])
+                    if !exists $_[0]->{$key};
+                return @{$_[0]->{$key}};
+            };
         }
         elsif ($type eq 'HASH') {
-            $methods{$method_name} = sub { %{$_[0]->{'___' . $method_name}} };
+            $methods{$method_name} = sub {
+                %{$_[0]->{$key}} = $method->execute($_[0])
+                    if !exists $_[0]->{$key};
+                return %{$_[0]->{$key}};
+            };
         }
         elsif ($type eq 'SCALAR') {
-            $methods{$method_name} = sub { $_[0]->{'___' . $method_name} };
+            $methods{$method_name} = sub {
+                $_[0]->{$key} = $method->execute($_[0])
+                    if !exists $_[0]->{$key};
+                return $_[0]->{$key};
+            };
         }
     }
     

@@ -5,6 +5,8 @@ Revision history for Perl extension Class-MOP.
       - Add an "execute" method to invoke the body so
         we can avoid using the coderef overload (Sartak)
     * Class::MOP::Immutable
+      - When we memoize methods, get their results lazily
+        to remove some compile-time cost (Sartak)
       - Small speedup from eliminating several method
         calls (Sartak)
 
