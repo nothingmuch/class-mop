@@ -397,7 +397,7 @@ void
 get_method_map(self)
     SV* self
     PREINIT:
-        SV* const class_name = HeVAL( hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package));
+        SV* const class_name = HeVAL( hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package) );
         HV* const stash      = gv_stashsv(class_name, TRUE);
         UV  const current    = check_package_cache_flag(stash);
         SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
