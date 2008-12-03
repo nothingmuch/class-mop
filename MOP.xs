@@ -1,3 +1,10 @@
+/* There's a lot of cases of doubled parens in here like this:
+
+  while ( (he = ...) ) {
+
+This shuts up warnings from gcc -Wall
+*/
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -77,7 +84,7 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     dSP;
     
     hv_iterinit(stash);
-    while ( gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len) ) {
+    while ( (gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len)) ) {
         CV* cv;
         if ( SvROK(gv) ) {
             /* rafl says that this wastes memory savings that GvSVs have
@@ -292,7 +299,7 @@ get_all_package_symbols(self, ...)
             } else {
                 EXTEND(SP, HvKEYS(stash) * 2);
 
-                while (he = hv_iternext(stash)) {
+                while ( (he = hv_iternext(stash)) ) {
                     SV *key = hv_iterkeysv(he);
                     SV *sv = HeVAL(he);
                     SPAGAIN;
@@ -314,7 +321,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if ( he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -331,7 +338,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if ( he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -348,7 +355,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if ( he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -363,7 +370,7 @@ package_name(self)
             die("Cannot call package_name as a class method");
         }
 
-        if ( he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name)) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -378,7 +385,7 @@ body(self)
             die("Cannot call body as a class method");
         }
 
-        if ( he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
