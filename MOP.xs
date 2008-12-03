@@ -389,33 +389,34 @@ MODULE = Class::MOP    PACKAGE = Class::MOP::Class
 void
 get_method_map(self)
     SV* self
-INIT:
-    if ( !SvRV(self) ) {
-        die("Cannot call get_method_map as a class method");
-    }
-CODE:
-    HE* const he         = hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package); /* $self->name() */
-    SV* const class_name = HeVAL(he);
-    HV* const stash      = gv_stashsv(class_name, TRUE);
-    UV  const current    = check_package_cache_flag(stash);
-    SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
-    SV* const map_ref    = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
+    PREINIT:
+        SV* const class_name = HeVAL( hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package));
+        HV* const stash      = gv_stashsv(class_name, TRUE);
+        UV  const current    = check_package_cache_flag(stash);
+        SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
+        SV* const map_ref    = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
+    PPCODE:
+        if ( ! SvRV(self) ) {
+            die("Cannot call get_method_map as a class method");
+        }
 
-    /* in  $self->{methods} does not yet exist (or got deleted) */
-    if ( ! (SvROK(map_ref) && SvTYPE(SvRV(map_ref)) == SVt_PVHV) ) {
-        SV* new_map_ref = newRV_noinc((SV*)newHV());
-        sv_2mortal(new_map_ref);
-        sv_setsv(map_ref, new_map_ref);
-    }
+        /* in  $self->{methods} does not yet exist (or got deleted) */
+        if ( ! (SvROK(map_ref) && SvTYPE(SvRV(map_ref)) == SVt_PVHV) ) {
+            SV* new_map_ref = newRV_noinc((SV*)newHV());
+            sv_2mortal(new_map_ref);
+            sv_setsv(map_ref, new_map_ref);
+        }
 
-    if ( ! (SvOK(cache_flag) && SvUV(cache_flag) == current) ) {
-        ENTER;
-        SAVETMPS;
+        if ( ! (SvOK(cache_flag) && SvUV(cache_flag) == current) ) {
+            ENTER;
+            SAVETMPS;
 
-        mop_update_method_map(aTHX_ self, class_name, stash, (HV*)SvRV(map_ref));
-        sv_setuv(cache_flag, check_package_cache_flag(stash)); /* update_cache_flag() */
+            mop_update_method_map(aTHX_ self, class_name, stash, (HV*)SvRV(map_ref));
+            sv_setuv(cache_flag, check_package_cache_flag(stash)); /* update_cache_flag() */
 
-        FREETMPS;
-        LEAVE;
-    }
-    ST(0) = map_ref; /* map_ref is already mortal */
+            FREETMPS;
+            LEAVE;
+        }
+
+        XPUSHs(map_ref);
+
