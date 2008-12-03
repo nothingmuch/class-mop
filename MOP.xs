@@ -77,7 +77,7 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     dSP;
     
     hv_iterinit(stash);
-    while((gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len))) {
+    while ( gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len) ) {
         CV* cv;
         if ( SvROK(gv) ) {
             /* rafl says that this wastes memory savings that GvSVs have
@@ -184,14 +184,14 @@ get_code_info(coderef)
     char* name;
     char* pkg;
   PPCODE:
-    if( SvOK(coderef) && SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV) {
+    if ( SvOK(coderef) && SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV ) {
       coderef = SvRV(coderef);
       /* I think this only gets triggered with a mangled coderef, but if
          we hit it without the guard, we segfault. The slightly odd return
          value strikes me as an improvement (mst)
       */
 #ifdef isGV_with_GP
-      if ( isGV_with_GP(CvGV(coderef))) {
+      if ( isGV_with_GP(CvGV(coderef)) ) {
 #endif
         pkg     = HvNAME( GvSTASH(CvGV(coderef)) );
         name    = GvNAME( CvGV(coderef) );
@@ -219,11 +219,11 @@ get_all_package_symbols(self, ...)
         SV *type_filter = NULL;
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call get_all_package_symbols as a class method");
         }
 
-        switch ( GIMME_V ) {
+        switch (GIMME_V) {
             case G_VOID: return; break;
             case G_SCALAR: ST(0) = &PL_sv_undef; return; break;
         }
@@ -232,17 +232,17 @@ get_all_package_symbols(self, ...)
 
         PUTBACK;
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) )
             stash = gv_stashsv(HeVAL(he),0);
 
-        if ( stash ) {
+        if (stash) {
 
             (void)hv_iterinit(stash);
 
             if ( type_filter && SvPOK(type_filter) ) {
                 const char *const type = SvPV_nolen(type_filter);
 
-                while ((he = hv_iternext(stash))) {
+                while ( (he = hv_iternext(stash)) ) {
                     SV *const gv = HeVAL(he);
                     SV *sv;
                     char *key;
@@ -265,7 +265,7 @@ get_all_package_symbols(self, ...)
                         case SVt_RV:
                             /* BAH! constants are horrible */
 
-                            if (!SvROK (gv)) {
+                            if ( ! SvROK(gv) ) {
                                 continue;
                             }
 
@@ -280,7 +280,7 @@ get_all_package_symbols(self, ...)
                             continue;
                     }
 
-                    if ( sv ) {
+                    if (sv) {
                         SV *key = hv_iterkeysv(he);
                         SPAGAIN;
                         EXTEND(SP, 2);
@@ -292,7 +292,7 @@ get_all_package_symbols(self, ...)
             } else {
                 EXTEND(SP, HvKEYS(stash) * 2);
 
-                while ((he = hv_iternext(stash))) {
+                while (he = hv_iternext(stash)) {
                     SV *key = hv_iterkeysv(he);
                     SV *sv = HeVAL(he);
                     SPAGAIN;
@@ -310,11 +310,11 @@ name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call name as a class method");
         }
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)))
+        if ( he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -327,11 +327,11 @@ name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call name as a class method");
         }
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
+        if ( he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -344,11 +344,11 @@ name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call name as a class method");
         }
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)))
+        if ( he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -359,11 +359,11 @@ package_name(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call package_name as a class method");
         }
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name)))
+        if ( he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -374,11 +374,11 @@ body(self)
     PREINIT:
         register HE *he;
     PPCODE:
-        if (! SvROK(self)) {
+        if ( ! SvROK(self) ) {
             die("Cannot call body as a class method");
         }
 
-        if ((he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)))
+        if ( he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -394,12 +394,12 @@ INIT:
         die("Cannot call get_method_map as a class method");
     }
 CODE:
-    HE* const he          = hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package); /* $self->name() */
-    SV* const class_name  = HeVAL(he);
-    HV* const stash       = gv_stashsv(class_name, TRUE);
-    UV  const current     = check_package_cache_flag(stash);
-    SV* const cache_flag  = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
-    SV* const map_ref     = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
+    HE* const he         = hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package); /* $self->name() */
+    SV* const class_name = HeVAL(he);
+    HV* const stash      = gv_stashsv(class_name, TRUE);
+    UV  const current    = check_package_cache_flag(stash);
+    SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
+    SV* const map_ref    = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
 
     /* in  $self->{methods} does not yet exist (or got deleted) */
     if ( ! (SvROK(map_ref) && SvTYPE(SvRV(map_ref)) == SVt_PVHV) ) {
