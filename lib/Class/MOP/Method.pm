@@ -43,7 +43,7 @@ sub wrap {
     ($params{package_name} && $params{name})
         || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
 
-    my $self = (ref($class) || $class)->_new(\%params);
+    my $self = $class->_new(\%params);
 
     weaken($self->{associated_metaclass}) if $self->{associated_metaclass};
 
