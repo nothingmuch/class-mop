@@ -9,6 +9,11 @@ Revision history for Perl extension Class-MOP.
         to remove some compile-time cost (Sartak)
       - Small speedup from eliminating several method
         calls (Sartak)
+    * Class::MOP::Class
+      - Some small internal tweaks to try to reduce the number of
+        times we call get_method_map when bootstrapping the MOP. This
+        might make loading Class::MOP (and Moose) a little
+        faster. (Dave Rolsky)
 
 0.71 Wed November 26, 2008
     * Class::MOP::Class
