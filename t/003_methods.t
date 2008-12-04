@@ -73,8 +73,8 @@ use Class::MOP::Method;
 
 my $Foo = Class::MOP::Class->initialize('Foo');
 
-ok(!$Foo->has_method('pie'), '... got the method stub pie');
-ok(!$Foo->has_method('cake'), '... got the constant method stub cake');
+ok($Foo->has_method('pie'), '... got the method stub pie');
+ok($Foo->has_method('cake'), '... got the constant method stub cake');
 
 my $foo = sub { 'Foo::foo' };
 
@@ -166,7 +166,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob foo) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah cake evaled_foo floob foo pie) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -180,9 +180,11 @@ is_deeply(
             bar 
             baz 
             blah 
+            cake
             evaled_foo 
             floob 
             foo
+            pie
         )
     ],
     '... got the right list of applicable methods for Foo');
@@ -193,7 +195,7 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah evaled_foo floob) ],
+    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah cake evaled_foo floob pie) ],
     '... got the right method list for Foo');
 
 
@@ -238,11 +240,13 @@ is_deeply(
         (map { $Foo->get_method($_) } qw(        
             baz 
             blah 
+            cake
             evaled_foo 
             floob 
         )),
         $Bar->get_method('foo'),
         $Bar->get_method('meta'),
+        $Foo->get_method('pie'),
     ],
     '... got the right list of applicable methods for Bar');
 
