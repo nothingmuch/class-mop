@@ -104,6 +104,8 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
                    here. */
                 gv_init((GV*)gv, stash, method_name, method_name_len, GV_ADDMULTI);
                 /* fall through */
+            default:
+                break;
         }
 
         if ( SvTYPE(gv) == SVt_PVGV && (cv = GvCVu(gv)) ) {
