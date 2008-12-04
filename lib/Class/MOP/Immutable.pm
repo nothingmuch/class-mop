@@ -198,6 +198,122 @@ sub _check_memoized_methods {
     }
 }
 
+sub create_methods_for_immutable_metaclass {
+    my $self = shift;
+
+    my %methods   = %DEFAULT_METHODS;
+    my $metaclass = $self->metaclass;
+    my $meta      = $metaclass->meta;
+
+    $methods{get_mutable_metaclass_name}
+        = sub { (shift)->{'___original_class'} };
+
+    $methods{immutable_transformer} = sub {$self};
+
+    return {
+        %DEFAULT_METHODS,
+        $self->_make_read_only_methods( $metaclass, $meta ),
+        $self->_make_uncallable_methods( $metaclass, $meta ),
+        $self->_make_memoized_methods( $metaclass, $meta ),
+        $self->_make_wrapped_methods( $metaclass, $meta ),
+        get_mutable_metaclass_name => sub { (shift)->{'___original_class'} },
+        immutable_transformer      => sub {$self},
+    };
+}
+
+sub _make_read_only_methods {
+    my ( $self, $metaclass, $meta ) = @_;
+
+    my %methods;
+    foreach my $read_only_method ( @{ $self->options->{read_only} } ) {
+        my $method = $meta->find_method_by_name($read_only_method);
+
+        ( defined $method )
+            || confess "Could not find the method '$read_only_method' in "
+            . $metaclass->name;
+
+        $methods{$read_only_method} = sub {
+            confess "This method is read-only" if scalar @_ > 1;
+            goto &{ $method->body };
+        };
+    }
+
+    return %methods;
+}
+
+sub _make_uncallable_methods {
+    my ( $self, $metaclass, $meta ) = @_;
+
+    my %methods;
+    foreach my $cannot_call_method ( @{ $self->options->{cannot_call} } ) {
+        $methods{$cannot_call_method} = sub {
+            confess
+                "This method ($cannot_call_method) cannot be called on an immutable instance";
+        };
+    }
+
+    return %methods;
+}
+
+sub _make_memoized_methods {
+    my ( $self, $metaclass, $meta ) = @_;
+
+    my %methods;
+
+    my $memoized_methods = $self->options->{memoize};
+    foreach my $method_name ( keys %{$memoized_methods} ) {
+        my $type   = $memoized_methods->{$method_name};
+        my $key    = '___' . $method_name;
+        my $method = $meta->find_method_by_name($method_name);
+
+        if ( $type eq 'ARRAY' ) {
+            $methods{$method_name} = sub {
+                @{ $_[0]->{$key} } = $method->execute( $_[0] )
+                    if !exists $_[0]->{$key};
+                return @{ $_[0]->{$key} };
+            };
+        }
+        elsif ( $type eq 'HASH' ) {
+            $methods{$method_name} = sub {
+                %{ $_[0]->{$key} } = $method->execute( $_[0] )
+                    if !exists $_[0]->{$key};
+                return %{ $_[0]->{$key} };
+            };
+        }
+        elsif ( $type eq 'SCALAR' ) {
+            $methods{$method_name} = sub {
+                $_[0]->{$key} = $method->execute( $_[0] )
+                    if !exists $_[0]->{$key};
+                return $_[0]->{$key};
+            };
+        }
+    }
+
+    return %methods;
+}
+
+sub _make_wrapped_methods {
+    my ( $self, $metaclass, $meta ) = @_;
+
+    my %methods;
+
+    my $wrapped_methods = $self->options->{wrapped};
+
+    foreach my $method_name ( keys %{$wrapped_methods} ) {
+        my $method = $meta->find_method_by_name($method_name);
+
+        ( defined $method )
+            || confess "Could not find the method '$method_name' in "
+            . $metaclass->name;
+
+        my $wrapper = $wrapped_methods->{$method_name};
+
+        $methods{$method_name} = sub { $wrapper->( $method, @_ ) };
+    }
+
+    return %methods;
+}
+
 sub make_metaclass_mutable {
     my ($self, $immutable, $options) = @_;
 
@@ -245,80 +361,6 @@ sub make_metaclass_mutable {
         $immutable->remove_method( $options{constructor_name}  )
           if blessed($immutable->get_method($options{constructor_name})) eq $constructor_class;
     }
-}
-
-sub create_methods_for_immutable_metaclass {
-    my $self = shift;
-
-    my %methods = %DEFAULT_METHODS;
-    my $metaclass = $self->metaclass;
-    my $meta = $metaclass->meta;
-
-    foreach my $read_only_method (@{$self->options->{read_only}}) {
-        my $method = $meta->find_method_by_name($read_only_method);
-
-        (defined $method)
-            || confess "Could not find the method '$read_only_method' in " . $metaclass->name;
-
-        $methods{$read_only_method} = sub {
-            confess "This method is read-only" if scalar @_ > 1;
-            goto &{$method->body}
-        };
-    }
-
-    foreach my $cannot_call_method (@{$self->options->{cannot_call}}) {
-        $methods{$cannot_call_method} = sub {
-            confess "This method ($cannot_call_method) cannot be called on an immutable instance";
-        };
-    }
-
-    my $memoized_methods = $self->options->{memoize};
-    foreach my $method_name (keys %{$memoized_methods}) {
-        my $type = $memoized_methods->{$method_name};
-        my $key = '___' . $method_name;
-        my $method = $meta->find_method_by_name($method_name);
-
-        if ($type eq 'ARRAY') {
-            $methods{$method_name} = sub {
-                @{$_[0]->{$key}} = $method->execute($_[0])
-                    if !exists $_[0]->{$key};
-                return @{$_[0]->{$key}};
-            };
-        }
-        elsif ($type eq 'HASH') {
-            $methods{$method_name} = sub {
-                %{$_[0]->{$key}} = $method->execute($_[0])
-                    if !exists $_[0]->{$key};
-                return %{$_[0]->{$key}};
-            };
-        }
-        elsif ($type eq 'SCALAR') {
-            $methods{$method_name} = sub {
-                $_[0]->{$key} = $method->execute($_[0])
-                    if !exists $_[0]->{$key};
-                return $_[0]->{$key};
-            };
-        }
-    }
-    
-    my $wrapped_methods = $self->options->{wrapped};
-    
-    foreach my $method_name (keys %{ $wrapped_methods }) {
-        my $method = $meta->find_method_by_name($method_name);
-
-        (defined $method)
-            || confess "Could not find the method '$method_name' in " . $metaclass->name;
-
-        my $wrapper = $wrapped_methods->{$method_name};
-
-        $methods{$method_name} = sub { $wrapper->($method, @_) };
-    }
-
-    $methods{get_mutable_metaclass_name} = sub { (shift)->{'___original_class'} };
-
-    $methods{immutable_transformer} = sub { $self };
-
-    return \%methods;
 }
 
 1;
