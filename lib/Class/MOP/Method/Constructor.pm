@@ -52,6 +52,8 @@ sub _new {
     }, $class;
 }
 
+sub can_be_inlined { 1 }
+
 ## accessors
 
 sub options              { (shift)->{'options'}              }
@@ -226,6 +228,12 @@ metaclass which is passed into C<new>.
 
 This returns a boolean, but since constructors are very rarely
 not inlined, this always returns true for now.
+
+=item B<can_be_inlined>
+
+This method always returns true in this class. It exists so that
+subclasses (like in Moose) can override and do some sort of checking
+to determine whether or not inlining the constructor is safe.
 
 =item B<initialize_body>
 

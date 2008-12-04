@@ -147,17 +147,16 @@ sub _inline_constructor {
     my $constructor_class = $options->{constructor_class}
         || 'Class::MOP::Method::Constructor';
 
-    $metaclass->add_method(
-        $options->{constructor_name},
-        $constructor_class->new(
-            options      => $options,
-            metaclass    => $metaclass,
-            is_inline    => 1,
-            package_name => $metaclass->name,
-            name         => $options->{constructor_name}
-        )
+    my $constructor = $constructor_class->new(
+        options      => $options,
+        metaclass    => $metaclass,
+        is_inline    => 1,
+        package_name => $metaclass->name,
+        name         => $options->{constructor_name},
     );
 
+    $metaclass->add_method( $options->{constructor_name} => $constructor )
+        if $constructor->can_be_inlined;
 }
 
 sub _inline_destructor {
