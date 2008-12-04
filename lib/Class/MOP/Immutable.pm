@@ -36,7 +36,7 @@ sub new {
         'metaclass'           => $metaclass,
         'options'             => $options,
         'immutable_metaclass' => undef,
-        'inlined_constructor' => 0,
+        'inlined_constructor' => undef,
     );
 
     return $self;
@@ -159,7 +159,7 @@ sub _inline_constructor {
 
     if ( $options->{replace_constructor} or $constructor->can_be_inlined ) {
         $metaclass->add_method( $options->{constructor_name} => $constructor );
-        $self->{inlined_constructor} = 1;
+        $self->{inlined_constructor} = $constructor;
     }
 }
 
@@ -364,7 +364,7 @@ sub make_metaclass_mutable {
 
         if ( blessed($immutable->get_method($options{constructor_name})) eq $constructor_class ) {
             $immutable->remove_method( $options{constructor_name}  );
-            $self->{inlined_constructor} = 0;
+            $self->{inlined_constructor} = undef;
         }
     }
 }
@@ -463,6 +463,9 @@ the immutable process. C<%options> should be the same options that were
 given to make_metaclass_immutable.
 
 =item B<inlined_constructor>
+
+If the constructor was inlined, this returns the constructor method
+object that was created to do this.
 
 =back
 
