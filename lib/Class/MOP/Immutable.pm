@@ -119,7 +119,7 @@ sub make_metaclass_immutable {
     $self->_inline_accessors( $metaclass, \%options );
     $self->_inline_constructor( $metaclass, \%options );
     $self->_inline_destructor( $metaclass, \%options );
-    $self->_memoize_methods( $metaclass, \%options );
+    $self->_check_memoized_methods( $metaclass, \%options );
 
     $metaclass->{'___original_class'} = blessed($metaclass);
     bless $metaclass => $self->immutable_metaclass->name;
@@ -185,7 +185,7 @@ sub _inline_destructor {
     $metaclass->add_method( 'DESTROY' => $destructor )
 }
 
-sub _memoize_methods {
+sub _check_memoized_methods {
     my ( $self, $metaclass, $options ) = @_;
 
     my $memoized_methods = $self->options->{memoize};
