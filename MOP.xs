@@ -82,7 +82,7 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     I32   method_name_len;
     GV* gv;
     dSP;
-    
+
     hv_iterinit(stash);
     while ( (gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len)) ) {
         CV* cv;
