@@ -258,6 +258,16 @@ get_all_package_symbols(self, ...)
                     SV *fq;
 
                     switch( SvTYPE(gv) ) {
+                        case SVt_PV:
+                        case SVt_IV:
+                            /* expand the gv into a real typeglob if it
+                             * contains stub functions and we were asked to
+                             * return CODE symbols */
+                            if (*type == 'C') {
+                                key = HePV(he, keylen);
+                                gv_init((GV *)gv, stash, key, keylen, GV_ADDMULTI);
+                            }
+                            /* fall through */
                         case SVt_PVGV:
                             switch (*type) {
                                 case 'C': sv = (SV *)GvCVu(gv); break; /* CODE */
