@@ -63,7 +63,8 @@ use Class::MOP;
             [ Scalar::Util::blessed($meta) ],
             '... immutable_metaclass superclasses are correct'
            );
-  ok($immutable_metaclass->has_method('get_mutable_metaclass_name'));
+  ok($immutable_metaclass->has_method('get_mutable_metaclass_name'),
+     'immutable metaclass has get_mutable_metaclass_name method');
 
 }
 
