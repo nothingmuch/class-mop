@@ -89,7 +89,7 @@ my @class_mop_class_methods = qw(
 
 # check the class ...
 
-is_deeply([ sort @class_mop_class_methods ], [ sort $class_mop_class_meta->get_method_list ], '... got the correct method list for class');
+is_deeply([ sort $class_mop_class_meta->get_method_list ], [ sort @class_mop_class_methods ], '... got the correct method list for class');
 
 foreach my $method_name (@class_mop_class_methods) {
     ok($class_mop_class_meta->has_method($method_name), '... Class::MOP::Class->has_method(' . $method_name . ')');
@@ -103,7 +103,7 @@ foreach my $method_name (@class_mop_class_methods) {
 
 ## check the package ....
 
-is_deeply([ sort @class_mop_package_methods ], [ sort $class_mop_package_meta->get_method_list ], '... got the correct method list for package');
+is_deeply([ sort $class_mop_package_meta->get_method_list ], [ sort @class_mop_package_methods ], '... got the correct method list for package');
 
 foreach my $method_name (@class_mop_package_methods) {
     ok($class_mop_package_meta->has_method($method_name), '... Class::MOP::Package->has_method(' . $method_name . ')');
@@ -117,7 +117,7 @@ foreach my $method_name (@class_mop_package_methods) {
 
 ## check the module ....
 
-is_deeply([ sort @class_mop_module_methods ], [ sort $class_mop_module_meta->get_method_list ], '... got the correct method list for module');
+is_deeply([ sort $class_mop_module_meta->get_method_list ], [ sort @class_mop_module_methods ], '... got the correct method list for module');
 
 foreach my $method_name (@class_mop_module_methods) {
     ok($class_mop_module_meta->has_method($method_name), '... Class::MOP::Module->has_method(' . $method_name . ')');
@@ -165,13 +165,14 @@ my @class_mop_class_attributes = (
 # check class
 
 is_deeply(
-    [ sort @class_mop_class_attributes ],
     [ sort $class_mop_class_meta->get_attribute_list ],
-    '... got the right list of attributes');
+    [ sort @class_mop_class_attributes ],
+    '... got the right list of attributes'
+);
 
 is_deeply(
-    [ sort @class_mop_class_attributes ],
     [ sort keys %{$class_mop_class_meta->get_attribute_map} ],
+    [ sort @class_mop_class_attributes ],
     '... got the right list of attributes');
 
 foreach my $attribute_name (@class_mop_class_attributes) {
@@ -182,13 +183,13 @@ foreach my $attribute_name (@class_mop_class_attributes) {
 # check module
 
 is_deeply(
-    [ sort @class_mop_package_attributes ],
     [ sort $class_mop_package_meta->get_attribute_list ],
+    [ sort @class_mop_package_attributes ],
     '... got the right list of attributes');
 
 is_deeply(
-    [ sort @class_mop_package_attributes ],
     [ sort keys %{$class_mop_package_meta->get_attribute_map} ],
+    [ sort @class_mop_package_attributes ],
     '... got the right list of attributes');
 
 foreach my $attribute_name (@class_mop_package_attributes) {
@@ -199,13 +200,13 @@ foreach my $attribute_name (@class_mop_package_attributes) {
 # check package
 
 is_deeply(
-    [ sort @class_mop_module_attributes ],
     [ sort $class_mop_module_meta->get_attribute_list ],
+    [ sort @class_mop_module_attributes ],
     '... got the right list of attributes');
 
 is_deeply(
-    [ sort @class_mop_module_attributes ],
     [ sort keys %{$class_mop_module_meta->get_attribute_map} ],
+    [ sort @class_mop_module_attributes ],
     '... got the right list of attributes');
 
 foreach my $attribute_name (@class_mop_module_attributes) {
