@@ -653,12 +653,8 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 ## --------------------------------------------------------
 ## Now close all the Class::MOP::* classes
 
-# NOTE:
-# we don't need to inline the
-# constructors or the accessors
-# this only lengthens the compile
-# time of the MOP, and gives us
-# no actual benefits.
+# NOTE: we don't need to inline the the accessors this only lengthens
+# the compile time of the MOP, and gives us no actual benefits.
 
 $_->meta->make_immutable(
     inline_constructor  => 1,
