@@ -156,7 +156,7 @@ sub _inline_constructor {
     );
 
     $metaclass->add_method( $options->{constructor_name} => $constructor )
-        if $constructor->can_be_inlined;
+        if $options->{replace_constructor} or $constructor->can_be_inlined;
 }
 
 sub _inline_destructor {
