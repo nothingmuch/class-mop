@@ -83,15 +83,27 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     GV* gv;
     dSP;
 
+    /* this function massivly overlaps with the xs version of
+     * get_all_package_symbols. a common c function to walk the symbol table
+     * should be factored out and used by both.  --rafl */
+
     hv_iterinit(stash);
     while ( (gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len)) ) {
         CV* cv;
-        if ( SvROK(gv) ) {
-            /* rafl says that this wastes memory savings that GvSVs have
-               in 5.8.9 and 5.10.x. But without it some tests fail. rafl
-               says the right thing to do is to handle GvSVs differently
-               here. */
-            gv_init((GV*)gv, stash, method_name, method_name_len, GV_ADDMULTI);
+        switch (SvTYPE (gv)) {
+            case SVt_RV:
+                if (!SvROK(gv)) {
+                    break;
+                }
+                /* fall through */
+            case SVt_IV:
+            case SVt_PV:
+                /* rafl says that this wastes memory savings that GvSVs have
+                   in 5.8.9 and 5.10.x. But without it some tests fail. rafl
+                   says the right thing to do is to handle GvSVs differently
+                   here. */
+                gv_init((GV*)gv, stash, method_name, method_name_len, GV_ADDMULTI);
+                /* fall through */
         }
 
         if ( SvTYPE(gv) == SVt_PVGV && (cv = GvCVu(gv)) ) {
