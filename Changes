@@ -14,10 +14,12 @@ Revision history for Perl extension Class-MOP.
         times we call get_method_map when bootstrapping the MOP. This
         might make loading Class::MOP (and Moose) a little
         faster. (Dave Rolsky)
-    * Class::MOP::Class
       - Implemented an optional XS version of get_method_map. Mostly
         taken from a patch by Goro Fuji (rt.cpan.org #41080), with
         help form Florian Ragwitz. (Dave Rolsky)
+      - Make the behaviour of of get_all_package_symbols (and therefor
+        get_method_map) consistent for stub methods. Report and test by Goro
+        Fuji (rt.cpan.org #41255). (Florian Ragwitz)
 
 0.71 Wed November 26, 2008
     * Class::MOP::Class
