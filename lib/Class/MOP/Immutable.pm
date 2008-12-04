@@ -140,8 +140,13 @@ sub _inline_constructor {
 
     return unless $options->{inline_constructor};
 
+    return
+        unless $options->{replace_constructor}
+            or !$metaclass->has_method( $options->{constructor_name} );
+
     my $constructor_class = $options->{constructor_class}
         || 'Class::MOP::Method::Constructor';
+
     $metaclass->add_method(
         $options->{constructor_name},
         $constructor_class->new(
@@ -151,9 +156,8 @@ sub _inline_constructor {
             package_name => $metaclass->name,
             name         => $options->{constructor_name}
         )
-        )
-        if $options->{replace_constructor}
-            or !$metaclass->has_method( $options->{constructor_name} );
+    );
+
 }
 
 sub _inline_destructor {
@@ -167,17 +171,18 @@ sub _inline_destructor {
 
     my $destructor_class = $options->{destructor_class};
 
-    if ( $destructor_class->is_needed($metaclass) ) {
-        my $destructor = $destructor_class->new(
-            options      => $options,
-            metaclass    => $metaclass,
-            package_name => $metaclass->name,
-            name         => 'DESTROY'
-        );
+    return unless $destructor_class->is_needed($metaclass);
 
-        $metaclass->add_method( 'DESTROY' => $destructor )
-            if $destructor->is_needed;
-    }
+    my $destructor = $destructor_class->new(
+        options      => $options,
+        metaclass    => $metaclass,
+        package_name => $metaclass->name,
+        name         => 'DESTROY'
+    );
+
+    return unless $destructor->is_needed;
+
+    $metaclass->add_method( 'DESTROY' => $destructor )
 }
 
 sub _memoize_methods {
