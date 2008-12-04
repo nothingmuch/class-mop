@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.72
+0.71_01 Wed, December 3, 2008
     * Class::MOP::Method
       - Add an "execute" method to invoke the body so
         we can avoid using the coderef overload (Sartak)

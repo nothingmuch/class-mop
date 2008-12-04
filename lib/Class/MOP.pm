@@ -31,7 +31,7 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.71';
+our $VERSION   = '0.71_01';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
