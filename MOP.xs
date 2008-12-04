@@ -91,11 +91,9 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     while ( (gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len)) ) {
         CV* cv;
         switch (SvTYPE (gv)) {
+#ifndef SVt_RV
             case SVt_RV:
-                if (!SvROK(gv)) {
-                    break;
-                }
-                /* fall through */
+#endif
             case SVt_IV:
             case SVt_PV:
                 /* rafl says that this wastes memory savings that GvSVs have
@@ -272,12 +270,25 @@ get_all_package_symbols(self, ...)
                     SV *fq;
 
                     switch( SvTYPE(gv) ) {
+#ifndef SVt_RV
+                        case SVt_RV:
+#endif
                         case SVt_PV:
                         case SVt_IV:
                             /* expand the gv into a real typeglob if it
                              * contains stub functions and we were asked to
                              * return CODE symbols */
                             if (*type == 'C') {
+                                if (SvROK(gv)) {
+                                    /* we don't really care about the length,
+                                       but that's the API */
+                                    key = HePV(he, keylen);
+                                    package = HvNAME(stash);
+                                    fq = newSVpvf("%s::%s", package, key);
+                                    sv = (SV*)get_cv(SvPV_nolen(fq), 0);
+                                    break;
+                                }
+
                                 key = HePV(he, keylen);
                                 gv_init((GV *)gv, stash, key, keylen, GV_ADDMULTI);
                             }
@@ -292,20 +303,6 @@ get_all_package_symbols(self, ...)
                                 default:
                                           croak("Unknown type %s\n", type);
                             }
-                            break;
-                        case SVt_RV:
-                            /* BAH! constants are horrible */
-
-                            if ( ! SvROK(gv) ) {
-                                continue;
-                            }
-
-                            /* we don't really care about the length,
-                               but that's the API */
-                            key = HePV(he, keylen);
-                            package = HvNAME(stash);
-                            fq = newSVpvf("%s::%s", package, key);
-                            sv = (SV*)get_cv(SvPV_nolen(fq), 0);
                             break;
                         default:
                             continue;
