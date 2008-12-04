@@ -4,6 +4,7 @@ package Class::MOP::Package;
 use strict;
 use warnings;
 
+use B;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
@@ -293,7 +294,12 @@ sub get_all_package_symbols {
                 ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
                 : ( (*{$namespace->{$_}}{CODE}) # the extra parents prevent breakage on 5.8.2
                     ? ( $_ => *{$namespace->{$_}}{CODE} )
-                    : () ) )
+                    : (do {
+                        my $sym = B::svref_2object(\$namespace->{$_});
+                        my $svt = ref $sym if $sym;
+                        ($sym && ($svt eq 'B::PV' || $svt eq 'B::PVIV'))
+                            ? ($_ => ($pkg ||= $self->name)->can($_))
+                            : () }) ) )
         } keys %$namespace;
     } else {
         return map {
