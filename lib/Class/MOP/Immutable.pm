@@ -116,68 +116,81 @@ sub make_metaclass_immutable {
 
     %$options = %options; # FIXME who the hell is relying on this?!? tests fail =(
 
-    if ($options{inline_accessors}) {
-        foreach my $attr_name ($metaclass->get_attribute_list) {
-            # inline the accessors
-            $metaclass->get_attribute($attr_name)
-                      ->install_accessors(1);
-        }
-    }
-
-    if ($options{inline_constructor}) {
-        my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
-        $metaclass->add_method(
-            $options{constructor_name},
-            $constructor_class->new(
-                options      => \%options,
-                metaclass    => $metaclass,
-                is_inline    => 1,
-                package_name => $metaclass->name,
-                name         => $options{constructor_name}
-            )
-        ) if $options{replace_constructor} or !$metaclass->has_method($options{constructor_name});
-    }
-
-    if ($options{inline_destructor}) {
-        (exists $options{destructor_class})
-            || confess "The 'inline_destructor' option is present, but "
-                     . "no destructor class was specified";
-
-        my $destructor_class = $options{destructor_class};
-
-        # NOTE:
-        # we allow the destructor to determine
-        # if it is needed or not before we actually 
-        # create the destructor too
-        # - SL
-        if ($destructor_class->is_needed($metaclass)) {
-            my $destructor = $destructor_class->new(
-                options      => \%options,
-                metaclass    => $metaclass,
-                package_name => $metaclass->name,
-                name         => 'DESTROY'            
-            );
-
-            $metaclass->add_method('DESTROY' => $destructor)
-                # NOTE:
-                # we allow the destructor to determine
-                # if it is needed or not, it can perform
-                # all sorts of checks because it has the
-                # metaclass instance
-                if $destructor->is_needed;
-        }
-    }
-
-    my $memoized_methods = $self->options->{memoize};
-    foreach my $method_name (keys %{$memoized_methods}) {
-        my $type = $memoized_methods->{$method_name};
-
-        ($metaclass->can($method_name))
-            || confess "Could not find the method '$method_name' in " . $metaclass->name;
-    }
+    $self->_inline_accessors( $metaclass, \%options );
+    $self->_inline_constructor( $metaclass, \%options );
+    $self->_inline_destructor( $metaclass, \%options );
+    $self->_memoize_methods( $metaclass, \%options );
 
     $metaclass->{'___original_class'} = blessed($metaclass);
     bless $metaclass => $self->immutable_metaclass->name;
+}
+
+sub _inline_accessors {
+    my ( $self, $metaclass, $options ) = @_;
+
+    return unless $options->{inline_accessors};
+
+    foreach my $attr_name ( $metaclass->get_attribute_list ) {
+        $metaclass->get_attribute($attr_name)->install_accessors(1);
+    }
+}
+
+sub _inline_constructor {
+    my ( $self, $metaclass, $options ) = @_;
+
+    return unless $options->{inline_constructor};
+
+    my $constructor_class = $options->{constructor_class}
+        || 'Class::MOP::Method::Constructor';
+    $metaclass->add_method(
+        $options->{constructor_name},
+        $constructor_class->new(
+            options      => $options,
+            metaclass    => $metaclass,
+            is_inline    => 1,
+            package_name => $metaclass->name,
+            name         => $options->{constructor_name}
+        )
+        )
+        if $options->{replace_constructor}
+            or !$metaclass->has_method( $options->{constructor_name} );
+}
+
+sub _inline_destructor {
+    my ( $self, $metaclass, $options ) = @_;
+
+    return unless $options->{inline_destructor};
+
+    ( exists $options->{destructor_class} )
+        || confess "The 'inline_destructor' option is present, but "
+        . "no destructor class was specified";
+
+    my $destructor_class = $options->{destructor_class};
+
+    if ( $destructor_class->is_needed($metaclass) ) {
+        my $destructor = $destructor_class->new(
+            options      => $options,
+            metaclass    => $metaclass,
+            package_name => $metaclass->name,
+            name         => 'DESTROY'
+        );
+
+        $metaclass->add_method( 'DESTROY' => $destructor )
+            if $destructor->is_needed;
+    }
+}
+
+sub _memoize_methods {
+    my ( $self, $metaclass, $options ) = @_;
+
+    my $memoized_methods = $self->options->{memoize};
+    foreach my $method_name ( keys %{$memoized_methods} ) {
+        my $type = $memoized_methods->{$method_name};
+
+        ( $metaclass->can($method_name) )
+            || confess "Could not find the method '$method_name' in "
+            . $metaclass->name;
+    }
 }
 
 sub make_metaclass_mutable {
