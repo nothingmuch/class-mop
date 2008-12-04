@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 111;
+use Test::More tests => 113;
 use Test::Exception;
 
 use Scalar::Util;
@@ -51,6 +51,8 @@ use Class::MOP;
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
     ok($meta->get_method_map->{new},    '... inlined constructor created');
     ok($meta->has_method('new'),        '... inlined constructor created for sure');    
+    ok($meta->get_immutable_transformer->inlined_constructor,
+       '... transformer says it did inline the constructor');
 
     lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
     ok($meta->is_mutable,               '... our class is mutable');
@@ -58,6 +60,8 @@ use Class::MOP;
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
     ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
     ok(!$meta->has_method('new'),        '... inlined constructor removed for sure');    
+    ok(!$meta->get_immutable_transformer->inlined_constructor,
+       '... transformer says it did not inline the constructor');
 
     my @new_keys = sort grep { !/^_/ } keys %$meta;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 84;
+use Test::More tests => 86;
 use Test::Exception;
 
 use Class::MOP;
@@ -49,6 +49,7 @@ use Class::MOP;
 
   my $immutable_metaclass = $transformer->immutable_metaclass;
   is($transformer->metaclass, $meta,      '... transformer has correct metaclass');
+  ok(!$transformer->inlined_constructor,  '... transformer says it did not inline the constructor');
   ok($immutable_metaclass->is_anon_class, '... immutable_metaclass is an anonymous class');
 
   #I don't understand why i need to ->meta here...
@@ -81,6 +82,7 @@ use Class::MOP;
         $meta->make_immutable();
     } '... changed Foo to be immutable';
 
+    ok($transformer->inlined_constructor,  '... transformer says it did inline the constructor');
     is($transformer, $meta->get_immutable_transformer, '... immutable transformer cache works');
     ok(!$meta->make_immutable, '... make immutable now returns nothing');
 

@@ -20,6 +20,9 @@ Revision history for Perl extension Class-MOP.
       - Make the behaviour of of get_all_package_symbols (and
         therefore get_method_map) consistent for stub methods. Report
         and test by Goro Fuji (rt.cpan.org #41255). (Florian Ragwitz)
+    * Class::MOP::Immutable
+      - Added a new attribute, inlined_constructor, which is true if
+        the constructor was inlined.
 
 0.71 Wed November 26, 2008
     * Class::MOP::Class

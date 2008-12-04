@@ -36,6 +36,7 @@ sub new {
         'metaclass'           => $metaclass,
         'options'             => $options,
         'immutable_metaclass' => undef,
+        'inlined_constructor' => 0,
     );
 
     return $self;
@@ -58,6 +59,7 @@ sub immutable_metaclass {
 
 sub metaclass           { (shift)->{'metaclass'}           }
 sub options             { (shift)->{'options'}             }
+sub inlined_constructor { (shift)->{'inlined_constructor'} }
 
 sub create_immutable_metaclass {
     my $self = shift;
@@ -155,8 +157,10 @@ sub _inline_constructor {
         name         => $options->{constructor_name},
     );
 
-    $metaclass->add_method( $options->{constructor_name} => $constructor )
-        if $options->{replace_constructor} or $constructor->can_be_inlined;
+    if ( $options->{replace_constructor} or $constructor->can_be_inlined ) {
+        $metaclass->add_method( $options->{constructor_name} => $constructor );
+        $self->{inlined_constructor} = 1;
+    }
 }
 
 sub _inline_destructor {
@@ -357,8 +361,11 @@ sub make_metaclass_mutable {
     # 14:27 <@stevan> so I am not worried
     if ($options{inline_constructor}  && $immutable->has_method($options{constructor_name})) {
         my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
-        $immutable->remove_method( $options{constructor_name}  )
-          if blessed($immutable->get_method($options{constructor_name})) eq $constructor_class;
+
+        if ( blessed($immutable->get_method($options{constructor_name})) eq $constructor_class ) {
+            $immutable->remove_method( $options{constructor_name}  );
+            $self->{inlined_constructor} = 0;
+        }
     }
 }
 
@@ -454,6 +461,8 @@ This will actually change the C<$metaclass> into the immutable version.
 This will change the C<$metaclass> into the mutable version by reversing
 the immutable process. C<%options> should be the same options that were
 given to make_metaclass_immutable.
+
+=item B<inlined_constructor>
 
 =back
 
