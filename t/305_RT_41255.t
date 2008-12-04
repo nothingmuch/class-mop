@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 20;
 use Test::Exception;
 
 use Class::MOP;
@@ -30,4 +30,22 @@ my %methods = map { $_ => $meta->find_method_by_name($_) } 'm1' .. 'm5';
 while (my ($name, $meta_method) = each %methods) {
     is $meta_method->fully_qualified_name, "Derived::${name}";
     throws_ok { $meta_method->execute } qr/Undefined subroutine .* called at/;
+}
+
+{
+    package Derived;
+    eval <<'EOC';
+
+    sub m1         { 'affe'  }
+    sub m2 ()      { 'apan'  }
+    sub m3 :method { 'tiger' }
+    sub m4         { 'birne' }
+    sub m5         { 'apfel' }
+
+EOC
+}
+
+while (my ($name, $meta_method) = each %methods) {
+    is $meta_method->fully_qualified_name, "Derived::${name}";
+    lives_ok { $meta_method->execute };
 }
