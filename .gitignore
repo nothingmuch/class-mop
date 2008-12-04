@@ -1,0 +1,9 @@
+t/pp_*.t
+.*
+!.gitignore
+!.shipit
+MOP.*
+!MOP.xs
+Makefile*
+!Makefile.PL
+*blib
