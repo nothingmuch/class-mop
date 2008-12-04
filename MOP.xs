@@ -251,7 +251,7 @@ get_all_package_symbols(self, ...)
 
                 while ( (he = hv_iternext(stash)) ) {
                     SV *const gv = HeVAL(he);
-                    SV *sv;
+                    SV *sv = NULL;
                     char *key;
                     STRLEN keylen;
                     char *package;
