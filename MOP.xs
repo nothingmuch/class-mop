@@ -453,10 +453,6 @@ get_method_map(self)
         SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
         SV* const map_ref    = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
     PPCODE:
-        if ( ! SvRV(self) ) {
-            die("Cannot call get_method_map as a class method");
-        }
-
         /* in  $self->{methods} does not yet exist (or got deleted) */
         if ( ! (SvROK(map_ref) && SvTYPE(SvRV(map_ref)) == SVt_PVHV) ) {
             SV* new_map_ref = newRV_noinc((SV*)newHV());
