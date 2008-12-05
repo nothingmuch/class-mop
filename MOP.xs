@@ -74,97 +74,31 @@ mop_call0(pTHX_ SV* const self, SV* const method) {
     return ret;
 }
 
-static void
-mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stash, HV* const map) {
-    const char* const class_name_pv = HvNAME(stash); /* must be HvNAME(stash), not SvPV_nolen_const(class_name) */
-    SV*   method_metaclass_name;
-    char* method_name;
-    I32   method_name_len;
-    GV* gv;
-    dSP;
-
-    /* this function massivly overlaps with the xs version of
-     * get_all_package_symbols. a common c function to walk the symbol table
-     * should be factored out and used by both.  --rafl */
-
-    hv_iterinit(stash);
-    while ( (gv = (GV*)hv_iternextsv(stash, &method_name, &method_name_len)) ) {
-        CV* cv;
-        switch (SvTYPE (gv)) {
-#ifndef SVt_RV
-            case SVt_RV:
-#endif
-            case SVt_IV:
-            case SVt_PV:
-                /* rafl says that this wastes memory savings that GvSVs have
-                   in 5.8.9 and 5.10.x. But without it some tests fail. rafl
-                   says the right thing to do is to handle GvSVs differently
-                   here. */
-                gv_init((GV*)gv, stash, method_name, method_name_len, GV_ADDMULTI);
-                /* fall through */
-            default:
-                break;
-        }
-
-        if ( SvTYPE(gv) == SVt_PVGV && (cv = GvCVu(gv)) ) {
-            GV* const cvgv = CvGV(cv);
-            /* ($cvpkg_name, $cv_name) = get_code_info($cv) */
-            const char* const cvpkg_name = HvNAME(GvSTASH(cvgv));
-            const char* const cv_name    = GvNAME(cvgv);
-            SV* method_slot;
-            SV* method_object;
-
-            /* this checks to see that the subroutine is actually from our package  */
-            if ( !(strEQ(cvpkg_name, "constant") && strEQ(cv_name, "__ANON__")) ) {
-                if ( strNE(cvpkg_name, class_name_pv) ) {
-                    continue;
-                }
-            }
-
-            method_slot = *hv_fetch(map, method_name, method_name_len, TRUE);
-            if ( SvOK(method_slot) ) {
-                SV* const body = call0(method_slot, key_body); /* $method_object->body() */
-                if ( SvROK(body) && ((CV*) SvRV(body)) == cv ) {
-                    continue;
-                }
-            }
-
-            method_metaclass_name = call0(self, method_metaclass); /* $self->method_metaclass() */
-
-            /*
-                $method_object = $method_metaclass->wrap(
-                    $cv,
-                    associated_metaclass => $self,
-                    package_name         => $class_name,
-                    name                 => $method_name
-                );
-            */
-            ENTER;
-            SAVETMPS;
-
-            PUSHMARK(SP);
-            EXTEND(SP, 8);
-            PUSHs(method_metaclass_name); /* invocant */
-            mPUSHs(newRV_inc((SV*)cv));
-            PUSHs(associated_metaclass);
-            PUSHs(self);
-            PUSHs(key_package_name);
-            PUSHs(class_name);
-            PUSHs(key_name);
-            mPUSHs(newSVpv(method_name, method_name_len));
-            PUTBACK;
-
-            call_sv(wrap, G_SCALAR | G_METHOD);
-            SPAGAIN;
-            method_object = POPs;
-            PUTBACK;
-            /* $map->{$method_name} = $method_object */
-            sv_setsv(method_slot, method_object);
-
-            FREETMPS;
-            LEAVE;
-        }
+int
+get_code_info (SV *coderef, char **pkg, char **name)
+{
+    if (!SvOK(coderef) || !SvROK(coderef) || SvTYPE(SvRV(coderef)) != SVt_PVCV) {
+        return 0;
     }
+
+    coderef = SvRV(coderef);
+    /* I think this only gets triggered with a mangled coderef, but if
+       we hit it without the guard, we segfault. The slightly odd return
+       value strikes me as an improvement (mst)
+    */
+#ifdef isGV_with_GP
+    if ( isGV_with_GP(CvGV(coderef)) ) {
+#endif
+        *pkg     = HvNAME( GvSTASH(CvGV(coderef)) );
+        *name    = GvNAME( CvGV(coderef) );
+#ifdef isGV_with_GP
+    } else {
+        *pkg     = "__UNKNOWN__";
+        *name    = "__ANON__";
+    }
+#endif
+
+    return 1;
 }
 
 typedef enum {
@@ -250,6 +184,83 @@ get_all_package_symbols(HV *stash, type_filter_t filter)
     return ret;
 }
 
+
+static void
+mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stash, HV* const map) {
+    const char* const class_name_pv = HvNAME(stash); /* must be HvNAME(stash), not SvPV_nolen_const(class_name) */
+    SV*   method_metaclass_name;
+    char* method_name;
+    I32   method_name_len;
+    SV *coderef;
+    HV *symbols;
+    dSP;
+
+    symbols = get_all_package_symbols(stash, TYPE_FILTER_CODE);
+
+    (void)hv_iterinit(symbols);
+    while ( (coderef = hv_iternextsv(symbols, &method_name, &method_name_len)) ) {
+        CV* cv = (CV *)SvRV(coderef);
+        char* cvpkg_name;
+        char* cv_name;
+        SV* method_slot;
+        SV* method_object;
+
+        if (!get_code_info(coderef, &cvpkg_name, &cv_name)) {
+            continue;
+        }
+
+        /* this checks to see that the subroutine is actually from our package  */
+        if ( !(strEQ(cvpkg_name, "constant") && strEQ(cv_name, "__ANON__")) ) {
+            if ( strNE(cvpkg_name, class_name_pv) ) {
+                continue;
+            }
+        }
+
+        method_slot = *hv_fetch(map, method_name, method_name_len, TRUE);
+        if ( SvOK(method_slot) ) {
+            SV* const body = call0(method_slot, key_body); /* $method_object->body() */
+            if ( SvROK(body) && ((CV*) SvRV(body)) == cv ) {
+                continue;
+            }
+        }
+
+        method_metaclass_name = call0(self, method_metaclass); /* $self->method_metaclass() */
+
+        /*
+            $method_object = $method_metaclass->wrap(
+                $cv,
+                associated_metaclass => $self,
+                package_name         => $class_name,
+                name                 => $method_name
+            );
+        */
+        ENTER;
+        SAVETMPS;
+
+        PUSHMARK(SP);
+        EXTEND(SP, 8);
+        PUSHs(method_metaclass_name); /* invocant */
+        mPUSHs(newRV_inc((SV*)cv));
+        PUSHs(associated_metaclass);
+        PUSHs(self);
+        PUSHs(key_package_name);
+        PUSHs(class_name);
+        PUSHs(key_name);
+        mPUSHs(newSVpv(method_name, method_name_len));
+        PUTBACK;
+
+        call_sv(wrap, G_SCALAR | G_METHOD);
+        SPAGAIN;
+        method_object = POPs;
+        PUTBACK;
+        /* $map->{$method_name} = $method_object */
+        sv_setsv(method_slot, method_object);
+
+        FREETMPS;
+        LEAVE;
+    }
+}
+
 /*
 get_code_info:
   Pass in a coderef, returns:
@@ -280,33 +291,16 @@ PROTOTYPES: ENABLE
 
 void
 get_code_info(coderef)
-  SV* coderef
-  PREINIT:
-    char* name;
-    char* pkg;
-  PPCODE:
-    if ( SvOK(coderef) && SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV ) {
-      coderef = SvRV(coderef);
-      /* I think this only gets triggered with a mangled coderef, but if
-         we hit it without the guard, we segfault. The slightly odd return
-         value strikes me as an improvement (mst)
-      */
-#ifdef isGV_with_GP
-      if ( isGV_with_GP(CvGV(coderef)) ) {
-#endif
-        pkg     = HvNAME( GvSTASH(CvGV(coderef)) );
-        name    = GvNAME( CvGV(coderef) );
-#ifdef isGV_with_GP
-      } else {
-        pkg     = "__UNKNOWN__";
-        name    = "__ANON__";
-      }
-#endif
-
-      EXTEND(SP, 2);
-      PUSHs(newSVpvn(pkg, strlen(pkg)));
-      PUSHs(newSVpvn(name, strlen(name)));
-    }
+    SV* coderef
+    PREINIT:
+        char* pkg  = NULL;
+        char* name = NULL;
+    PPCODE:
+        if (get_code_info(coderef, &pkg, &name)) {
+            EXTEND(SP, 2);
+            PUSHs(newSVpv(pkg, 0));
+            PUSHs(newSVpv(name, 0));
+        }
 
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
