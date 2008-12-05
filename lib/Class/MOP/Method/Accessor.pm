@@ -114,41 +114,54 @@ sub generate_clearer_method {
 
 
 sub generate_accessor_method_inline {
-    my $attr          = (shift)->associated_attribute;
+    my $self          = shift;
+    my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = eval 'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')  . ' if scalar(@_) == 2; '
+    my $code = $self->_eval_closure(
+        q{},
+        'sub {'
+        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
+        . ' if scalar(@_) == 2; '
         . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
-    . '}';
+        . '}'
+    );
     confess "Could not generate inline accessor because : $@" if $@;
 
     return $code;
 }
 
 sub generate_reader_method_inline {
-    my $attr          = (shift)->associated_attribute;
+    my $self          = shift;
+    my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = eval 'sub {'
+    my $code = $self->_eval_closure(
+         q{},
+        'sub {'
         . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
         . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
-    . '}';
+        . '}'
+    );
     confess "Could not generate inline accessor because : $@" if $@;
 
     return $code;
 }
 
 sub generate_writer_method_inline {
-    my $attr          = (shift)->associated_attribute;
+    my $self          = shift;
+    my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = eval 'sub {'
+    my $code = $self->_eval_closure(
+        q{},
+        'sub {'
         . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
-    . '}';
+        . '}'
+    );
     confess "Could not generate inline accessor because : $@" if $@;
 
     return $code;
@@ -156,26 +169,34 @@ sub generate_writer_method_inline {
 
 
 sub generate_predicate_method_inline {
-    my $attr          = (shift)->associated_attribute;
+    my $self          = shift;
+    my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = eval 'sub {' .
-       $meta_instance->inline_is_slot_initialized('$_[0]', "'$attr_name'")
-    . '}';
+    my $code = $self->_eval_closure(
+        q{},
+       'sub {'
+       . $meta_instance->inline_is_slot_initialized('$_[0]', "'$attr_name'")
+       . '}'
+    );
     confess "Could not generate inline predicate because : $@" if $@;
 
     return $code;
 }
 
 sub generate_clearer_method_inline {
-    my $attr          = (shift)->associated_attribute;
+    my $self          = shift;
+    my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = eval 'sub {'
+    my $code = $self->_eval_closure(
+        q{},
+        'sub {'
         . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
-    . '}';
+        . '}'
+    );
     confess "Could not generate inline clearer because : $@" if $@;
 
     return $code;

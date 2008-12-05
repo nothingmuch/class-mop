@@ -110,9 +110,11 @@ sub generate_constructor_method_inline {
         # NOTE:
         # create the nessecary lexicals
         # to be picked up in the eval
-        my $attrs = $self->attributes;
 
-        $code = eval $source;
+        $code = $self->_eval_closure(
+            q{my $attrs = $self->attributes;},
+            $source
+        );
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
     }
     return $code;

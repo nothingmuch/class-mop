@@ -44,7 +44,10 @@ sub initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
 }
 
-
+sub _eval_closure {
+    my $self = shift;
+    eval join("\n",@_);
+}
 
 1;
 
