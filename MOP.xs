@@ -31,9 +31,9 @@ U32 hash_package_cache_flag;
 SV *key_methods;
 U32 hash_methods;
 
-SV* method_metaclass;
-SV* associated_metaclass;
-SV* wrap;
+SV *method_metaclass;
+SV *associated_metaclass;
+SV *wrap;
 
 
 #define check_package_cache_flag(stash) mop_check_package_cache_flag(aTHX_ stash)
@@ -53,7 +53,7 @@ mop_check_package_cache_flag(pTHX_ HV* stash) {
 #else /* pre 5.10.0 */
 
 static UV
-mop_check_package_cache_flag(pTHX_ HV* stash) {
+mop_check_package_cache_flag(pTHX_ HV *stash) {
     PERL_UNUSED_ARG(stash);
     assert(SvTYPE(stash) == SVt_PVHV);
 
@@ -62,10 +62,10 @@ mop_check_package_cache_flag(pTHX_ HV* stash) {
 #endif
 
 #define call0(s, m)  mop_call0(aTHX_ s, m)
-static SV*
-mop_call0(pTHX_ SV* const self, SV* const method) {
+static SV *
+mop_call0(pTHX_ SV *const self, SV *const method) {
     dSP;
-    SV* ret;
+    SV *ret;
 
     PUSHMARK(SP);
     XPUSHs(self);
@@ -192,24 +192,24 @@ get_all_package_symbols(HV *stash, type_filter_t filter)
 
 
 static void
-mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stash, HV* const map) {
-    const char* const class_name_pv = HvNAME(stash); /* must be HvNAME(stash), not SvPV_nolen_const(class_name) */
-    SV*   method_metaclass_name;
-    char* method_name;
+mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stash, HV *const map) {
+    const char *const class_name_pv = HvNAME(stash); /* must be HvNAME(stash), not SvPV_nolen_const(class_name) */
+    SV   *method_metaclass_name;
+    char *method_name;
     I32   method_name_len;
-    SV *coderef;
-    HV *symbols;
+    SV   *coderef;
+    HV   *symbols;
     dSP;
 
     symbols = get_all_package_symbols(stash, TYPE_FILTER_CODE);
 
     (void)hv_iterinit(symbols);
     while ( (coderef = hv_iternextsv(symbols, &method_name, &method_name_len)) ) {
-        CV* cv = (CV *)SvRV(coderef);
-        char* cvpkg_name;
-        char* cv_name;
-        SV* method_slot;
-        SV* method_object;
+        CV *cv = (CV *)SvRV(coderef);
+        char *cvpkg_name;
+        char *cv_name;
+        SV *method_slot;
+        SV *method_object;
 
         if (!get_code_info(coderef, &cvpkg_name, &cv_name)) {
             continue;
@@ -225,7 +225,7 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
         method_slot = *hv_fetch(map, method_name, method_name_len, TRUE);
         if ( SvOK(method_slot) ) {
             SV* const body = call0(method_slot, key_body); /* $method_object->body() */
-            if ( SvROK(body) && ((CV*) SvRV(body)) == cv ) {
+            if ( SvROK(body) && ((CV *) SvRV(body)) == cv ) {
                 continue;
             }
         }
@@ -246,7 +246,7 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
         PUSHMARK(SP);
         EXTEND(SP, 8);
         PUSHs(method_metaclass_name); /* invocant */
-        mPUSHs(newRV_inc((SV*)cv));
+        mPUSHs(newRV_inc((SV *)cv));
         PUSHs(associated_metaclass);
         PUSHs(self);
         PUSHs(key_package_name);
@@ -301,7 +301,7 @@ PROTOTYPES: ENABLE
 
 void
 get_code_info(coderef)
-    SV* coderef
+    SV *coderef
     PREINIT:
         char* pkg  = NULL;
         char* name = NULL;
@@ -455,7 +455,7 @@ MODULE = Class::MOP    PACKAGE = Class::MOP::Class
 
 void
 get_method_map(self)
-    SV* self
+    SV *self
     PREINIT:
         HV *const obj        = (HV *)SvRV(self);
         SV *const class_name = HeVAL( hv_fetch_ent(obj, key_package, 0, hash_package) );
@@ -466,13 +466,13 @@ get_method_map(self)
     PPCODE:
         /* in  $self->{methods} does not yet exist (or got deleted) */
         if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
-            SV* new_map_ref = newRV_noinc((SV *)newHV());
+            SV *new_map_ref = newRV_noinc((SV *)newHV());
             sv_2mortal(new_map_ref);
             sv_setsv(map_ref, new_map_ref);
         }
 
         if ( !SvOK(cache_flag) || SvUV(cache_flag) != current ) {
-            mop_update_method_map(aTHX_ self, class_name, stash, (HV*)SvRV(map_ref));
+            mop_update_method_map(aTHX_ self, class_name, stash, (HV *)SvRV(map_ref));
             sv_setuv(cache_flag, check_package_cache_flag(stash)); /* update_cache_flag() */
         }
 
