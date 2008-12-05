@@ -25,6 +25,12 @@ U32 hash_package_name;
 SV *key_body;
 U32 hash_body;
 
+SV *key_package_cache_flag;
+U32 hash_package_cache_flag;
+
+SV *key_methods;
+U32 hash_methods;
+
 SV* method_metaclass;
 SV* associated_metaclass;
 SV* wrap;
@@ -275,11 +281,15 @@ BOOT:
     key_body = newSVpvs("body");
     key_package = newSVpvs("package");
     key_package_name = newSVpvs("package_name");
+    key_package_cache_flag = newSVpvs("_package_cache_flag");
+    key_methods = newSVpvs("methods");
 
     PERL_HASH(hash_name, "name", 4);
     PERL_HASH(hash_body, "body", 4);
     PERL_HASH(hash_package, "package", 7);
     PERL_HASH(hash_package_name, "package_name", 12);
+    PERL_HASH(hash_package_cache_flag, "_package_cache_flag", 19);
+    PERL_HASH(hash_methods, "methods", 7);
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
@@ -447,29 +457,23 @@ void
 get_method_map(self)
     SV* self
     PREINIT:
-        SV* const class_name = HeVAL( hv_fetch_ent((HV*)SvRV(self), key_package, TRUE, hash_package) );
-        HV* const stash      = gv_stashsv(class_name, TRUE);
+        HV *const obj        = (HV *)SvRV(self);
+        SV *const class_name = HeVAL( hv_fetch_ent(obj, key_package, 0, hash_package) );
+        HV *const stash      = gv_stashsv(class_name, 0);
         UV  const current    = check_package_cache_flag(stash);
-        SV* const cache_flag = *hv_fetchs((HV*)SvRV(self), "_package_cache_flag", TRUE);
-        SV* const map_ref    = *hv_fetchs((HV*)SvRV(self), "methods", TRUE);
+        SV *const cache_flag = HeVAL( hv_fetch_ent(obj, key_package_cache_flag, TRUE, hash_package_cache_flag));
+        SV *const map_ref    = HeVAL( hv_fetch_ent(obj, key_methods, TRUE, hash_methods));
     PPCODE:
         /* in  $self->{methods} does not yet exist (or got deleted) */
-        if ( ! (SvROK(map_ref) && SvTYPE(SvRV(map_ref)) == SVt_PVHV) ) {
-            SV* new_map_ref = newRV_noinc((SV*)newHV());
+        if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
+            SV* new_map_ref = newRV_noinc((SV *)newHV());
             sv_2mortal(new_map_ref);
             sv_setsv(map_ref, new_map_ref);
         }
 
-        if ( ! (SvOK(cache_flag) && SvUV(cache_flag) == current) ) {
-            ENTER;
-            SAVETMPS;
-
+        if ( !SvOK(cache_flag) || SvUV(cache_flag) != current ) {
             mop_update_method_map(aTHX_ self, class_name, stash, (HV*)SvRV(map_ref));
             sv_setuv(cache_flag, check_package_cache_flag(stash)); /* update_cache_flag() */
-
-            FREETMPS;
-            LEAVE;
         }
 
         XPUSHs(map_ref);
-
