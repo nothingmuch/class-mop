@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.72
+0.71_02 Fri, December 5, 2008
     * Class::MOP::Immutable
       - Added a new attribute, inlined_constructor, which is true if
         the constructor was inlined.
