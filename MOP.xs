@@ -167,6 +167,88 @@ mop_update_method_map(pTHX_ SV* const self, SV* const class_name, HV* const stas
     }
 }
 
+typedef enum {
+    TYPE_FILTER_NONE,
+    TYPE_FILTER_CODE,
+    TYPE_FILTER_ARRAY,
+    TYPE_FILTER_IO,
+    TYPE_FILTER_HASH,
+    TYPE_FILTER_SCALAR,
+} type_filter_t;
+
+static HV *
+get_all_package_symbols(HV *stash, type_filter_t filter)
+{
+    HE *he;
+    HV *ret = newHV();
+
+    (void)hv_iterinit(stash);
+
+    if (filter == TYPE_FILTER_NONE) {
+        while ( (he = hv_iternext(stash)) ) {
+            STRLEN keylen;
+            char *key = HePV(he, keylen);
+            hv_store(ret, key, keylen, SvREFCNT_inc(HeVAL(he)), 0);
+        }
+
+        return ret;
+    }
+
+    while ( (he = hv_iternext(stash)) ) {
+        SV *const gv = HeVAL(he);
+        SV *sv = NULL;
+        char *key;
+        STRLEN keylen;
+        char *package;
+        SV *fq;
+
+        switch( SvTYPE(gv) ) {
+#ifndef SVt_RV
+            case SVt_RV:
+#endif
+            case SVt_PV:
+            case SVt_IV:
+                /* expand the gv into a real typeglob if it
+                 * contains stub functions and we were asked to
+                 * return CODE symbols */
+                if (filter == TYPE_FILTER_CODE) {
+                    if (SvROK(gv)) {
+                        /* we don't really care about the length,
+                           but that's the API */
+                        key = HePV(he, keylen);
+                        package = HvNAME(stash);
+                        fq = newSVpvf("%s::%s", package, key);
+                        sv = (SV *)get_cv(SvPV_nolen(fq), 0);
+                        break;
+                    }
+
+                    key = HePV(he, keylen);
+                    gv_init((GV *)gv, stash, key, keylen, GV_ADDMULTI);
+                }
+                /* fall through */
+            case SVt_PVGV:
+                switch (filter) {
+                    case TYPE_FILTER_CODE:   sv = (SV *)GvCVu(gv); break;
+                    case TYPE_FILTER_ARRAY:  sv = (SV *)GvAV(gv);  break;
+                    case TYPE_FILTER_IO:     sv = (SV *)GvIO(gv);  break;
+                    case TYPE_FILTER_HASH:   sv = (SV *)GvHV(gv);  break;
+                    case TYPE_FILTER_SCALAR: sv = (SV *)GvSV(gv);  break;
+                    default:
+                        croak("Unknown type");
+                }
+                break;
+            default:
+                continue;
+        }
+
+        if (sv) {
+            char *key = HePV(he, keylen);
+            hv_store(ret, key, keylen, newRV_inc(sv), 0);
+        }
+    }
+
+    return ret;
+}
 
 /*
 get_code_info:
@@ -230,16 +312,21 @@ get_code_info(coderef)
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
 
 void
-get_all_package_symbols(self, ...)
+get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
     SV *self
+    type_filter_t filter
     PROTOTYPE: $;$
     PREINIT:
         HV *stash = NULL;
-        SV *type_filter = NULL;
+        HV *symbols = NULL;
         register HE *he;
     PPCODE:
         if ( ! SvROK(self) ) {
             die("Cannot call get_all_package_symbols as a class method");
+        }
+
+        if (GIMME_V == G_VOID) {
+            XSRETURN_EMPTY;
         }
 
         switch (GIMME_V) {
@@ -247,90 +334,26 @@ get_all_package_symbols(self, ...)
             case G_SCALAR: ST(0) = &PL_sv_undef; return; break;
         }
 
-        if ( items > 1 ) type_filter = ST(1);
-
         PUTBACK;
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) )
-            stash = gv_stashsv(HeVAL(he),0);
-
-        if (stash) {
-
-            (void)hv_iterinit(stash);
-
-            if ( type_filter && SvPOK(type_filter) ) {
-                const char *const type = SvPV_nolen(type_filter);
-
-                while ( (he = hv_iternext(stash)) ) {
-                    SV *const gv = HeVAL(he);
-                    SV *sv = NULL;
-                    char *key;
-                    STRLEN keylen;
-                    char *package;
-                    SV *fq;
-
-                    switch( SvTYPE(gv) ) {
-#ifndef SVt_RV
-                        case SVt_RV:
-#endif
-                        case SVt_PV:
-                        case SVt_IV:
-                            /* expand the gv into a real typeglob if it
-                             * contains stub functions and we were asked to
-                             * return CODE symbols */
-                            if (*type == 'C') {
-                                if (SvROK(gv)) {
-                                    /* we don't really care about the length,
-                                       but that's the API */
-                                    key = HePV(he, keylen);
-                                    package = HvNAME(stash);
-                                    fq = newSVpvf("%s::%s", package, key);
-                                    sv = (SV*)get_cv(SvPV_nolen(fq), 0);
-                                    break;
-                                }
-
-                                key = HePV(he, keylen);
-                                gv_init((GV *)gv, stash, key, keylen, GV_ADDMULTI);
-                            }
-                            /* fall through */
-                        case SVt_PVGV:
-                            switch (*type) {
-                                case 'C': sv = (SV *)GvCVu(gv); break; /* CODE */
-                                case 'A': sv = (SV *)GvAV(gv); break; /* ARRAY */
-                                case 'I': sv = (SV *)GvIO(gv); break; /* IO */
-                                case 'H': sv = (SV *)GvHV(gv); break; /* HASH */
-                                case 'S': sv = (SV *)GvSV(gv); break; /* SCALAR */
-                                default:
-                                          croak("Unknown type %s\n", type);
-                            }
-                            break;
-                        default:
-                            continue;
-                    }
-
-                    if (sv) {
-                        SV *key = hv_iterkeysv(he);
-                        SPAGAIN;
-                        EXTEND(SP, 2);
-                        PUSHs(key);
-                        PUSHs(sv_2mortal(newRV_inc(sv)));
-                        PUTBACK;
-                    }
-                }
-            } else {
-                EXTEND(SP, HvKEYS(stash) * 2);
-
-                while ( (he = hv_iternext(stash)) ) {
-                    SV *key = hv_iterkeysv(he);
-                    SV *sv = HeVAL(he);
-                    SPAGAIN;
-                    PUSHs(key);
-                    PUSHs(sv);
-                    PUTBACK;
-                }
-            }
-
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) ) {
+            stash = gv_stashsv(HeVAL(he), 0);
         }
+
+
+        if (!stash) {
+            XSRETURN_EMPTY;
+        }
+
+        symbols = get_all_package_symbols(stash, filter);
+
+        EXTEND(SP, HvKEYS(symbols) * 2);
+        while ((he = hv_iternext(symbols))) {
+            PUSHs(hv_iterkeysv(he));
+            PUSHs(sv_2mortal(SvREFCNT_inc(HeVAL(he))));
+        }
+
+        SvREFCNT_dec((SV *)symbols);
 
 void
 name(self)
