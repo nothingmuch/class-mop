@@ -329,10 +329,6 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
             XSRETURN_EMPTY;
         }
 
-        switch (GIMME_V) {
-            case G_VOID: return; break;
-            case G_SCALAR: ST(0) = &PL_sv_undef; return; break;
-        }
 
         PUTBACK;
 
@@ -342,15 +338,31 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
 
 
         if (!stash) {
-            XSRETURN_EMPTY;
+            switch (GIMME_V) {
+                case G_SCALAR: XSRETURN_UNDEF; break;
+                case G_ARRAY:  XSRETURN_EMPTY; break;
+            }
         }
 
         symbols = get_all_package_symbols(stash, filter);
 
-        EXTEND(SP, HvKEYS(symbols) * 2);
-        while ((he = hv_iternext(symbols))) {
-            PUSHs(hv_iterkeysv(he));
-            PUSHs(sv_2mortal(SvREFCNT_inc(HeVAL(he))));
+        switch (GIMME_V) {
+            case G_SCALAR:
+                PUSHs(sv_2mortal(newRV_inc((SV *)symbols)));
+                break;
+            case G_ARRAY:
+                warn("Class::MOP::Package::get_all_package_symbols in list context is deprecated. use scalar context instead.");
+
+                EXTEND(SP, HvKEYS(symbols) * 2);
+
+                while ((he = hv_iternext(symbols))) {
+                    PUSHs(hv_iterkeysv(he));
+                    PUSHs(sv_2mortal(SvREFCNT_inc(HeVAL(he))));
+                }
+
+                break;
+            default:
+                break;
         }
 
         SvREFCNT_dec((SV *)symbols);

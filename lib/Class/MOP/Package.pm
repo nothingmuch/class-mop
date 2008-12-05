@@ -283,13 +283,18 @@ sub get_all_package_symbols {
 
     my $namespace = $self->namespace;
 
-    return %$namespace unless defined $type_filter;
+    if (wantarray) {
+        warn 'Class::MOP::Package::get_all_package_symbols in list context is deprecated. use scalar context instead.';
+    }
 
+    return (wantarray ? %$namespace : $namespace) unless defined $type_filter;
+
+    my %ret;
     # for some reason this nasty impl is orders of magnitude faster than a clean version
     if ( $type_filter eq 'CODE' ) {
         my $pkg;
         no strict 'refs';
-        return map {
+        %ret = map {
             (ref($namespace->{$_})
                 ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
                 : ( ref \$namespace->{$_} eq 'GLOB' # don't use {CODE} unless it's really a glob to prevent stringification of stubs
@@ -303,12 +308,14 @@ sub get_all_package_symbols {
                             : () }) ) )
         } keys %$namespace;
     } else {
-        return map {
+        %ret = map {
             $_ => *{$namespace->{$_}}{$type_filter}
         } grep {
             !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
         } keys %$namespace;
     }
+
+    return wantarray ? %ret : \%ret;
 }
 
 1;
