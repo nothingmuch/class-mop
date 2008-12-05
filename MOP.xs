@@ -80,7 +80,7 @@ mop_call0(pTHX_ SV* const self, SV* const method) {
     return ret;
 }
 
-int
+static int
 get_code_info (SV *coderef, char **pkg, char **name)
 {
     if (!SvOK(coderef) || !SvROK(coderef) || SvTYPE(SvRV(coderef)) != SVt_PVCV) {
