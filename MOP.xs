@@ -128,7 +128,9 @@ get_all_package_symbols(HV *stash, type_filter_t filter)
         while ( (he = hv_iternext(stash)) ) {
             STRLEN keylen;
             char *key = HePV(he, keylen);
-            hv_store(ret, key, keylen, SvREFCNT_inc(HeVAL(he)), 0);
+            if (!hv_store(ret, key, keylen, SvREFCNT_inc(HeVAL(he)), 0)) {
+                croak("failed to store glob ref");
+            }
         }
 
         return ret;
@@ -183,7 +185,9 @@ get_all_package_symbols(HV *stash, type_filter_t filter)
 
         if (sv) {
             char *key = HePV(he, keylen);
-            hv_store(ret, key, keylen, newRV_inc(sv), 0);
+            if (!hv_store(ret, key, keylen, newRV_inc(sv), 0)) {
+                croak("failed to store symbol ref");
+            }
         }
     }
 
