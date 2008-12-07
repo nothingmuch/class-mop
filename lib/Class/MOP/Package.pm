@@ -32,6 +32,7 @@ sub initialize {
     } else {
         my $meta = ( ref $class || $class )->_new({
             'package'   => $package_name,
+            %options,
         });
 
         Class::MOP::store_metaclass_by_name($package_name, $meta);
