@@ -8,6 +8,8 @@ Revision history for Perl extension Class-MOP.
       - Make get_all_package_symbols return a hash ref in scalar
         context and deprecate calling it in list context with a
         warning. (Florian Ragwitz)
+      - Pass options to _new, so subclass' attributes can be
+        initialized (Sartak)
     * MOP.xs
       - Various improvements and refactoring, making things more robust and
         easier to maintain. (Florian Ragwitz)
