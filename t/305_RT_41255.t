@@ -7,7 +7,7 @@ use Test::Exception;
 use Class::MOP;
 
 {
-    package Base;
+    package BaseClass;
     sub m1 { 1 }
     sub m2 { 2 }
     sub m3 { 3 }
@@ -15,7 +15,7 @@ use Class::MOP;
     sub m5 { 5 }
 
     package Derived;
-    use base qw(Base);
+    use base qw(BaseClass);
 
     sub m1;
     sub m2 ();
