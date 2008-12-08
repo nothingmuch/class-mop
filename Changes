@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.72
+0.72 Mon, December 8, 2008
     * Class::MOP::Package
       - Pass options to _new, so subclass' attributes can be
         initialized (Sartak)
