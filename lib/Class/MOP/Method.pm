@@ -168,10 +168,8 @@ to this class.
 =item B<wrap ($code, %params)>
 
 This is the basic constructor, it returns a B<Class::MOP::Method>
-instance which wraps the given C<$code> reference. You can also
+instance which wraps the given C<$code> reference. You must also
 set the C<package_name> and C<name> attributes using the C<%params>.
-If these are not set, then thier accessors will attempt to figure
-it out using the C<Class::MOP::get_code_info> function.
 
 =item B<clone (%params)>
 

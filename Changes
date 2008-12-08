@@ -16,6 +16,8 @@ Revision history for Perl extension Class-MOP.
     * MOP.xs
       - Various improvements and refactoring, making things more robust and
         easier to maintain. (Florian Ragwitz)
+    * Class::MOP::Method
+      - Indicate that package_name and name are required (Stefan O'Rear)
 
 0.71_01 Wed, December 3, 2008
     * Class::MOP::Method
