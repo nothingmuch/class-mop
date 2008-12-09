@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+    * t/082_get_code_info.t
+      - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not munger
+        anonymous subs when under -d and so making the tests succeed
+        in that case.
+
 0.72 Mon, December 8, 2008
     * Class::MOP::Package
       - Pass options to _new, so subclass' attributes can be
