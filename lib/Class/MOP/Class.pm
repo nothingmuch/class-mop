@@ -1183,6 +1183,10 @@ manipulation of Perl 5 classes (and it can create them too). The
 best way to understand what this module can do, is to read the
 documentation for each of it's methods.
 
+=head1 INHERITANCE
+
+B<Class::MOP::Class> is a subclass of L<Class::MOP::Module>
+
 =head1 METHODS
 
 =head2 Self Introspection

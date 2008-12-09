@@ -68,6 +68,10 @@ This is an abstraction of a Perl 5 module, it is a superclass of
 L<Class::MOP::Class>. A module essentially a package with metadata, 
 in our case the version and authority. 
 
+=head1 INHERITANCE
+
+B<Class::MOP::Module> is a subclass of L<Class::MOP::Package>
+
 =head1 METHODS
 
 =over 4

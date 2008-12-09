@@ -335,6 +335,10 @@ This is an abstraction of a Perl 5 package, it is a superclass of
 L<Class::MOP::Class> and provides all of the symbol table 
 introspection methods.
 
+=head1 INHERITANCE
+
+B<Class::MOP::Package> is a subclass of L<Class::MOP::Object>
+
 =head1 METHODS
 
 =over 4
