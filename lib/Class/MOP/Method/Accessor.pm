@@ -120,7 +120,7 @@ sub generate_accessor_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my $code = $self->_eval_closure(
-        q{},
+        {},
         'sub {'
         . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
         . ' if scalar(@_) == 2; '
@@ -139,7 +139,7 @@ sub generate_reader_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my $code = $self->_eval_closure(
-         q{},
+         {},
         'sub {'
         . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
         . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
@@ -157,7 +157,7 @@ sub generate_writer_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my $code = $self->_eval_closure(
-        q{},
+        {},
         'sub {'
         . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
         . '}'
@@ -175,7 +175,7 @@ sub generate_predicate_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my $code = $self->_eval_closure(
-        q{},
+        {},
        'sub {'
        . $meta_instance->inline_is_slot_initialized('$_[0]', "'$attr_name'")
        . '}'
@@ -192,7 +192,7 @@ sub generate_clearer_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my $code = $self->_eval_closure(
-        q{},
+        {},
         'sub {'
         . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
         . '}'

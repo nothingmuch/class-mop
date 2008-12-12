@@ -45,8 +45,17 @@ sub initialize_body {
 }
 
 sub _eval_closure {
-    my $self = shift;
-    eval join("\n",@_);
+    # my ($self, $captures, $sub_body) = @_;
+    my $__captures = $_[1];
+    eval join(
+        "\n",
+        (map {
+            /^([\@\%\$])/
+                or die "capture key should start with \@, \% or \$: $_";
+            q!my !.$_.q! = !.$1.q!{$__captures->{'!.$_.q!'}};!;
+        } keys %$__captures),
+        $_[2]
+    );
 }
 
 1;

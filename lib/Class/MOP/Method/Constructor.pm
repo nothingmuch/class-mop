@@ -89,6 +89,8 @@ sub generate_constructor_method {
 sub generate_constructor_method_inline {
     my $self = shift;
 
+    my $close_over = {};
+
     my $source = 'sub {';
     $source .= "\n" . 'my $class = shift;';
 
@@ -112,7 +114,7 @@ sub generate_constructor_method_inline {
         # to be picked up in the eval
 
         $code = $self->_eval_closure(
-            q{my $attrs = $self->attributes;},
+            { '$attrs' => \$self->attributes },
             $source
         );
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
