@@ -13,10 +13,10 @@ use Class::MOP;
 
 my $meta = Class::MOP::Class->initialize('Foo');
 
-my %syms = $meta->get_all_package_symbols('CODE');
-is(ref $syms{FOO}, 'CODE', 'get constant symbol');
+my $syms = $meta->get_all_package_symbols('CODE');
+is(ref $syms->{FOO}, 'CODE', 'get constant symbol');
 
-undef %syms;
+undef $syms;
 
-%syms = $meta->get_all_package_symbols('CODE');
-is(ref $syms{FOO}, 'CODE', 'constant symbol still there, although we dropped our reference');
+$syms = $meta->get_all_package_symbols('CODE');
+is(ref $syms->{FOO}, 'CODE', 'constant symbol still there, although we dropped our reference');

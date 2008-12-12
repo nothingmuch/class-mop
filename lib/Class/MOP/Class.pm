@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.71_01';
+our $VERSION   = '0.72';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -311,8 +311,6 @@ sub attribute_metaclass { $_[0]->{'attribute_metaclass'} }
 sub method_metaclass    { $_[0]->{'method_metaclass'}    }
 sub instance_metaclass  { $_[0]->{'instance_metaclass'}  }
 
-# FIXME:
-# this is a prime canidate for conversion to XS
 sub get_method_map {
     my $self = shift;
 
@@ -330,10 +328,10 @@ sub get_method_map {
 
     my $method_metaclass = $self->method_metaclass;
 
-    my %all_code = $self->get_all_package_symbols('CODE');
+    my $all_code = $self->get_all_package_symbols('CODE');
 
-    foreach my $symbol (keys %all_code) {
-        my $code = $all_code{$symbol};
+    foreach my $symbol (keys %{ $all_code }) {
+        my $code = $all_code->{$symbol};
 
         next if exists  $map->{$symbol} &&
                 defined $map->{$symbol} &&
@@ -1184,6 +1182,10 @@ meta-object protocol. It controls the introspection and
 manipulation of Perl 5 classes (and it can create them too). The
 best way to understand what this module can do, is to read the
 documentation for each of it's methods.
+
+=head1 INHERITANCE
+
+B<Class::MOP::Class> is a subclass of L<Class::MOP::Module>
 
 =head1 METHODS
 

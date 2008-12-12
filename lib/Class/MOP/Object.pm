@@ -6,7 +6,7 @@ use warnings;
 
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.71_01';
+our $VERSION   = '0.72';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -49,7 +49,7 @@ Class::MOP::Object - Object Meta Object
 
 =head1 DESCRIPTION
 
-This class is basically a stub, it provides no functionality at all, 
+This class is basically a stub, it provides almost no functionality at all, 
 and really just exists to make the Class::MOP metamodel complete.
 
                          ......

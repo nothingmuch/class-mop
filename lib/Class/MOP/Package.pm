@@ -8,7 +8,7 @@ use B;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.71_01';
+our $VERSION   = '0.72';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -32,6 +32,7 @@ sub initialize {
     } else {
         my $meta = ( ref $class || $class )->_new({
             'package'   => $package_name,
+            %options,
         });
 
         Class::MOP::store_metaclass_by_name($package_name, $meta);
@@ -283,13 +284,18 @@ sub get_all_package_symbols {
 
     my $namespace = $self->namespace;
 
-    return %$namespace unless defined $type_filter;
+    if (wantarray) {
+        warn 'Class::MOP::Package::get_all_package_symbols in list context is deprecated. use scalar context instead.';
+    }
 
+    return (wantarray ? %$namespace : $namespace) unless defined $type_filter;
+
+    my %ret;
     # for some reason this nasty impl is orders of magnitude faster than a clean version
     if ( $type_filter eq 'CODE' ) {
         my $pkg;
         no strict 'refs';
-        return map {
+        %ret = map {
             (ref($namespace->{$_})
                 ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
                 : ( ref \$namespace->{$_} eq 'GLOB' # don't use {CODE} unless it's really a glob to prevent stringification of stubs
@@ -303,12 +309,14 @@ sub get_all_package_symbols {
                             : () }) ) )
         } keys %$namespace;
     } else {
-        return map {
+        %ret = map {
             $_ => *{$namespace->{$_}}{$type_filter}
         } grep {
             !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
         } keys %$namespace;
     }
+
+    return wantarray ? %ret : \%ret;
 }
 
 1;
@@ -326,6 +334,10 @@ Class::MOP::Package - Package Meta Object
 This is an abstraction of a Perl 5 package, it is a superclass of
 L<Class::MOP::Class> and provides all of the symbol table 
 introspection methods.
+
+=head1 INHERITANCE
+
+B<Class::MOP::Package> is a subclass of L<Class::MOP::Object>
 
 =head1 METHODS
 

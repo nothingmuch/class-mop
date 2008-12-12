@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.71_01';
+our $VERSION   = '0.72';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -67,6 +67,10 @@ Class::MOP::Module - Module Meta Object
 This is an abstraction of a Perl 5 module, it is a superclass of
 L<Class::MOP::Class>. A module essentially a package with metadata, 
 in our case the version and authority. 
+
+=head1 INHERITANCE
+
+B<Class::MOP::Module> is a subclass of L<Class::MOP::Package>
 
 =head1 METHODS
 

@@ -234,46 +234,46 @@ is(Foo->meta->get_package_symbol('@foo'), $ARRAY, '... got the right values for 
 # get_all_package_symbols
 
 {
-    my %syms = Foo->meta->get_all_package_symbols;
+    my $syms = Foo->meta->get_all_package_symbols;
     is_deeply(
-        [ sort keys %syms ],
+        [ sort keys %{ $syms } ],
         [ sort Foo->meta->list_all_package_symbols ],
         '... the fetched symbols are the same as the listed ones'
     ); 
 }
 
 {
-    my %syms = Foo->meta->get_all_package_symbols('CODE');
+    my $syms = Foo->meta->get_all_package_symbols('CODE');
 
     is_deeply(
-        [ sort keys %syms ],
+        [ sort keys %{ $syms } ],
         [ sort Foo->meta->list_all_package_symbols('CODE') ],
         '... the fetched symbols are the same as the listed ones'
     );
     
-    foreach my $symbol (keys %syms) {
-        is($syms{$symbol}, Foo->meta->get_package_symbol('&' . $symbol), '... got the right symbol');
+    foreach my $symbol (keys %{ $syms }) {
+        is($syms->{$symbol}, Foo->meta->get_package_symbol('&' . $symbol), '... got the right symbol');
     } 
 }
 
 {
     Foo->meta->add_package_symbol('%zork');
 
-    my %syms = Foo->meta->get_all_package_symbols('HASH');
+    my $syms = Foo->meta->get_all_package_symbols('HASH');
 
     is_deeply(
-        [ sort keys %syms ],
+        [ sort keys %{ $syms } ],
         [ sort Foo->meta->list_all_package_symbols('HASH') ],
         '... the fetched symbols are the same as the listed ones'
     );
 
-    foreach my $symbol (keys %syms) {
-        is($syms{$symbol}, Foo->meta->get_package_symbol('%' . $symbol), '... got the right symbol');
+    foreach my $symbol (keys %{ $syms }) {
+        is($syms->{$symbol}, Foo->meta->get_package_symbol('%' . $symbol), '... got the right symbol');
     }
 
     no warnings 'once';
     is_deeply(
-        \%syms,
+        $syms,
         { zork => \%Foo::zork },
         "got the right ones",
     );

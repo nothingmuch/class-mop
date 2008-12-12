@@ -95,3 +95,4 @@ t/lib/MyMetaClass/Instance.pm
 t/lib/MyMetaClass/Method.pm
 t/lib/MyMetaClass/Random.pm
 t/lib/SyntaxError.pm
+typemap

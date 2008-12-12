@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'weaken';
 
-our $VERSION   = '0.71_01';
+our $VERSION   = '0.72';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -168,10 +168,8 @@ to this class.
 =item B<wrap ($code, %params)>
 
 This is the basic constructor, it returns a B<Class::MOP::Method>
-instance which wraps the given C<$code> reference. You can also
-set the C<package_name> and C<name> attributes using the C<%params>.
-If these are not set, then thier accessors will attempt to figure
-it out using the C<Class::MOP::get_code_info> function.
+instance which wraps the given C<$code> reference. You must also set
+the C<package_name> and C<name> attributes in C<%params>.
 
 =item B<clone (%params)>
 

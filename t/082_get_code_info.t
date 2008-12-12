@@ -6,6 +6,7 @@ use warnings;
 use Test::More;
 
 BEGIN {
+    $^P &= ~0x200; # Don't munger anonymous sub names
     if ( eval 'use Sub::Name qw(subname); 1;' ) {
         plan tests => 5;
     }
