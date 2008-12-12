@@ -101,7 +101,7 @@ sub generate_constructor_method_inline {
 
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
-        $self->_generate_slot_initializer($_)
+        $self->_generate_slot_initializer($_, $close_over)
     } 0 .. (@{$self->attributes} - 1));
     $source .= ";\n" . 'return $instance';
     $source .= ";\n" . '}';
@@ -114,7 +114,7 @@ sub generate_constructor_method_inline {
         # to be picked up in the eval
 
         $code = $self->_eval_closure(
-            { '$attrs' => \$self->attributes },
+            $close_over,
             $source
         );
         confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
@@ -125,6 +125,7 @@ sub generate_constructor_method_inline {
 sub _generate_slot_initializer {
     my $self  = shift;
     my $index = shift;
+    my $close = shift;
 
     my $attr = $self->attributes->[$index];
 
@@ -137,7 +138,9 @@ sub _generate_slot_initializer {
         # in which case we can just deal with them
         # in the code we eval.
         if ($attr->is_default_a_coderef) {
-            $default = '$attrs->[' . $index . ']->default($instance)';
+            my $idx = @{$close->{'@defaults'}||=[]};
+            push(@{$close->{'@defaults'}}, $attr->default);
+            $default = '$defaults[' . $idx . ']->($instance)';
         }
         else {
             $default = $attr->default;
