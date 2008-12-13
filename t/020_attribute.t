@@ -5,7 +5,7 @@ use warnings;
 
 use Scalar::Util 'reftype', 'blessed';
 
-use Test::More tests => 100;
+use Test::More tests => 104;
 use Test::Exception;
 
 use Class::MOP;
@@ -226,4 +226,26 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
     ok($attr->has_builder, '... $attr does have a builder');
     is($attr->builder, 'foo_builder', '... $attr->builder == foo_builder');
 
+}
+
+{
+    for my $value ({}, bless({}, 'Foo')) {
+        throws_ok {
+            Class::MOP::Attribute->new('$foo', default => $value);
+        } qr/References are not allowed as default values/;
+    }
+}
+
+{
+    {
+        package Method;
+        use overload '&{}' => sub { sub { $_[0] } };
+    }
+
+    my $attr;
+    lives_ok {
+        $attr = Class::MOP::Attribute->new('$foo', default => bless({}, 'Method'));
+    } 'objects with overloaded codification accepted as default';
+
+    is($attr->default(42), 42, 'default calculated correctly with overloaded object');
 }
