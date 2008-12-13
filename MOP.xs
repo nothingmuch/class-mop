@@ -38,17 +38,39 @@ SV *wrap;
 
 
 #define check_package_cache_flag(stash) mop_check_package_cache_flag(aTHX_ stash)
-#ifdef HvMROMETA /* 5.10.0 */
-
-#ifndef mro_meta_init
-#define mro_meta_init(stash) Perl_mro_meta_init(aTHX_ stash) /* used in HvMROMETA macro */
-#endif /* !mro_meta_init */
+#if PERL_VERSION >= 10
 
 static UV
 mop_check_package_cache_flag(pTHX_ HV* stash) {
     assert(SvTYPE(stash) == SVt_PVHV);
 
-    return HvMROMETA(stash)->pkg_gen; /* mro::get_pkg_gen($pkg) */
+    /* here we're trying to implement a c version of mro::get_pkg_gen($stash),
+     * however the perl core doesn't make it easy for us. It doesn't provide an
+     * api that just does what we want.
+     *
+     * However, we know that the information we want is, inside the core,
+     * available using HvMROMETA(stash)->pkg_gen. Unfortunately, although the
+     * HvMROMETA macro is public, it is implemented using Perl_mro_meta_init,
+     * which is not public and only available inside the core, as the mro
+     * interface as well as the structure returned by mro_meta_init isn't
+     * considered to be stable yet.
+     *
+     * Perl_mro_meta_init isn't declared static, so we could just define it
+     * ourselfs if perls headers don't do that for us, except that won't work
+     * on platforms where symbols need to be explicitly exported when linking
+     * shared libraries.
+     *
+     * So our, hopefully temporary, solution is to be even more evil and
+     * basically reimplement HvMROMETA in a very fragile way that'll blow up
+     * when the relevant parts of the mro implementation in core change.
+     *
+     * :-(
+     *
+     */
+
+    return HvAUX(stash)->xhv_mro_meta
+         ? HvAUX(stash)->xhv_mro_meta->pkg_gen
+         : 0;
 }
 
 #else /* pre 5.10.0 */
