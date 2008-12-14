@@ -3,10 +3,6 @@ Revision history for Perl extension Class-MOP.
     * MOP.xs
       - Don't use Perl_mro_meta_init. It's not part of the public perl api.
         (Florian Ragwitz)
-    * Class::MOP::Attribute
-      - Allow default values to be objects with overloaded codification.
-        (Florian Ragwitz)
-      - Test the above. (Rhesa Rozendaal)
     * t/082_get_code_info.t
       - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not munger
         anonymous subs when under -d and so making the tests succeed
