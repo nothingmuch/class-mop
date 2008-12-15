@@ -1355,7 +1355,7 @@ This method is used to construct an instance structure suitable for
 C<bless>-ing into your package of choice. It works in conjunction
 with the Attribute protocol to collect all applicable attributes.
 
-This will construct and instance using a HASH ref as storage
+This will construct an instance using a HASH ref as storage
 (currently only HASH references are supported). This will collect all
 the applicable attributes and layout out the fields in the HASH ref,
 it will then initialize them using either use the corresponding key
