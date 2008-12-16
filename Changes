@@ -1,12 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
+0.73 Tue, December 16, 2008
     * MOP.xs
-      - Don't use Perl_mro_meta_init. It's not part of the public perl api.
-        (Florian Ragwitz)
+      - Don't use Perl_mro_meta_init. It's not part of the public perl
+        api. Fixes failures to build on Win32 (RT #41750).  (Florian
+        Ragwitz)
     * t/082_get_code_info.t
-      - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not munger
-        anonymous subs when under -d and so making the tests succeed
-        in that case.
+      - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not
+        munger anonymous subs when under -d and so making the tests
+        succeed in that case.
 
 0.72 Mon, December 8, 2008
     * Class::MOP::Package
