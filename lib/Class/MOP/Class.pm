@@ -1620,8 +1620,10 @@ the call tree might looks something like this:
     around 2
      around 1
       primary
-     after 1
-    after 2
+     around 1
+    around 2
+   after 1
+  after 2
 
 To see examples of using method modifiers, see the following examples
 included in the distribution; F<InstanceCountingClass>, F<Perl6Attribute>,
