@@ -384,7 +384,7 @@ is_class_loaded(klass=&PL_sv_undef)
         }
 
         (void)hv_iterinit(stash);
-        while (gv = (GV *)hv_iternextsv(stash, &key, &keylen)) {
+        while ((gv = (GV *)hv_iternextsv(stash, &key, &keylen))) {
             if (keylen <= 0) {
                 continue;
             }
