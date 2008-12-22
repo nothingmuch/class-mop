@@ -339,8 +339,60 @@ get_code_info(coderef)
             PUSHs(newSVpv(name, 0));
         }
 
+PROTOTYPES: DISABLE
+
+void
+is_class_loaded(klass=&PL_sv_undef)
+    SV *klass
+    PREINIT:
+        HV *stash;
+        char *key;
+        I32 keylen;
+        GV *gv;
+    PPCODE:
+        if (!SvPOK(klass) || !SvCUR(klass)) {
+            XSRETURN_NO;
+        }
+
+        stash = gv_stashsv(klass, 0);
+        if (!stash) {
+            XSRETURN_NO;
+        }
+
+        if (hv_exists (stash, "VERSION", 7)) {
+            SV **version = hv_fetch(stash, "VERSION", 7, 0);
+            if (version && *version && GvSV(*version)) {
+                XSRETURN_YES;
+            }
+        }
+
+        if (hv_exists (stash, "ISA", 3)) {
+            SV **isa = hv_fetch(stash, "ISA", 3, 0);
+            if (isa && *isa && GvAV(*isa)) {
+                XSRETURN_YES;
+            }
+        }
+
+        (void)hv_iterinit(stash);
+        while (gv = (GV *)hv_iternextsv(stash, &key, &keylen)) {
+            if (keylen <= 0) {
+                continue;
+            }
+
+            if (key[keylen - 1] == ':' && key[keylen - 2] == ':') {
+                continue;
+            }
+
+            if (!isGV(gv) || GvCV(gv) || GvSV(gv) || GvAV(gv) || GvHV(gv) || GvIO(gv) || GvFORM(gv)) {
+                XSRETURN_YES;
+            }
+        }
+
+        XSRETURN_NO;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
+
+PROTOTYPES: ENABLE
 
 void
 get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
