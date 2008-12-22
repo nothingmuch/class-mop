@@ -32,6 +32,12 @@ U32 hash_package_cache_flag;
 SV *key_methods;
 U32 hash_methods;
 
+SV *key_VERSION;
+U32 hash_VERSION;
+
+SV *key_ISA;
+U32 hash_ISA;
+
 SV *method_metaclass;
 SV *associated_metaclass;
 SV *wrap;
@@ -310,6 +316,8 @@ BOOT:
     key_package_name = newSVpvs("package_name");
     key_package_cache_flag = newSVpvs("_package_cache_flag");
     key_methods = newSVpvs("methods");
+    key_VERSION = newSVpvs("VERSION");
+    key_ISA = newSVpvs("ISA");
 
     PERL_HASH(hash_name, "name", 4);
     PERL_HASH(hash_body, "body", 4);
@@ -317,6 +325,8 @@ BOOT:
     PERL_HASH(hash_package_name, "package_name", 12);
     PERL_HASH(hash_package_cache_flag, "_package_cache_flag", 19);
     PERL_HASH(hash_methods, "methods", 7);
+    PERL_HASH(hash_VERSION, "VERSION", 7);
+    PERL_HASH(hash_ISA, "ISA", 3);
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
@@ -359,16 +369,16 @@ is_class_loaded(klass=&PL_sv_undef)
             XSRETURN_NO;
         }
 
-        if (hv_exists (stash, "VERSION", 7)) {
-            SV **version = hv_fetch(stash, "VERSION", 7, 0);
-            if (version && *version && GvSV(*version)) {
+        if (hv_exists_ent (stash, key_VERSION, hash_VERSION)) {
+            HE *version = hv_fetch_ent(stash, key_VERSION, 0, hash_VERSION);
+            if (version && HeVAL(version) && GvSV(HeVAL(version))) {
                 XSRETURN_YES;
             }
         }
 
-        if (hv_exists (stash, "ISA", 3)) {
-            SV **isa = hv_fetch(stash, "ISA", 3, 0);
-            if (isa && *isa && GvAV(*isa)) {
+        if (hv_exists_ent (stash, key_ISA, hash_ISA)) {
+            HE *isa = hv_fetch_ent(stash, key_ISA, 0, hash_ISA);
+            if (isa && HeVAL(isa) && GvAV(HeVAL(isa))) {
                 XSRETURN_YES;
             }
         }
