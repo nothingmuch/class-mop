@@ -14,29 +14,21 @@ This shuts up warnings from gcc -Wall
 #define NEED_sv_2pv_nolen
 #include "ppport.h"
 
-SV *key_name;
-U32 hash_name;
+#define DECLARE_KEY(name) SV *key_##name; U32 hash_##name;
 
-SV *key_package;
-U32 hash_package;
+#define PREHASH_KEY(name, value) do { \
+    key_##name = newSVpvs(value); \
+    PERL_HASH(hash_##name, value, sizeof(value) - 1); \
+} while (0)
 
-SV *key_package_name;
-U32 hash_package_name;
-
-SV *key_body;
-U32 hash_body;
-
-SV *key_package_cache_flag;
-U32 hash_package_cache_flag;
-
-SV *key_methods;
-U32 hash_methods;
-
-SV *key_VERSION;
-U32 hash_VERSION;
-
-SV *key_ISA;
-U32 hash_ISA;
+DECLARE_KEY(name);
+DECLARE_KEY(package);
+DECLARE_KEY(package_name);
+DECLARE_KEY(body);
+DECLARE_KEY(package_cache_flag);
+DECLARE_KEY(methods);
+DECLARE_KEY(VERSION);
+DECLARE_KEY(ISA);
 
 SV *method_metaclass;
 SV *associated_metaclass;
@@ -310,23 +302,14 @@ get_code_info:
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 BOOT:
-    key_name = newSVpvs("name");
-    key_body = newSVpvs("body");
-    key_package = newSVpvs("package");
-    key_package_name = newSVpvs("package_name");
-    key_package_cache_flag = newSVpvs("_package_cache_flag");
-    key_methods = newSVpvs("methods");
-    key_VERSION = newSVpvs("VERSION");
-    key_ISA = newSVpvs("ISA");
-
-    PERL_HASH(hash_name, "name", 4);
-    PERL_HASH(hash_body, "body", 4);
-    PERL_HASH(hash_package, "package", 7);
-    PERL_HASH(hash_package_name, "package_name", 12);
-    PERL_HASH(hash_package_cache_flag, "_package_cache_flag", 19);
-    PERL_HASH(hash_methods, "methods", 7);
-    PERL_HASH(hash_VERSION, "VERSION", 7);
-    PERL_HASH(hash_ISA, "ISA", 3);
+    PREHASH_KEY(name, "name");
+    PREHASH_KEY(body, "body");
+    PREHASH_KEY(package, "package");
+    PREHASH_KEY(package_name, "package_name");
+    PREHASH_KEY(package_cache_flag, "_package_cache_flag");
+    PREHASH_KEY(methods, "methods");
+    PREHASH_KEY(VERSION, "VERSION");
+    PREHASH_KEY(ISA, "ISA");
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
