@@ -312,7 +312,7 @@ BOOT:
     PREHASH_KEY(ISA);
     PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
     /* we can't stringify VERSION as it's a define already */
-    PREHASH_KEY_WITH_VALUE(VERSION, "VALUE");
+    PREHASH_KEY_WITH_VALUE(VERSION, "VERSION");
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
