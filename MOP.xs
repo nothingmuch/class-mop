@@ -21,7 +21,16 @@ This shuts up warnings from gcc -Wall
     PERL_HASH(hash_##name, value, sizeof(value) - 1); \
 } while (0)
 
-#define PREHASH_KEY(name) PREHASH_KEY_WITH_VALUE(name, #name)
+/* this is basically the same as the above macro, except that the value will be
+ * the stringified name. However, we can't just implement this in terms of
+ * PREHASH_KEY_WITH_VALUE as that'd cause macro expansion on the value of
+ * 'name' when it's being passed to the other macro. suggestions on how to make
+ * this more elegant would be much appreciated */
+
+#define PREHASH_KEY(name) do { \
+    key_##name = newSVpvs(#name); \
+    PERL_HASH(hash_##name, #name, sizeof(#name) - 1); \
+} while (0)
 
 DECLARE_KEY(name);
 DECLARE_KEY(package);
@@ -310,9 +319,8 @@ BOOT:
     PREHASH_KEY(package_name);
     PREHASH_KEY(methods);
     PREHASH_KEY(ISA);
+    PREHASH_KEY(VERSION);
     PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
-    /* we can't stringify VERSION as it's a define already */
-    PREHASH_KEY_WITH_VALUE(VERSION, "VERSION");
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
