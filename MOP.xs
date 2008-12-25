@@ -16,10 +16,12 @@ This shuts up warnings from gcc -Wall
 
 #define DECLARE_KEY(name) SV *key_##name; U32 hash_##name;
 
-#define PREHASH_KEY(name, value) do { \
+#define PREHASH_KEY_WITH_VALUE(name, value) do { \
     key_##name = newSVpvs(value); \
     PERL_HASH(hash_##name, value, sizeof(value) - 1); \
 } while (0)
+
+#define PREHASH_KEY(name) PREHASH_KEY_WITH_VALUE(name, #name)
 
 DECLARE_KEY(name);
 DECLARE_KEY(package);
@@ -302,14 +304,15 @@ get_code_info:
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 BOOT:
-    PREHASH_KEY(name, "name");
-    PREHASH_KEY(body, "body");
-    PREHASH_KEY(package, "package");
-    PREHASH_KEY(package_name, "package_name");
-    PREHASH_KEY(package_cache_flag, "_package_cache_flag");
-    PREHASH_KEY(methods, "methods");
-    PREHASH_KEY(VERSION, "VERSION");
-    PREHASH_KEY(ISA, "ISA");
+    PREHASH_KEY(name);
+    PREHASH_KEY(body);
+    PREHASH_KEY(package);
+    PREHASH_KEY(package_name);
+    PREHASH_KEY(methods);
+    PREHASH_KEY(ISA);
+    PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
+    /* we can't stringify VERSION as it's a define already */
+    PREHASH_KEY_WITH_VALUE(VERSION, "VALUE");
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
