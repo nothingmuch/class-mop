@@ -327,12 +327,13 @@ BOOT:
     associated_metaclass = newSVpvs("associated_metaclass");
 
 
-PROTOTYPES: ENABLE
+PROTOTYPES: DISABLE
 
-
+# use prototype here to be compatible with get_code_info from Sub::Identify
 void
 get_code_info(coderef)
     SV *coderef
+    PROTOTYPE: $
     PREINIT:
         char *pkg  = NULL;
         char *name = NULL;
@@ -342,8 +343,6 @@ get_code_info(coderef)
             PUSHs(newSVpv(pkg, 0));
             PUSHs(newSVpv(name, 0));
         }
-
-PROTOTYPES: DISABLE
 
 void
 is_class_loaded(klass=&PL_sv_undef)
@@ -396,13 +395,10 @@ is_class_loaded(klass=&PL_sv_undef)
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
 
-PROTOTYPES: ENABLE
-
 void
 get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
     SV *self
     type_filter_t filter
-    PROTOTYPE: $;$
     PREINIT:
         HV *stash = NULL;
         HV *symbols = NULL;
