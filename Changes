@@ -8,7 +8,7 @@ Revision history for Perl extension Class-MOP.
         error-prone. (Florian Ragwitz)
     * Class::MOP::Class
       - Fix documentation to show that around modifiers happen on both
-        sides of the primary method. (Dave Rolsky)
+        sides of the modified method. (Dave Rolsky)
 
 0.73 Tue, December 16, 2008
     * MOP.xs
