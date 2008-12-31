@@ -1055,8 +1055,7 @@ sub is_immutable { 0 }
     sub get_immutable_transformer {
         my $self = shift;
         if( $self->is_mutable ){
-            my $class = ref $self || $self;
-            return $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
+            return $IMMUTABLE_TRANSFORMERS{$self->name} ||= $self->create_immutable_transformer;
         }
         confess "unable to find transformer for immutable class"
             unless exists $IMMUTABLE_OPTIONS{$self->name};

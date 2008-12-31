@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+0.75 Tue, December 31, 2008
+    * Class::MOP::Class
+      - A class that was made immutable and then mutable could end up
+        sharing an immutable transformer object
+        (Class::MOP::Immutable) with other classes, leading to all
+        sorts of odd bugs. Reported by t0m. (Dave Rolsky)
+
 0.74 Tue, December 25, 2008
     * MOP.xs
       - Add an xs implementation of Class::MOP::is_class_loaded (closes

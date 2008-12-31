@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 113;
+use Test::More tests => 114;
 use Test::Exception;
 
 use Scalar::Util;
@@ -227,4 +227,13 @@ use Class::MOP;
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       compute_all_applicable_attributes
              class_precedence_list  get_method_map );
+}
+
+{
+    Foo->meta->make_immutable;
+    Bar->meta->make_immutable;
+    Bar->meta->make_mutable;
+
+    isnt( Foo->meta->get_immutable_transformer, Bar->meta->get_immutable_transformer,
+          'Foo and Bar should have different immutable transformer objects' );
 }
