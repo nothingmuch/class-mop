@@ -23,8 +23,8 @@ BEGIN {
 
 # make sure we are tracking metaclasses correctly
 
-my $CLASS_MOP_CLASS_IMMUTABLE_CLASS
-    = 'Class::MOP::Class::__ANON__::SERIAL::1';
+my @CLASS_MOP_CLASS_IMMUTABLE_CLASSES
+    = map { 'Class::MOP::Class::__ANON__::SERIAL::' . $_ } 1..11;
 
 my %METAS = (
     'Class::MOP::Attribute'         => Class::MOP::Attribute->meta,
@@ -51,8 +51,7 @@ is_deeply(
     {Class::MOP::get_all_metaclasses},
     {
         %METAS,
-        $CLASS_MOP_CLASS_IMMUTABLE_CLASS =>
-            $CLASS_MOP_CLASS_IMMUTABLE_CLASS->meta
+        map { $_ => $_->meta } @CLASS_MOP_CLASS_IMMUTABLE_CLASSES
     },
     '... got all the metaclasses'
 );
@@ -64,7 +63,7 @@ is_deeply(
     [
         Class::MOP::Attribute->meta,
         Class::MOP::Class->meta,
-        $CLASS_MOP_CLASS_IMMUTABLE_CLASS->meta,
+        ( map { $_->meta } sort @CLASS_MOP_CLASS_IMMUTABLE_CLASSES ),
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
@@ -93,7 +92,7 @@ is_deeply(
             Class::MOP::Module
             Class::MOP::Object
             Class::MOP::Package
-            /, $CLASS_MOP_CLASS_IMMUTABLE_CLASS
+            /, @CLASS_MOP_CLASS_IMMUTABLE_CLASSES
     ],
     '... got all the metaclass names'
 );
@@ -108,7 +107,7 @@ is_deeply(
             . $Class::MOP::Attribute::VERSION
             . "-cpan:STEVAN",
         "Class::MOP::Class-" . $Class::MOP::Class::VERSION . "-cpan:STEVAN",
-        $CLASS_MOP_CLASS_IMMUTABLE_CLASS,
+        ( sort @CLASS_MOP_CLASS_IMMUTABLE_CLASSES ),
         "Class::MOP::Instance-"
             . $Class::MOP::Instance::VERSION
             . "-cpan:STEVAN",

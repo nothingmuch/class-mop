@@ -49,7 +49,8 @@ use lib catdir($FindBin::Bin, 'lib');
 {
     my $meta = Baz->meta;
     ok($meta->is_mutable, '... Baz is mutable');
-    is(Scalar::Util::blessed(Foo->meta), Scalar::Util::blessed(Bar->meta), 'Foo and Bar immutable metaclasses match');
+    isnt(Scalar::Util::blessed(Foo->meta), Scalar::Util::blessed(Bar->meta),
+         'Foo and Bar immutable metaclasses do not match');
     is(Scalar::Util::blessed($meta), 'MyMetaClass', 'Baz->meta blessed as MyMetaClass');
     ok(Baz->can('mymetaclass_attributes'), '... Baz can do method before immutable');
     ok($meta->can('mymetaclass_attributes'), '... meta can do method before immutable');
