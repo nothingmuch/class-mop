@@ -1,2 +1,13 @@
+Class::MOP::get_meta - done
+
 Replace uses of $foo->meta with Class::MOP::get_meta($foo)
 
+Replace *some* uses of Class::MOP::Class->initialize($pkg) with get_meta
+
+Smolder the MooseX modules after all said and done
+
+Figure out an API for Moose::Exporter, for not installing meta, or installing it under a different name
+
+Tests!
+
+Document for extension authors why we changed what we did, and how to move forward
