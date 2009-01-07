@@ -9,7 +9,7 @@ use 5.008;
 use MRO::Compat;
 
 use Carp          'confess';
-use Scalar::Util  'weaken';
+use Scalar::Util  qw/weaken blessed/;
 
 
 use Class::MOP::Class;
@@ -64,7 +64,7 @@ sub _try_load_xs {
     die $e if $e && $e !~ /object version|loadable object/;
 
     return $e ? 0 : 1;
-}
+ }
 
 sub _load_pure_perl {
     require Sub::Identify;
@@ -92,6 +92,8 @@ sub _load_pure_perl {
     sub weaken_metaclass            { weaken($METAS{$_[0]}) }
     sub does_metaclass_exist        { exists $METAS{$_[0]} && defined $METAS{$_[0]} }
     sub remove_metaclass_by_name    { $METAS{$_[0]} = undef }
+
+    sub get_meta { $METAS{ blessed($_[0]) || $_[0] } }
 
     # NOTE:
     # We only cache metaclasses, meaning instances of
