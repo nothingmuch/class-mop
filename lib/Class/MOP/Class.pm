@@ -81,7 +81,7 @@ sub construct_class_instance {
         # it is safe to use meta here because
         # class will always be a subclass of
         # Class::MOP::Class, which defines meta
-        $meta = $class->meta->construct_instance($options)
+        $meta = $class->meta->construct_instance($options);
     }
 
     # and check the metaclass compatibility
@@ -455,9 +455,9 @@ sub rebless_instance {
 
     my $old_metaclass;
     if ($instance->can('meta')) {
-        ($instance->meta->isa('Class::MOP::Class'))
-            || confess 'Cannot rebless instance if ->meta is not an instance of Class::MOP::Class';
-        $old_metaclass = $instance->meta;
+        $old_metaclass = Class::MOP::get_meta($instance);
+        ($old_metaclass->isa('Class::MOP::Class'))
+            || confess 'Cannot rebless instance if the metaclass is not an instance of Class::MOP::Class';
     }
     else {
         $old_metaclass = $self->initialize(ref($instance));

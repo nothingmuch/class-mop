@@ -89,7 +89,7 @@ my %DEFAULT_METHODS = (
         # that has been made immutable and for that we need 
         # to dig a bit ...
         if ($self->isa('Class::MOP::Class')) {
-            return $self->{'___original_class'}->meta;
+            return Class::MOP::get_meta($self->{'___original_class'});
         }
         else {
             return $self;
@@ -206,7 +206,7 @@ sub create_methods_for_immutable_metaclass {
 
     my %methods   = %DEFAULT_METHODS;
     my $metaclass = $self->metaclass;
-    my $meta      = $metaclass->meta;
+    my $meta      = Class::MOP::get_meta($metaclass);
 
     $methods{get_mutable_metaclass_name}
         = sub { (shift)->{'___original_class'} };
