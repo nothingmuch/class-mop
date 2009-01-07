@@ -162,16 +162,16 @@ sub check_metaclass_compatibility {
                             : ref($meta));
 
         ($self->isa($meta_type))
-            || confess $self->name . "->meta => (" . (ref($self)) . ")" .
+            || confess $self->name . "'s metaclass => (" . (ref($self)) . ")" .
                        " is not compatible with the " .
-                       $class_name . "->meta => (" . ($meta_type)     . ")";
+                       $class_name . "'s metaclass => (" . ($meta_type)     . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
         ($self->instance_metaclass->isa($meta->instance_metaclass))
-            || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
+            || confess $self->name . "'s instance metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $class_name . "->meta->instance_metaclass => (" . ($meta->instance_metaclass) . ")";
+                       $class_name . "'s instance metaclass => (" . ($meta->instance_metaclass) . ")";
     }
 }
 
