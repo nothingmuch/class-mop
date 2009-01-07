@@ -977,7 +977,7 @@ been cached by B<Class::MOP::Class>.
 
 =item B<get_metaclass_by_name ($name)>
 
-This will return a cached B<Class::MOP::Class> instance of nothing
+This will return a cached B<Class::MOP::Class> instance, or nothing
 if no metaclass exist by that C<$name>.
 
 =item B<store_metaclass_by_name ($name, $meta)>
