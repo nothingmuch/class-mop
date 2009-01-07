@@ -160,6 +160,6 @@ pp_tests: ${pp_tests}
 ${test_dep}
 
 t/pp_%: t/% t/header_pp.inc
-\t\$(NOECHO) \$(ABSPERLRUN) "-MExtUtils::Command" -e cat t/header_pp.inc \$< >> \$@
+\t\$(NOECHO) \$(ABSPERLRUN) "-MExtUtils::Command" -e cat t/header_pp.inc \$< > \$@
 EOM
 }
