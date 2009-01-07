@@ -1001,6 +1001,12 @@ C<$name> key and return false otherwise.
 
 This will remove a the metaclass stored in the C<$name> key.
 
+=item B<get_meta ($instance)>
+
+This will return a cached B<Class::MOP::Class> instance for the given
+C<$instance> (which may be a class name) This should be used instead of
+C<< $instance->meta >> in the MOP and its extensions.
+
 =back
 
 =head1 SEE ALSO
