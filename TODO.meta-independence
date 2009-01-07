@@ -1,3 +1,2 @@
-Class::MOP::get_meta($instance || $class_name)
 Replace uses of $foo->meta with Class::MOP::get_meta($foo)
 
