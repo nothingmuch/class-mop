@@ -744,12 +744,6 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    # NOTE:
-    # I don't really need this here, because
-    # if the method_map is missing a key it
-    # will just return undef for me now
-    # return unless $self->has_method($method_name);
-
     return $self->{methods}{$method_name} || $self->get_method_map->{$method_name};
 }
 
