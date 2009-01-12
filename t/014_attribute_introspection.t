@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 62;
+use Test::More tests => 64;
 use Test::Exception;
 
 use Class::MOP;
@@ -34,6 +34,8 @@ use Class::MOP;
         has_init_arg      init_arg
         has_default       default           is_default_a_coderef
         has_initializer   initializer
+
+        definition_context
 
         slots
         get_value
@@ -77,6 +79,7 @@ use Class::MOP;
         'builder',
         'init_arg',
         'initializer',
+        'definition_context',
         'default',
         'associated_class',
         'associated_methods',

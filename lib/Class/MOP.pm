@@ -449,6 +449,12 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('definition_context' => (
+        reader    => { 'definition_context'     => \&Class::MOP::Attribute::definition_context     },
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('writer' => (
         reader    => { 'writer'     => \&Class::MOP::Attribute::writer     },
         predicate => { 'has_writer' => \&Class::MOP::Attribute::has_writer },
@@ -561,6 +567,12 @@ Class::MOP::Method::Generated->meta->add_attribute(
     Class::MOP::Attribute->new('is_inline' => (
         reader   => { 'is_inline' => \&Class::MOP::Method::Generated::is_inline },
         default  => 0, 
+    ))
+);
+
+Class::MOP::Method::Generated->meta->add_attribute(
+    Class::MOP::Attribute->new('definition_context' => (
+        reader   => { 'definition_context' => \&Class::MOP::Method::Generated::definition_context },
     ))
 );
 
