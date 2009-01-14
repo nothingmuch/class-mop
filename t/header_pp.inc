@@ -1,0 +1,2 @@
+BEGIN { $ENV{CLASS_MOP_NO_XS} = 1 }
+

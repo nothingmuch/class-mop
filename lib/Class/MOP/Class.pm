@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.72';
+our $VERSION   = '0.75';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -744,12 +744,6 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    # NOTE:
-    # I don't really need this here, because
-    # if the method_map is missing a key it
-    # will just return undef for me now
-    # return unless $self->has_method($method_name);
-
     return $self->{methods}{$method_name} || $self->get_method_map->{$method_name};
 }
 
@@ -1055,8 +1049,7 @@ sub is_immutable { 0 }
     sub get_immutable_transformer {
         my $self = shift;
         if( $self->is_mutable ){
-            my $class = ref $self || $self;
-            return $IMMUTABLE_TRANSFORMERS{$class} ||= $self->create_immutable_transformer;
+            return $IMMUTABLE_TRANSFORMERS{$self->name} ||= $self->create_immutable_transformer;
         }
         confess "unable to find transformer for immutable class"
             unless exists $IMMUTABLE_OPTIONS{$self->name};
@@ -1355,7 +1348,7 @@ This method is used to construct an instance structure suitable for
 C<bless>-ing into your package of choice. It works in conjunction
 with the Attribute protocol to collect all applicable attributes.
 
-This will construct and instance using a HASH ref as storage
+This will construct an instance using a HASH ref as storage
 (currently only HASH references are supported). This will collect all
 the applicable attributes and layout out the fields in the HASH ref,
 it will then initialize them using either use the corresponding key
@@ -1460,7 +1453,8 @@ This returns a list of subclasses for this class.
 
 =item B<get_method_map>
 
-Returns a HASH ref of name to CODE reference mapping for this class.
+Returns a HASH ref of name to L<Class::MOP::Method> instance mapping
+for this class.
 
 =item B<method_metaclass>
 
@@ -1526,16 +1520,17 @@ CODE reference, see L<Class::MOP::Method> for more information.
 
 =item B<find_method_by_name ($method_name)>
 
-This will return a CODE reference of the specified C<$method_name>,
-or return undef if that method does not exist.
+This will return a L<Class::MOP::Method> instance for the specified
+C<$method_name>, or return undef if that method does not exist.
 
 Unlike C<get_method> this will also look in the superclasses.
 
 =item B<remove_method ($method_name)>
 
 This will attempt to remove a given C<$method_name> from the class.
-It will return the CODE reference that it has removed, and will
-attempt to use B<Sub::Name> to clear the methods associated name.
+It will return the L<Class::MOP::Method> instance that it has removed,
+and will attempt to use B<Sub::Name> to clear the methods associated
+name.
 
 =item B<get_method_list>
 
@@ -1620,8 +1615,10 @@ the call tree might looks something like this:
     around 2
      around 1
       primary
-     after 1
-    after 2
+     around 1
+    around 2
+   after 1
+  after 2
 
 To see examples of using method modifiers, see the following examples
 included in the distribution; F<InstanceCountingClass>, F<Perl6Attribute>,

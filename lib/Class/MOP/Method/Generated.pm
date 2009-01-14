@@ -6,7 +6,7 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION   = '0.72';
+our $VERSION   = '0.75';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -26,6 +26,32 @@ sub new {
     return $self;
 }
 
+
+sub _prepare_code {
+    my ( $self, %args ) = @_;
+
+    my ( $line, $file );
+
+    if ( my $ctx = ( $args{context} || $self->definition_context ) ) {
+        $line = $ctx->{line};
+        if ( my $desc = $ctx->{description} ) {
+            $file = "$desc defined at $ctx->{file}";
+        } else {
+            $file = $ctx->{file};
+        }
+    } else {
+        ( $line, $file ) = ( 0, "generated method (unknown origin)" );
+    }
+
+    my $code = $args{code};
+
+    # if it's an array of lines, join it up
+    # don't use newlines so that the definition context is more meaningful
+    $code = join(@$code, ' ') if ref $code;
+
+    return qq{#line $line "$file"\n} . $code;
+}
+
 sub _new {
     my $class = shift;
     my $options = @_ == 1 ? $_[0] : {@_};
@@ -38,7 +64,9 @@ sub _new {
 
 ## accessors
 
-sub is_inline { (shift)->{'is_inline'} }
+sub is_inline { $_[0]{is_inline} }
+
+sub definition_context { $_[0]{definition_context} }
 
 sub initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";

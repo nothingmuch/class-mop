@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.72';
+our $VERSION   = '0.75';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -60,16 +60,17 @@ sub _new {
     my $options = @_ == 1 ? $_[0] : {@_};
 
     bless {
-        'name'        => $options->{name},
-        'accessor'    => $options->{accessor},
-        'reader'      => $options->{reader},
-        'writer'      => $options->{writer},
-        'predicate'   => $options->{predicate},
-        'clearer'     => $options->{clearer},
-        'builder'     => $options->{builder},
-        'init_arg'    => $options->{init_arg},
-        'default'     => $options->{default},
-        'initializer' => $options->{initializer},        
+        'name'               => $options->{name},
+        'accessor'           => $options->{accessor},
+        'reader'             => $options->{reader},
+        'writer'             => $options->{writer},
+        'predicate'          => $options->{predicate},
+        'clearer'            => $options->{clearer},
+        'builder'            => $options->{builder},
+        'init_arg'           => $options->{init_arg},
+        'default'            => $options->{default},
+        'initializer'        => $options->{initializer},
+        'definition_context' => $options->{definition_context},
         # keep a weakened link to the
         # class we are associated with
         'associated_class' => undef,
@@ -165,14 +166,15 @@ sub has_init_arg    { defined($_[0]->{'init_arg'}) }
 sub has_default     { defined($_[0]->{'default'}) }
 sub has_initializer { defined($_[0]->{'initializer'}) }
 
-sub accessor    { $_[0]->{'accessor'}    }
-sub reader      { $_[0]->{'reader'}      }
-sub writer      { $_[0]->{'writer'}      }
-sub predicate   { $_[0]->{'predicate'}   }
-sub clearer     { $_[0]->{'clearer'}     }
-sub builder     { $_[0]->{'builder'}     }
-sub init_arg    { $_[0]->{'init_arg'}    }
-sub initializer { $_[0]->{'initializer'} }
+sub accessor           { $_[0]->{'accessor'}    }
+sub reader             { $_[0]->{'reader'}      }
+sub writer             { $_[0]->{'writer'}      }
+sub predicate          { $_[0]->{'predicate'}   }
+sub clearer            { $_[0]->{'clearer'}     }
+sub builder            { $_[0]->{'builder'}     }
+sub init_arg           { $_[0]->{'init_arg'}    }
+sub initializer        { $_[0]->{'initializer'} }
+sub definition_context { $_[0]->{'definition_context'} }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
@@ -330,6 +332,13 @@ sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 
 sub process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
+
+    my $method_ctx;
+
+    if ( my $ctx = $self->definition_context ) {
+        $method_ctx = { %$ctx };
+    }
+
     if (ref($accessor)) {
         (ref($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
@@ -338,6 +347,7 @@ sub process_accessors {
             $method,
             package_name => $self->associated_class->name,
             name         => $name,
+            definition_context => $method_ctx,
         );
         $self->associate_method($method);
         return ($name, $method);
@@ -346,12 +356,22 @@ sub process_accessors {
         my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
         my $method;
         eval {
+            if ( $method_ctx ) {
+                my $desc = "accessor $accessor";
+                if ( $accessor ne $self->name ) {
+                    $desc .= " of attribute " . $self->name;
+                }
+
+                $method_ctx->{description} = $desc;
+            }
+
             $method = $self->accessor_metaclass->new(
                 attribute     => $self,
                 is_inline     => $inline_me,
                 accessor_type => $type,
                 package_name  => $self->associated_class->name,
                 name          => $accessor,
+                definition_context => $method_ctx,
             );
         };
         confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;

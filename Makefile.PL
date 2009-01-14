@@ -18,7 +18,7 @@ for (@ARGV) {
     /^--xs/ and $force_xs = 1;
 }
 
-my $has_compiler = $force_xs;
+our $has_compiler = $force_xs;
 unless ( defined $force_xs ) {
     $has_compiler = check_for_compiler()
         or no_cc();
@@ -40,10 +40,6 @@ my %prereqs = (
 
 delete @prereqs{qw(Sub::Name Devel::GlobalDestruction)}
     unless $has_compiler;
-
-if ($has_compiler && is_maintainer()) {
-    create_pp_tests();
-}
 
 write_makefile();
 
@@ -131,32 +127,12 @@ sub is_maintainer {
     return 1;
 }
 
-sub create_pp_tests {
+sub get_pp_tests {
     opendir my $dh, 't' or die "Cannot read t: $!";
 
-    foreach my $file ( grep {/^\d.+\.t$/} readdir $dh ) {
-        next if $file =~ /^99/;
-
-        my $real_file = File::Spec->catfile( 't', $file );
-
-        open my $fh, '<', $real_file
-            or die "Cannot read $real_file: $!";
-
-        my $shbang = <$fh>;
-        my $test = do { local $/; <$fh> };
-
-        close $fh;
-
-        $test = "$shbang\nBEGIN { \$ENV{CLASS_MOP_NO_XS} = 1 }\n\n$test";
-
-        my $new_file = File::Spec->catfile( 't', "pp_$file" );
-        open my $new_fh, '>', $new_file
-            or die "Cannot write to $new_file: $!";
-
-        print $new_fh $test;
-
-        close $new_fh;
-    }
+    return map {
+        File::Spec->catfile('t', "pp_${_}")
+    } grep { $_ !~ /^99/ } grep {/^\d.+\.t$/} readdir $dh;
 }
 
 # This is EUMM voodoo
@@ -168,4 +144,22 @@ sub init {
     }
 
     $hash;
+}
+
+package MY;
+
+sub postamble {
+    my $pp_tests = join q{ }, ::get_pp_tests();
+    my $test_dep = $::has_compiler && ::is_maintainer()
+        ? 'pure_all :: pp_tests'
+        : '';
+
+    return <<"EOM"
+pp_tests: ${pp_tests}
+
+${test_dep}
+
+t/pp_%: t/% t/header_pp.inc
+\t\$(NOECHO) \$(ABSPERLRUN) "-MExtUtils::Command" -e cat t/header_pp.inc \$< > \$@
+EOM
 }

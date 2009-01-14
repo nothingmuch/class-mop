@@ -14,23 +14,32 @@ This shuts up warnings from gcc -Wall
 #define NEED_sv_2pv_nolen
 #include "ppport.h"
 
-SV *key_name;
-U32 hash_name;
+#define DECLARE_KEY(name) SV *key_##name; U32 hash_##name;
 
-SV *key_package;
-U32 hash_package;
+#define PREHASH_KEY_WITH_VALUE(name, value) do { \
+    key_##name = newSVpvs(value); \
+    PERL_HASH(hash_##name, value, sizeof(value) - 1); \
+} while (0)
 
-SV *key_package_name;
-U32 hash_package_name;
+/* this is basically the same as the above macro, except that the value will be
+ * the stringified name. However, we can't just implement this in terms of
+ * PREHASH_KEY_WITH_VALUE as that'd cause macro expansion on the value of
+ * 'name' when it's being passed to the other macro. suggestions on how to make
+ * this more elegant would be much appreciated */
 
-SV *key_body;
-U32 hash_body;
+#define PREHASH_KEY(name) do { \
+    key_##name = newSVpvs(#name); \
+    PERL_HASH(hash_##name, #name, sizeof(#name) - 1); \
+} while (0)
 
-SV *key_package_cache_flag;
-U32 hash_package_cache_flag;
-
-SV *key_methods;
-U32 hash_methods;
+DECLARE_KEY(name);
+DECLARE_KEY(package);
+DECLARE_KEY(package_name);
+DECLARE_KEY(body);
+DECLARE_KEY(package_cache_flag);
+DECLARE_KEY(methods);
+DECLARE_KEY(VERSION);
+DECLARE_KEY(ISA);
 
 SV *method_metaclass;
 SV *associated_metaclass;
@@ -38,17 +47,39 @@ SV *wrap;
 
 
 #define check_package_cache_flag(stash) mop_check_package_cache_flag(aTHX_ stash)
-#ifdef HvMROMETA /* 5.10.0 */
-
-#ifndef mro_meta_init
-#define mro_meta_init(stash) Perl_mro_meta_init(aTHX_ stash) /* used in HvMROMETA macro */
-#endif /* !mro_meta_init */
+#if PERL_VERSION >= 10
 
 static UV
 mop_check_package_cache_flag(pTHX_ HV* stash) {
     assert(SvTYPE(stash) == SVt_PVHV);
 
-    return HvMROMETA(stash)->pkg_gen; /* mro::get_pkg_gen($pkg) */
+    /* here we're trying to implement a c version of mro::get_pkg_gen($stash),
+     * however the perl core doesn't make it easy for us. It doesn't provide an
+     * api that just does what we want.
+     *
+     * However, we know that the information we want is, inside the core,
+     * available using HvMROMETA(stash)->pkg_gen. Unfortunately, although the
+     * HvMROMETA macro is public, it is implemented using Perl_mro_meta_init,
+     * which is not public and only available inside the core, as the mro
+     * interface as well as the structure returned by mro_meta_init isn't
+     * considered to be stable yet.
+     *
+     * Perl_mro_meta_init isn't declared static, so we could just define it
+     * ourselfs if perls headers don't do that for us, except that won't work
+     * on platforms where symbols need to be explicitly exported when linking
+     * shared libraries.
+     *
+     * So our, hopefully temporary, solution is to be even more evil and
+     * basically reimplement HvMROMETA in a very fragile way that'll blow up
+     * when the relevant parts of the mro implementation in core change.
+     *
+     * :-(
+     *
+     */
+
+    return HvAUX(stash)->xhv_mro_meta
+         ? HvAUX(stash)->xhv_mro_meta->pkg_gen
+         : 0;
 }
 
 #else /* pre 5.10.0 */
@@ -282,31 +313,27 @@ get_code_info:
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 BOOT:
-    key_name = newSVpvs("name");
-    key_body = newSVpvs("body");
-    key_package = newSVpvs("package");
-    key_package_name = newSVpvs("package_name");
-    key_package_cache_flag = newSVpvs("_package_cache_flag");
-    key_methods = newSVpvs("methods");
-
-    PERL_HASH(hash_name, "name", 4);
-    PERL_HASH(hash_body, "body", 4);
-    PERL_HASH(hash_package, "package", 7);
-    PERL_HASH(hash_package_name, "package_name", 12);
-    PERL_HASH(hash_package_cache_flag, "_package_cache_flag", 19);
-    PERL_HASH(hash_methods, "methods", 7);
+    PREHASH_KEY(name);
+    PREHASH_KEY(body);
+    PREHASH_KEY(package);
+    PREHASH_KEY(package_name);
+    PREHASH_KEY(methods);
+    PREHASH_KEY(ISA);
+    PREHASH_KEY(VERSION);
+    PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
 
     method_metaclass     = newSVpvs("method_metaclass");
     wrap                 = newSVpvs("wrap");
     associated_metaclass = newSVpvs("associated_metaclass");
 
 
-PROTOTYPES: ENABLE
+PROTOTYPES: DISABLE
 
-
+# use prototype here to be compatible with get_code_info from Sub::Identify
 void
 get_code_info(coderef)
     SV *coderef
+    PROTOTYPE: $
     PREINIT:
         char *pkg  = NULL;
         char *name = NULL;
@@ -317,6 +344,54 @@ get_code_info(coderef)
             PUSHs(newSVpv(name, 0));
         }
 
+void
+is_class_loaded(klass=&PL_sv_undef)
+    SV *klass
+    PREINIT:
+        HV *stash;
+        char *key;
+        I32 keylen;
+        GV *gv;
+    PPCODE:
+        if (!SvPOK(klass) || !SvCUR(klass)) {
+            XSRETURN_NO;
+        }
+
+        stash = gv_stashsv(klass, 0);
+        if (!stash) {
+            XSRETURN_NO;
+        }
+
+        if (hv_exists_ent (stash, key_VERSION, hash_VERSION)) {
+            HE *version = hv_fetch_ent(stash, key_VERSION, 0, hash_VERSION);
+            if (version && HeVAL(version) && GvSV(HeVAL(version))) {
+                XSRETURN_YES;
+            }
+        }
+
+        if (hv_exists_ent (stash, key_ISA, hash_ISA)) {
+            HE *isa = hv_fetch_ent(stash, key_ISA, 0, hash_ISA);
+            if (isa && HeVAL(isa) && GvAV(HeVAL(isa))) {
+                XSRETURN_YES;
+            }
+        }
+
+        (void)hv_iterinit(stash);
+        while ((gv = (GV *)hv_iternextsv(stash, &key, &keylen))) {
+            if (keylen <= 0) {
+                continue;
+            }
+
+            if (key[keylen - 1] == ':' && key[keylen - 2] == ':') {
+                continue;
+            }
+
+            if (!isGV(gv) || GvCV(gv) || GvSV(gv) || GvAV(gv) || GvHV(gv) || GvIO(gv) || GvFORM(gv)) {
+                XSRETURN_YES;
+            }
+        }
+
+        XSRETURN_NO;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
 
@@ -324,7 +399,6 @@ void
 get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
     SV *self
     type_filter_t filter
-    PROTOTYPE: $;$
     PREINIT:
         HV *stash = NULL;
         HV *symbols = NULL;

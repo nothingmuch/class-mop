@@ -1,9 +1,35 @@
 Revision history for Perl extension Class-MOP.
 
+    * Tests
+      - Add test showing how the xs Class::MOP::is_class_loaded can
+        be made to operate differently to the pure perl version (t0m)
+
+0.75 Wed, December 31, 2008
+    * Class::MOP::Class
+      - A class that was made immutable and then mutable could end up
+        sharing an immutable transformer object
+        (Class::MOP::Immutable) with other classes, leading to all
+        sorts of odd bugs. Reported by t0m. (Dave Rolsky)
+
+0.74 Tue, December 25, 2008
+    * MOP.xs
+      - Add an xs implementation of Class::MOP::is_class_loaded (closes
+        RT#41862). Based on a patch by Goro Fuji. (Florian Ragwitz)
+      - Changed internals to make prehashing of hash keys easier and less
+        error-prone. (Florian Ragwitz)
+    * Class::MOP::Class
+      - Fix documentation to show that around modifiers happen on both
+        sides of the modified method. (Dave Rolsky)
+
+0.73 Tue, December 16, 2008
+    * MOP.xs
+      - Don't use Perl_mro_meta_init. It's not part of the public perl
+        api. Fixes failures to build on Win32 (RT #41750).  (Florian
+        Ragwitz)
     * t/082_get_code_info.t
-      - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not munger
-        anonymous subs when under -d and so making the tests succeed
-        in that case.
+      - Add $^P &= ~0x200; (per Ovid's suggestion) in order to not
+        munger anonymous subs when under -d and so making the tests
+        succeed in that case.
 
 0.72 Mon, December 8, 2008
     * Class::MOP::Package
