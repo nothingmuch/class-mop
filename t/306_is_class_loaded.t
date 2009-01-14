@@ -20,6 +20,6 @@ Class::MOP::load_class('TestClassLoaded');
 TODO: {
     local $TODO = 'Borked';
     ok(TestClassLoaded->can('a_method'), 
-        'TestClassLoader::LoadedByLoader::a_method is defined');
+        'TestClassLoader::a_method is defined');
 }
 
