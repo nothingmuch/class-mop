@@ -26,8 +26,41 @@ sub new {
     return $self;
 }
 
+sub _new {
+    my $class = shift;
+    my $options = @_ == 1 ? $_[0] : {@_};
 
-sub _prepare_code {
+    $options->{is_inline} ||= 0;
+    $options->{body} ||= undef;
+
+    bless $options, $class;
+}
+
+## accessors
+
+sub is_inline { $_[0]{is_inline} }
+
+sub definition_context { $_[0]{definition_context} }
+
+sub initialize_body {
+    confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
+}
+
+sub _eval_closure {
+    # my ($self, $captures, $sub_body) = @_;
+    my $__captures = $_[1];
+    eval join(
+        "\n",
+        (map {
+            /^([\@\%\$])/
+                or die "capture key should start with \@, \% or \$: $_";
+            q!my !.$_.q! = !.$1.q!{$__captures->{'!.$_.q!'}};!;
+        } keys %$__captures),
+        $_[2]
+    );
+}
+
+sub _add_line_directive {
     my ( $self, %args ) = @_;
 
     my ( $line, $file );
@@ -52,26 +85,13 @@ sub _prepare_code {
     return qq{#line $line "$file"\n} . $code;
 }
 
-sub _new {
-    my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
+sub _compile_code {
+    my ( $self, %args ) = @_;
 
-    $options->{is_inline} ||= 0;
-    $options->{body} ||= undef;
+    my $code = $self->_add_line_directive(%args);
 
-    bless $options, $class;
+    $self->_eval_closure($args{environment}, $code);
 }
-
-## accessors
-
-sub is_inline { $_[0]{is_inline} }
-
-sub definition_context { $_[0]{definition_context} }
-
-sub initialize_body {
-    confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
-}
-
 
 1;
 
