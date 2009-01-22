@@ -51,11 +51,18 @@ sub _eval_closure {
     my $__captures = $_[1];
     eval join(
         "\n",
-        (map {
-            /^([\@\%\$])/
-                or die "capture key should start with \@, \% or \$: $_";
-            q!my !.$_.q! = !.$1.q!{$__captures->{'!.$_.q!'}};!;
-        } keys %$__captures),
+        (
+            map {
+                /^([\@\%\$])/
+                    or die "capture key should start with \@, \% or \$: $_";
+                q[my ]
+                . $_ . q[ = ]
+                . $1
+                . q[{$__captures->{']
+                . $_
+                . q['}};];
+            } keys %$__captures
+        ),
         $_[2]
     );
 }
