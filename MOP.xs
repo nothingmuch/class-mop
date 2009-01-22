@@ -386,7 +386,8 @@ is_class_loaded(klass=&PL_sv_undef)
                 continue;
             }
 
-            if (!isGV(gv) || GvCV(gv) || GvSV(gv) || GvAV(gv) || GvHV(gv) || GvIO(gv) || GvFORM(gv)) {
+            if (!isGV(gv) || GvCV(gv) || GvSV(gv) || GvAV(gv)
+                || GvHV(gv) || GvIO(gv) || GvFORM(gv)) {
                 XSRETURN_YES;
             }
         }
