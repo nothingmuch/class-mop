@@ -8,7 +8,8 @@ use Test::More;
 use Class::MOP ();
 
 plan 'skip_all' => 'This test is only meaningful for an XS-enabled CMOP with Perl < 5.10'
-    unless Class::MOP::USING_XS() && ! Class::MOP::IS_RUNNING_ON_5_10();
+    if Class::MOP::IS_RUNNING_ON_5_10() || ! Class::MOP::USING_XS();
+
 
 plan tests => 1;
 
