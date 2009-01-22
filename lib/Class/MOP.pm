@@ -31,11 +31,11 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.75';
+our $VERSION   = '0.76';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
-    
+
 # after that everything is loaded, if we're allowed try to load faster XS
 # versions of various things
 _try_load_xs() or _load_pure_perl();
@@ -57,6 +57,8 @@ sub _try_load_xs {
 
             require Devel::GlobalDestruction;
             Devel::GlobalDestruction->import("in_global_destruction");
+
+            *USING_XS = sub () { 1 };
         };
         $@;
     };
@@ -71,7 +73,9 @@ sub _load_pure_perl {
     Sub::Identify->import('get_code_info');
 
     *subname = sub { $_[1] };
-    *in_global_destruction = sub () { !1 }
+    *in_global_destruction = sub () { !1 };
+
+    *USING_XS = sub () { 0 };
 }
 
 
