@@ -36,8 +36,6 @@ our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
 
-# after that everything is loaded, if we're allowed try to load faster XS
-# versions of various things
 _try_load_xs() or _load_pure_perl();
 
 sub _try_load_xs {
