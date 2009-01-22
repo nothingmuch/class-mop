@@ -1,5 +1,20 @@
 Revision history for Perl extension Class-MOP.
 
+0.76
+    * Class::MOP::Method::Generated
+      - Added new private methods to support code generation, which
+        are being used by Moose and can be used by MooseX
+        authors. (mst)
+      - Generated methods are now generated with a #line directive
+        reflecting the source of the generated method. (nothingmuch)
+
+    * Class::MOP::Class
+      - Clarified documentation of methods that return
+        Class::MOP::Method objects. (doy)
+
+    * Class::MOP
+      - Clarified documentation of the metaclass cache methods. (Sartak)
+
     * Tests
       - Add test showing how the xs Class::MOP::is_class_loaded can
         be made to operate differently to the pure perl version (t0m)
