@@ -893,6 +893,10 @@ compat.
 Whether or not C<mro> provides C<get_isarev>, a much faster way to get all the
 subclasses of a certain class.
 
+=item I<USING_XS>
+
+Whether or not the running C<Class::MOP> is using its XS version.
+
 =back
 
 =head2 Utility functions
