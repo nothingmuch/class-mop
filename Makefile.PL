@@ -150,7 +150,7 @@ package MY;
 
 sub postamble {
     my $pp_tests = join q{ }, ::get_pp_tests();
-    my $test_dep = $::has_compiler && ::is_maintainer()
+    my $test_dep = $::has_compiler && (::is_maintainer() || $ENV{AUTOMATED_TESTING});
         ? 'pure_all :: pp_tests'
         : '';
 
