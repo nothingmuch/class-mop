@@ -1243,8 +1243,9 @@ as we use a special reserved slot (C<__MOP__>) to store this.
 
 =item B<initialize ($package_name, %options)>
 
-This initializes and returns returns a B<Class::MOP::Class> object
-for a given a C<$package_name>.
+This initializes and returns returns a B<Class::MOP::Class> object for
+a given a C<$package_name>. If a metaclass already exists for the
+package, it simply returns it instead of creating a new one.
 
 =item B<construct_class_instance (%options)>
 
