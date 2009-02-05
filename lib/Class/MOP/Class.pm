@@ -800,6 +800,12 @@ sub compute_all_applicable_methods {
     } shift->get_all_methods(@_);
 }
 
+sub get_all_method_names {
+    my $self = shift;
+    my %uniq;
+    grep { $uniq{$_}++ == 0 } map { $_->name } $self->get_all_methods;
+}
+
 sub find_all_methods_by_name {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
@@ -1100,6 +1106,7 @@ sub create_immutable_transformer {
            class_precedence_list             => 'ARRAY',
            linearized_isa                    => 'ARRAY', # FIXME perl 5.10 memoizes this on its own, no need?
            get_all_methods                   => 'ARRAY',
+           get_all_method_names              => 'ARRAY',
            #get_all_attributes               => 'ARRAY', # it's an alias, no need, but maybe in the future
            compute_all_applicable_attributes => 'ARRAY',
            get_meta_instance                 => 'SCALAR',
@@ -1554,6 +1561,12 @@ class.
 
 Use L<get_all_methods>, which is easier/better/faster. This method predates
 L<Class::MOP::Method>.
+
+=item B<get_all_method_names>
+
+This will traverse the inheritance heirachy and return a list of all the
+applicable method names for this class. Duplicate names are removed, but the
+order the methods come out is not defined.
 
 =item B<find_all_methods_by_name ($method_name)>
 
