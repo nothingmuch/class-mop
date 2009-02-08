@@ -344,6 +344,9 @@ get_code_info(coderef)
             PUSHs(newSVpv(name, 0));
         }
 
+/* This is some pretty grotty logic. It _should_ be parallel to the
+   pure Perl version in lib/Class/MOP.pm, so if you want to understand
+   it we suggest you start there. */
 void
 is_class_loaded(klass=&PL_sv_undef)
     SV *klass
