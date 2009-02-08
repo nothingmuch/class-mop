@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 28;
+use Test::More tests => 29;
 use Test::Exception;
 
 require Class::MOP;
@@ -82,4 +82,12 @@ throws_ok {
     Class::MOP::load_first_existing_class("Does::Not::Exist", "Also::Does::Not::Exist")
 } qr/Could not load class \(Does::Not::Exist.*Could not load class \(Also::Does::Not::Exist/s, 'Multiple non-existant classes cause exception';
 
+{
+    sub whatever {
+        TestClassLoaded::this_method_does_not_even_exist();
+    }
+
+    ok( ! Class::MOP::is_class_loaded('TestClassLoaded'),
+        'the mere mention of TestClassLoaded in the whatever sub does not make us think it has been loaded' );
+}
 
