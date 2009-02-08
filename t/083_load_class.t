@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 29;
+use Test::More tests => 33;
 use Test::Exception;
 
 require Class::MOP;
@@ -91,3 +91,26 @@ throws_ok {
         'the mere mention of TestClassLoaded in the whatever sub does not make us think it has been loaded' );
 }
 
+{
+    require TestClassLoaded::Sub;
+    ok( ! Class::MOP::is_class_loaded('TestClassLoaded'),
+        'requiring TestClassLoaded::Sub does not make us think TestClassLoaded is loaded' );
+}
+
+{
+    require TestClassLoaded;
+    ok( Class::MOP::is_class_loaded('TestClassLoaded'),
+        'We see that TestClassLoaded is loaded after requiring it (it has methods but no $VERSION or @ISA)' );
+}
+
+{
+    require TestClassLoaded2;
+    ok( Class::MOP::is_class_loaded('TestClassLoaded2'),
+        'We see that TestClassLoaded2 is loaded after requiring it (it has a $VERSION but no methods or @ISA)' );
+}
+
+{
+    require TestClassLoaded3;
+    ok( Class::MOP::is_class_loaded('TestClassLoaded3'),
+        'We see that TestClassLoaded3 is loaded after requiring it (it has an @ISA but no methods or $VERSION)' );
+}
