@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Class
+      - Add get_all_method_names (Sartak)
+
 0.76 Thu, January 22, 2008
     * Class::MOP::Method::Generated
       - Added new private methods to support code generation, which
@@ -18,8 +21,6 @@ Revision history for Perl extension Class-MOP.
     * Tests
       - Add test showing how the xs Class::MOP::is_class_loaded can
         be made to operate differently to the pure perl version (t0m)
-    * Class::MOP::Class
-      - Add get_all_method_names (Sartak)
 
 0.75 Wed, December 31, 2008
     * Class::MOP::Class
