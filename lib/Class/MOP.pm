@@ -9,7 +9,7 @@ use 5.008;
 use MRO::Compat;
 
 use Carp          'confess';
-use Scalar::Util  'weaken';
+use Scalar::Util  'weaken', 'reftype';
 
 
 use Class::MOP::Class;
@@ -186,9 +186,19 @@ sub is_class_loaded {
         $pack = \*{${$$pack}{"${part}::"}};
     }
 
-    # check for $VERSION or @ISA
-    return 1 if exists ${$$pack}{VERSION}
-             && defined *{${$$pack}{VERSION}}{SCALAR};
+    # We used to check in the package stash, but it turns out that
+    # *{${$$package}{VERSION}{SCALAR}} can end up pointing to a
+    # reference to undef. It looks
+
+    my $version = do {
+        no strict 'refs';
+        ${$class . '::VERSION'};
+    };
+
+    return 1 if ! ref $version && defined $version;
+    # Sometimes $VERSION ends up as a reference to undef (weird)
+    return 1 if ref $version && reftype $version eq 'SCALAR' && defined ${$version};
+
     return 1 if exists ${$$pack}{ISA}
              && defined *{${$$pack}{ISA}}{ARRAY};
 
