@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP
+      - Fixed various corner cases where is_class_loaded incorrectly
+        returned true for a class that wasn't really loaded. (Dave
+        Rolsky)
+
     * Class::MOP::Class
       - Add get_all_method_names (Sartak)
 
