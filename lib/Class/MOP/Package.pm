@@ -284,11 +284,7 @@ sub get_all_package_symbols {
 
     my $namespace = $self->namespace;
 
-    if (wantarray) {
-        warn 'Class::MOP::Package::get_all_package_symbols in list context is deprecated. use scalar context instead.';
-    }
-
-    return (wantarray ? %$namespace : $namespace) unless defined $type_filter;
+    return $namespace unless defined $type_filter;
 
     my %ret;
     # for some reason this nasty impl is orders of magnitude faster than a clean version
@@ -316,7 +312,7 @@ sub get_all_package_symbols {
         } keys %$namespace;
     }
 
-    return wantarray ? %ret : \%ret;
+    return \%ret;
 }
 
 1;

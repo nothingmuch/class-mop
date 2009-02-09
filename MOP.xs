@@ -425,7 +425,6 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
             XSRETURN_EMPTY;
         }
 
-
         PUTBACK;
 
         if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) ) {
@@ -434,34 +433,11 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
 
 
         if (!stash) {
-            switch (GIMME_V) {
-                case G_SCALAR: XSRETURN_UNDEF; break;
-                case G_ARRAY:  XSRETURN_EMPTY; break;
-            }
+            XSRETURN_UNDEF;
         }
 
         symbols = get_all_package_symbols(stash, filter);
-
-        switch (GIMME_V) {
-            case G_SCALAR:
-                PUSHs(sv_2mortal(newRV_inc((SV *)symbols)));
-                break;
-            case G_ARRAY:
-                warn("Class::MOP::Package::get_all_package_symbols in list context is deprecated. use scalar context instead.");
-
-                EXTEND(SP, HvKEYS(symbols) * 2);
-
-                while ((he = hv_iternext(symbols))) {
-                    PUSHs(hv_iterkeysv(he));
-                    PUSHs(sv_2mortal(SvREFCNT_inc(HeVAL(he))));
-                }
-
-                break;
-            default:
-                break;
-        }
-
-        SvREFCNT_dec((SV *)symbols);
+        PUSHs(sv_2mortal(newRV_noinc((SV *)symbols)));
 
 void
 name(self)

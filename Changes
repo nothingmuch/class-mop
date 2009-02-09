@@ -8,6 +8,10 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - Add get_all_method_names (Sartak)
 
+    * Class::MOP::Package
+      - Disable deprecated get_all_package_symbols in list context. (Florian
+        Ragwitz)
+
 0.76 Thu, January 22, 2008
     * Class::MOP::Method::Generated
       - Added new private methods to support code generation, which
