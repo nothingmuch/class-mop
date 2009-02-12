@@ -9,7 +9,11 @@ Revision history for Perl extension Class-MOP.
       - Add get_all_method_names (Sartak)
 
     * Class::MOP::Package
-      - Disable deprecated get_all_package_symbols in list context. (Florian
+      - Disable deprecated get_all_package_symbols in list
+        context. (Florian Ragwitz)
+
+    * Makefile.PL
+      - Make sure we generate a BSD-compatible Makefile (Florian
         Ragwitz)
 
 0.76 Thu, January 22, 2008
