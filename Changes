@@ -23,7 +23,7 @@ Revision history for Perl extension Class-MOP.
         Ragwitz)
 
     * Class::MOP::Class
-      - The mispelled "check_metaclass_compatability" method we've
+      - The misspelled "check_metaclass_compatability" method we've
         kept around for backwards compat_i_bility will be removed in a
         near future release. You've been warned.
 
