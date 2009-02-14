@@ -103,7 +103,7 @@ sub _new {
 
     bless {
         # inherited from Class::MOP::Package
-        'package'             => $options->{package},
+        'package'                     => $options->{package},
 
         # NOTE:
         # since the following attributes will
@@ -113,18 +113,19 @@ sub _new {
         # listed here for reference, because they
         # should not actually have a value associated
         # with the slot.
-        'namespace'           => \undef,
+        'namespace'                   => \undef,
         # inherited from Class::MOP::Module
-        'version'             => \undef,
-        'authority'           => \undef,
+        'version'                     => \undef,
+        'authority'                   => \undef,
         # defined in Class::MOP::Class
-        'superclasses'        => \undef,
+        'superclasses'                => \undef,
 
-        'methods'             => {},
-        'attributes'          => {},
-        'attribute_metaclass' => $options->{'attribute_metaclass'} || 'Class::MOP::Attribute',
-        'method_metaclass'    => $options->{'method_metaclass'}    || 'Class::MOP::Method',
-        'instance_metaclass'  => $options->{'instance_metaclass'}  || 'Class::MOP::Instance',
+        'methods'                     => {},
+        'attributes'                  => {},
+        'attribute_metaclass'         => $options->{'attribute_metaclass'}      || 'Class::MOP::Attribute',
+        'method_metaclass'            => $options->{'method_metaclass'}         || 'Class::MOP::Method',
+        'wrapped_method_metaclass'    => $options->{'wrapped_method_metaclass'} || 'Class::MOP::Method::Wrapped',
+        'instance_metaclass'          => $options->{'instance_metaclass'}       || 'Class::MOP::Instance',
     }, $class;
 }
 
@@ -306,10 +307,11 @@ sub create {
 # all these attribute readers will be bootstrapped
 # away in the Class::MOP bootstrap section
 
-sub get_attribute_map   { $_[0]->{'attributes'}          }
-sub attribute_metaclass { $_[0]->{'attribute_metaclass'} }
-sub method_metaclass    { $_[0]->{'method_metaclass'}    }
-sub instance_metaclass  { $_[0]->{'instance_metaclass'}  }
+sub get_attribute_map        { $_[0]->{'attributes'}                  }
+sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
+sub method_metaclass         { $_[0]->{'method_metaclass'}            }
+sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
+sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
 
 sub get_method_map {
     my $self = shift;
@@ -658,6 +660,7 @@ sub add_method {
 {
     my $fetch_and_prepare_method = sub {
         my ($self, $method_name) = @_;
+        my $wrapped_metaclass = $self->wrapped_method_metaclass;
         # fetch it locally
         my $method = $self->get_method($method_name);
         # if we dont have local ...
@@ -670,12 +673,12 @@ sub add_method {
             # and now make sure to wrap it
             # even if it is already wrapped
             # because we need a new sub ref
-            $method = Class::MOP::Method::Wrapped->wrap($method);
+            $method = $wrapped_metaclass->wrap($method);
         }
         else {
             # now make sure we wrap it properly
-            $method = Class::MOP::Method::Wrapped->wrap($method)
-                unless $method->isa('Class::MOP::Method::Wrapped');
+            $method = $wrapped_metaclass->wrap($method)
+                unless $method->isa($wrapped_metaclass);
         }
         $self->add_method($method_name => $method);
         return $method;

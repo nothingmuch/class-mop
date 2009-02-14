@@ -388,6 +388,18 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'wrapped_method_metaclass' => \&Class::MOP::Class::wrapped_method_metaclass
+        },
+        default  => 'Class::MOP::Method::Wrapped',
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('instance_metaclass' => (
         reader   => {
             # NOTE: we need to do this in order
