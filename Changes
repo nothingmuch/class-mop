@@ -21,6 +21,11 @@ Revision history for Perl extension Class-MOP.
       - Make sure we generate a BSD-compatible Makefile (Florian
         Ragwitz)
 
+    * Class::MOP::Class
+      - The mispelled "check_metaclass_compatability" method we've
+        kept around for backwards compat_i_bility will be removed in a
+        near future release. You've been warned.
+
 0.76 Thu, January 22, 2008
     * Class::MOP::Method::Generated
       - Added new private methods to support code generation, which
