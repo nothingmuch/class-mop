@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * MOP.xs
+      - Avoid assertion errors on debugging perls in is_class_loaded
+        (Florian Ragwitz)
+
     * Class::MOP
       - Fixed various corner cases where is_class_loaded incorrectly
         returned true for a class that wasn't really loaded. (Dave
@@ -7,6 +11,7 @@ Revision history for Perl extension Class-MOP.
 
     * Class::MOP::Class
       - Add get_all_method_names (Sartak)
+      - Add a wrapped_method_metaclass attribute (Florian Ragwitz)
 
     * Class::MOP::Package
       - Disable deprecated get_all_package_symbols in list
