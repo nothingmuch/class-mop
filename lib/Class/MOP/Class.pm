@@ -103,7 +103,7 @@ sub _new {
 
     bless {
         # inherited from Class::MOP::Package
-        'package'                     => $options->{package},
+        'package' => $options->{package},
 
         # NOTE:
         # since the following attributes will
@@ -113,19 +113,25 @@ sub _new {
         # listed here for reference, because they
         # should not actually have a value associated
         # with the slot.
-        'namespace'                   => \undef,
-        # inherited from Class::MOP::Module
-        'version'                     => \undef,
-        'authority'                   => \undef,
-        # defined in Class::MOP::Class
-        'superclasses'                => \undef,
+        'namespace' => \undef,
 
-        'methods'                     => {},
-        'attributes'                  => {},
-        'attribute_metaclass'         => $options->{'attribute_metaclass'}      || 'Class::MOP::Attribute',
-        'method_metaclass'            => $options->{'method_metaclass'}         || 'Class::MOP::Method',
-        'wrapped_method_metaclass'    => $options->{'wrapped_method_metaclass'} || 'Class::MOP::Method::Wrapped',
-        'instance_metaclass'          => $options->{'instance_metaclass'}       || 'Class::MOP::Instance',
+        # inherited from Class::MOP::Module
+        'version'   => \undef,
+        'authority' => \undef,
+
+        # defined in Class::MOP::Class
+        'superclasses' => \undef,
+
+        'methods'             => {},
+        'attributes'          => {},
+        'attribute_metaclass' => $options->{'attribute_metaclass'}
+            || 'Class::MOP::Attribute',
+        'method_metaclass' => $options->{'method_metaclass'}
+            || 'Class::MOP::Method',
+        'wrapped_method_metaclass' => $options->{'wrapped_method_metaclass'}
+            || 'Class::MOP::Method::Wrapped',
+        'instance_metaclass' => $options->{'instance_metaclass'}
+            || 'Class::MOP::Instance',
     }, $class;
 }
 
