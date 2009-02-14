@@ -354,7 +354,7 @@ is_class_loaded(klass=&PL_sv_undef)
         HV *stash;
         char *key;
         I32 keylen;
-        GV *gv;
+        SV *gv;
     PPCODE:
         if (!SvPOK(klass) || !SvCUR(klass)) {
             XSRETURN_NO;
@@ -390,7 +390,7 @@ is_class_loaded(klass=&PL_sv_undef)
         }
 
         (void)hv_iterinit(stash);
-        while ((gv = (GV *)hv_iternextsv(stash, &key, &keylen))) {
+        while ((gv = hv_iternextsv(stash, &key, &keylen))) {
             if (keylen <= 0) {
                 continue;
             }
@@ -399,7 +399,7 @@ is_class_loaded(klass=&PL_sv_undef)
                 continue;
             }
 
-            if (GvCV(gv)) {
+            if (!isGV(gv) || GvCV(gv)) {
                 XSRETURN_YES;
             }
         }
