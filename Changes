@@ -1,5 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
+0.77 Sat, February 14, 2009
     * MOP.xs
       - Avoid assertion errors on debugging perls in is_class_loaded
         (Florian Ragwitz)
@@ -26,7 +27,7 @@ Revision history for Perl extension Class-MOP.
         kept around for backwards compat_i_bility will be removed in a
         near future release. You've been warned.
 
-0.76 Thu, January 22, 2008
+0.76 Thu, January 22, 2009
     * Class::MOP::Method::Generated
       - Added new private methods to support code generation, which
         are being used by Moose and can be used by MooseX
