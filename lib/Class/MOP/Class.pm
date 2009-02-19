@@ -157,28 +157,29 @@ sub check_metaclass_compatibility {
     my @class_list = $self->linearized_isa;
     shift @class_list; # shift off $self->name
 
-    foreach my $class_name (@class_list) {
-        my $meta = Class::MOP::get_metaclass_by_name($class_name) || next;
+    foreach my $superclass_name (@class_list) {
+        my $super_meta = Class::MOP::get_metaclass_by_name($superclass_name) || next;
 
         # NOTE:
         # we need to deal with the possibility
         # of class immutability here, and then
         # get the name of the class appropriately
-        my $meta_type = ($meta->is_immutable
-                            ? $meta->get_mutable_metaclass_name()
-                            : ref($meta));
+        my $super_meta_type
+            = $super_meta->is_immutable
+            ? $super_meta->get_mutable_metaclass_name()
+            : ref($super_meta);
 
-        ($self->isa($meta_type))
+        ($self->isa($super_meta_type))
             || confess $self->name . "->meta => (" . (ref($self)) . ")" .
                        " is not compatible with the " .
-                       $class_name . "->meta => (" . ($meta_type)     . ")";
+                       $class_name . "->meta => (" . ($super_meta_type)     . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
-        ($self->instance_metaclass->isa($meta->instance_metaclass))
+        ($self->instance_metaclass->isa($super_meta->instance_metaclass))
             || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $class_name . "->meta->instance_metaclass => (" . ($meta->instance_metaclass) . ")";
+                       $class_name . "->meta->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
     }
 }
 
