@@ -26,6 +26,7 @@ Foo->meta->add_method( bar => sub { } );
 
 {
     my $map = Foo->meta->get_method_map;
+
     is( scalar keys %{$map}, 3,
         'method map for Foo has three keys' );
     ok( $map->{foo}, '... has a foo method in the map' );
@@ -40,6 +41,7 @@ Class::MOP::remove_metaclass_by_name('Foo');
 
 {
     my $map = Foo->meta->get_method_map;
+
     is( scalar keys %{$map}, 3,
         'method map for Foo has three keys' );
     ok( $map->{foo}, '... has a foo method in the map' );
