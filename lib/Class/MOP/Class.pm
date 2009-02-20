@@ -1559,7 +1559,7 @@ methods, use the C<compute_all_applicable_methods> method.
 
 =item B<get_all_methods>
 
-This will traverse the inheritance heirachy and return a list of all
+This will traverse the inheritance hierarchy and return a list of all
 the applicable L<Class::MOP::Method> objects for this class.
 
 =item B<compute_all_applicable_methods>
@@ -1574,7 +1574,7 @@ L<Class::MOP::Method>.
 
 =item B<get_all_method_names>
 
-This will traverse the inheritance heirachy and return a list of all the
+This will traverse the inheritance hierarchy and return a list of all the
 applicable method names for this class. Duplicate names are removed, but the
 order the methods come out is not defined.
 
@@ -1780,14 +1780,14 @@ use the C<compute_all_applicable_attributes> method.
 
 =item B<get_all_attributes>
 
-This will traverse the inheritance heirachy and return a list of all
+This will traverse the inheritance hierarchy and return a list of all
 the applicable L<Class::MOP::Attribute> objects for this class.
 
 C<get_all_attributes> is an alias for consistency with C<get_all_methods>.
 
 =item B<find_attribute_by_name ($attr_name)>
 
-This method will traverse the inheritance heirachy and find the
+This method will traverse the inheritance hierarchy and find the
 first attribute whose name matches C<$attr_name>, then return it.
 It will return undef if nothing is found.
 
