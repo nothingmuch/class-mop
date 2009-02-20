@@ -107,10 +107,13 @@ sub generate_constructor_method_inline {
     $source .= ";\n" . '}';
     warn $source if $self->options->{debug};
 
-    return $self->_eval_closure(
+    my $code = $self->_eval_closure(
         $close_over,
         $source
     );
+    confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
+
+    return $code;
 }
 
 sub _generate_slot_initializer {

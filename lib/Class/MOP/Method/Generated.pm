@@ -49,9 +49,7 @@ sub initialize_body {
 sub _eval_closure {
     # my ($self, $captures, $sub_body) = @_;
     my $__captures = $_[1];
-
-    local $@;
-    my $code = join(
+    eval join(
         "\n",
         (
             map {
@@ -67,11 +65,6 @@ sub _eval_closure {
         ),
         $_[2]
     );
-    my $sub = eval $code;
-
-    die "$@\n$code" if $@;
-
-    return $sub;
 }
 
 sub _add_line_directive {
