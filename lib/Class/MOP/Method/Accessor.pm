@@ -67,8 +67,7 @@ sub initialize_body {
         ($self->is_inline ? 'inline' : ())
     );
 
-    eval { $self->{'body'} = $self->$method_name() };
-    die $@ if $@;
+    $self->{'body'} = $self->$method_name();
 }
 
 ## generators
@@ -119,17 +118,14 @@ sub generate_accessor_method_inline {
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = $self->_eval_closure(
+    return $self->_eval_closure(
         {},
         'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
+        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
         . ' if scalar(@_) == 2; '
-        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
+        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
         . '}'
     );
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
 }
 
 sub generate_reader_method_inline {
@@ -138,16 +134,13 @@ sub generate_reader_method_inline {
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = $self->_eval_closure(
+    return $self->_eval_closure(
          {},
         'sub {'
         . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
         . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
         . '}'
     );
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
 }
 
 sub generate_writer_method_inline {
@@ -156,15 +149,12 @@ sub generate_writer_method_inline {
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = $self->_eval_closure(
+    return $self->_eval_closure(
         {},
         'sub {'
         . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
         . '}'
     );
-    confess "Could not generate inline accessor because : $@" if $@;
-
-    return $code;
 }
 
 
@@ -174,15 +164,12 @@ sub generate_predicate_method_inline {
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = $self->_eval_closure(
+    return $self->_eval_closure(
         {},
        'sub {'
        . $meta_instance->inline_is_slot_initialized('$_[0]', "'$attr_name'")
        . '}'
     );
-    confess "Could not generate inline predicate because : $@" if $@;
-
-    return $code;
 }
 
 sub generate_clearer_method_inline {
@@ -191,15 +178,12 @@ sub generate_clearer_method_inline {
     my $attr_name     = $attr->name;
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
-    my $code = $self->_eval_closure(
+    return $self->_eval_closure(
         {},
         'sub {'
         . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
         . '}'
     );
-    confess "Could not generate inline clearer because : $@" if $@;
-
-    return $code;
 }
 
 1;

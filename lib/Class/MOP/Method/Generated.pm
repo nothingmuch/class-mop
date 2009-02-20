@@ -67,9 +67,11 @@ sub _eval_closure {
         ),
         $_[2]
     );
-    eval $code;
+    my $sub = eval $code;
 
     die "$@\n$code" if $@;
+
+    return $sub;
 }
 
 sub _add_line_directive {

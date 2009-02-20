@@ -107,19 +107,10 @@ sub generate_constructor_method_inline {
     $source .= ";\n" . '}';
     warn $source if $self->options->{debug};
 
-    my $code;
-    {
-        # NOTE:
-        # create the nessecary lexicals
-        # to be picked up in the eval
-
-        $code = $self->_eval_closure(
-            $close_over,
-            $source
-        );
-        confess "Could not eval the constructor :\n\n$source\n\nbecause :\n\n$@" if $@;
-    }
-    return $code;
+    return $self->_eval_closure(
+        $close_over,
+        $source
+    );
 }
 
 sub _generate_slot_initializer {
