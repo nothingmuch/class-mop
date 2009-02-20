@@ -51,7 +51,7 @@ sub _eval_closure {
     my $__captures = $_[1];
 
     local $@;
-    eval join(
+    my $code = join(
         "\n",
         (
             map {
@@ -67,7 +67,9 @@ sub _eval_closure {
         ),
         $_[2]
     );
-    die $@ if $@;
+    eval $code;
+
+    die "$@\n$code" if $@;
 }
 
 sub _add_line_directive {
