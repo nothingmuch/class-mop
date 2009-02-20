@@ -49,6 +49,8 @@ sub initialize_body {
 sub _eval_closure {
     # my ($self, $captures, $sub_body) = @_;
     my $__captures = $_[1];
+
+    local $@;
     eval join(
         "\n",
         (
@@ -65,6 +67,7 @@ sub _eval_closure {
         ),
         $_[2]
     );
+    die $@ if $@;
 }
 
 sub _add_line_directive {
