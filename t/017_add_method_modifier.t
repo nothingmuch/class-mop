@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 20;
 use Test::Exception;
 
 use Class::MOP;
@@ -63,6 +63,14 @@ use Class::MOP;
                 $self->deposit($overdraft_amount);
             }
         }
+    );
+
+    ::throws_ok(
+        sub {
+            CheckingAccount->meta->add_before_method_modifier(
+                'does_not_exist' => sub { } );
+        },
+        qr/\QThe method 'does_not_exist' was not found in the inheritance hierarchy for CheckingAccount/
     );
 
     ::ok( CheckingAccount->meta->has_method('withdraw'),
