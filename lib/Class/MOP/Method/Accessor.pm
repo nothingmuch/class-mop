@@ -122,9 +122,9 @@ sub generate_accessor_method_inline {
     my $code = $self->_eval_closure(
         {},
         'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
+        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
         . ' if scalar(@_) == 2; '
-        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
+        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
         . '}'
     );
     confess "Could not generate inline accessor because : $@" if $@;
