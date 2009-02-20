@@ -676,7 +676,7 @@ sub add_method {
             $method = $self->find_next_method_by_name($method_name);
             # die if it does not exist
             (defined $method)
-                || confess "The method '$method_name' is not found in the inheritance hierarchy for class " . $self->name;
+                || confess "The method '$method_name' was not found in the inheritance hierarchy for " . $self->name;
             # and now make sure to wrap it
             # even if it is already wrapped
             # because we need a new sub ref
