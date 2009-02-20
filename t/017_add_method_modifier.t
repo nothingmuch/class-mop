@@ -90,7 +90,7 @@ lives_ok {
 }
 '... withdrew from savings successfully';
 is( $savings_account->balance, 200,
-    '... got the right savings balance after withdrawl' );
+    '... got the right savings balance after withdrawal' );
 dies_ok {
     $savings_account->withdraw(250);
 }
@@ -117,9 +117,9 @@ lives_ok {
 }
 '... withdrew from checking successfully';
 is( $checking_account->balance, 50,
-    '... got the right checkings balance after withdrawl' );
+    '... got the right checkings balance after withdrawal' );
 is( $savings_account->balance, 350,
-    '... got the right savings balance after checking withdrawl (no overdraft)'
+    '... got the right savings balance after checking withdrawal (no overdraft)'
 );
 
 lives_ok {
@@ -127,7 +127,7 @@ lives_ok {
 }
 '... withdrew from checking successfully';
 is( $checking_account->balance, 0,
-    '... got the right checkings balance after withdrawl' );
+    '... got the right checkings balance after withdrawal' );
 is( $savings_account->balance, 200,
-    '... got the right savings balance after overdraft withdrawl' );
+    '... got the right savings balance after overdraft withdrawal' );
 
