@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Test::Exception;
 
 use Class::MOP;
@@ -79,6 +79,11 @@ use Class::MOP;
         'Class::MOP::Method::Wrapped' );
     ::isa_ok( BankAccount->meta->get_method('withdraw'),
         'Class::MOP::Method' );
+
+    CheckingAccount->meta->add_method( foo => sub { 'foo' } );
+    CheckingAccount->meta->add_before_method_modifier( foo => sub { 'wrapped' } );
+    ::isa_ok( CheckingAccount->meta->get_method('foo'),
+        'Class::MOP::Method::Wrapped' );
 }
 
 my $savings_account = BankAccount->new( balance => 250 );
