@@ -149,12 +149,12 @@ sub _generate_slot_initializer {
           'if(exists $params->{\'' . $attr->init_arg . '\'}){' . "\n" .
                 $self->meta_instance->inline_set_slot_value(
                     '$instance',
-                    ("'" . $attr->name . "'"),
+                    $attr->name,
                     '$params->{\'' . $attr->init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
                 $self->meta_instance->inline_set_slot_value(
                     '$instance',
-                    ("'" . $attr->name . "'"),
+                    $attr->name,
                      $default ) . "\n" .
            '}')
         );
@@ -162,7 +162,7 @@ sub _generate_slot_initializer {
         return (
             $self->meta_instance->inline_set_slot_value(
                 '$instance',
-                ("'" . $attr->name . "'"),
+                $attr->name,
                  $default ) . "\n"
         );
     } else { return '' }

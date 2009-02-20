@@ -138,7 +138,7 @@ sub generate_reader_method_inline {
          {},
         'sub {'
         . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
-        . $meta_instance->inline_get_slot_value('$_[0]', "'$attr_name'")
+        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
         . '}'
     );
 }
@@ -152,7 +152,7 @@ sub generate_writer_method_inline {
     return $self->_eval_closure(
         {},
         'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', "'$attr_name'", '$_[1]')
+        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
         . '}'
     );
 }
@@ -167,7 +167,7 @@ sub generate_predicate_method_inline {
     return $self->_eval_closure(
         {},
        'sub {'
-       . $meta_instance->inline_is_slot_initialized('$_[0]', "'$attr_name'")
+       . $meta_instance->inline_is_slot_initialized('$_[0]', $attr_name)
        . '}'
     );
 }
@@ -181,7 +181,7 @@ sub generate_clearer_method_inline {
     return $self->_eval_closure(
         {},
         'sub {'
-        . $meta_instance->inline_deinitialize_slot('$_[0]', "'$attr_name'")
+        . $meta_instance->inline_deinitialize_slot('$_[0]', $attr_name)
         . '}'
     );
 }
