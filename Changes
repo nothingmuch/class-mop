@@ -1,10 +1,16 @@
 Revision history for Perl extension Class-MOP.
 
-0.78
+0.77_01 Sun, February 22, 2009
     * Everything
       - This package now requires its XS components. Not using
         Sub::Name lead to different behavior and bugginess in the pure
-        Perl version of the code.
+        Perl version of the code. A Moose test would fail when run
+        against the pure Perl version of this code.
+
+    * Moose::Meta::Instance
+      - The inline_* methods now quote attribute names themselves, and
+        don't expect to receive a quoted value.
+
 
 0.77 Sat, February 14, 2009
     * MOP.xs
