@@ -320,57 +320,6 @@ sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
 
-sub get_method_map {
-    my $self = shift;
-
-    my $class_name = $self->name;
-
-    my $current = Class::MOP::check_package_cache_flag($class_name);
-
-    if (defined $self->{'_package_cache_flag'} && $self->{'_package_cache_flag'} == $current) {
-        return $self->{'methods'} ||= {};
-    }
-
-    $self->{_package_cache_flag} = $current;
-
-    my $map = $self->{'methods'} ||= {};
-
-    my $method_metaclass = $self->method_metaclass;
-
-    my $all_code = $self->get_all_package_symbols('CODE');
-
-    foreach my $symbol (keys %{ $all_code }) {
-        my $code = $all_code->{$symbol};
-
-        next if exists  $map->{$symbol} &&
-                defined $map->{$symbol} &&
-                        $map->{$symbol}->body == $code;
-
-        my ($pkg, $name) = Class::MOP::get_code_info($code);
-        
-        # NOTE:
-        # in 5.10 constant.pm the constants show up 
-        # as being in the right package, but in pre-5.10
-        # they show up as constant::__ANON__ so we 
-        # make an exception here to be sure that things
-        # work as expected in both.
-        # - SL
-        unless ($pkg eq 'constant' && $name eq '__ANON__') {
-            next if ($pkg  || '') ne $class_name ||
-                    (($name || '') ne '__ANON__' && ($pkg  || '') ne $class_name);
-        }
-
-        $map->{$symbol} = $method_metaclass->wrap(
-            $code,
-            associated_metaclass => $self,
-            package_name         => $class_name,
-            name                 => $symbol,
-        );
-    }
-
-    return $map;
-}
-
 # Instance Construction & Cloning
 
 sub new_object {

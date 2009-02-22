@@ -79,7 +79,6 @@ sub _new {
 # all these attribute readers will be bootstrapped 
 # away in the Class::MOP bootstrap section
 
-sub name      { $_[0]->{'package'} }
 sub namespace { 
     # NOTE:
     # because of issues with the Perl API 
@@ -274,45 +273,6 @@ sub list_all_package_symbols {
     } else {
         return grep { *{$namespace->{$_}}{$type_filter} } keys %{$namespace};
     }
-}
-
-sub get_all_package_symbols {
-    my ($self, $type_filter) = @_;
-
-    die "Cannot call get_all_package_symbols as a class method"
-        unless ref $self;
-
-    my $namespace = $self->namespace;
-
-    return $namespace unless defined $type_filter;
-
-    my %ret;
-    # for some reason this nasty impl is orders of magnitude faster than a clean version
-    if ( $type_filter eq 'CODE' ) {
-        my $pkg;
-        no strict 'refs';
-        %ret = map {
-            (ref($namespace->{$_})
-                ? ( $_ => \&{$pkg ||= $self->name . "::$_"} )
-                : ( ref \$namespace->{$_} eq 'GLOB' # don't use {CODE} unless it's really a glob to prevent stringification of stubs
-                    && (*{$namespace->{$_}}{CODE})  # the extra parents prevent breakage on 5.8.2
-                    ? ( $_ => *{$namespace->{$_}}{CODE} )
-                    : (do {
-                        my $sym = B::svref_2object(\$namespace->{$_});
-                        my $svt = ref $sym if $sym;
-                        ($sym && ($svt eq 'B::PV' || $svt eq 'B::IV'))
-                            ? ($_ => ($pkg ||= $self->name)->can($_))
-                            : () }) ) )
-        } keys %$namespace;
-    } else {
-        %ret = map {
-            $_ => *{$namespace->{$_}}{$type_filter}
-        } grep {
-            !ref($namespace->{$_}) && *{$namespace->{$_}}{$type_filter}
-        } keys %$namespace;
-    }
-
-    return \%ret;
 }
 
 1;

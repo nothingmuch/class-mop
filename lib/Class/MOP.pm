@@ -9,8 +9,9 @@ use 5.008;
 use MRO::Compat;
 
 use Carp          'confess';
+use Devel::GlobalDestruction qw( in_global_destruction );
 use Scalar::Util  'weaken', 'reftype';
-
+use Sub::Name qw( subname );
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -36,45 +37,8 @@ our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
 
-_try_load_xs() or _load_pure_perl();
-
-sub _try_load_xs {
-    return if $ENV{CLASS_MOP_NO_XS};
-
-    my $e = do {
-        local $@;
-        eval {
-            require XSLoader;
-            # just doing this - no warnings 'redefine' - doesn't work
-            # for some reason
-            local $^W = 0;
-            __PACKAGE__->XSLoader::load($XS_VERSION);
-
-            require Sub::Name;
-            Sub::Name->import(qw(subname));
-
-            require Devel::GlobalDestruction;
-            Devel::GlobalDestruction->import("in_global_destruction");
-
-            *USING_XS = sub () { 1 };
-        };
-        $@;
-    };
-
-    die $e if $e && $e !~ /object version|loadable object/;
-
-    return $e ? 0 : 1;
-}
-
-sub _load_pure_perl {
-    require Sub::Identify;
-    Sub::Identify->import('get_code_info');
-
-    *subname = sub { $_[1] };
-    *in_global_destruction = sub () { !1 };
-
-    *USING_XS = sub () { 0 };
-}
+require XSLoader;
+XSLoader::load( __PACKAGE__, $XS_VERSION );
 
 
 {
@@ -171,55 +135,6 @@ sub _is_valid_class_name {
 
     return 0;
 }
-
-sub is_class_loaded {
-    my $class = shift;
-
-    return 0 unless _is_valid_class_name($class);
-
-    # walk the symbol table tree to avoid autovififying
-    # \*{${main::}{"Foo::"}} == \*main::Foo::
-
-    my $pack = \*::;
-    foreach my $part (split('::', $class)) {
-        return 0 unless exists ${$$pack}{"${part}::"};
-        $pack = \*{${$$pack}{"${part}::"}};
-    }
-
-    # We used to check in the package stash, but it turns out that
-    # *{${$$package}{VERSION}{SCALAR}} can end up pointing to a
-    # reference to undef. It looks
-
-    my $version = do {
-        no strict 'refs';
-        ${$class . '::VERSION'};
-    };
-
-    return 1 if ! ref $version && defined $version;
-    # Sometimes $VERSION ends up as a reference to undef (weird)
-    return 1 if ref $version && reftype $version eq 'SCALAR' && defined ${$version};
-
-    return 1 if exists ${$$pack}{ISA}
-             && defined *{${$$pack}{ISA}}{ARRAY};
-
-    # check for any method
-    foreach ( keys %{$$pack} ) {
-        next if substr($_, -2, 2) eq '::';
-
-        my $glob = ${$$pack}{$_} || next;
-
-        # constant subs
-        if ( IS_RUNNING_ON_5_10 ) {
-            return 1 if ref $glob eq 'SCALAR';
-        }
-
-        return 1 if defined *{$glob}{CODE};
-    }
-
-    # fail
-    return 0;
-}
-
 
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
@@ -914,10 +829,6 @@ compat.
 
 Whether or not C<mro> provides C<get_isarev>, a much faster way to get all the
 subclasses of a certain class.
-
-=item I<USING_XS>
-
-Whether or not the running C<Class::MOP> is using its XS version.
 
 =back
 

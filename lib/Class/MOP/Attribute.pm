@@ -151,8 +151,6 @@ sub _set_initial_slot_value {
 # the next bunch of methods will get bootstrapped
 # away in the Class::MOP bootstrapping section
 
-sub name { $_[0]->{'name'} }
-
 sub associated_class   { $_[0]->{'associated_class'}   }
 sub associated_methods { $_[0]->{'associated_methods'} }
 
