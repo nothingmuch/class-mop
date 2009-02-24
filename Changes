@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+0.78 Mon, February 23, 2009
+    * No changes from 0.78
+
 0.77_01 Sun, February 22, 2009
     * Everything
       - This package now requires its XS components. Not using
