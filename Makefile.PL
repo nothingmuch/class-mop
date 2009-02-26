@@ -10,14 +10,13 @@ perl_version '5.008001';
 all_from 'lib/Class/MOP.pm';
 license 'perl';
 
-
 my $ccflags = -d '.svn' || -d '.git' || $ENV{MAINTAINER_MODE} ? '-Wall' : '';
 
 requires 'Carp';
 requires 'Devel::GlobalDestruction';
-requires 'MRO::Compat' => '0.05';
-requires 'Scalar::Util'     => '1.18';
-requires 'Sub::Name' => '0.04';
+requires 'MRO::Compat'  => '0.05';
+requires 'Scalar::Util' => '1.18';
+requires 'Sub::Name'    => '0.04';
 requires 'Task::Weaken';
 
 test_requires 'File::Spec';
@@ -63,8 +62,8 @@ EOF
     return unless $found;
 
     # More or less copied from Module::Build
-    return if  $ENV{PERL_MM_USE_DEFAULT};
-    return unless -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT));
+    return if $ENV{PERL_MM_USE_DEFAULT};
+    return unless -t STDIN && ( -t STDOUT || !( -f STDOUT || -c STDOUT ) );
 
     sleep 4;
 }
