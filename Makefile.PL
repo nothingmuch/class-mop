@@ -17,7 +17,6 @@ requires 'Carp';
 requires 'Devel::GlobalDestruction';
 requires 'MRO::Compat' => '0.05';
 requires 'Scalar::Util'     => '1.18';
-requires 'Sub::Identify'    => '0.03';
 requires 'Sub::Name' => '0.04';
 requires 'Task::Weaken';
 
