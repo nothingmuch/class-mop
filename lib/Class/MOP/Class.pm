@@ -427,7 +427,8 @@ sub rebless_instance {
         || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
-    $meta_instance->rebless_instance_structure($instance, $self);
+    # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
+    $meta_instance->rebless_instance_structure($_[1], $self);
 
     foreach my $attr ( $self->compute_all_applicable_attributes ) {
         if ( $attr->has_value($instance) ) {

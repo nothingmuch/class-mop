@@ -154,7 +154,9 @@ sub strengthen_slot_value {
 
 sub rebless_instance_structure {
     my ($self, $instance, $metaclass) = @_;
-    bless $instance, $metaclass->name;
+
+    # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
+    bless $_[1], $metaclass->name;
 }
 
 sub is_dependent_on_superclasses {
