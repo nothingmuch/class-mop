@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+0.79
+    * Class::MOP::Class
+    * Class::MOP::Instance
+      - Reblessing into a package that supports overloading wasn't
+        properly adding overload magic to the object due to a bug
+        in (at least) 5.8.8. We now use $_[1] directly which seems
+        to set the magic properly. (Sartak)
+
 0.78 Mon, February 23, 2009
     * No changes from 0.77_01
 
