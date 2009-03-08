@@ -10,7 +10,7 @@ Revision history for Perl extension Class-MOP.
         Perl version of the code. A Moose test would fail when run
         against the pure Perl version of this code.
 
-    * Moose::Meta::Instance
+    * Class::MOP::Instance
       - The inline_* methods now quote attribute names themselves, and
         don't expect to receive a quoted value.
 
