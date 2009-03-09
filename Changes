@@ -7,6 +7,12 @@ Revision history for Perl extension Class-MOP.
         properly adding overload magic to the object due to a bug
         in (at least) 5.8.8. We now use $_[1] directly which seems
         to set the magic properly. (Sartak)
+    * MOP.xs
+      - Stop is_class_loaded from thinking a class is loaded if it
+        only has an empty GV (Florian Ragwitz).
+        + Add a test for this (Yappo).
+      - Refactor get_all_package_symbols to allow short-circuiting (Florian Ragwitz).
+        + Use this in is_class_loaded (Florian Ragwitz).
 
 0.78 Mon, February 23, 2009
     * No changes from 0.77_01
