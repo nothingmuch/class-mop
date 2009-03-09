@@ -2,8 +2,9 @@ t/pp_*.t
 .*
 !.gitignore
 !.shipit
-MOP.*
-!MOP.xs
+xs/*.c
+*.o
+*.bs
 Makefile*
 !Makefile.PL
 *blib
