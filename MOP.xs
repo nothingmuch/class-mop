@@ -352,9 +352,7 @@ is_class_loaded(klass=&PL_sv_undef)
     SV *klass
     PREINIT:
         HV *stash;
-        char *key;
-        I32 keylen;
-        SV *gv;
+        HV *symbols;
     PPCODE:
         if (!SvPOK(klass) || !SvCUR(klass)) {
             XSRETURN_NO;
@@ -389,21 +387,13 @@ is_class_loaded(klass=&PL_sv_undef)
             }
         }
 
-        (void)hv_iterinit(stash);
-        while ((gv = hv_iternextsv(stash, &key, &keylen))) {
-            if (keylen <= 0) {
-                continue;
-            }
-
-            if (key[keylen - 1] == ':' && key[keylen - 2] == ':') {
-                continue;
-            }
-
-            if (!isGV(gv) || GvCV(gv)) {
-                XSRETURN_YES;
-            }
+        symbols = get_all_package_symbols(stash, TYPE_FILTER_CODE);
+        if (HvKEYS(symbols) > 0) {
+            SvREFCNT_dec((SV *)symbols);
+            XSRETURN_YES;
         }
 
+        SvREFCNT_dec((SV *)symbols);
         XSRETURN_NO;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
