@@ -225,6 +225,14 @@ get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb
 }
 
 static bool
+find_method (const char *key, STRLEN keylen, SV *val, void *ud)
+{
+    bool *found_method = (bool *)ud;
+    *found_method = TRUE;
+    return FALSE;
+}
+
+static bool
 collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
 {
     HV *hash = (HV *)ud;
@@ -369,7 +377,7 @@ is_class_loaded(klass=&PL_sv_undef)
     SV *klass
     PREINIT:
         HV *stash;
-        HV *symbols;
+        bool found_method = FALSE;
     PPCODE:
         if (!SvPOK(klass) || !SvCUR(klass)) {
             XSRETURN_NO;
@@ -404,13 +412,11 @@ is_class_loaded(klass=&PL_sv_undef)
             }
         }
 
-        symbols = get_all_package_symbols(stash, TYPE_FILTER_CODE);
-        if (HvKEYS(symbols) > 0) {
-            SvREFCNT_dec((SV *)symbols);
+        get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
+        if (found_method) {
             XSRETURN_YES;
         }
 
-        SvREFCNT_dec((SV *)symbols);
         XSRETURN_NO;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP::Package
