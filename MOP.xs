@@ -148,24 +148,24 @@ typedef enum {
     TYPE_FILTER_SCALAR,
 } type_filter_t;
 
-static HV *
-get_all_package_symbols(HV *stash, type_filter_t filter)
+typedef bool (*get_package_symbols_cb_t) (const char *, STRLEN, SV *, void *);
+
+static void
+get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud)
 {
     HE *he;
-    HV *ret = newHV();
 
     (void)hv_iterinit(stash);
 
     if (filter == TYPE_FILTER_NONE) {
         while ( (he = hv_iternext(stash)) ) {
             STRLEN keylen;
-            char *key = HePV(he, keylen);
-            if (!hv_store(ret, key, keylen, SvREFCNT_inc(HeVAL(he)), 0)) {
-                croak("failed to store glob ref");
+            const char *key = HePV(he, keylen);
+            if (!cb(key, keylen, HeVAL(he), ud)) {
+                return;
             }
         }
-
-        return ret;
+        return;
     }
 
     while ( (he = hv_iternext(stash)) ) {
@@ -216,16 +216,33 @@ get_all_package_symbols(HV *stash, type_filter_t filter)
         }
 
         if (sv) {
-            char *key = HePV(he, keylen);
-            if (!hv_store(ret, key, keylen, newRV_inc(sv), 0)) {
-                croak("failed to store symbol ref");
+            const char *key = HePV(he, keylen);
+            if (!cb(key, keylen, sv, ud)) {
+                return;
             }
         }
     }
-
-    return ret;
 }
 
+static bool
+collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
+{
+    HV *hash = (HV *)ud;
+
+    if (!hv_store (hash, key, keylen, newRV_inc(val), 0)) {
+        croak("failed to store symbol ref");
+    }
+
+    return TRUE;
+}
+
+static HV *
+get_all_package_symbols (HV *stash, type_filter_t filter)
+{
+    HV *ret = newHV ();
+    get_package_symbols (stash, filter, collect_all_symbols, ret);
+    return ret;
+}
 
 static void
 mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stash, HV *const map) {
