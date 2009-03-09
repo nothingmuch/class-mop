@@ -113,8 +113,7 @@ mop_call0(pTHX_ SV *const self, SV *const method) {
 }
 
 static int
-get_code_info (SV *coderef, char **pkg, char **name)
-{
+get_code_info (SV *coderef, char **pkg, char **name) {
     if (!SvOK(coderef) || !SvROK(coderef) || SvTYPE(SvRV(coderef)) != SVt_PVCV) {
         return 0;
     }
@@ -151,8 +150,7 @@ typedef enum {
 typedef bool (*get_package_symbols_cb_t) (const char *, STRLEN, SV *, void *);
 
 static void
-get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud)
-{
+get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud) {
     HE *he;
 
     (void)hv_iterinit(stash);
@@ -225,16 +223,14 @@ get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb
 }
 
 static bool
-find_method (const char *key, STRLEN keylen, SV *val, void *ud)
-{
+find_method (const char *key, STRLEN keylen, SV *val, void *ud) {
     bool *found_method = (bool *)ud;
     *found_method = TRUE;
     return FALSE;
 }
 
 static bool
-collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
-{
+collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud) {
     HV *hash = (HV *)ud;
 
     if (!hv_store (hash, key, keylen, newRV_inc(val), 0)) {
@@ -245,8 +241,7 @@ collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
 }
 
 static HV *
-get_all_package_symbols (HV *stash, type_filter_t filter)
-{
+get_all_package_symbols (HV *stash, type_filter_t filter) {
     HV *ret = newHV ();
     get_package_symbols (stash, filter, collect_all_symbols, ret);
     return ret;
