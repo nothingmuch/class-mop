@@ -83,6 +83,12 @@ get_code_info (SV *coderef, char **pkg, char **name)
     }
 
     coderef = SvRV(coderef);
+
+    /* sub is still being compiled */
+    if (!CvGV(coderef)) {
+        return 0;
+    }
+
     /* I think this only gets triggered with a mangled coderef, but if
        we hit it without the guard, we segfault. The slightly odd return
        value strikes me as an improvement (mst)
