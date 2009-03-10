@@ -1,16 +1,11 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 6;
+use Sub::Name 'subname';
 
 BEGIN {
     $^P &= ~0x200; # Don't munger anonymous sub names
-    if ( eval 'use Sub::Name qw(subname); 1;' ) {
-        plan tests => 6;
-    }
-    else {
-        plan skip_all => 'These tests require Sub::Name';
-    }
 }
 
 BEGIN { use_ok("Class::MOP") }
