@@ -20,7 +20,7 @@ Revision history for Perl extension Class-MOP.
       - Prefix all public symbols with "mop_" (Florian Ragwitz).
     * Tests
       - Remove optional test plans for tests depending on Sub::Name as
-        we have a hard dependency on Sub::Name anyway (Florin Ragwitz).
+        we have a hard dependency on Sub::Name anyway (Florian Ragwitz).
 
 0.78 Mon, February 23, 2009
     * No changes from 0.77_01
