@@ -11,10 +11,10 @@
 #include "ppport.h"
 
 #define MOP_CALL_BOOT(name) \
-	{ \
-		EXTERN_C XS(name); \
-		mop_call_xs(aTHX_ name, cv, mark); \
-	}
+    { \
+        EXTERN_C XS(name); \
+        mop_call_xs(aTHX_ name, cv, mark); \
+    }
 
 void mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark);
 

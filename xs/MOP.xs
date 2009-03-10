@@ -39,10 +39,10 @@ BOOT:
     wrap                 = newSVpvs("wrap");
     associated_metaclass = newSVpvs("associated_metaclass");
 
-	MOP_CALL_BOOT (boot_Class__MOP__Package);
-	MOP_CALL_BOOT (boot_Class__MOP__Class);
-	MOP_CALL_BOOT (boot_Class__MOP__Attribute);
-	MOP_CALL_BOOT (boot_Class__MOP__Method);
+    MOP_CALL_BOOT (boot_Class__MOP__Package);
+    MOP_CALL_BOOT (boot_Class__MOP__Class);
+    MOP_CALL_BOOT (boot_Class__MOP__Attribute);
+    MOP_CALL_BOOT (boot_Class__MOP__Method);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
 void
