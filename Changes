@@ -17,6 +17,7 @@ Revision history for Perl extension Class-MOP.
       - Stop segfaulting when trying to get the name from a sub that's
         still being compiled (Florian Ragwitz).
         + Add tests for this (Florian Ragwitz).
+      - Prefix all public symbols with "mop_" (Florian Ragwitz).
     * Tests
       - Remove optional test plans for tests depending on Sub::Name as
         we have a hard dependency on Sub::Name anyway (Florin Ragwitz).
