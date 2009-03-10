@@ -17,9 +17,9 @@ DECLARE_KEY(methods);
 DECLARE_KEY(VERSION);
 DECLARE_KEY(ISA);
 
-SV *method_metaclass;
-SV *associated_metaclass;
-SV *wrap;
+SV *mop_method_metaclass;
+SV *mop_associated_metaclass;
+SV *mop_wrap;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
@@ -35,9 +35,9 @@ BOOT:
     PREHASH_KEY(VERSION);
     PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
 
-    method_metaclass     = newSVpvs("method_metaclass");
-    wrap                 = newSVpvs("wrap");
-    associated_metaclass = newSVpvs("associated_metaclass");
+    mop_method_metaclass     = newSVpvs("method_metaclass");
+    mop_wrap                 = newSVpvs("wrap");
+    mop_associated_metaclass = newSVpvs("associated_metaclass");
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
     MOP_CALL_BOOT (boot_Class__MOP__Class);
@@ -53,7 +53,7 @@ get_code_info(coderef)
         char *pkg  = NULL;
         char *name = NULL;
     PPCODE:
-        if (get_code_info(coderef, &pkg, &name)) {
+        if (mop_get_code_info(coderef, &pkg, &name)) {
             EXTEND(SP, 2);
             PUSHs(newSVpv(pkg, 0));
             PUSHs(newSVpv(name, 0));
@@ -102,7 +102,7 @@ is_class_loaded(klass=&PL_sv_undef)
             }
         }
 
-        get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
+        mop_get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
         if (found_method) {
             XSRETURN_YES;
         }

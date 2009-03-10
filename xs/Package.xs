@@ -34,7 +34,7 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
             XSRETURN_UNDEF;
         }
 
-        symbols = get_all_package_symbols(stash, filter);
+        symbols = mop_get_all_package_symbols(stash, filter);
         PUSHs(sv_2mortal(newRV_noinc((SV *)symbols)));
 
 void

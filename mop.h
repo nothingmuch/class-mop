@@ -37,12 +37,12 @@ void mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark);
     PERL_HASH(hash_##name, #name, sizeof(#name) - 1); \
 } while (0)
 
-extern SV *method_metaclass;
-extern SV *associated_metaclass;
-extern SV *wrap;
+extern SV *mop_method_metaclass;
+extern SV *mop_associated_metaclass;
+extern SV *mop_wrap;
 
 UV mop_check_package_cache_flag(pTHX_ HV *stash);
-int get_code_info (SV *coderef, char **pkg, char **name);
+int mop_get_code_info (SV *coderef, char **pkg, char **name);
 SV *mop_call0(pTHX_ SV *const self, SV *const method);
 
 typedef enum {
@@ -56,7 +56,7 @@ typedef enum {
 
 typedef bool (*get_package_symbols_cb_t) (const char *, STRLEN, SV *, void *);
 
-void get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud);
-HV *get_all_package_symbols (HV *stash, type_filter_t filter);
+void mop_get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud);
+HV *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 
 #endif

@@ -18,7 +18,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
     HV   *symbols;
     dSP;
 
-    symbols = get_all_package_symbols(stash, TYPE_FILTER_CODE);
+    symbols = mop_get_all_package_symbols(stash, TYPE_FILTER_CODE);
 
     (void)hv_iterinit(symbols);
     while ( (coderef = hv_iternextsv(symbols, &method_name, &method_name_len)) ) {
@@ -28,7 +28,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
         SV *method_slot;
         SV *method_object;
 
-        if (!get_code_info(coderef, &cvpkg_name, &cv_name)) {
+        if (!mop_get_code_info(coderef, &cvpkg_name, &cv_name)) {
             continue;
         }
 
@@ -47,7 +47,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
             }
         }
 
-        method_metaclass_name = mop_call0(aTHX_ self, method_metaclass); /* $self->method_metaclass() */
+        method_metaclass_name = mop_call0(aTHX_ self, mop_method_metaclass); /* $self->method_metaclass() */
 
         /*
             $method_object = $method_metaclass->wrap(
@@ -64,7 +64,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
         EXTEND(SP, 8);
         PUSHs(method_metaclass_name); /* invocant */
         mPUSHs(newRV_inc((SV *)cv));
-        PUSHs(associated_metaclass);
+        PUSHs(mop_associated_metaclass);
         PUSHs(self);
         PUSHs(key_package_name);
         PUSHs(class_name);
@@ -72,7 +72,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
         mPUSHs(newSVpv(method_name, method_name_len));
         PUTBACK;
 
-        call_sv(wrap, G_SCALAR | G_METHOD);
+        call_sv(mop_wrap, G_SCALAR | G_METHOD);
         SPAGAIN;
         method_object = POPs;
         PUTBACK;

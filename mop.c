@@ -76,7 +76,7 @@ mop_call0 (pTHX_ SV *const self, SV *const method)
 }
 
 int
-get_code_info (SV *coderef, char **pkg, char **name)
+mop_get_code_info (SV *coderef, char **pkg, char **name)
 {
     if (!SvOK(coderef) || !SvROK(coderef) || SvTYPE(SvRV(coderef)) != SVt_PVCV) {
         return 0;
@@ -109,7 +109,7 @@ get_code_info (SV *coderef, char **pkg, char **name)
 }
 
 void
-get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud)
+mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud)
 {
     HE *he;
 
@@ -195,9 +195,9 @@ collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
 }
 
 HV *
-get_all_package_symbols (HV *stash, type_filter_t filter)
+mop_get_all_package_symbols (HV *stash, type_filter_t filter)
 {
     HV *ret = newHV ();
-    get_package_symbols (stash, filter, collect_all_symbols, ret);
+    mop_get_package_symbols (stash, filter, collect_all_symbols, ret);
     return ret;
 }
