@@ -18,9 +18,6 @@
 
 void mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark);
 
-#define DECLARE_KEY(name)                    { #name, #name, NULL, 0 }
-#define DECLARE_KEY_WITH_VALUE(name, value)  { #name, value, NULL, 0 }
-
 typedef enum {
     KEY_name,
     KEY_package,

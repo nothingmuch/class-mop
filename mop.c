@@ -202,6 +202,9 @@ mop_get_all_package_symbols (HV *stash, type_filter_t filter)
     return ret;
 }
 
+#define DECLARE_KEY(name)                    { #name, #name, NULL, 0 }
+#define DECLARE_KEY_WITH_VALUE(name, value)  { #name, value, NULL, 0 }
+
 /* the order of these has to match with those in mop.h */
 static struct {
     const char *name;
@@ -235,7 +238,6 @@ void
 mop_prehash_keys ()
 {
     int i;
-
     for (i = 0; i < key_last; i++) {
         const char *value = prehashed_keys[i].value;
         prehashed_keys[i].key = newSVpv(value, strlen(value));
