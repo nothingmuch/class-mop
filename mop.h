@@ -37,12 +37,7 @@ void mop_prehash_keys (void);
 inline SV *mop_prehashed_key_for (mop_prehashed_key_t key);
 inline U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
 
-#define INSTALL_SIMPLE_READER(klass, name) \
-    { \
-        CV *cv = newXS("Class::MOP::" #klass "::" #name, mop_xs_simple_reader, __FILE__); \
-        CvXSUBANY(cv).any_i32 = KEY_ ##name; \
-    }
-
+#define INSTALL_SIMPLE_READER(klass, name)  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) \
     { \
         CV *cv = newXS("Class::MOP::" #klass "::" #name, mop_xs_simple_reader, __FILE__); \
