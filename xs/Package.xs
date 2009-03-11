@@ -35,17 +35,5 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
         symbols = mop_get_all_package_symbols(stash, filter);
         PUSHs(sv_2mortal(newRV_noinc((SV *)symbols)));
 
-void
-name(self)
-    SV *self
-    PREINIT:
-        register HE *he;
-    PPCODE:
-        if ( ! SvROK(self) ) {
-            die("Cannot call name as a class method");
-        }
-
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(package), 0, HASH_FOR(package))) )
-            XPUSHs(HeVAL(he));
-        else
-            ST(0) = &PL_sv_undef;
+BOOT:
+    INSTALL_SIMPLE_READER_WITH_KEY(Package, name, package);

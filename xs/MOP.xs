@@ -1,5 +1,9 @@
 #include "mop.h"
 
+SV *mop_method_metaclass;
+SV *mop_associated_metaclass;
+SV *mop_wrap;
+
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 {
@@ -7,10 +11,6 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
     *found_method = TRUE;
     return FALSE;
 }
-
-SV *mop_method_metaclass;
-SV *mop_associated_metaclass;
-SV *mop_wrap;
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
