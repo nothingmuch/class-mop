@@ -1,9 +1,5 @@
 #include "mop.h"
 
-NEEDS_KEY(name);
-NEEDS_KEY(body);
-NEEDS_KEY(package_name);
-
 MODULE = Class::MOP::Method   PACKAGE = Class::MOP::Method
 
 PROTOTYPES: DISABLE
@@ -18,7 +14,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_name, 0, hash_name)) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(name), 0, HASH_FOR(name))) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -33,7 +29,7 @@ package_name(self)
             die("Cannot call package_name as a class method");
         }
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package_name, 0, hash_package_name)) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(package_name), 0, HASH_FOR(package_name))) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;
@@ -48,7 +44,7 @@ body(self)
             die("Cannot call body as a class method");
         }
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_body, 0, hash_body)) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(body), 0, HASH_FOR(body))) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;

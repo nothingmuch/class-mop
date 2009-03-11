@@ -18,24 +18,27 @@
 
 void mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark);
 
-#define DECLARE_KEY(name) SV *key_##name; U32 hash_##name;
-#define NEEDS_KEY(name) extern SV *key_##name; extern U32 hash_##name;
+#define DECLARE_KEY(name)                    { #name, #name, NULL, 0 }
+#define DECLARE_KEY_WITH_VALUE(name, value)  { #name, value, NULL, 0 }
 
-#define PREHASH_KEY_WITH_VALUE(name, value) do { \
-    key_##name = newSVpvs(value); \
-    PERL_HASH(hash_##name, value, sizeof(value) - 1); \
-} while (0)
+typedef enum {
+    KEY_name,
+    KEY_package,
+    KEY_package_name,
+    KEY_body,
+    KEY_package_cache_flag,
+    KEY_methods,
+    KEY_VERSION,
+    KEY_ISA,
+    key_last,
+} mop_prehashed_key_t;
 
-/* this is basically the same as the above macro, except that the value will be
- * the stringified name. However, we can't just implement this in terms of
- * PREHASH_KEY_WITH_VALUE as that'd cause macro expansion on the value of
- * 'name' when it's being passed to the other macro. suggestions on how to make
- * this more elegant would be much appreciated */
+#define KEY_FOR(name)  mop_prehashed_key_for(KEY_ ##name)
+#define HASH_FOR(name) mop_prehashed_hash_for(KEY_ ##name)
 
-#define PREHASH_KEY(name) do { \
-    key_##name = newSVpvs(#name); \
-    PERL_HASH(hash_##name, #name, sizeof(#name) - 1); \
-} while (0)
+void mop_prehash_keys (void);
+inline SV *mop_prehashed_key_for (mop_prehashed_key_t key);
+inline U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
 
 extern SV *mop_method_metaclass;
 extern SV *mop_associated_metaclass;

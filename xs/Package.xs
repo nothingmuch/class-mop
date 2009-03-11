@@ -1,7 +1,5 @@
 #include "mop.h"
 
-NEEDS_KEY(package);
-
 MODULE = Class::MOP::Package   PACKAGE = Class::MOP::Package
 
 PROTOTYPES: DISABLE
@@ -25,7 +23,7 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
 
         PUTBACK;
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) ) {
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(package), 0, HASH_FOR(package))) ) {
             stash = gv_stashsv(HeVAL(he), 0);
         }
 
@@ -47,7 +45,7 @@ name(self)
             die("Cannot call name as a class method");
         }
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), key_package, 0, hash_package)) )
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(package), 0, HASH_FOR(package))) )
             XPUSHs(HeVAL(he));
         else
             ST(0) = &PL_sv_undef;

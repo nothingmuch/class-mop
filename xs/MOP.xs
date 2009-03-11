@@ -8,15 +8,6 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
     return FALSE;
 }
 
-DECLARE_KEY(name);
-DECLARE_KEY(package);
-DECLARE_KEY(package_name);
-DECLARE_KEY(body);
-DECLARE_KEY(package_cache_flag);
-DECLARE_KEY(methods);
-DECLARE_KEY(VERSION);
-DECLARE_KEY(ISA);
-
 SV *mop_method_metaclass;
 SV *mop_associated_metaclass;
 SV *mop_wrap;
@@ -26,14 +17,7 @@ MODULE = Class::MOP   PACKAGE = Class::MOP
 PROTOTYPES: DISABLE
 
 BOOT:
-    PREHASH_KEY(name);
-    PREHASH_KEY(body);
-    PREHASH_KEY(package);
-    PREHASH_KEY(package_name);
-    PREHASH_KEY(methods);
-    PREHASH_KEY(ISA);
-    PREHASH_KEY(VERSION);
-    PREHASH_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag");
+    mop_prehash_keys();
 
     mop_method_metaclass     = newSVpvs("method_metaclass");
     mop_wrap                 = newSVpvs("wrap");
@@ -78,8 +62,8 @@ is_class_loaded(klass=&PL_sv_undef)
             XSRETURN_NO;
         }
 
-        if (hv_exists_ent (stash, key_VERSION, hash_VERSION)) {
-            HE *version = hv_fetch_ent(stash, key_VERSION, 0, hash_VERSION);
+        if (hv_exists_ent (stash, KEY_FOR(VERSION), HASH_FOR(VERSION))) {
+            HE *version = hv_fetch_ent(stash, KEY_FOR(VERSION), 0, HASH_FOR(VERSION));
             SV *version_sv;
             if (version && HeVAL(version) && (version_sv = GvSV(HeVAL(version)))) {
                 if (SvROK(version_sv)) {
@@ -95,8 +79,8 @@ is_class_loaded(klass=&PL_sv_undef)
             }
         }
 
-        if (hv_exists_ent (stash, key_ISA, hash_ISA)) {
-            HE *isa = hv_fetch_ent(stash, key_ISA, 0, hash_ISA);
+        if (hv_exists_ent (stash, KEY_FOR(ISA), HASH_FOR(ISA))) {
+            HE *isa = hv_fetch_ent(stash, KEY_FOR(ISA), 0, HASH_FOR(ISA));
             if (isa && HeVAL(isa) && GvAV(HeVAL(isa))) {
                 XSRETURN_YES;
             }

@@ -201,3 +201,44 @@ mop_get_all_package_symbols (HV *stash, type_filter_t filter)
     mop_get_package_symbols (stash, filter, collect_all_symbols, ret);
     return ret;
 }
+
+/* the order of these has to match with those in mop.h */
+static struct {
+    const char *name;
+    const char *value;
+    SV *key;
+    U32 hash;
+} prehashed_keys[key_last] = {
+    DECLARE_KEY(name),
+    DECLARE_KEY(package),
+    DECLARE_KEY(package_name),
+    DECLARE_KEY(body),
+    DECLARE_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag"),
+    DECLARE_KEY(methods),
+    DECLARE_KEY(VERSION),
+    DECLARE_KEY(ISA)
+};
+
+inline SV *
+mop_prehashed_key_for (mop_prehashed_key_t key)
+{
+    return prehashed_keys[key].key;
+}
+
+inline U32
+mop_prehashed_hash_for (mop_prehashed_key_t key)
+{
+    return prehashed_keys[key].hash;
+}
+
+void
+mop_prehash_keys ()
+{
+    int i;
+
+    for (i = 0; i < key_last; i++) {
+        const char *value = prehashed_keys[i].value;
+        prehashed_keys[i].key = newSVpv(value, strlen(value));
+        PERL_HASH(prehashed_keys[i].hash, value, strlen(value));
+    }
+}

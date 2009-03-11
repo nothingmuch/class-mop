@@ -1,12 +1,5 @@
 #include "mop.h"
 
-NEEDS_KEY(name);
-NEEDS_KEY(body);
-NEEDS_KEY(methods);
-NEEDS_KEY(package);
-NEEDS_KEY(package_name);
-NEEDS_KEY(package_cache_flag);
-
 static void
 mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stash, HV *const map)
 {
@@ -41,7 +34,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
 
         method_slot = *hv_fetch(map, method_name, method_name_len, TRUE);
         if ( SvOK(method_slot) ) {
-            SV *const body = mop_call0(aTHX_ method_slot, key_body); /* $method_object->body() */
+            SV *const body = mop_call0(aTHX_ method_slot, KEY_FOR(body)); /* $method_object->body() */
             if ( SvROK(body) && ((CV *) SvRV(body)) == cv ) {
                 continue;
             }
@@ -66,9 +59,9 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
         mPUSHs(newRV_inc((SV *)cv));
         PUSHs(mop_associated_metaclass);
         PUSHs(self);
-        PUSHs(key_package_name);
+        PUSHs(KEY_FOR(package_name));
         PUSHs(class_name);
-        PUSHs(key_name);
+        PUSHs(KEY_FOR(name));
         mPUSHs(newSVpv(method_name, method_name_len));
         PUTBACK;
 
@@ -93,11 +86,11 @@ get_method_map(self)
     SV *self
     PREINIT:
         HV *const obj        = (HV *)SvRV(self);
-        SV *const class_name = HeVAL( hv_fetch_ent(obj, key_package, 0, hash_package) );
+        SV *const class_name = HeVAL( hv_fetch_ent(obj, KEY_FOR(package), 0, HASH_FOR(package)) );
         HV *const stash      = gv_stashsv(class_name, 0);
         UV  const current    = mop_check_package_cache_flag(aTHX_ stash);
-        SV *const cache_flag = HeVAL( hv_fetch_ent(obj, key_package_cache_flag, TRUE, hash_package_cache_flag));
-        SV *const map_ref    = HeVAL( hv_fetch_ent(obj, key_methods, TRUE, hash_methods));
+        SV *const cache_flag = HeVAL( hv_fetch_ent(obj, KEY_FOR(package_cache_flag), TRUE, HASH_FOR(package_cache_flag)));
+        SV *const map_ref    = HeVAL( hv_fetch_ent(obj, KEY_FOR(methods), TRUE, HASH_FOR(methods)));
     PPCODE:
         /* in  $self->{methods} does not yet exist (or got deleted) */
         if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
