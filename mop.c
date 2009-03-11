@@ -268,11 +268,11 @@ XS(mop_xs_simple_reader)
         croak("object is not a hashref");
     }
 
-    if (!(he = hv_fetch_ent((HV *)SvRV(self), prehashed_keys[key].key, 0, prehashed_keys[key].hash))) {
-        ST(0) = &PL_sv_undef;
+    if ((he = hv_fetch_ent((HV *)SvRV(self), prehashed_keys[key].key, 0, prehashed_keys[key].hash))) {
+        ST(0) = HeVAL(he);
     }
     else {
-        ST(0) = HeVAL(he);
+        ST(0) = &PL_sv_undef;
     }
 
     XSRETURN(1);
