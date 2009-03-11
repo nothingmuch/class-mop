@@ -52,7 +52,6 @@ inline U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
         CvXSUBANY(cv).any_i32 = KEY_ ##key; \
     }
 
-SV *mop_simple_reader (SV *self, mop_prehashed_key_t key);
 XS(mop_xs_simple_reader);
 
 extern SV *mop_method_metaclass;

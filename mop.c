@@ -243,10 +243,22 @@ mop_prehash_keys ()
     }
 }
 
-SV *
-mop_simple_reader (SV *self, mop_prehashed_key_t key)
+XS(mop_xs_simple_reader)
 {
+#ifdef dVAR
+    dVAR; dXSARGS;
+#else
+    dXSARGS;
+#endif
     register HE *he;
+    mop_prehashed_key_t key = CvXSUBANY(cv).any_i32;
+    SV *self;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
+    }
+
+    self = ST(0);
 
     if (!SvROK(self)) {
         croak("can't call %s as a class method", prehashed_keys[key].name);
@@ -257,26 +269,12 @@ mop_simple_reader (SV *self, mop_prehashed_key_t key)
     }
 
     if (!(he = hv_fetch_ent((HV *)SvRV(self), prehashed_keys[key].key, 0, prehashed_keys[key].hash))) {
-        return &PL_sv_undef;
+        ST(0) = &PL_sv_undef;
+    }
+    else {
+        ST(0) = HeVAL(he);
     }
 
-    return SvREFCNT_inc(HeVAL(he));
-}
-
-XS(mop_xs_simple_reader)
-{
-#ifdef dVAR
-    dVAR; dXSARGS;
-#else
-    dXSARGS;
-#endif
-
-    if (items != 1) {
-        croak("expected exactly one argument");
-    }
-
-    ST(0) = mop_simple_reader (ST(0), CvXSUBANY(cv).any_i32);
-    sv_2mortal(ST(0));
     XSRETURN(1);
 }
 
