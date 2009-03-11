@@ -19,10 +19,15 @@ Revision history for Perl extension Class-MOP.
         still being compiled (Florian Ragwitz).
         - Add tests for this (Florian Ragwitz).
       - Prefix all public symbols with "mop_" (Florian Ragwitz).
+      - Clean up and simplify prehashing of hash keys (Florian Ragwitz).
+      - Simplify creating simple xs reader methods (Florian Ragwitz).
 
     * Tests
       - Remove optional test plans for tests depending on Sub::Name as
         we have a hard dependency on Sub::Name anyway (Florian Ragwitz).
+
+    * Makefile.PL
+      - Rebuild all c code if mop.h has changed (Florian Ragwitz)
 
 0.78 Mon, February 23, 2009
     * No changes from 0.77_01
