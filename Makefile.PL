@@ -51,6 +51,10 @@ makemaker_args( CCFLAGS => $ccflags );
     );
 }
 
+postamble(<<'EOM');
+$(OBJECT) : mop.h
+EOM
+
 WriteAll();
 
 # Use the cpan-smolder-stable script in the Moose svn root to figure
