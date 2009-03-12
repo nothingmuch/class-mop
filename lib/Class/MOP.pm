@@ -647,60 +647,62 @@ Perl 5 object system. It makes no attempt to change the behavior or
 characteristics of the Perl 5 object system, only to create a
 protocol for its manipulation and introspection.
 
-That said, it does attempt to create the tools for building a rich
-set of extensions to the Perl 5 object system. Every attempt has been
-made for these tools to keep to the spirit of the Perl 5 object
-system that we all know and love.
+That said, it does attempt to create the tools for building a rich set
+of extensions to the Perl 5 object system. Every attempt has been made
+to abide by the spirit of the Perl 5 object system that we all know
+and love.
 
-This documentation is admittedly sparse on details, as time permits
-I will try to improve them. For now, I suggest looking at the items
-listed in the L<SEE ALSO> section for more information. In particular
-the book "The Art of the Meta Object Protocol" was very influential
-in the development of this system.
+This documentation is sparse on conceptual details. We suggest looking
+at the items listed in the L<SEE ALSO> section for more
+information. In particular the book "The Art of the Meta Object
+Protocol" was very influential in the development of this system.
 
 =head2 What is a Meta Object Protocol?
 
 A meta object protocol is an API to an object system.
 
-To be more specific, it is a set of abstractions of the components of
-an object system (typically things like; classes, object, methods,
-object attributes, etc.). These abstractions can then be used to both
-inspect and manipulate the object system which they describe.
+To be more specific, it abstracts the components of an object system
+(classes, object, methods, object attributes, etc.). These
+abstractions can then be used to inspect and manipulate the object
+system which they describe.
 
 It can be said that there are two MOPs for any object system; the
-implicit MOP, and the explicit MOP. The implicit MOP handles things
+implicit MOP and the explicit MOP. The implicit MOP handles things
 like method dispatch or inheritance, which happen automatically as
 part of how the object system works. The explicit MOP typically
 handles the introspection/reflection features of the object system.
-All object systems have implicit MOPs, without one, they would not
-work. Explict MOPs however as less common, and depending on the
-language can vary from restrictive (Reflection in Java or C#) to
-wide open (CLOS is a perfect example).
 
-=head2 Yet Another Class Builder!! Why?
+All object systems have implicit MOPs. Without one, they would not
+work. Explict MOPs are much less common, and depending on the language
+can vary from restrictive (Reflection in Java or C#) to wide open
+(CLOS is a perfect example).
 
-This is B<not> a class builder so much as it is a I<class builder
-B<builder>>. My intent is that an end user does not use this module
-directly, but instead this module is used by module authors to
-build extensions and features onto the Perl 5 object system.
+=head2 Yet Another Class Builder! Why?
+
+This is B<not> a class builder so much as a I<class builder
+B<builder>>. The intent is that an end user will not use this module
+directly, but instead this module is used by module authors to build
+extensions and features onto the Perl 5 object system.
+
+This system is used by L<Moose>, which supplies a powerful class
+builder system built entirely on top of C<Class::MOP>.
 
 =head2 Who is this module for?
 
-This module is specifically for anyone who has ever created or
-wanted to create a module for the Class:: namespace. The tools which
-this module will provide will hopefully make it easier to do more
-complex things with Perl 5 classes by removing such barriers as
-the need to hack the symbol tables, or understand the fine details
-of method dispatch.
+This module is for anyone who has ever created or wanted to create a
+module for the Class:: namespace. The tools which this module provides
+make doing complex Perl 5 wizardry simpler, by removing such barriers
+as the need to hack symbol tables, or understand the fine details of
+method dispatch.
 
 =head2 What changes do I have to make to use this module?
 
-This module was designed to be as unintrusive as possible. Many of
-its features are accessible without B<any> change to your existsing
-code at all. It is meant to be a compliment to your existing code and
-not an intrusion on your code base. Unlike many other B<Class::>
-modules, this module B<does not> require you subclass it, or even that
-you C<use> it in within your module's package.
+This module was designed to be as unintrusive as possible. Many of its
+features are accessible without B<any> change to your existsing
+code. It is meant to be a compliment to your existing code and not an
+intrusion on your code base. Unlike many other B<Class::> modules,
+this module B<does not> require you subclass it, or even that you
+C<use> it in within your module's package.
 
 The only features which requires additions to your code are the
 attribute handling and instance construction features, and these are
@@ -708,22 +710,23 @@ both completely optional features. The only reason for this is because
 Perl 5's object system does not actually have these features built
 in. More information about this feature can be found below.
 
-=head2 A Note about Performance?
+=head2 About Performance
 
-It is a common misconception that explict MOPs are performance drains.
-But this is not a universal truth at all, it is an side-effect of
-specific implementations. For instance, using Java reflection is much
-slower because the JVM cannot take advantage of any compiler
-optimizations, and the JVM has to deal with much more runtime type
-information as well. Reflection in C# is marginally better as it was
-designed into the language and runtime (the CLR). In contrast, CLOS
-(the Common Lisp Object System) was built to support an explicit MOP,
-and so performance is tuned for it.
+It is a common misconception that explict MOPs are a performance hit.
+This is not a universal truth, it is a side-effect of some specific
+implementations. For instance, using Java reflection is slow because
+the JVM cannot take advantage of any compiler optimizations, and the
+JVM has to deal with much more runtime type information as well.
 
-This library in particular does it's absolute best to avoid putting
+Reflection in C# is marginally better as it was designed into the
+language and runtime (the CLR). In contrast, CLOS (the Common Lisp
+Object System) was built to support an explicit MOP, and so
+performance is tuned for it.
+
+This library in particular does its absolute best to avoid putting
 B<any> drain at all upon your code's performance. In fact, by itself
-it does nothing to affect your existing code. So you only pay for
-what you actually use.
+it does nothing to affect your existing code. So you only pay for what
+you actually use.
 
 =head2 About Metaclass compatibility
 
@@ -738,7 +741,7 @@ given class is either the same as (or a subclass of) all of the
 class's ancestors.
 
 Downward metaclass compatibility means that the metaclasses of a
-given class's anscestors are all either the same as (or a subclass
+given class's ancestors are all either the same as (or a subclass
 of) that metaclass.
 
 Here is a diagram showing a set of two classes (C<A> and C<B>) and
@@ -755,80 +758,83 @@ metaclass compatibility both upwards and downwards.
     +---------+     +---------+
 
 As I said this is a highly esoteric topic and one you will only run
-into if you do a lot of subclassing of B<Class::MOP::Class>. If you
-are interested in why this is an issue see the paper
-I<Uniform and safe metaclass composition> linked to in the
-L<SEE ALSO> section of this document.
+into if you do a lot of subclassing of L<Class::MOP::Class>. If you
+are interested in why this is an issue see the paper I<Uniform and
+safe metaclass composition> linked to in the L<SEE ALSO> section of
+this document.
 
 =head2 Using custom metaclasses
 
-Always use the metaclass pragma when using a custom metaclass, this
-will ensure the proper initialization order and not accidentely
-create an incorrect type of metaclass for you. This is a very rare
-problem, and one which can only occur if you are doing deep metaclass
+Always use the L<metaclass> pragma when using a custom metaclass, this
+will ensure the proper initialization order and not accidentely create
+an incorrect type of metaclass for you. This is a very rare problem,
+and one which can only occur if you are doing deep metaclass
 programming. So in other words, don't worry about it.
+
+Note that if you're using L<Moose> we encourage you to I<not> use
+L<metaclass> pragma, and instead use L<Moose::Util::MetaRole> to apply
+roles to a class's metaclasses. This topic is covered at length in
+various L<Moose::Cookbook> recipes.
 
 =head1 PROTOCOLS
 
-The protocol is divided into 4 main sub-protocols:
+The meta-object protocol is divided into 4 main sub-protocols:
 
-=over 4
-
-=item The Class protocol
+=head2 The Class protocol
 
 This provides a means of manipulating and introspecting a Perl 5
-class. It handles all of symbol table hacking for you, and provides
-a rich set of methods that go beyond simple package introspection.
+class. It handles symbol table hacking for you, and provides a rich
+set of methods that go beyond simple package introspection.
 
 See L<Class::MOP::Class> for more details.
 
-=item The Attribute protocol
+=head2 The Attribute protocol
 
-This provides a consistent represenation for an attribute of a
-Perl 5 class. Since there are so many ways to create and handle
-attributes in Perl 5 OO, this attempts to provide as much of a
-unified approach as possible, while giving the freedom and
-flexibility to subclass for specialization.
+This provides a consistent representation for an attribute of a Perl 5
+class. Since there are so many ways to create and handle attributes in
+Perl 5 OO, the Attribute protocol provide as much of a unified
+approach as possible. Of course, you are always free to extend this
+protocol by subclassing the appropriate classes.
 
 See L<Class::MOP::Attribute> for more details.
 
-=item The Method protocol
+=head2 The Method protocol
 
-This provides a means of manipulating and introspecting methods in
-the Perl 5 object system. As with attributes, there are many ways to
+This provides a means of manipulating and introspecting methods in the
+Perl 5 object system. As with attributes, there are many ways to
 approach this topic, so we try to keep it pretty basic, while still
 making it possible to extend the system in many ways.
 
 See L<Class::MOP::Method> for more details.
 
-=item The Instance protocol
+=head2 The Instance protocol
 
-This provides a layer of abstraction for creating object instances. 
-Since the other layers use this protocol, it is relatively easy to 
-change the type of your instances from the default HASH ref to other
-types of references. Several examples are provided in the F<examples/> 
-directory included in this distribution.
+This provides a layer of abstraction for creating object instances.
+Since the other layers use this protocol, it is relatively easy to
+change the type of your instances from the default hash reference to
+some other type of reference. Several examples are provided in the
+F<examples/> directory included in this distribution.
 
 See L<Class::MOP::Instance> for more details.
 
-=back
-
 =head1 FUNCTIONS
+
+Note that this module does not export any constants or functions.
 
 =head2 Constants
 
 =over 4
 
-=item I<IS_RUNNING_ON_5_10>
+=item I<Class::MOP::IS_RUNNING_ON_5_10>
 
-We set this constant depending on what version perl we are on, this 
-allows us to take advantage of new 5.10 features and stay backwards 
+We set this constant depending on what version perl we are on, this
+allows us to take advantage of new 5.10 features and stay backwards
 compat.
 
-=item I<HAVE_ISAREV>
+=item I<Class::MOP::HAVE_ISAREV>
 
-Whether or not C<mro> provides C<get_isarev>, a much faster way to get all the
-subclasses of a certain class.
+Whether or not the L<mro> pragme provides C<get_isarev>, a much faster
+way to get all the subclasses of a certain class.
 
 =back
 
@@ -838,50 +844,51 @@ Note that these are all called as B<functions, not methods>.
 
 =over 4
 
-=item B<load_class($class_name)>
+=item B<Class::MOP::load_class($class_name)>
 
-This will load a given C<$class_name> and if it does not have an
-already initialized metaclass, then it will intialize one for it.
-This function can be used in place of tricks like 
-C<eval "use $module"> or using C<require> unconditionally.
+This will load the specified C<$class_name>. This function can be used
+in place of tricks like C<eval "use $module"> or using C<require>
+unconditionally.
 
-=item B<is_class_loaded($class_name)>
+=item B<Class::MOP::is_class_loaded($class_name)>
 
 Returns a boolean indicating whether or not C<$class_name> has been
 loaded.
 
-NOTE: This does a basic check of the symbol table to try and
-determine as best it can if the C<$class_name> is loaded, it
-is probably correct about 99% of the time.
+This does a basic check of the symbol table to try and determine as
+best it can if the C<$class_name> is loaded, it is probably correct
+about 99% of the time, but it can be fooled into reporting false
+positives.
 
-=item B<check_package_cache_flag($pkg)>
-
-B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
-
-This will return an integer that is managed by C<Class::MOP::Class>
-to determine if a module's symbol table has been altered. 
-
-In Perl 5.10 or greater, this flag is package specific. However in 
-versions prior to 5.10, this will use the C<PL_sub_generation> variable
-which is not package specific. 
-
-=item B<get_code_info($code)>
+=item B<Class::MOP::check_package_cache_flag($pkg)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
-This function returns two values, the name of the package the C<$code> 
-is from and the name of the C<$code> itself. This is used by several 
-elements of the MOP to detemine where a given C<$code> reference is from.
+This will return an integer that is managed by L<Class::MOP::Class> to
+determine if a module's symbol table has been altered.
 
-=item B<load_first_existing_class(@class_names)>
+In Perl 5.10 or greater, this flag is package specific. However in
+versions prior to 5.10, this will use the C<PL_sub_generation>
+variable which is not package specific.
+
+=item B<Class::MOP::get_code_info($code)>
+
+B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
+
+This function returns two values, the name of the package the C<$code>
+is from and the name of the C<$code> itself. This is used by several
+elements of the MOP to detemine where a given C<$code> reference is
+from.
+
+=item B<Class::MOP::load_first_existing_class(@class_names)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
 Given a list of class names, this function will attempt to load each
 one in turn.
 
-If it finds a class it can load, it will return that class' name.
-If none of the classes can be loaded, it will throw an exception.
+If it finds a class it can load, it will return that class' name.  If
+none of the classes can be loaded, it will throw an exception.
 
 =back
 
@@ -894,43 +901,43 @@ you are brave and willing to risk it: go for it!
 
 =over 4
 
-=item B<get_all_metaclasses>
+=item B<Class::MOP::get_all_metaclasses>
 
 This will return a hash of all the metaclass instances that have
-been cached by B<Class::MOP::Class>, keyed by the package name.
+been cached by L<Class::MOP::Class>, keyed by the package name.
 
-=item B<get_all_metaclass_instances>
+=item B<Class::MOP::get_all_metaclass_instances>
 
 This will return a list of all the metaclass instances that have
-been cached by B<Class::MOP::Class>.
+been cached by L<Class::MOP::Class>.
 
-=item B<get_all_metaclass_names>
+=item B<Class::MOP::get_all_metaclass_names>
 
 This will return a list of all the metaclass names that have
-been cached by B<Class::MOP::Class>.
+been cached by L<Class::MOP::Class>.
 
-=item B<get_metaclass_by_name($name)>
+=item B<Class::MOP::get_metaclass_by_name($name)>
 
-This will return a cached B<Class::MOP::Class> instance, or nothing
+This will return a cached L<Class::MOP::Class> instance, or nothing
 if no metaclass exists with that C<$name>.
 
-=item B<store_metaclass_by_name($name, $meta)>
+=item B<Class::MOP::store_metaclass_by_name($name, $meta)>
 
 This will store a metaclass in the cache at the supplied C<$key>.
 
-=item B<weaken_metaclass($name)>
+=item B<Class::MOP::weaken_metaclass($name)>
 
 In rare cases (e.g. anonymous metaclasses) it is desirable to
 store a weakened reference in the metaclass cache. This
 function will weaken the reference to the metaclass stored
 in C<$name>.
 
-=item B<does_metaclass_exist($name)>
+=item B<Class::MOP::does_metaclass_exist($name)>
 
-This will return true of there exists a metaclass stored in the 
+This will return true of there exists a metaclass stored in the
 C<$name> key, and return false otherwise.
 
-=item B<remove_metaclass_by_name($name)>
+=item B<Class::MOP::remove_metaclass_by_name($name)>
 
 This will remove the metaclass stored in the C<$name> key.
 
