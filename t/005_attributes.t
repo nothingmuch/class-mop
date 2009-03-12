@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 70;
+use Test::More tests => 73;
 use Test::Exception;
 
 use Class::MOP;
@@ -85,6 +85,23 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
 
     ::isa_ok($meta->get_method('get_baz'), 'Class::MOP::Method::Accessor');
     ::isa_ok($meta->get_method('set_baz'), 'Class::MOP::Method::Accessor');
+}
+
+{
+    package Foo2;
+    use metaclass;
+
+    my $meta = Foo2->meta;
+    $meta->add_attribute(
+        Class::MOP::Attribute->new( '$foo2' => ( reader => 'foo2' ) ) );
+
+    ::ok( $meta->has_method('foo2'), '... a reader has been created' );
+
+    my $attr = $meta->get_attribute('$foo2');
+    ::is( $attr->get_read_method, 'foo2',
+        '... got the right read method for Foo2' );
+    ::is( $attr->get_write_method, undef,
+        '... got undef for the writer with a read-only attribute in Foo2' );
 }
 
 {
