@@ -838,23 +838,23 @@ Note that these are all called as B<functions, not methods>.
 
 =over 4
 
-=item B<load_class ($class_name)>
+=item B<load_class($class_name)>
 
 This will load a given C<$class_name> and if it does not have an
 already initialized metaclass, then it will intialize one for it.
 This function can be used in place of tricks like 
-C<eval "use $module"> or using C<require>.
+C<eval "use $module"> or using C<require> unconditionally.
 
-=item B<is_class_loaded ($class_name)>
+=item B<is_class_loaded($class_name)>
 
-This will return a boolean depending on if the C<$class_name> has
-been loaded.
+Returns a boolean indicating whether or not C<$class_name> has been
+loaded.
 
 NOTE: This does a basic check of the symbol table to try and
 determine as best it can if the C<$class_name> is loaded, it
 is probably correct about 99% of the time.
 
-=item B<check_package_cache_flag ($pkg)>
+=item B<check_package_cache_flag($pkg)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
@@ -865,7 +865,7 @@ In Perl 5.10 or greater, this flag is package specific. However in
 versions prior to 5.10, this will use the C<PL_sub_generation> variable
 which is not package specific. 
 
-=item B<get_code_info ($code)>
+=item B<get_code_info($code)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
@@ -873,24 +873,7 @@ This function returns two values, the name of the package the C<$code>
 is from and the name of the C<$code> itself. This is used by several 
 elements of the MOP to detemine where a given C<$code> reference is from.
 
-=item B<subname ($name, $code)>
-
-B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
-
-If possible, we will load the L<Sub::Name> module and this will function 
-as C<Sub::Name::subname> does, otherwise it will just return the C<$code>
-argument.
-
-=item B<in_global_destruction>
-
-B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
-
-If L<Devel::GlobalDestruction> is available, this returns true under global
-destruction.
-
-Otherwise it's a constant returning false.
-
-=item B<load_first_existing_class ($class_name, [$class_name, ...])>
+=item B<load_first_existing_class(@class_names)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
@@ -926,28 +909,28 @@ been cached by B<Class::MOP::Class>.
 This will return a list of all the metaclass names that have
 been cached by B<Class::MOP::Class>.
 
-=item B<get_metaclass_by_name ($name)>
+=item B<get_metaclass_by_name($name)>
 
 This will return a cached B<Class::MOP::Class> instance, or nothing
 if no metaclass exists with that C<$name>.
 
-=item B<store_metaclass_by_name ($name, $meta)>
+=item B<store_metaclass_by_name($name, $meta)>
 
 This will store a metaclass in the cache at the supplied C<$key>.
 
-=item B<weaken_metaclass ($name)>
+=item B<weaken_metaclass($name)>
 
 In rare cases (e.g. anonymous metaclasses) it is desirable to
 store a weakened reference in the metaclass cache. This
 function will weaken the reference to the metaclass stored
 in C<$name>.
 
-=item B<does_metaclass_exist ($name)>
+=item B<does_metaclass_exist($name)>
 
 This will return true of there exists a metaclass stored in the 
 C<$name> key, and return false otherwise.
 
-=item B<remove_metaclass_by_name ($name)>
+=item B<remove_metaclass_by_name($name)>
 
 This will remove the metaclass stored in the C<$name> key.
 
@@ -964,13 +947,13 @@ email me and let me know, I would love to hear about them.
 
 =over 4
 
-=item "The Art of the Meta Object Protocol"
+=item I<The Art of the Meta Object Protocol>
 
-=item "Advances in Object-Oriented Metalevel Architecture and Reflection"
+=item I<Advances in Object-Oriented Metalevel Architecture and Reflection>
 
-=item "Putting MetaClasses to Work"
+=item I<Putting MetaClasses to Work>
 
-=item "Smalltalk: The Language"
+=item I<Smalltalk: The Language>
 
 =back
 
@@ -978,7 +961,7 @@ email me and let me know, I would love to hear about them.
 
 =over 4
 
-=item Uniform and safe metaclass composition
+=item "Uniform and safe metaclass composition"
 
 An excellent paper by the people who brought us the original Traits paper.
 This paper is on how Traits can be used to do safe metaclass composition,
@@ -987,7 +970,7 @@ metaclass compatibility.
 
 L<http://www.iam.unibe.ch/~scg/Archive/Papers/Duca05ySafeMetaclassTrait.pdf>
 
-=item Safe Metaclass Programming
+=item "Safe Metaclass Programming"
 
 This paper seems to precede the above paper, and propose a mix-in based
 approach as opposed to the Traits based approach. Both papers have similar
