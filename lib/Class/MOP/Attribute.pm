@@ -646,6 +646,19 @@ a false value (C<0> or C<undef>).
 This method will uninitialize the attribute. After an attribute is
 cleared, its C<predicate> will return false.
 
+=item I<definition_context>
+
+Mostly, this exists as a hook for the benefit of Moose.
+
+This option should be a hash reference containing several keys which
+will be used when inlining the attribute's accessors. The keys should
+include C<line>, the line number where the attribute was created, and
+either C<file> or C<description>.
+
+This information will ultimately be used when eval'ing inlined
+accessor code so that error messages report a useful line and file
+name.
+
 =back
 
 =item B<< $attr->clone(%options) >>
