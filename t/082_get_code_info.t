@@ -5,7 +5,7 @@ use Test::More tests => 6;
 use Sub::Name 'subname';
 
 BEGIN {
-    $^P &= ~0x200; # Don't munger anonymous sub names
+    $^P &= ~0x200; # Don't munge anonymous sub names
 }
 
 BEGIN { use_ok("Class::MOP") }
