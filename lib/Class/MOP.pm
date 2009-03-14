@@ -640,7 +640,7 @@ __END__
 
 Class::MOP - A Meta Object Protocol for Perl 5
 
-=head1 DESCRIPTON
+=head1 DESCRIPTION
 
 This module is a fully functioning meta object protocol for the
 Perl 5 object system. It makes no attempt to change the behavior or
@@ -673,9 +673,9 @@ part of how the object system works. The explicit MOP typically
 handles the introspection/reflection features of the object system.
 
 All object systems have implicit MOPs. Without one, they would not
-work. Explict MOPs are much less common, and depending on the language
-can vary from restrictive (Reflection in Java or C#) to wide open
-(CLOS is a perfect example).
+work. Explicit MOPs are much less common, and depending on the
+language can vary from restrictive (Reflection in Java or C#) to wide
+open (CLOS is a perfect example).
 
 =head2 Yet Another Class Builder! Why?
 
@@ -698,7 +698,7 @@ method dispatch.
 =head2 What changes do I have to make to use this module?
 
 This module was designed to be as unintrusive as possible. Many of its
-features are accessible without B<any> change to your existsing
+features are accessible without B<any> change to your existing
 code. It is meant to be a compliment to your existing code and not an
 intrusion on your code base. Unlike many other B<Class::> modules,
 this module B<does not> require you subclass it, or even that you
@@ -712,7 +712,7 @@ in. More information about this feature can be found below.
 
 =head2 About Performance
 
-It is a common misconception that explict MOPs are a performance hit.
+It is a common misconception that explicit MOPs are a performance hit.
 This is not a universal truth, it is a side-effect of some specific
 implementations. For instance, using Java reflection is slow because
 the JVM cannot take advantage of any compiler optimizations, and the
@@ -766,9 +766,9 @@ this document.
 =head2 Using custom metaclasses
 
 Always use the L<metaclass> pragma when using a custom metaclass, this
-will ensure the proper initialization order and not accidentely create
-an incorrect type of metaclass for you. This is a very rare problem,
-and one which can only occur if you are doing deep metaclass
+will ensure the proper initialization order and not accidentally
+create an incorrect type of metaclass for you. This is a very rare
+problem, and one which can only occur if you are doing deep metaclass
 programming. So in other words, don't worry about it.
 
 Note that if you're using L<Moose> we encourage you to I<not> use
@@ -829,11 +829,11 @@ Note that this module does not export any constants or functions.
 
 We set this constant depending on what version perl we are on, this
 allows us to take advantage of new 5.10 features and stay backwards
-compat.
+compatible.
 
 =item I<Class::MOP::HAVE_ISAREV>
 
-Whether or not the L<mro> pragme provides C<get_isarev>, a much faster
+Whether or not the L<mro> pragma provides C<get_isarev>, a much faster
 way to get all the subclasses of a certain class.
 
 =back
@@ -864,7 +864,7 @@ positives.
 
 This function returns two values, the name of the package the C<$code>
 is from and the name of the C<$code> itself. This is used by several
-elements of the MOP to detemine where a given C<$code> reference is
+elements of the MOP to determine where a given C<$code> reference is
 from.
 
 =item B<Class::MOP::check_package_cache_flag($pkg)>
