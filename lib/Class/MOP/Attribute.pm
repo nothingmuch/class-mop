@@ -695,11 +695,11 @@ the constructor.
 
 The C<accessor>, C<reader>, C<writer>, C<predicate>, and C<clearer>
 methods all return exactly what was passed to the constructor, so it
-can be either a string containing a method name, or a hash refrence.
+can be either a string containing a method name, or a hash reference.
 
 =item B<< $attr->initializer >>
 
-Returns the intializer as passed to the constructor, so this may be
+Returns the initializer as passed to the constructor, so this may be
 either a method name or a subroutine reference.
 
 =item B<< $attr->init_arg >>
@@ -785,7 +785,7 @@ C<undef> is the default C<default> anyway.
 
 =head2 Value management
 
-These methods are basically "backdoors" to the instance, and can be
+These methods are basically "back doors" to the instance, and can be
 used to bypass the regular accessors, but still stay within the MOP.
 
 These methods are not for general use, and should only be used if you

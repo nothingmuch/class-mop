@@ -93,6 +93,7 @@ definedness
 destructor
 destructors
 DWIM
+eval'ing
 hashrefs
 immutabilize
 immutabilized
@@ -103,6 +104,7 @@ irc
 IRC
 isa
 login
+metadata
 munge
 namespace
 namespaced
