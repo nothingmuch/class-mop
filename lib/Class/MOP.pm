@@ -860,6 +860,13 @@ best it can if the C<$class_name> is loaded, it is probably correct
 about 99% of the time, but it can be fooled into reporting false
 positives.
 
+=item B<Class::MOP::get_code_info($code)>
+
+This function returns two values, the name of the package the C<$code>
+is from and the name of the C<$code> itself. This is used by several
+elements of the MOP to detemine where a given C<$code> reference is
+from.
+
 =item B<Class::MOP::check_package_cache_flag($pkg)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
@@ -870,15 +877,6 @@ determine if a module's symbol table has been altered.
 In Perl 5.10 or greater, this flag is package specific. However in
 versions prior to 5.10, this will use the C<PL_sub_generation>
 variable which is not package specific.
-
-=item B<Class::MOP::get_code_info($code)>
-
-B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
-
-This function returns two values, the name of the package the C<$code>
-is from and the name of the C<$code> itself. This is used by several
-elements of the MOP to detemine where a given C<$code> reference is
-from.
 
 =item B<Class::MOP::load_first_existing_class(@class_names)>
 
