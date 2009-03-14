@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 64;
+use Test::More tests => 65;
 use Test::Exception;
 
 use Class::MOP;
@@ -54,6 +54,7 @@ use Class::MOP;
         associate_method
 
         process_accessors
+        _process_accessors
         install_accessors
         remove_accessors
 

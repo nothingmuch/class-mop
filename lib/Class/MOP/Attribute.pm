@@ -329,6 +329,11 @@ sub clear_value {
 sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 
 sub process_accessors {
+    warn "The process_accessors method has been made private and this public alias will be removed in a future release.";
+    goto &_process_accessors;
+}
+
+sub _process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
 
     my $method_ctx;
@@ -384,23 +389,23 @@ sub install_accessors {
     my $class  = $self->associated_class;
 
     $class->add_method(
-        $self->process_accessors('accessor' => $self->accessor(), $inline)
+        $self->_process_accessors('accessor' => $self->accessor(), $inline)
     ) if $self->has_accessor();
 
     $class->add_method(
-        $self->process_accessors('reader' => $self->reader(), $inline)
+        $self->_process_accessors('reader' => $self->reader(), $inline)
     ) if $self->has_reader();
 
     $class->add_method(
-        $self->process_accessors('writer' => $self->writer(), $inline)
+        $self->_process_accessors('writer' => $self->writer(), $inline)
     ) if $self->has_writer();
 
     $class->add_method(
-        $self->process_accessors('predicate' => $self->predicate(), $inline)
+        $self->_process_accessors('predicate' => $self->predicate(), $inline)
     ) if $self->has_predicate();
 
     $class->add_method(
-        $self->process_accessors('clearer' => $self->clearer(), $inline)
+        $self->_process_accessors('clearer' => $self->clearer(), $inline)
     ) if $self->has_clearer();
 
     return;
@@ -892,22 +897,6 @@ attribute.
 This method generates and installs code the attributes various
 accessors. It is typically called from the L<Class::MOP::Class>
 C<add_attribute> method.
-
-This method will call C<< $attr->process_accessors >> for each of the
-possible method types (accessor, reader, writer & predicate).
-
-=item B<< $attr->process_accessors($type, $value) >>
-
-This method takes a C<$type> (accessor, reader, writer or predicate), and
-a C<$value> (the value passed into the constructor for each of the
-different types).
-
-It will then either generate the method itself (using the
-C<generate_*_method> methods listed below) or it will use the custom
-method passed through the constructor.
-
-This method is mostly intended for internal use from the C<<
-$attr->install_accessors >> method.
 
 =item B<< $attr->remove_accessors >>
 

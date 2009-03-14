@@ -31,7 +31,7 @@ AttributesWithHistory->meta->add_after_method_modifier('install_accessors' => su
     my ($self) = @_;
     # and now add the history accessor
     $self->associated_class->add_method(
-        $self->process_accessors('history_accessor' => $self->history_accessor())
+        $self->_process_accessors('history_accessor' => $self->history_accessor())
     ) if $self->has_history_accessor();
 });
 

@@ -8,6 +8,11 @@ Revision history for Perl extension Class-MOP.
         in (at least) 5.8.8. We now use $_[1] directly which seems
         to set the magic properly. (Sartak)
 
+    * Class::MOP::Attribute
+      - The process_accessors method is now private. A public alias
+        exists (and will stick around for a few releases), but it
+        warns that calling the public method is deprecated.
+
     * MOP.xs
       - Stop is_class_loaded from thinking a class is loaded if it
         only has an empty GV (Florian Ragwitz).

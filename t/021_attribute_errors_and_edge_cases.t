@@ -129,7 +129,7 @@ BEGIN {use Class::MOP;use Class::MOP::Attribute;
     my $attr = Class::MOP::Attribute->new('$test');
 
     dies_ok {
-        $attr->process_accessors('fail', 'my_failing_sub');
+        $attr->_process_accessors('fail', 'my_failing_sub');
     } '... cannot find "fail" type generator';
 }
 
