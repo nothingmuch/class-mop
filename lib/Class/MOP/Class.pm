@@ -1111,29 +1111,31 @@ Class::MOP::Class - Class Meta Object
   # use this for introspection ...
 
   # add a method to Foo ...
-  Foo->meta->add_method('bar' => sub { ... })
+  Foo->meta->add_method( 'bar' => sub {...} )
 
-  # get a list of all the classes searched
-  # the method dispatcher in the correct order
-  Foo->meta->class_precedence_list()
+      # get a list of all the classes searched
+      # the method dispatcher in the correct order
+      Foo->meta->class_precedence_list()
 
-  # remove a method from Foo
-  Foo->meta->remove_method('bar');
+      # remove a method from Foo
+      Foo->meta->remove_method('bar');
 
   # or use this to actually create classes ...
 
-  Class::MOP::Class->create('Bar' => (
-      version      => '0.01',
-      superclasses => [ 'Foo' ],
-      attributes => [
-          Class::MOP:::Attribute->new('$bar'),
-          Class::MOP:::Attribute->new('$baz'),
-      ],
-      methods => {
-          calculate_bar => sub { ... },
-          construct_baz => sub { ... }
-      }
-  ));
+  Class::MOP::Class->create(
+      'Bar' => (
+          version      => '0.01',
+          superclasses => ['Foo'],
+          attributes   => [
+              Class::MOP:: : Attribute->new('$bar'),
+              Class::MOP:: : Attribute->new('$baz'),
+          ],
+          methods => {
+              calculate_bar => sub {...},
+              construct_baz => sub {...}
+          }
+      )
+  );
 
 =head1 DESCRIPTION
 
