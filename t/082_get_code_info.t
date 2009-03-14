@@ -1,24 +1,23 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 5;
 use Sub::Name 'subname';
 
 BEGIN {
     $^P &= ~0x200; # Don't munge anonymous sub names
 }
 
-BEGIN { use_ok("Class::MOP") }
+use Class::MOP;
 
 
-sub code_name_is ($$$;$) {
-    my ( $code, $stash, $name, $desc ) = @_;
-    $desc ||= "sub name is ${stash}::$name";
+sub code_name_is {
+    my ( $code, $stash, $name ) = @_;
 
     is_deeply(
         [ Class::MOP::get_code_info($code) ],
         [ $stash, $name ],
-        $desc,
+        "sub name is ${stash}::$name"
     );
 }
 
