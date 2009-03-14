@@ -183,12 +183,6 @@ sub check_metaclass_compatibility {
     }
 }
 
-# backwards compat for stevan's inability to spell ;)
-sub check_metaclass_compatability {
-    my $self = shift;
-    $self->check_metaclass_compatibility(@_);
-}
-
 ## ANON classes
 
 {
