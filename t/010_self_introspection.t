@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 246;
+use Test::More tests => 244;
 use Test::Exception;
 
 use Class::MOP;
