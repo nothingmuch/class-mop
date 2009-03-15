@@ -1,7 +1,7 @@
 #include "mop.h"
 
 void
-mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark)
+mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark)
 {
     dSP;
     PUSHMARK(mark);

@@ -12,7 +12,7 @@
 
 #define MOP_CALL_BOOT(name)  mop_call_xs(aTHX_ name, cv, mark);
 
-void mop_call_xs (pTHX_ void (*subaddr) (pTHX_ CV *), CV *cv, SV **mark);
+void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
 
 typedef enum {
     KEY_name,
