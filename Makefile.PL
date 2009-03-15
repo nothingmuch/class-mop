@@ -10,7 +10,7 @@ perl_version '5.008001';
 all_from 'lib/Class/MOP.pm';
 license 'perl';
 
-my $ccflags = ' -I.';
+my $ccflags = ' -Iinclude';
 $ccflags .= ' -Wall' if -d '.svn' || -d '.git' || $ENV{MAINTAINER_MODE};
 
 requires 'Carp';
@@ -38,7 +38,7 @@ makemaker_args( CCFLAGS => $ccflags );
         push @clean, $o;
     }
 
-    for my $c (<*.c>) {
+    for my $c (<cmop/*.c>) {
         (my $o = $c) =~ s/\.c$/\$(OBJ_EXT)/i;
         push @OBJECT, $o;
         push @clean, $o;
@@ -52,7 +52,7 @@ makemaker_args( CCFLAGS => $ccflags );
 }
 
 postamble(<<'EOM');
-$(OBJECT) : mop.h
+$(OBJECT) : include/mop.h
 EOM
 
 WriteAll();
