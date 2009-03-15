@@ -253,7 +253,7 @@ XS(mop_xs_simple_reader)
     dXSARGS;
 #endif
     register HE *he;
-    mop_prehashed_key_t key = CvXSUBANY(cv).any_i32;
+    mop_prehashed_key_t key = (mop_prehashed_key_t)CvXSUBANY(cv).any_i32;
     SV *self;
 
     if (items != 1) {
