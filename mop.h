@@ -34,8 +34,8 @@ typedef enum {
 #define HASH_FOR(name) mop_prehashed_hash_for(KEY_ ##name)
 
 void mop_prehash_keys (void);
-inline SV *mop_prehashed_key_for (mop_prehashed_key_t key);
-inline U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
+SV *mop_prehashed_key_for (mop_prehashed_key_t key);
+U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
 
 #define INSTALL_SIMPLE_READER(klass, name)  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) \

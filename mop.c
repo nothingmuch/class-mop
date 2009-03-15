@@ -222,13 +222,13 @@ static struct {
     DECLARE_KEY(ISA)
 };
 
-inline SV *
+SV *
 mop_prehashed_key_for (mop_prehashed_key_t key)
 {
     return prehashed_keys[key].key;
 }
 
-inline U32
+U32
 mop_prehashed_hash_for (mop_prehashed_key_t key)
 {
     return prehashed_keys[key].hash;
