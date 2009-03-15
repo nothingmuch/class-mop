@@ -27,6 +27,7 @@ Revision history for Perl extension Class-MOP.
       - Clean up and simplify prehashing of hash keys (Florian Ragwitz).
       - Simplify creating simple xs reader methods (Florian Ragwitz).
       - Make everything compile with c++ compilers (Florian Ragwitz).
+      - Upgrade ppport.h from 3.14 to 3.16 (Florian Ragwitz).
 
     * Tests
       - Remove optional test plans for tests depending on Sub::Name as
