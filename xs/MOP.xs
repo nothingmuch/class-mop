@@ -12,6 +12,11 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
     return FALSE;
 }
 
+EXTERN_C XS(boot_Class__MOP__Package);
+EXTERN_C XS(boot_Class__MOP__Class);
+EXTERN_C XS(boot_Class__MOP__Attribute);
+EXTERN_C XS(boot_Class__MOP__Method);
+
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 PROTOTYPES: DISABLE
