@@ -223,160 +223,178 @@ Class::MOP::Instance - Instance Meta Object
 
 =head1 DESCRIPTION
 
-The meta instance is used by attributes for low level storage.
+The meta instance API controls the creation of object instances, and
+the storage of attribute values in those instances.
 
-Using this API generally violates attribute encapsulation and is not
-recommended, instead look at L<Class::MOP::Attribute/get_value>,
-L<Class::MOP::Attribute/set_value> for the recommended way to fiddle with
-attribute values in a generic way, independent of how/whether accessors have
-been defined. Accessors can be found using L<Class::MOP::Class/get_attribute>.
+Using this API directly in your own code violates encapsulation, and
+we recommend that you use the appropriate APIs in L<Class::MOP::Class>
+and L<Class::MOP::Attribute> instead. Those APIs in turn call the
+methods in this class as appropriate.
 
-This may seem like over-abstraction, but by abstracting
-this process into a sub-protocol we make it possible to
-easily switch the details of how an object's instance is
-stored with minimal impact. In most cases just subclassing
-this class will be all you need to do (see the examples;
-F<examples/ArrayBasedStorage.pod> and
-F<examples/InsideOutClass.pod> for details).
+This class also participates in generating inlined code by providing
+snippets of code to access an object instance.
 
 =head1 METHODS
 
+=head2 Object construction
+
 =over 4
 
-=item B<new %args>
+=item B<< Class::MOP::Instance->new(%options) >>
 
-Creates a new instance meta-object and gathers all the slots from
-the list of C<@attrs> given.
+This method creates a new meta-instance object.
 
-=item B<BUILDARGS>
+It accepts the following keys in C<%options>:
 
-Processes arguments for compatibility.
+=over 8
 
-=item B<meta>
+=item * associated_metaclass
 
-Returns the metaclass of L<Class::MOP::Instance>.
+The L<Class::MOP::Class> object for which instances will be created.
+
+=item * attributes
+
+An array reference of L<Class::MOP::Attribute> objects. These are the
+attributes which can be stored in each instance.
 
 =back
 
-=head2 Creation of Instances
+=back
+
+=head2 Creating and altering instances
 
 =over 4
 
-=item B<create_instance>
+=item B<< $metainstance->create_instance >>
 
-This creates the appropriate structure needed for the instance and blesses it.
+This method returns a reference blessed into the associated
+metaclass's class.
 
-=item B<bless_instance_structure ($instance_structure)>
+The default is to use a hash reference. Subclasses can override this.
 
-This does just exactly what it says it does.
+=item B<< $metainstance->clone_instance($instance) >>
 
-This method has been deprecated but remains for compatibility reasons. None of
-the subclasses of L<Class::MOP::Instance> ever bothered to actually make use of
-it, so it was deemed unnecessary fluff.
-
-=item B<clone_instance ($instance_structure)>
-
-Creates a shallow clone of $instance_structure.
+Given an instance, this method creates a new object by making
+I<shallow> clone of the original.
 
 =back
 
 =head2 Introspection
 
-NOTE: There might be more methods added to this part of the API,
-we will add then when we need them basically.
-
 =over 4
 
-=item B<associated_metaclass>
+=item B<< $metainstance->associated_metaclass >>
 
-This returns the metaclass associated with this instance.
+This returns the L<Class::MOP::Class> object associated with the
+meta-instance object.
 
-=item B<get_all_slots>
+=item B<< $metainstance->get_all_slots >>
 
-This will return the current list of slots based on what was
-given to this object in C<new>.
+This returns a list of slot names stored in object instances. In
+almost all cases, slot names correspond directly attribute names.
 
-=item B<is_valid_slot ($slot_name)>
+=item B<< $metainstance->is_valid_slot($slot_name) >>
 
 This will return true if C<$slot_name> is a valid slot name.
 
-=item B<is_dependent_on_superclasses>
+=item B<< $metainstance->get_all_attributes >>
 
-This method returns true when the meta instance must be recreated on any
-superclass changes.
-
-Defaults to false.
-
-=item B<get_all_attributes>
-
-This will return the current list of attributes (as
-Class::MOP::Attribute objects) based on what was given to this object
-in C<new>.
+This returns a list of attributes corresponding to the attributes
+passed to the constructor.
 
 =back
 
 =head2 Operations on Instance Structures
 
-An important distinction of this sub-protocol is that the
-instance meta-object is a different entity from the actual
-instance it creates. For this reason, any actions on slots
-require that the C<$instance_structure> is passed into them.
-
-The names of these methods pretty much explain exactly 
-what they do, if that is not enough then I suggest reading 
-the source, it is very straightfoward.
+It's important to understand that the meta-instance object is a
+different entity from the actual instances it creates. For this
+reason, any operations on the C<$instance_structure> always require
+that the object instance be passed to the method.
 
 =over 4
 
-=item B<get_slot_value ($instance_structure, $slot_name)>
+=item B<< $metainstance->get_slot_value($instance_structure, $slot_name) >>
 
-=item B<set_slot_value ($instance_structure, $slot_name, $value)>
+=item B<< $metainstance->set_slot_value($instance_structure, $slot_name, $value) >>
 
-=item B<initialize_slot ($instance_structure, $slot_name)>
+=item B<< $metainstance->initialize_slot($instance_structure, $slot_name) >>
 
-=item B<deinitialize_slot ($instance_structure, $slot_name)>
+=item B<< $metainstance->deinitialize_slot($instance_structure, $slot_name) >>
 
-=item B<initialize_all_slots ($instance_structure)>
+=item B<< $metainstance->initialize_all_slots($instance_structure) >>
 
-=item B<deinitialize_all_slots ($instance_structure)>
+=item B<< $metainstance->deinitialize_all_slots($instance_structure) >>
 
-=item B<is_slot_initialized ($instance_structure, $slot_name)>
+=item B<< $metainstance->is_slot_initialized($instance_structure, $slot_name) >>
 
-=item B<weaken_slot_value ($instance_structure, $slot_name)>
+=item B<< $metainstance->weaken_slot_value($instance_structure, $slot_name) >>
 
-=item B<strengthen_slot_value ($instance_structure, $slot_name)>
+=item B<< $metainstance->strengthen_slot_value($instance_structure, $slot_name) >>
 
-=item B<rebless_instance_structure ($instance_structure, $new_metaclass)>
+=item B<< $metainstance->rebless_instance_structure($instance_structure, $new_metaclass) >>
+
+The exact details of what each method does should be fairly obvious
+from the method name.
 
 =back
 
-=head2 Inlineable Instance Operations
+=head2 Inlinable Instance Operations
 
 =over 4
 
-=item B<is_inlinable>
+=item B<< $metainstance->is_inlinable >>
 
-Each meta-instance should override this method to tell Class::MOP if it's
-possible to inline the slot access. This is currently only used by 
-L<Class::MOP::Immutable> when performing optimizations.
+This is a boolean that indicates whether or not slot access operations
+can be inlined. By default it is true, but subclasses can override
+this.
 
-=item B<inline_create_instance>
+=item B<< $metainstance->inline_create_instance($class_variable) >>
 
-=item B<inline_slot_access ($instance_structure, $slot_name)>
+This method expects a string that, I<when inlined>, will become a
+class name. This would literally be something like C<'$class'>, not an
+actual class name.
 
-=item B<inline_get_slot_value ($instance_structure, $slot_name)>
+It returns a snippet of code that creates a new object for the
+class. This is something like C< bless {}, $class_name >.
 
-=item B<inline_set_slot_value ($instance_structure, $slot_name, $value)>
+=item B<< $metainstance->inline_slot_access($instance_variable, $slot_name) >>
 
-=item B<inline_initialize_slot ($instance_structure, $slot_name)>
+=item B<< $metainstance->inline_get_slot_value($instance_variable, $slot_name) >>
 
-=item B<inline_deinitialize_slot ($instance_structure, $slot_name)>
+=item B<< $metainstance->inline_set_slot_value($instance_variable, $slot_name, $value) >>
 
-=item B<inline_is_slot_initialized ($instance_structure, $slot_name)>
+=item B<< $metainstance->inline_initialize_slot($instance_variable, $slot_name) >>
 
-=item B<inline_weaken_slot_value ($instance_structure, $slot_name)>
+=item B<< $metainstance->inline_deinitialize_slot($instance_variable, $slot_name) >>
 
-=item B<inline_strengthen_slot_value ($instance_structure, $slot_name)>
+=item B<< $metainstance->inline_is_slot_initialized($instance_variable, $slot_name) >>
+
+=item B<< $metainstance->inline_weaken_slot_value($instance_variable, $slot_name) >>
+
+=item B<< $metainstance->inline_strengthen_slot_value($instance_variable, $slot_name) >>
+
+These methods all expect two arguments. The first is the name of a
+variable, than when inlined, will represent the object
+instance. Typically this will be a literal string like C<'$_[0]'>.
+
+The second argument is a slot name.
+
+The method returns a snippet of code that, when inlined, performs some
+operation on the instance.
+
+=back
+
+=head2 Introspection
+
+=over 4
+
+=item B<< Class::MOP::Instance->meta >>
+
+This will return a L<Class::MOP::Class> instance for this class.
+
+It should also be noted that L<Class::MOP> will actually bootstrap
+this module by installing a number of attribute meta-objects into its
+metaclass.
 
 =back
 

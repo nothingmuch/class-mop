@@ -100,6 +100,7 @@ Immutabilization
 immutabilization
 immutabilize
 immutabilized
+Inlinable
 inline
 invocant
 invocant's
