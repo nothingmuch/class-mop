@@ -15,6 +15,29 @@ plan tests => scalar @modules;
 
 my %trustme = (
     'Class::MOP::Attribute' => ['process_accessors'],
+    'Class::MOP::Class'     => [
+        # deprecated
+        'alias_method',
+        'compute_all_applicable_methods',
+
+        # unfinished feature
+        'add_dependent_meta_instance',
+        'add_meta_instance_dependencies',
+        'invalidate_meta_instance',
+        'invalidate_meta_instances',
+        'remove_dependent_meta_instance',
+        'remove_meta_instance_depdendencies',
+        'update_meta_instance_dependencies',
+
+        # effectively internal
+        'check_metaclass_compatibility',
+        'clone_instance',
+        'construct_class_instance',
+        'construct_instance',
+        'create_meta_instance',
+        'reset_package_cache_flag',
+        'update_package_cache_flag',
+    ],
 );
 
 for my $module ( sort @modules ) {
