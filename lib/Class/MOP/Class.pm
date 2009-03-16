@@ -368,10 +368,16 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $self = shift;
-    $self->{'_meta_instance'} ||= $self->create_meta_instance();
+    $self->{'_meta_instance'} ||= $self->_create_meta_instance();
 }
 
 sub create_meta_instance {
+    warn 'The create_meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_create_meta_instance;
+}
+
+sub _create_meta_instance {
     my $self = shift;
     
     my $instance = $self->instance_metaclass->new(
