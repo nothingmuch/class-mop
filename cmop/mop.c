@@ -75,6 +75,39 @@ mop_call0 (pTHX_ SV *const self, SV *const method)
     return ret;
 }
 
+bool
+mop_call_predicate (SV *self, const char *method)
+{
+    dSP;
+    I32 count;
+    SV *sv;
+    bool ret;
+
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK (SP);
+    XPUSHs (self);
+    PUTBACK;
+
+    count = call_method (method, G_SCALAR);
+
+    if (count != 1) {
+        croak ("predicate method %s didn't return exactly one value", method);
+    }
+
+    SPAGAIN;
+
+    sv = POPs;
+    ret = SvTRUE (sv);
+
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+
+    return ret;
+}
+
 int
 mop_get_code_info (SV *coderef, char **pkg, char **name)
 {
