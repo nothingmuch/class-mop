@@ -1665,6 +1665,20 @@ The return value of the modifier is what will be seen by the caller.
 
 =back
 
+=head2 Introspection
+
+=over 4
+
+=item B<< Class::MOP::Class->meta >>
+
+This will return a L<Class::MOP::Class> instance for this class.
+
+It should also be noted that L<Class::MOP> will actually bootstrap
+this module by installing a number of attribute meta-objects into its
+metaclass.
+
+=back
+
 =head1 AUTHORS
 
 Stevan Little E<lt>stevan@iinteractive.comE<gt>
