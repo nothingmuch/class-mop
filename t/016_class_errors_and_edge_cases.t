@@ -22,16 +22,16 @@ use Class::MOP;
 
 {
     dies_ok {
-        Class::MOP::Class->construct_class_instance();
-    } '... construct_class_instance requires an :package parameter';
+        Class::MOP::Class->_construct_class_instance();
+    } '... _construct_class_instance requires an :package parameter';
     
     dies_ok {
-        Class::MOP::Class->construct_class_instance(':package' => undef);
-    } '... construct_class_instance requires a defined :package parameter';     
+        Class::MOP::Class->_construct_class_instance(':package' => undef);
+    } '... _construct_class_instance requires a defined :package parameter';     
     
     dies_ok {
-        Class::MOP::Class->construct_class_instance(':package' => '');
-    } '... construct_class_instance requires a valid :package parameter'; 
+        Class::MOP::Class->_construct_class_instance(':package' => '');
+    } '... _construct_class_instance requires a valid :package parameter'; 
 }
 
 

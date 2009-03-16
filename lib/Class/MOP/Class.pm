@@ -35,7 +35,13 @@ sub initialize {
         || confess "You must pass a package name and it cannot be blessed";
 
     return Class::MOP::get_metaclass_by_name($package_name)
-        || $class->construct_class_instance(package => $package_name, @_);
+        || $class->_construct_class_instance(package => $package_name, @_);
+}
+
+sub construct_class_instance {
+    warn 'The construct_class_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_construct_class_instance;
 }
 
 # NOTE: (meta-circularity)
@@ -44,7 +50,7 @@ sub initialize {
 # meta-object instances for any Class::MOP::*
 # class. All other classes will use the more
 # normal &construct_instance.
-sub construct_class_instance {
+sub _construct_class_instance {
     my $class        = shift;
     my $options      = @_ == 1 ? $_[0] : {@_};
     my $package_name = $options->{package};
@@ -324,7 +330,7 @@ sub new_object {
     # Class::MOP::Class singletons here, so we
     # delegate this to &construct_class_instance
     # which will deal with the singletons
-    return $class->construct_class_instance(@_)
+    return $class->_construct_class_instance(@_)
         if $class->name->isa('Class::MOP::Class');
     return $class->construct_instance(@_);
 }
