@@ -1135,7 +1135,7 @@ Class::MOP::Class - Class Meta Object
 
 This is the largest and most complex part of the Class::MOP
 meta-object protocol. It controls the introspection and manipulation
-of Perl 5 classes, and it can create them as wlel. The best way to
+of Perl 5 classes, and it can create them as well. The best way to
 understand what this module can do, is to read the documentation for
 each of its methods.
 
@@ -1245,7 +1245,7 @@ instances.
 This method clones an existing object instance. Any parameters you
 provide are will override existing attribute values in the object.
 
-This is a convience method for cloning an object instance, then
+This is a convenience method for cloning an object instance, then
 blessing it into the appropriate package.
 
 You could implement a clone method in your class, using this method:
@@ -1528,7 +1528,7 @@ Making a class immutable "freezes" the class definition. You can no
 longer call methods which alter the class, such as adding or removing
 methods or attributes.
 
-Making a class immutable lets us optimize the class by inlning some
+Making a class immutable lets us optimize the class by inlining some
 methods, and also allows us to optimize some methods on the metaclass
 object itself.
 
@@ -1572,8 +1572,8 @@ parent classes.
 
 Method modifiers work by wrapping the original method and then
 replacing it in the class's symbol table. The wrappers will handle
-calling all the modifiers in the appropariate orders and preserving
-the calling context for the original method.
+calling all the modifiers in the appropriate order and preserving the
+calling context for the original method.
 
 The return values of C<before> and C<after> modifiers are
 ignored. This is because their purpose is B<not> to filter the input

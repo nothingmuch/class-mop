@@ -79,6 +79,7 @@ JVM
 MetaModel
 metamodel
 metaclass
+metaclass's
 BUILDARGS
 MOPs
 Metalevel
@@ -95,6 +96,8 @@ destructors
 DWIM
 eval'ing
 hashrefs
+Immutabilization
+immutabilization
 immutabilize
 immutabilized
 inline
@@ -121,6 +124,7 @@ parameterizes
 pluggable
 prechecking
 prepends
+rebless
 runtime
 sigil
 stacktrace
