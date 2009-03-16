@@ -3,6 +3,8 @@
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#define NO_XSLOCKS
 #include "XSUB.h"
 
 #define NEED_newRV_noinc
