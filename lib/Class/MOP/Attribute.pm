@@ -913,7 +913,7 @@ C<associated_methods>.
 
 =over 4
 
-=item B<< $attr->meta >>
+=item B<< Class::MOP::Attribute->meta >>
 
 This will return a L<Class::MOP::Class> instance for this class.
 
