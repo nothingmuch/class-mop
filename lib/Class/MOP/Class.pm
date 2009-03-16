@@ -1419,6 +1419,27 @@ This method returns the first method in any superclass matching the
 given name. It is effectively the method that C<SUPER::$method_name>
 would dispatch to.
 
+=item B<< $metaclass->add_method($method_name, $method) >>
+
+This method takes a method name and a subroutine reference, and adds
+the method to the class.
+
+The subroutine reference can be a L<Class::MOP::Method>, and you are
+strongly encouraged to pass a meta method object instead of a code
+reference. If you do so, that object gets stored as part of the
+class's method map directly. If not, the meta information will have to
+be recreated later, and may be incorrect.
+
+If you provide a method object, this method will clone that object if
+the object's package name does not match the class name. This lets us
+track the original source of any methods added from other classes
+(notably Moose roles).
+
+=item B<< $metaclass->remove_method($method_name) >>
+
+Remove the named method from the class. This method returns the
+L<Class::MOP::Method> object for the method.
+
 =back
 
 =head2 Attribute introspection and creation

@@ -16,16 +16,34 @@ plan tests => scalar @modules;
 my %trustme = (
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
-        qw( reset_package_cache_flag update_package_cache_flag
-            add_meta_instance_dependencies remove_meta_instance_dependencies
-            update_meta_instance_dependencies add_dependent_meta_instance
-            remove_dependent_meta_instance invalidate_meta_instances
-            invalidate_meta_instance
-            construct_instance
-            clone_instance
-            compute_all_applicable_methods
-            alias_method
-            )
+        # deprecated
+        'alias_method',
+        'compute_all_applicable_methods',
+
+        # unfinished feature
+        'add_dependent_meta_instance',
+        'add_meta_instance_dependencies',
+        'invalidate_meta_instance',
+        'invalidate_meta_instances',
+        'remove_dependent_meta_instance',
+        'remove_meta_instance_dependencies',
+        'update_meta_instance_dependencies',
+
+        # effectively internal
+        'check_metaclass_compatibility',
+        'clone_instance',
+        'construct_class_instance',
+        'construct_instance',
+        'create_immutable_transformer',
+        'create_meta_instance',
+        'get_immutable_options',
+        'reset_package_cache_flag',
+        'update_package_cache_flag',
+        'wrap_method_body',
+
+        # doc'd under get_all_attributes
+        'compute_all_applicable_attributes',
+
     ],
 );
 
