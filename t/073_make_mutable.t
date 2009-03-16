@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 114;
+use Test::More tests => 101;
 use Test::Exception;
 
 use Scalar::Util;
@@ -69,13 +69,6 @@ use Class::MOP;
     ok( $meta->add_method('xyz', sub{'xxx'}), '... added method');
     is( Baz->xyz, 'xxx',                      '... method xyz works');
 
-    ok(! $meta->has_method('zxy')             ,'...  we dont have the aliased method yet');    
-    ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
-    ok( $meta->has_method('zxy')             ,'...  the aliased method does register');    
-    is( Baz->zxy, 'xxx',                      '... method zxy works');
-    ok( $meta->remove_method('xyz'),          '... removed method');
-    ok( $meta->remove_method('zxy'),          '... removed aliased method');
-
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok(Baz->can('fickle'),                '... Baz can fickle');
     ok($meta->remove_attribute('fickle'), '... removed attribute');
@@ -108,8 +101,6 @@ use Class::MOP;
     lives_ok { $meta->make_immutable() } '... changed Baz to be immutable';
 
     dies_ok{ $meta->add_method('xyz', sub{'xxx'})  } '... exception thrown as expected';
-    dies_ok{ $meta->alias_method('zxy',sub{'xxx'}) } '... exception thrown as expected';
-    dies_ok{ $meta->remove_method('zxy')           } '... exception thrown as expected';
 
     dies_ok {
       $meta->add_attribute('fickle', accessor => 'fickle')
@@ -133,8 +124,8 @@ use Class::MOP;
     ok(Baz->meta->is_immutable,  'Superclass is immutable');
     my $meta = Baz->meta->create_anon_class(superclasses => ['Baz']);
     my @orig_keys  = sort grep { !/^_/ } keys %$meta;
-    my @orig_meths = sort { $a->{name} cmp $b->{name} }
-      $meta->compute_all_applicable_methods;
+    my @orig_meths = sort { $a->name cmp $b->name }
+      $meta->get_all_methods;
     ok($meta->is_anon_class,                  'We have an anon metaclass');
     ok($meta->is_mutable,  '... our anon class is mutable');
     ok(!$meta->is_immutable,  '... our anon class is not immutable');
@@ -157,8 +148,8 @@ use Class::MOP;
     my $instance = $meta->new_object;
 
     my @new_keys  = sort grep { !/^_/ } keys %$meta;
-    my @new_meths = sort { $a->{name} cmp $b->{name} }
-      $meta->compute_all_applicable_methods;
+    my @new_meths = sort { $a->name cmp $b->name }
+      $meta->get_all_methods;
     is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
     is_deeply(\@orig_meths, \@new_meths, '... no straneous methods');
 
@@ -166,10 +157,7 @@ use Class::MOP;
 
     ok( $meta->add_method('xyz', sub{'xxx'}), '... added method');
     is( $instance->xyz , 'xxx',               '... method xyz works');
-    ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
-    is( $instance->zxy, 'xxx',                '... method zxy works');
     ok( $meta->remove_method('xyz'),          '... removed method');
-    ok( $meta->remove_method('zxy'),          '... removed aliased method');
 
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok($instance->can('fickle'),          '... instance can fickle');
@@ -207,8 +195,6 @@ use Class::MOP;
     lives_ok {$meta->make_immutable  } '... changed class to be immutable';
 
     dies_ok{ $meta->add_method('xyz', sub{'xxx'})  } '... exception thrown as expected';
-    dies_ok{ $meta->alias_method('zxy',sub{'xxx'}) } '... exception thrown as expected';
-    dies_ok{ $meta->remove_method('zxy')           } '... exception thrown as expected';
 
     dies_ok {
       $meta->add_attribute('fickle', accessor => 'fickle')

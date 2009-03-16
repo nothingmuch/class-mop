@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 47;
+use Test::More tests => 43;
 use Test::Exception;
 
 use Class::MOP;
@@ -76,24 +76,6 @@ use Class::MOP;
     dies_ok {
         Class::MOP::Class->add_method('foo' => []);
     } '... add_method dies as expected';     
-}
-
-{
-    dies_ok {
-        Class::MOP::Class->alias_method();
-    } '... alias_method dies as expected';
-    
-    dies_ok {
-        Class::MOP::Class->alias_method('');
-    } '... alias_method dies as expected';   
-
-    dies_ok {
-        Class::MOP::Class->alias_method('foo' => 'foo');
-    } '... alias_method dies as expected';
-    
-    dies_ok {
-        Class::MOP::Class->alias_method('foo' => []);
-    } '... alias_method dies as expected';     
 }
 
 {

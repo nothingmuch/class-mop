@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 67;
+use Test::More tests => 65;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -137,17 +137,6 @@ for my $method_name (qw/
     }
 }
 
-{
-    package Foo::Aliasing;
-    use metaclass;
-    sub alias_me { '...' }
-}
-
-$Foo->alias_method('alias_me' => Foo::Aliasing->meta->get_method('alias_me'));
-
-ok($Foo->has_method('alias_me'), '... Foo->has_method(alias_me) (aliased from Foo::Aliasing)');
-ok(defined &Foo::alias_me, '... Foo does have a symbol table slow for alias_me though');
-
 ok(!$Foo->has_method('blessed'), '... !Foo->has_method(blessed) (imported into Foo)');
 ok(!$Foo->has_method('boom'), '... !Foo->has_method(boom) (defined in main:: using symbol tables and Sub::Name w/out package name)');
 
@@ -156,7 +145,7 @@ is($Foo->get_method('not_a_real_method'), undef, '... Foo->get_method(not_a_real
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah cake evaled_foo floob foo pie) ],
+    [ qw(FOO_CONSTANT baaz bang bar baz blah cake evaled_foo floob foo pie) ],
     '... got the right method list for Foo');
 
 is_deeply(
@@ -164,7 +153,6 @@ is_deeply(
     [
         map { $Foo->get_method($_) } qw(
             FOO_CONSTANT
-            alias_me
             baaz            
             bang 
             bar 
@@ -186,7 +174,7 @@ dies_ok { Foo->foo } '... cannot call Foo->foo because it is not there';
 
 is_deeply(
     [ sort $Foo->get_method_list ],
-    [ qw(FOO_CONSTANT alias_me baaz bang bar baz blah cake evaled_foo floob pie) ],
+    [ qw(FOO_CONSTANT baaz bang bar baz blah cake evaled_foo floob pie) ],
     '... got the right method list for Foo');
 
 
@@ -224,7 +212,6 @@ is_deeply(
     [ sort { $a->name cmp $b->name } $Bar->get_all_methods() ],
     [
         $Foo->get_method('FOO_CONSTANT'),
-        $Foo->get_method('alias_me'),
         $Foo->get_method('baaz'),
         $Foo->get_method('bang'),
         $Bar->get_method('bar'),

@@ -705,9 +705,9 @@ sub add_method {
 }
 
 sub alias_method {
-    my $self = shift;
+    warn "The alias_method method is deprecated. Use add_method instead.\n";
 
-    $self->add_method(@_);
+    goto &add_method;
 }
 
 sub has_method {
@@ -768,8 +768,10 @@ sub get_all_methods {
     return values %methods;
 }
 
-# compatibility
 sub compute_all_applicable_methods {
+    warn 'The compute_all_applicable_methods method is deprecated.'
+        . " Use get_all_methods instead.\n";
+
     return map {
         {
             name  => $_->name,

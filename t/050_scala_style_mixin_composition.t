@@ -101,7 +101,7 @@ sub ::with ($) {
 
     # add all the methods in ....    
     foreach my $method_name (keys %methods) {
-        $metaclass->alias_method($method_name => $methods{$method_name}) 
+        $metaclass->add_method($method_name => $methods{$method_name}) 
             unless $metaclass->has_method($method_name);
     }    
 }
