@@ -52,6 +52,12 @@ my %trustme = (
             make_metaclass_immutable
             make_metaclass_mutable )
     ],
+
+    'Class::MOP::Instance' => [
+        qw( BUILDARGS
+            bless_instance_structure
+            is_dependent_on_superclasses ),
+    ],
 );
 
 for my $module ( sort @modules ) {
