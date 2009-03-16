@@ -52,7 +52,7 @@ makemaker_args( CCFLAGS => $ccflags );
 }
 
 postamble(<<'EOM');
-$(OBJECT) : include/mop.h
+$(OBJECT) : include/*.h
 EOM
 
 WriteAll();
