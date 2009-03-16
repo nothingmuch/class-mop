@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 48;
+use Test::More tests => 47;
 use Test::Exception;
 
 use Class::MOP;
@@ -58,10 +58,6 @@ use Class::MOP;
     dies_ok {
         Class::MOP::Class->clone_object(1);
     } '... can only clone instances';
-    
-    dies_ok {
-        Class::MOP::Class->clone_instance(1);
-    } '... can only clone instances';    
 }
 
 {

@@ -402,10 +402,16 @@ sub clone_object {
     # Class::MOP::Class singletons here, they
     # should not be cloned.
     return $instance if $instance->isa('Class::MOP::Class');
-    $class->clone_instance($instance, @_);
+    $class->_clone_instance($instance, @_);
 }
 
 sub clone_instance {
+    warn 'The clone_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_clone_instance;
+}
+
+sub _clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
         || confess "You can only clone instances, ($instance) is not a blessed instance";
