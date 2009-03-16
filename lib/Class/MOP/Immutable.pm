@@ -406,63 +406,108 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
 
 =head1 DESCRIPTION
 
-This is basically a module for applying a transformation on a given
-metaclass. Current features include making methods read-only,
-making methods un-callable and memoizing methods (in a type specific
-way too).
+This class encapsulates the logic behind immutabilization.
 
-This module is not for the feint of heart, it does some whacky things
-to the metaclass in order to make it immutable. If you are just curious, 
-I suggest you turn back now, there is nothing to see here.
+This class provides generic immutabilization logic. Decisions about
+I<what> gets transformed are up to the caller.
+
+Immutabilization allows for a number of transformations. It can ask
+the calling metaclass to inline methods such as the constructor,
+destructor, or accessors. It can memoize metaclass accessors
+themselves. It can also turn read-write accessors in the metaclass
+into read-only methods, and make attempting to set these values an
+error. Finally, it can make some methods throw an exception when they
+are called. This is used to disable methods that can alter the class.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new ($metaclass, \%options)>
+=item B<< Class::MOP::Immutable->new($metaclass, %options) >>
 
-Given a C<$metaclass> and a set of C<%options> this module will
-prepare an immutable version of the C<$metaclass>, which can then
-be applied to the C<$metaclass> using the C<make_metaclass_immutable>
-method.
+This method takes a metaclass object (typically a L<Class::MOP::Class>
+object) and a hash of options.
 
-=item B<options>
+It returns a new transformer, but does not actually do any
+transforming yet.
 
-Returns the options HASH set in C<new>.
+This method accepts the following options:
 
-=item B<metaclass>
+=over 8
 
-Returns the metaclass set in C<new>.
+=item * inline_accessors
 
-=item B<immutable_metaclass>
+=item * inline_constructor
 
-Returns the immutable metaclass created within C<new>.
+=item * inline_destructor
+
+These are all booleans indicating whether the specified method(s)
+should be inlined.
+
+By default, accessors and the constructor are inlined, but not the
+destructor.
+
+=item * replace_constructor
+
+This is a boolean indicating whether an existing constructor should be
+replaced when inlining a constructor. This defaults to false.
+
+=item * constructor_name
+
+This is the constructor method name. This defaults to "new".
+
+=item * constructor_class
+
+The name of the method metaclass for constructors. It will be used to
+generate the inlined constructor. This defaults to
+"Class::MOP::Method::Constructor".
+
+=item * destructor_class
+
+The name of the method metaclass for destructors. It will be used to
+generate the inlined destructor. This defaults to
+"Class::MOP::Method::Denstructor".
+
+=item * memoize
+
+This option takes a hash reference. They keys are method names to be
+memoized, and the values are the type of data the method returns. This
+can be one of "SCALAR", "ARRAY", or "HASH".
+
+=item * read_only
+
+This option takes an array reference of read-write methods which will
+be made read-only. After they are transformed, attempting to set them
+will throw an error.
+
+=item * cannot_call
+
+This option takes an array reference of methods which cannot be called
+after immutabilization. Attempting to call these methods will throw an
+error.
+
+=item * wrapped
+
+This option takes a hash reference. The keys are method names and the
+body is a subroutine reference which will wrap the named method. This
+allows you to do some sort of custom transformation to a method.
 
 =back
 
-=over 4
+=item B<< $transformer->options >>
 
-=item B<create_immutable_metaclass>
+Returns a hash reference of the options passed to C<new>.
 
-This will create the immutable version of the C<$metaclass>, but will
-not actually change the original metaclass.
+=item B<< $transformer->metaclass >>
 
-=item B<create_methods_for_immutable_metaclass>
+Returns the metaclass object passed to C<new>.
 
-This will create all the methods for the immutable metaclass based
-on the C<%options> passed into C<new>.
+=item B<< $transformer->immutable_metaclass >>
 
-=item B<make_metaclass_immutable (%options)>
+Returns the immutable metaclass object that is created by the
+transformation process.
 
-This will actually change the C<$metaclass> into the immutable version.
-
-=item B<make_metaclass_mutable (%options)>
-
-This will change the C<$metaclass> into the mutable version by reversing
-the immutable process. C<%options> should be the same options that were
-given to make_metaclass_immutable.
-
-=item B<inlined_constructor>
+=item B<< $transformer->inlined_constructor >>
 
 If the constructor was inlined, this returns the constructor method
 object that was created to do this.
