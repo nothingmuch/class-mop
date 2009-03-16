@@ -45,6 +45,46 @@ my %trustme = (
         'compute_all_applicable_attributes',
 
     ],
+
+    'Class::MOP::Instance' => [
+        qw( BUILDARGS
+            bless_instance_structure
+            is_dependent_on_superclasses ),
+    ],
+
+    'Class::MOP::Method::Accessor' => [
+        qw( generate_accessor_method
+            generate_accessor_method_inline
+            generate_clearer_method
+            generate_clearer_method_inline
+            generate_predicate_method
+            generate_predicate_method_inline
+            generate_reader_method
+            generate_reader_method_inline
+            generate_writer_method
+            generate_writer_method_inline
+            initialize_body
+            )
+    ],
+
+    'Class::MOP::Method::Constructor' => [
+        qw( attributes
+            generate_constructor_method
+            generate_constructor_method_inline
+            initialize_body
+            meta_instance
+            )
+    ],
+
+    'Class::MOP::Method::Generated' => [
+        qw( new
+            definition_context
+            is_inline
+            initialize_body
+            )
+    ],
+
+    'Class::MOP::Module' => ['create'],
 );
 
 for my $module ( sort @modules ) {
