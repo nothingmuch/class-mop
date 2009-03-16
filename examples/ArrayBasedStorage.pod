@@ -23,7 +23,7 @@ sub new {
 
 sub create_instance {
     my $self = shift;
-    my $instance = $self->bless_instance_structure([]);
+    my $instance = bless [], $self->_class_name;
     $self->initialize_all_slots($instance);
     return $instance;
 }
