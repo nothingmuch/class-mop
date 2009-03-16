@@ -842,7 +842,7 @@ sub update_meta_instance_dependencies {
 sub add_meta_instance_dependencies {
     my $self = shift;
 
-    $self->remove_meta_instance_depdendencies;
+    $self->remove_meta_instance_dependencies;
 
     my @attrs = $self->compute_all_applicable_attributes();
 
@@ -856,7 +856,7 @@ sub add_meta_instance_dependencies {
     $self->{meta_instance_dependencies} = \@classes;
 }
 
-sub remove_meta_instance_depdendencies {
+sub remove_meta_instance_dependencies {
     my $self = shift;
 
     if ( my $classes = delete $self->{meta_instance_dependencies} ) {
@@ -1244,7 +1244,7 @@ Registers this class as dependent on its superclasses.
 
 Only superclasses from which this class inherits attributes will be added.
 
-=item B<remove_meta_instance_depdendencies>
+=item B<remove_meta_instance_dependencies>
 
 Unregisters this class from its superclasses.
 
