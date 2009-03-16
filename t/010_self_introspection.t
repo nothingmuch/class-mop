@@ -78,8 +78,8 @@ my @class_mop_class_methods = qw(
     has_attribute get_attribute add_attribute remove_attribute
     get_attribute_list get_attribute_map get_all_attributes compute_all_applicable_attributes find_attribute_by_name
 
-    is_mutable is_immutable make_mutable make_immutable create_immutable_transformer
-    get_immutable_options get_immutable_transformer
+    is_mutable is_immutable make_mutable make_immutable
+    immutable_transformer _set_immutable_transformer
 
     DESTROY
 );
@@ -157,7 +157,8 @@ my @class_mop_class_attributes = (
     'attribute_metaclass',
     'method_metaclass',
     'wrapped_method_metaclass',
-    'instance_metaclass'
+    'instance_metaclass',
+    'immutable_transformer',
 );
 
 # check class

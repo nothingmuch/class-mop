@@ -329,6 +329,17 @@ Class::MOP::Class->meta->add_attribute(
     ))
 );
 
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('immutable_transformer' => (
+        reader   => {
+            'immutable_transformer' => \&Class::MOP::Class::immutable_transformer
+        },
+        writer   => {
+            '_set_immutable_transformer' => \&Class::MOP::Class::_set_immutable_transformer
+        },
+    ))
+);
+
 # NOTE:
 # we don't actually need to tie the knot with
 # Class::MOP::Class here, it is actually handled

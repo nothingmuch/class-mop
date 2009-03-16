@@ -45,13 +45,6 @@ my %trustme = (
         'compute_all_applicable_attributes',
 
     ],
-
-    'Class::MOP::Immutable' => [
-        qw( create_immutable_metaclass
-            create_methods_for_immutable_metaclass
-            make_metaclass_immutable
-            make_metaclass_mutable )
-    ],
 );
 
 for my $module ( sort @modules ) {

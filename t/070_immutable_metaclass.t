@@ -1,13 +1,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 86;
+use Test::More tests => 80;
 use Test::Exception;
 
 use Class::MOP;
 
 {
-
     package Foo;
 
     use strict;
@@ -39,19 +38,19 @@ use Class::MOP;
 
 {
     my $meta = Foo->meta;
+    my $original_metaclass_name = ref $meta;
 
-    my $transformer;
-    lives_ok { $transformer = $meta->create_immutable_transformer }
-    "Created immutable transformer";
+    $meta->make_immutable;
+
+    my $transformer = $meta->immutable_transformer;
     isa_ok( $transformer, 'Class::MOP::Immutable',
         '... transformer isa Class::MOP::Immutable' );
-    my $methods = $transformer->create_methods_for_immutable_metaclass;
 
     my $immutable_metaclass = $transformer->immutable_metaclass;
     is( $transformer->metaclass, $meta,
         '... transformer has correct metaclass' );
-    ok( !$transformer->inlined_constructor,
-        '... transformer says it did not inline the constructor' );
+    ok( $transformer->inlined_constructor,
+        '... transformer says it did inline the constructor' );
     ok( $immutable_metaclass->is_anon_class,
         '... immutable_metaclass is an anonymous class' );
 
@@ -66,7 +65,7 @@ use Class::MOP;
 
     is_deeply(
         [ $immutable_metaclass->superclasses ],
-        [ Scalar::Util::blessed($meta) ],
+        [ $original_metaclass_name ],
         '... immutable_metaclass superclasses are correct'
     );
     ok(
@@ -80,24 +79,13 @@ use Class::MOP;
     my $meta = Foo->meta;
     is( $meta->name, 'Foo', '... checking the Foo metaclass' );
 
-    ok( $meta->is_mutable,    '... our class is mutable' );
-    ok( !$meta->is_immutable, '... our class is not immutable' );
+    ok( !$meta->is_mutable,    '... our class is not mutable' );
+    ok( $meta->is_immutable, '... our class is immutable' );
 
-    my $transformer = $meta->get_immutable_transformer;
+    my $transformer = $meta->immutable_transformer;
 
-    lives_ok {
-        $meta->make_immutable();
-    }
-    '... changed Foo to be immutable';
-
-    ok( $transformer->inlined_constructor,
-        '... transformer says it did inline the constructor' );
-    is( $transformer, $meta->get_immutable_transformer,
+    is( $transformer, $meta->immutable_transformer,
         '... immutable transformer cache works' );
-    ok( !$meta->make_immutable, '... make immutable now returns nothing' );
-
-    ok( !$meta->is_mutable,  '... our class is no longer mutable' );
-    ok( $meta->is_immutable, '... our class is now immutable' );
 
     isa_ok( $meta, 'Class::MOP::Class' );
 
