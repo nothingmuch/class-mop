@@ -61,7 +61,7 @@ my @class_mop_class_methods = qw(
     rebless_instance
     check_metaclass_compatibility
 
-    add_meta_instance_dependencies remove_meta_instance_depdendencies update_meta_instance_dependencies
+    add_meta_instance_dependencies remove_meta_instance_dependencies update_meta_instance_dependencies
     add_dependent_meta_instance remove_dependent_meta_instance
     invalidate_meta_instances invalidate_meta_instance
 
