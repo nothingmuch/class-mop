@@ -91,7 +91,7 @@ sub _construct_class_instance {
     }
 
     # and check the metaclass compatibility
-    $meta->check_metaclass_compatibility();  
+    $meta->_check_metaclass_compatibility();  
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -153,7 +153,14 @@ sub update_package_cache_flag {
     $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
+
 sub check_metaclass_compatibility {
+    warn 'The check_metaclass_compatibility method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_check_metaclass_compatibility;
+}
+
+sub _check_metaclass_compatibility {
     my $self = shift;
 
     # this is always okay ...
@@ -472,7 +479,7 @@ sub superclasses {
         # not potentially creating an issues
         # we don't know about
 
-        $self->check_metaclass_compatibility();
+        $self->_check_metaclass_compatibility();
         $self->update_meta_instance_dependencies();
     }
     @{$self->get_package_symbol($var_spec)};
