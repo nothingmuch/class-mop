@@ -1265,7 +1265,7 @@ like constructor parameters and used to initialize the object's
 attributes. Any existing attributes that are already set will be
 overwritten.
 
-=item B<< $metaclass->new_object(%params) >
+=item B<< $metaclass->new_object(%params) >>
 
 This method is used to create a new object of the metaclass's
 class. Any parameters you provide are used to initialize the
