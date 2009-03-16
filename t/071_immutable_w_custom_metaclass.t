@@ -40,8 +40,8 @@ use lib catdir( $FindBin::Bin, 'lib' );
         shift->meta->mymetaclass_attributes;
     }
 
-    ::lives_ok{ Baz->meta->superclasses('Bar');
-        } '... we survive the metaclass incompatibility test';
+    ::lives_ok{ Baz->meta->superclasses('Bar') }
+        '... we survive the metaclass incompatibility test';
 }
 
 {
