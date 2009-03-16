@@ -12,6 +12,9 @@
 #define NEED_sv_2pv_nolen
 #include "ppport.h"
 
+#include "mop_attr.h"
+#include "mop_instance.h"
+
 #define MOP_CALL_BOOT(name)  mop_call_xs(aTHX_ name, cv, mark);
 
 void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);

@@ -16,6 +16,7 @@ EXTERN_C XS(boot_Class__MOP__Package);
 EXTERN_C XS(boot_Class__MOP__Class);
 EXTERN_C XS(boot_Class__MOP__Attribute);
 EXTERN_C XS(boot_Class__MOP__Method);
+EXTERN_C XS(boot_Class__MOP__Instance);
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
@@ -32,6 +33,7 @@ BOOT:
     MOP_CALL_BOOT (boot_Class__MOP__Class);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
     MOP_CALL_BOOT (boot_Class__MOP__Method);
+    MOP_CALL_BOOT (boot_Class__MOP__Instance);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
 void
