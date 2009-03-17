@@ -102,7 +102,7 @@ sub generate_constructor_method_inline {
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
         $self->_generate_slot_initializer($_, $close_over)
-    } 0 .. (@{$self->attributes} - 1));
+    } @{$self->attributes});
     $source .= ";\n" . 'return $instance';
     $source .= ";\n" . '}';
     warn $source if $self->options->{debug};
@@ -118,10 +118,8 @@ sub generate_constructor_method_inline {
 
 sub _generate_slot_initializer {
     my $self  = shift;
-    my $index = shift;
+    my $attr  = shift;
     my $close = shift;
-
-    my $attr = $self->attributes->[$index];
 
     my $default;
     if ($attr->has_default) {
