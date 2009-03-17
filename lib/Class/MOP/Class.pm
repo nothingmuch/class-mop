@@ -1160,11 +1160,11 @@ Class::MOP::Class - Class Meta Object
 
 =head1 DESCRIPTION
 
-This is the largest and most complex part of the Class::MOP
-meta-object protocol. It controls the introspection and manipulation
-of Perl 5 classes, and it can create them as well. The best way to
-understand what this module can do, is to read the documentation for
-each of its methods.
+The Class Protocol is the largest and most complex part of the
+Class::MOP meta-object protocol. It controls the introspection and
+manipulation of Perl 5 classes, and it can create them as well. The
+best way to understand what this module can do, is to read the
+documentation for each of its methods.
 
 =head1 INHERITANCE
 
