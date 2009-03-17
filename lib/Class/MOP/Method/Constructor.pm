@@ -62,6 +62,12 @@ sub associated_metaclass { (shift)->{'associated_metaclass'} }
 ## cached values ...
 
 sub meta_instance {
+    warn 'The meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_meta_instance;
+}
+
+sub _meta_instance {
     my $self = shift;
     $self->{'meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
 }
@@ -120,7 +126,7 @@ sub _generate_constructor_method_inline {
 
     $source .= "\n" . 'my $params = @_ == 1 ? $_[0] : {@_};';
 
-    $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
+    $source .= "\n" . 'my $instance = ' . $self->_meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
         $self->_generate_slot_initializer($_, $close_over)
     } $self->associated_metaclass->compute_all_applicable_attributes);
@@ -169,12 +175,12 @@ sub _generate_slot_initializer {
     if ( defined $attr->init_arg ) {
       return (
           'if(exists $params->{\'' . $attr->init_arg . '\'}){' . "\n" .
-                $self->meta_instance->inline_set_slot_value(
+                $self->_meta_instance->inline_set_slot_value(
                     '$instance',
                     $attr->name,
                     '$params->{\'' . $attr->init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
-                $self->meta_instance->inline_set_slot_value(
+                $self->_meta_instance->inline_set_slot_value(
                     '$instance',
                     $attr->name,
                      $default ) . "\n" .
@@ -182,7 +188,7 @@ sub _generate_slot_initializer {
         );
     } elsif ( defined $default ) {
         return (
-            $self->meta_instance->inline_set_slot_value(
+            $self->_meta_instance->inline_set_slot_value(
                 '$instance',
                 $attr->name,
                  $default ) . "\n"
