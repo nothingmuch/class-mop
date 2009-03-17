@@ -31,7 +31,7 @@ sub new {
     # needed
     weaken($self->{'associated_metaclass'});
 
-    $self->initialize_body;
+    $self->_initialize_body;
 
     return $self;
 }
@@ -74,6 +74,12 @@ sub attributes {
 ## method
 
 sub initialize_body {
+    warn 'The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_initialize_body;
+}
+
+sub _initialize_body {
     my $self        = shift;
     my $method_name = 'generate_constructor_method';
 
