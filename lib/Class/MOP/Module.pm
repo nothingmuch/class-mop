@@ -90,7 +90,7 @@ package, if one exists.
 This constructs a string which combines the name, version and
 authority.
 
-=item B<< Class::MOP::Module->meta >
+=item B<< Class::MOP::Module->meta >>
 
 This will return a L<Class::MOP::Class> instance for this class.
 
