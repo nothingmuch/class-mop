@@ -67,6 +67,9 @@ sub meta_instance {
 }
 
 sub attributes {
+    warn 'The attributes method is deprecated.'
+        . " Use ->associated_metaclass->compute_all_applicable_attributes instead.\n";
+
     my $self = shift;
     $self->{'attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
 }
@@ -120,7 +123,7 @@ sub _generate_constructor_method_inline {
     $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
         $self->_generate_slot_initializer($_, $close_over)
-    } @{$self->attributes});
+    } $self->associated_metaclass->compute_all_applicable_attributes);
     $source .= ";\n" . 'return $instance';
     $source .= ";\n" . '}';
     warn $source if $self->options->{debug};
