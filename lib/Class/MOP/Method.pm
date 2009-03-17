@@ -139,118 +139,121 @@ Class::MOP::Method - Method Meta Object
 =head1 DESCRIPTION
 
 The Method Protocol is very small, since methods in Perl 5 are just
-subroutines within the particular package. We provide a very basic
+subroutines in a specific package. We provide a very basic
 introspection interface.
 
 =head1 METHODS
 
-=head2 Introspection
-
 =over 4
 
-=item B<meta>
+=item B<< Class::MOP::Method->wrap($code, %options) >>
 
-This will return a B<Class::MOP::Class> instance which is related
-to this class.
+This is the constructor. It accepts a subroutine reference and a hash
+of options.
+
+The options are:
+
+=over 8
+
+=item * name
+
+The method name (without a package name). This is required.
+
+=item * package_name
+
+The package name for the method. This is required.
+
+=item * associated_metaclass
+
+An optional L<Class::MOP::Class> object. This is the metaclass for the
+method's class.
 
 =back
 
-=head2 Construction
+=item B<< $metamethod->clone(%params) >>
 
-=over 4
+This makes a shallow clone of the method object. In particular,
+subroutine reference itself is shared between all clones of a given
+method.
 
-=item B<wrap ($code, %params)>
+When a method is cloned, the original method object will be available
+by calling C<original_method> on the clone.
 
-This is the basic constructor, it returns a B<Class::MOP::Method>
-instance which wraps the given C<$code> reference. You must also set
-the C<package_name> and C<name> attributes in C<%params>.
+=item B<< $metamethod->body >>
 
-=item B<clone (%params)>
+This returns a reference to the method's subroutine.
 
-This will make a copy of the object, allowing you to override
-any values by stuffing them in C<%params>.
+=item B<< $metamethod->name >>
 
-=back
+This returns the method's name
 
-=head2 Informational
+=item B<< $metamethod->package_name >>
 
-=over 4
+This returns the method's package name.
 
-=item B<body>
+=item B<< $metamethod->fully_qualified_name >>
 
-This returns the actual CODE reference of the particular instance.
+This returns the method's fully qualified name (package name and
+method name).
 
-=item B<name>
+=item B<< $metamethod->associated_metaclass >>
 
-This returns the name of the CODE reference.
+This returns the L<Class::MOP::Class> object for the method, if one
+exists.
 
-=item B<associated_metaclass>
-
-The metaclass of the method
-
-=item B<package_name>
-
-This returns the package name that the CODE reference is attached to.
-
-=item B<fully_qualified_name>
-
-This returns the fully qualified name of the CODE reference.
-
-=item B<original_method>
+=item B<< $metamethod->original_method >>
 
 If this method object was created as a clone of some other method
 object, this returns the object that was cloned.
 
-=item B<original_name>
+=item B<< $metamethod->original_name >>
 
-This returns the original name of the CODE reference, wherever it was
-first defined.
+This returns the method's original name, wherever it was first
+defined.
 
 If this method is a clone of a clone (of a clone, etc.), this method
 returns the name from the I<first> method in the chain of clones.
 
-=item B<original_package_name>
+=item B<< $metamethod->original_package_name >>
 
-This returns the original package name that the CODE reference is
-attached to, wherever it was first defined.
+This returns the method's original package name, wherever it was first
+defined.
 
 If this method is a clone of a clone (of a clone, etc.), this method
 returns the package name from the I<first> method in the chain of
 clones.
 
-=item B<original_fully_qualified_name>
+=item B<< $metamethod->original_fully_qualified_name >>
 
-This returns the original fully qualified name of the CODE reference,
-wherever it was first defined.
+This returns the method's original fully qualified name, wherever it
+was first defined.
 
 If this method is a clone of a clone (of a clone, etc.), this method
 returns the fully qualified name from the I<first> method in the chain
 of clones.
 
-=back
+=item B<< $metamethod->attach_to_class($metaclass) >>
 
-=head2 Metaclass
+Given a L<Class::MOP::Class> object, this method sets the associated
+metaclass for the method. This will overwrite any existing associated
+metaclass.
 
-=over 4
+=item B<< $metamethod->detach_from_class >>
 
-=item B<attach_to_class>
+Removes any associated metaclass object for the method.
 
-Sets the associated metaclass
+=item B<< $metamethod->execute(...) >>
 
-=item B<detach_from_class>
+This executes the method. Any arguments provided will be passed on to
+the method itself.
 
-Disassociates the method from the metaclass
+=item B<< Class::MOP::Method->meta >>
 
-=back
+This will return a L<Class::MOP::Class> instance for this class.
 
-=head2 Miscellaneous
-
-=over 4
-
-=item B<execute>
-
-Executes the method. Be sure to pass in the instance, since the
-method expects it.
+It should also be noted that L<Class::MOP> will actually bootstrap
+this module by installing a number of attribute meta-objects into its
+metaclass.
 
 =back
 
