@@ -45,50 +45,27 @@ __END__
 
 =head1 NAME 
 
-Class::MOP::Object - Object Meta Object
+Class::MOP::Object - Base class for metaclasses
 
 =head1 DESCRIPTION
 
-This class is basically a stub, it provides almost no functionality at all, 
-and really just exists to make the Class::MOP metamodel complete.
+This class is a very minimal base class for metaclasses.
 
-                         ......
-                        :      :                  
-                        :      v
-                  +-------------------+
-            +-----| Class::MOP::Class |
-            |     +-------------------+
-            |        ^      ^       ^
-            v        :      :       :
-  +--------------------+    :      +--------------------+
-  | Class::MOP::Module |    :      | Class::MOP::Object |
-  +--------------------+    :      +--------------------+
-            |               :                ^
-            |               :                |
-            |    +---------------------+     |
-            +--->| Class::MOP::Package |-----+
-                 +---------------------+
-                 
-  legend:
-    ..(is an instance of)..>
-    --(is a subclass of)--->
-
-A deeper discussion of this model is currently beyond the scope of 
-this documenation. 
-  
 =head1 METHODS
+
+This class provides a few methods which are useful in all metaclasses.
 
 =over 4
 
-=item B<meta>
+=item B<< Class::MOP::???->meta >>
 
-=item B<dump (?$max_depth)>
+This returns a L<Class::MOP::Class> object.
 
-This will C<require> the L<Data::Dumper> module and then dump a 
-representation of your object. It passed the C<$max_depth> arg 
-to C<$Data::Dumper::Maxdepth>. The default C<$max_depth> is 1, 
-so it will not go crazy and print a massive bunch of stuff. 
-Adjust this as nessecary.
+=item B<< $metaobject->dump($max_depth) >>
+
+This method uses L<Data::Dumper> to dump the object. You can pass an
+optional maximum depth, which will set C<$Data::Dumper::Maxdepth>. The
+default maximum depth is 1.
 
 =back
 
