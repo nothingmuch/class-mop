@@ -495,7 +495,7 @@ C<%options> are added as key-value pairs.
 
 =over 8
 
-=item I<init_arg>
+=item * init_arg
 
 This is a string value representing the expected key in an
 initialization hash. For instance, if we have an C<init_arg> value of
@@ -507,13 +507,13 @@ If an init_arg is not assigned, it will automatically use the
 attribute's name. If C<init_arg> is explicitly set to C<undef>, the
 attribute cannot be specified during initialization.
 
-=item I<builder>
+=item * builder
 
 This provides the name of a method that will be called to initialize
 the attribute. This method will be called on the object after it is
 constructed. It is expected to return a valid value for the attribute.
 
-=item I<default>
+=item * default
 
 This can be used to provide an explicit default for initializing the
 attribute. If the default you provide is a subroutine reference, then
@@ -563,7 +563,7 @@ Note that there is no guarantee that attributes are initialized in any
 particular order, so you cannot rely on the value of some other
 attribute when generating the default.
 
-=item I<initializer>
+=item * initializer
 
 This option can be either a method name or a subroutine
 reference. This method will be called when setting the attribute's
@@ -613,9 +613,9 @@ containing exactly one key (the method name) and one value. The value
 should be a subroutine reference, which will be installed as the
 method itself.
 
-=over 4
+=over 8
 
-=item I<accessor>
+=item * accessor
 
 An C<accessor> is a standard Perl-style read/write accessor. It will
 return the value of the attribute, and if a value is passed as an
@@ -625,12 +625,12 @@ Note that C<undef> is a legitimate value, so this will work:
 
   $object->set_something(undef);
 
-=item I<reader>
+=item * reader
 
 This is a basic read-only accessor. It returns the value of the
 attribute.
 
-=item I<writer>
+=item * writer
 
 This is a basic write accessor, it accepts a single argument, and
 assigns that value to the attribute.
@@ -639,7 +639,7 @@ Note that C<undef> is a legitimate value, so this will work:
 
   $object->set_something(undef);
 
-=item I<predicate>
+=item * predicate
 
 The predicate method returns a boolean indicating whether or not the
 attribute has been explicitly set.
@@ -647,12 +647,12 @@ attribute has been explicitly set.
 Note that the predicate returns true even if the attribute was set to
 a false value (C<0> or C<undef>).
 
-=item I<clearer>
+=item * clearer
 
 This method will uninitialize the attribute. After an attribute is
 cleared, its C<predicate> will return false.
 
-=item I<definition_context>
+=item * definition_context
 
 Mostly, this exists as a hook for the benefit of Moose.
 
@@ -683,6 +683,8 @@ the constructor.
 =over 4
 
 =item B<< $attr->name >>
+
+Returns the attribute's name.
 
 =item B<< $attr->accessor >>
 
