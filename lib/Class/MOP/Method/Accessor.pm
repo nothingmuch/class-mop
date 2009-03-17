@@ -243,21 +243,29 @@ C<%options> provided.
 
 =over 4
 
-=item attribute
+=item * attribute
 
 This is the C<Class::MOP::Attribute> for which accessors are being
 generated. This option is required.
 
-=item accessor_type
+=item * accessor_type
 
 This is a string which should be one of "reader", "writer",
 "accessor", "predicate", or "clearer". This is the type of method
 being generated. This option is required.
 
-=item is_inline
+=item * is_inline
 
 This indicates whether or not the accessor should be inlined. This
 default to false.
+
+=item * name
+
+The method name (without a package name). This is required.
+
+=item * package_name
+
+The package name for the method. This is required.
 
 =back
 
