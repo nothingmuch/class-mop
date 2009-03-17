@@ -114,6 +114,7 @@ munge
 namespace
 namespaced
 namespaces
+namespace's
 namespacing
 OO
 OOP
@@ -129,6 +130,7 @@ prepends
 rebless
 runtime
 sigil
+sigils
 stacktrace
 subclassable
 subtyping
