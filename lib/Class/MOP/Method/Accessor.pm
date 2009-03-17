@@ -36,7 +36,7 @@ sub new {
     # needed
     weaken($self->{'attribute'});
 
-    $self->initialize_body;
+    $self->_initialize_body;
 
     return $self;
 }
@@ -58,6 +58,12 @@ sub accessor_type        { (shift)->{'accessor_type'} }
 ## factory
 
 sub initialize_body {
+    warn 'The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_initialize_body;
+}
+
+sub _initialize_body {
     my $self = shift;
 
     my $method_name = join "_" => (
