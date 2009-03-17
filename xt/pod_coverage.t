@@ -74,7 +74,7 @@ my %trustme = (
             )
     ],
 
-    'Class::MOP::Method::Accessor' => [
+    'Class::MOP::Method::Constructor' => [
         qw( attributes
             generate_constructor_method
             generate_constructor_method_inline
