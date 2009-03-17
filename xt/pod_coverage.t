@@ -90,6 +90,8 @@ my %trustme = (
             initialize_body
             )
     ],
+
+    'Class::MOP::Module' => ['create'],
 );
 
 for my $module ( sort @modules ) {
