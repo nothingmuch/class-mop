@@ -502,6 +502,14 @@ transformation process.
 If the constructor was inlined, this returns the constructor method
 object that was created to do this.
 
+=item B<< $transformer->make_metaclass_immutable >>
+
+Makes the transformer's metaclass immutable.
+
+=item B<< $transformer->make_metaclass_mutable >>
+
+Makes the transformer's metaclass mutable.
+
 =back
 
 =head1 AUTHORS
