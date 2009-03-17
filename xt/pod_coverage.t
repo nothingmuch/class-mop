@@ -58,6 +58,21 @@ my %trustme = (
             bless_instance_structure
             is_dependent_on_superclasses ),
     ],
+
+    'Class::MOP::Method::Accessor' => [
+        qw( generate_accessor_method
+            generate_accessor_method_inline
+            generate_clearer_method
+            generate_clearer_method_inline
+            generate_predicate_method
+            generate_predicate_method_inline
+            generate_reader_method
+            generate_reader_method_inline
+            generate_writer_method
+            generate_writer_method_inline
+            initialize_body
+            )
+    ],
 );
 
 for my $module ( sort @modules ) {
