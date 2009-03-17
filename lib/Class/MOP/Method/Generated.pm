@@ -92,36 +92,11 @@ Class::MOP::Method::Generated - Abstract base class for generated methods
 
 =head1 DESCRIPTION
 
-This is a C<Class::MOP::Method> subclass which is used interally 
-by C<Class::MOP::Method::Accessor> and C<Class::MOP::Method::Constructor>.
+This is a C<Class::MOP::Method> subclass which is subclassed by
+C<Class::MOP::Method::Accessor> and
+C<Class::MOP::Method::Constructor>.
 
-=head1 METHODS
-
-=over 4
-
-=item B<new (%options)>
-
-This creates the method based on the criteria in C<%options>, 
-these options are:
-
-=over 4
-
-=item I<is_inline>
-
-This is a boolean to indicate if the method should be generated
-as a closure, or as a more optimized inline version.
-
-=back
-
-=item B<is_inline>
-
-This returns the boolean which was passed into C<new>.
-
-=item B<initialize_body>
-
-This is an abstract method and will throw an exception if called.
-
-=back
+It is not intended to be used directly.
 
 =head1 AUTHORS
 

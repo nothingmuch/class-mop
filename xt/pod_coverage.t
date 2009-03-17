@@ -82,6 +82,14 @@ my %trustme = (
             meta_instance
             )
     ],
+
+    'Class::MOP::Method::Generated' => [
+        qw( new
+            definition_context
+            is_inline
+            initialize_body
+            )
+    ],
 );
 
 for my $module ( sort @modules ) {
