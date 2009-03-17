@@ -1302,7 +1302,7 @@ instance's attributes.
 
 Returns the class name of the instance metaclass, see
 L<Class::MOP::Instance> for more information on the instance
-metaclasses.
+metaclass.
 
 =item B<< $metaclass->get_meta_instance >>
 
@@ -1466,6 +1466,17 @@ track the original source of any methods added from other classes
 
 Remove the named method from the class. This method returns the
 L<Class::MOP::Method> object for the method.
+
+=item B<< $metaclass->method_metaclass >>
+
+Returns the class name of the method metaclass, see
+L<Class::MOP::Method> for more information on the method metaclass.
+
+=item B<< $metaclass->wrapped_method_metaclass >>
+
+Returns the class name of the wrapped method metaclass, see
+L<Class::MOP::Method::Wrapped> for more information on the wrapped
+method metaclass.
 
 =back
 
