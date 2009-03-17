@@ -12,31 +12,11 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
 
-sub new {
-    my $class   = shift;
-    my %options = @_;  
-        
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
-        
-    my $self = $class->_new(\%options);
-    
-    $self->initialize_body;
-    
-    return $self;
-}
-
-sub _new {
-    my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
-
-    $options->{is_inline} ||= 0;
-    $options->{body} ||= undef;
-
-    bless $options, $class;
-}
-
 ## accessors
+
+sub new {
+    confess __PACKAGE__ . " is an abstract base class, you must provide a constructor.";
+}
 
 sub is_inline { $_[0]{is_inline} }
 
