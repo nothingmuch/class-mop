@@ -38,7 +38,7 @@ our $VERSION = '0.01';
 
 use base 'Class::MOP::Method::Accessor';
 
-sub generate_accessor_method {
+sub _generate_accessor_method {
     my $attr = (shift)->associated_attribute;
 
 	my $attr_name = $attr->name;
@@ -59,7 +59,7 @@ sub generate_accessor_method {
     };
 }
 
-sub generate_reader_method {
+sub _generate_reader_method {
     my $attr = (shift)->associated_attribute;
 
 	my $attr_name = $attr->name;

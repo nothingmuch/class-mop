@@ -47,7 +47,7 @@ use base 'Class::MOP::Method::Accessor';
 
 # generate the methods
 
-sub generate_history_accessor_method {
+sub _generate_history_accessor_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
@@ -57,7 +57,7 @@ sub generate_history_accessor_method {
     }};    
 }
 
-sub generate_accessor_method {
+sub _generate_accessor_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         if (scalar(\@_) == 2) {
@@ -71,7 +71,7 @@ sub generate_accessor_method {
     }};
 }
 
-sub generate_writer_method {
+sub _generate_writer_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
