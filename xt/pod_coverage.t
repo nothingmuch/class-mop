@@ -73,6 +73,15 @@ my %trustme = (
             initialize_body
             )
     ],
+
+    'Class::MOP::Method::Accessor' => [
+        qw( attributes
+            generate_constructor_method
+            generate_constructor_method_inline
+            initialize_body
+            meta_instance
+            )
+    ],
 );
 
 for my $module ( sort @modules ) {
