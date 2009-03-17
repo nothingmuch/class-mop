@@ -223,7 +223,7 @@ Class::MOP::Instance - Instance Meta Object
 
 =head1 DESCRIPTION
 
-The meta instance API controls the creation of object instances, and
+The Instance Protocol controls the creation of object instances, and
 the storage of attribute values in those instances.
 
 Using this API directly in your own code violates encapsulation, and
