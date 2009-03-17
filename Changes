@@ -13,6 +13,11 @@ Revision history for Perl extension Class-MOP.
         exists (and will stick around for a few releases), but it
         warns that calling the public method is deprecated.
 
+    * Class::MOP::Method::Generated
+      - Removed the new and _new methods, since this is an abstract
+        base class, and all existing subclasses implement their own
+        constructors.
+
     * MOP.xs
       - Stop is_class_loaded from thinking a class is loaded if it
         only has an empty GV (Florian Ragwitz).
