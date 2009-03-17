@@ -81,7 +81,7 @@ sub initialize_body {
 
 sub _initialize_body {
     my $self        = shift;
-    my $method_name = 'generate_constructor_method';
+    my $method_name = '_generate_constructor_method';
 
     $method_name .= '_inline' if $self->is_inline;
 
@@ -89,10 +89,22 @@ sub _initialize_body {
 }
 
 sub generate_constructor_method {
+    warn 'The generate_constructor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_generate_constructor_method;
+}
+
+sub _generate_constructor_method {
     return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
 }
 
 sub generate_constructor_method_inline {
+    warn 'The generate_constructor_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    goto &_generate_constructor_method_inline;
+}
+
+sub _generate_constructor_method_inline {
     my $self = shift;
 
     my $close_over = {};
