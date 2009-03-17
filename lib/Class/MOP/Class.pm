@@ -277,8 +277,6 @@ sub create {
         || confess "You must pass a HASH ref of methods"
             if exists $options{methods};                  
 
-    $class->SUPER::create(%options);
-
     my (%initialize_options) = @args;
     delete @initialize_options{qw(
         package
@@ -289,6 +287,8 @@ sub create {
         authority
     )};
     my $meta = $class->initialize( $package_name => %initialize_options );
+
+    $meta->_instantiate_module( $options{version}, $options{authority} );
 
     # FIXME totally lame
     $meta->add_method('meta' => sub {

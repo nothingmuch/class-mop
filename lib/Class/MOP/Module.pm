@@ -33,23 +33,25 @@ sub identifier {
 }
 
 sub create {
-    my ( $class, %options ) = @_;
+    confess "The Class::MOP::Module->create method has been made a private object method.\n";
+}
 
-    my $package_name = $options{package};
+sub _instantiate_module {
+    my $self      = shift;
+    my $version   = shift;
+    my $authority = shift;
 
-    (defined $package_name && $package_name)
-        || confess "You must pass a package name";
+    my $package_name = $self->name;
 
     my $code = "package $package_name;";
-    $code .= "\$$package_name\:\:VERSION = '" . $options{version} . "';"
-        if exists $options{version};
-    $code .= "\$$package_name\:\:AUTHORITY = '" . $options{authority} . "';"
-        if exists $options{authority};
+
+    $code .= "\$$package_name\:\:VERSION = '" . $version . "';"
+        if defined $version;
+    $code .= "\$$package_name\:\:AUTHORITY = '" . $authority . "';"
+        if defined $authority;
 
     eval $code;
     confess "creation of $package_name failed : $@" if $@;
-
-    return; # XXX: should this return some kind of meta object? ~sartak
 }
 
 1;
