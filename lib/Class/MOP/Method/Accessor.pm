@@ -257,7 +257,7 @@ being generated. This option is required.
 =item * is_inline
 
 This indicates whether or not the accessor should be inlined. This
-default to false.
+defaults to false.
 
 =item * name
 
