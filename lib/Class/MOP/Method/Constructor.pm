@@ -197,58 +197,58 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 =head1 DESCRIPTION
 
-This is a subclass of C<Class::MOP::Method> which deals with
-class constructors. This is used when making a class immutable
-to generate an optimized constructor.
+This is a subclass of C<Class::MOP::Method> which generates
+constructor methods.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new (metaclass => $meta, options => \%options)>
+=item B<< Class::MOP::Method::Constructor->new(%options) >>
 
-=item B<options>
+This creates a new constructor object. It accepts a hash reference of
+options.
 
-This returns the options HASH which is passed into C<new>.
+=over 8
 
-=item B<associated_metaclass>
+=item * metaclass
 
-This returns the metaclass which is passed into C<new>.
+This should be a L<Class::MOP::Class> object. It is required.
 
-=item B<attributes>
+=item * name
 
-This returns the list of attributes which are associated with the
-metaclass which is passed into C<new>.
+The method name (without a package name). This is required.
 
-=item B<meta_instance>
+=item * package_name
 
-This returns the meta instance which is associated with the
-metaclass which is passed into C<new>.
+The package name for the method. This is required.
 
-=item B<is_inline>
+=item * is_inline
 
-This returns a boolean, but since constructors are very rarely
-not inlined, this always returns true for now.
-
-=item B<can_be_inlined>
-
-This method always returns true in this class. It exists so that
-subclasses (like in Moose) can override and do some sort of checking
-to determine whether or not inlining the constructor is safe.
-
-=item B<initialize_body>
-
-This creates the code reference for the constructor itself.
+This indicates whether or not the constructor should be inlined. This
+defaults to false.
 
 =back
 
-=head2 Method Generators 
+=item B<< $metamethod->is_inline >>
 
-=over 4
+Returns a boolean indicating whether or not the constructor is
+inlined.
 
-=item B<generate_constructor_method>
+=item B<< $metamethod->associated_metaclass >>
 
-=item B<generate_constructor_method_inline>
+This returns the L<Class::MOP::Class> object for the method.
+
+=item B<< $metamethod->is_inline >>
+
+Returns a boolean indicating whether or not the constructor is
+inlined.
+
+=item B<< $metamethod->can_be_inlined >>
+
+This method always returns true in this class. It exists so that
+subclasses (as in Moose) can do some sort of checking to determine
+whether or not inlining the constructor is safe.
 
 =back
 
