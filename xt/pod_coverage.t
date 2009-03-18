@@ -80,6 +80,7 @@ my %trustme = (
             generate_constructor_method_inline
             initialize_body
             meta_instance
+            options
             )
     ],
 
