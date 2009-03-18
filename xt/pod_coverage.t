@@ -98,7 +98,7 @@ for my $module ( sort @modules ) {
     my $trustme = [];
     if ( $trustme{$module} ) {
         my $methods = join '|', @{ $trustme{$module} };
-        $trustme = [qr/$methods/];
+        $trustme = [qr/^(?:$methods)$/];
     }
 
     pod_coverage_ok(
