@@ -80,6 +80,7 @@ my %trustme = (
             generate_constructor_method_inline
             initialize_body
             meta_instance
+            options
             )
     ],
 
@@ -98,7 +99,7 @@ for my $module ( sort @modules ) {
     my $trustme = [];
     if ( $trustme{$module} ) {
         my $methods = join '|', @{ $trustme{$module} };
-        $trustme = [qr/$methods/];
+        $trustme = [qr/^(?:$methods)$/];
     }
 
     pod_coverage_ok(
