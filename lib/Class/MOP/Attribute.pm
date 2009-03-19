@@ -331,7 +331,7 @@ sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 sub process_accessors {
     warn 'The process_accessors method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_process_accessors;
+    shift->_process_accessors;
 }
 
 sub _process_accessors {

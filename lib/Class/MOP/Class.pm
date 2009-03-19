@@ -41,7 +41,7 @@ sub initialize {
 sub construct_class_instance {
     warn 'The construct_class_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_construct_class_instance;
+    shift->_construct_class_instance;
 }
 
 # NOTE: (meta-circularity)
@@ -157,7 +157,7 @@ sub update_package_cache_flag {
 sub check_metaclass_compatibility {
     warn 'The check_metaclass_compatibility method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_check_metaclass_compatibility;
+    shift->_check_metaclass_compatibility;
 }
 
 sub _check_metaclass_compatibility {
@@ -374,7 +374,7 @@ sub get_meta_instance {
 sub create_meta_instance {
     warn 'The create_meta_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_create_meta_instance;
+    shift->_create_meta_instance;
 }
 
 sub _create_meta_instance {
@@ -408,7 +408,7 @@ sub clone_object {
 sub clone_instance {
     warn 'The clone_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_clone_instance;
+    shift->_clone_instance;
 }
 
 sub _clone_instance {
@@ -707,7 +707,7 @@ sub add_method {
 sub alias_method {
     warn "The alias_method method is deprecated. Use add_method instead.\n";
 
-    goto &add_method;
+    shift->add_method;
 }
 
 sub has_method {

@@ -60,7 +60,7 @@ sub accessor_type        { (shift)->{'accessor_type'} }
 sub initialize_body {
     warn 'The initialize_body method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_initialize_body;
+    shift->_initialize_body;
 }
 
 sub _initialize_body {
@@ -82,7 +82,7 @@ sub _initialize_body {
 sub generate_accessor_method {
     warn 'The generate_accessor_method method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_accessor_method;
+    shift->_generate_accessor_method;
 }
 
 sub _generate_accessor_method {
@@ -96,7 +96,7 @@ sub _generate_accessor_method {
 sub generate_reader_method {
     warn 'The generate_reader_method method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_reader_method;
+    shift->_generate_reader_method;
 }
 
 sub _generate_reader_method {
@@ -110,7 +110,7 @@ sub _generate_reader_method {
 sub generate_writer_method {
     warn 'The generate_writer_method method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_writer_method;
+    shift->_generate_writer_method;
 }
 
 sub _generate_writer_method {
@@ -123,7 +123,7 @@ sub _generate_writer_method {
 sub generate_predicate_method {
     warn 'The generate_predicate_method method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_predicate_method;
+    shift->_generate_predicate_method;
 }
 
 sub _generate_predicate_method {
@@ -136,7 +136,7 @@ sub _generate_predicate_method {
 sub generate_clearer_method {
     warn 'The generate_clearer_method method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_clearer_method;
+    shift->_generate_clearer_method;
 }
 
 sub _generate_clearer_method {
@@ -151,7 +151,7 @@ sub _generate_clearer_method {
 sub generate_accessor_method_inline {
     warn 'The generate_accessor_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_accessor_method_inline;
+    shift->_generate_accessor_method_inline;
 }
 
 sub _generate_accessor_method_inline {
@@ -176,7 +176,7 @@ sub _generate_accessor_method_inline {
 sub generate_reader_method_inline {
     warn 'The generate_reader_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_reader_method_inline;
+    shift->_generate_reader_method_inline;
 }
 
 sub _generate_reader_method_inline {
@@ -200,7 +200,7 @@ sub _generate_reader_method_inline {
 sub generate_writer_method_inline {
     warn 'The generate_writer_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_writer_method_inline;
+    shift->_generate_writer_method_inline;
 }
 
 sub _generate_writer_method_inline {
@@ -223,7 +223,7 @@ sub _generate_writer_method_inline {
 sub generate_predicate_method_inline {
     warn 'The generate_predicate_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_predicate_method_inline;
+    shift->_generate_predicate_method_inline;
 }
 
 sub _generate_predicate_method_inline {
@@ -246,7 +246,7 @@ sub _generate_predicate_method_inline {
 sub generate_clearer_method_inline {
     warn 'The generate_clearer_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n";
-    goto &_generate_clearer_method_inline;
+    shift->_generate_clearer_method_inline;
 }
 
 sub _generate_clearer_method_inline {
