@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 244;
+use Test::More tests => 248;
 use Test::Exception;
 
 use Class::MOP;
@@ -80,6 +80,8 @@ my @class_mop_class_methods = qw(
 
     is_mutable is_immutable make_mutable make_immutable
     immutable_transformer _set_immutable_transformer
+    _make_immutable_transformer
+    _default_immutable_transformer_options
 
     DESTROY
 );

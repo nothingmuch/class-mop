@@ -975,18 +975,31 @@ sub is_immutable { 0 }
 sub immutable_transformer { $_[0]->{immutable_transformer} }
 sub _set_immutable_transformer { $_[0]->{immutable_transformer} = $_[1] }
 
+sub make_immutable {
+    my $self = shift;
+
+    return if $self->is_immutable;
+
+    my $transformer = $self->immutable_transformer
+        || $self->_make_immutable_transformer(@_);
+
+    $self->_set_immutable_transformer($transformer);
+
+    $transformer->make_metaclass_immutable;
+}
+
 {
     my %Default_Immutable_Options = (
         read_only   => [qw/superclasses/],
         cannot_call => [
-            qw/
+            qw(
                 add_method
                 alias_method
                 remove_method
                 add_attribute
                 remove_attribute
                 remove_package_symbol
-                /
+                )
         ],
         memoize => {
             class_precedence_list => 'ARRAY',
@@ -1019,22 +1032,19 @@ sub _set_immutable_transformer { $_[0]->{immutable_transformer} = $_[1] }
         },
     );
 
-    sub make_immutable {
-        my $self = shift;
-
-        return if $self->is_immutable;
-
-        my $transformer = $self->immutable_transformer
-            || Class::MOP::Immutable->new(
-            $self,
-            %Default_Immutable_Options,
-            @_
-            );
-
-        $self->_set_immutable_transformer($transformer);
-
-        $transformer->make_metaclass_immutable;
+    sub _default_immutable_transformer_options {
+        return %Default_Immutable_Options;
     }
+}
+
+sub _make_immutable_transformer {
+    my $self = shift;
+
+    Class::MOP::Immutable->new(
+        $self,
+        $self->_default_immutable_transformer_options,
+        @_
+    );
 }
 
 sub make_mutable {
