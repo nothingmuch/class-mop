@@ -237,11 +237,6 @@ inlined.
 
 This returns the L<Class::MOP::Class> object for the method.
 
-=item B<< $metamethod->is_inline >>
-
-Returns a boolean indicating whether or not the constructor is
-inlined.
-
 =item B<< $metamethod->can_be_inlined >>
 
 This method always returns true in this class. It exists so that
