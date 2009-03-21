@@ -183,8 +183,6 @@ sub _inline_destructor {
         name         => 'DESTROY'
     );
 
-    return unless $destructor->is_needed;
-
     $metaclass->add_method( 'DESTROY' => $destructor )
 }
 
