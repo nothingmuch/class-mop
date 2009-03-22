@@ -1,6 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
-0.79
+0.78_01 Wed, March 18, 2009
+    * Class::MOP::*
+      - Revised and reorganized all of the API documentation.
+
     * Class::MOP::Class
     * Class::MOP::Instance
       - Reblessing into a package that supports overloading wasn't

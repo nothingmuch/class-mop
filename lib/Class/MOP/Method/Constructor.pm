@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken', 'looks_like_number';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.78_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -236,11 +236,6 @@ inlined.
 =item B<< $metamethod->associated_metaclass >>
 
 This returns the L<Class::MOP::Class> object for the method.
-
-=item B<< $metamethod->is_inline >>
-
-Returns a boolean indicating whether or not the constructor is
-inlined.
 
 =item B<< $metamethod->can_be_inlined >>
 

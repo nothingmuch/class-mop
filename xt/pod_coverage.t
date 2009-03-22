@@ -52,6 +52,12 @@ my %trustme = (
             is_dependent_on_superclasses ),
     ],
 
+    'Class::MOP::Instance' => [
+        qw( BUILDARGS
+            bless_instance_structure
+            is_dependent_on_superclasses ),
+    ],
+
     'Class::MOP::Method::Accessor' => [
         qw( generate_accessor_method
             generate_accessor_method_inline
@@ -73,6 +79,7 @@ my %trustme = (
             generate_constructor_method_inline
             initialize_body
             meta_instance
+            options
             )
     ],
 
@@ -91,7 +98,7 @@ for my $module ( sort @modules ) {
     my $trustme = [];
     if ( $trustme{$module} ) {
         my $methods = join '|', @{ $trustme{$module} };
-        $trustme = [qr/$methods/];
+        $trustme = [qr/^(?:$methods)$/];
     }
 
     pod_coverage_ok(

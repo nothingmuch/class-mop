@@ -9,7 +9,7 @@ use Class::MOP::Method::Constructor;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.78_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -140,8 +140,6 @@ sub _inline_destructor {
         package_name => $self->metaclass->name,
         name         => 'DESTROY'
     );
-
-    return unless $destructor->is_needed;
 
     $self->metaclass->add_method( 'DESTROY' => $destructor );
 }
