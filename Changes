@@ -2,7 +2,8 @@ Revision history for Perl extension Class-MOP.
 
 0.78_01 Wed, March 18, 2009
     * Class::MOP::*
-      - Revised and reorganized all of the API documentation.
+      - Revised and reorganized all of the API documentation. All
+        classes now have (more or less) complete API documentation.
 
     * Class::MOP::Class
     * Class::MOP::Immutable
