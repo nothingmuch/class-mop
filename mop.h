@@ -12,6 +12,10 @@
 
 #define MOP_CALL_BOOT(name)  mop_call_xs(aTHX_ name, cv, mark);
 
+#ifndef XSPROTO
+#define XSPROTO(name) XS(name)
+#endif
+
 void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
 
 typedef enum {
