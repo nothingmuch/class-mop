@@ -5,6 +5,11 @@ Revision history for Perl extension Class-MOP.
       - Revised and reorganized all of the API documentation.
 
     * Class::MOP::Class
+    * Class::MOP::Immutable
+      - A big backwards-incompatible refactoring of the Immutable API,
+        and the make_immutable/make_mutable pieces of the Class API.
+
+    * Class::MOP::Class
     * Class::MOP::Instance
       - Reblessing into a package that supports overloading wasn't
         properly adding overload magic to the object due to a bug
