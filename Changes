@@ -8,7 +8,10 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
     * Class::MOP::Immutable
       - A big backwards-incompatible refactoring of the Immutable API,
-        and the make_immutable/make_mutable pieces of the Class API.
+        and the make_immutable/make_mutable pieces of the Class
+        API. The core __PACKAGE__->meta->make_immutable API remains
+        the same, however, so this should only affect the most
+        guts-digging code.
 
     * Class::MOP::Class
     * Class::MOP::Instance
