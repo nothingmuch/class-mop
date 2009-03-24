@@ -414,6 +414,8 @@ sub rebless_instance {
         $old_metaclass = $self->initialize(blessed($instance));
     }
 
+    $old_metaclass->rebless_instance_away($instance, $self, %params);
+
     my $meta_instance = $self->get_meta_instance();
 
     $self->name->isa($old_metaclass->name)
@@ -440,6 +442,10 @@ sub rebless_instance {
     }
     
     $instance;
+}
+
+sub rebless_instance_away {
+    # this intentionally does nothing, it is just a hook
 }
 
 # Inheritance
