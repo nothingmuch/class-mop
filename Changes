@@ -13,6 +13,11 @@ Revision history for Perl extension Class-MOP.
       - The XS code used a macro, XSPROTO, that's only in 5.10.x. This
         has been fixed to be backwards compatible with 5.8.x.
 
+    * Class::MOP::Class
+      - Add a hook for rebless_instance_away (Sartak)
+      - Use blessed instead of ref to get an instance's class name
+        in rebless_instance. (Sartak)
+
 0.78_01 Wed, March 18, 2009
     * Class::MOP::*
       - Revised and reorganized all of the API documentation. All
