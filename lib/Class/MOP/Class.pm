@@ -1239,6 +1239,12 @@ like constructor parameters and used to initialize the object's
 attributes. Any existing attributes that are already set will be
 overwritten.
 
+Before reblessing the instance, this method will call
+C<rebless_instance_away> on the instance's current metaclass. This method
+will be passed the instance, the new metaclass, and any parameters
+specified to C<rebless_instance>. By default, C<rebless_instance_away>
+does nothing; it is merely a hook.
+
 =item B<< $metaclass->new_object(%params) >>
 
 This method is used to create a new object of the metaclass's
