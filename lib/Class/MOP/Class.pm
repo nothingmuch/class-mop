@@ -411,7 +411,7 @@ sub rebless_instance {
         $old_metaclass = $instance->meta;
     }
     else {
-        $old_metaclass = $self->initialize(ref($instance));
+        $old_metaclass = $self->initialize(blessed($instance));
     }
 
     my $meta_instance = $self->get_meta_instance();
