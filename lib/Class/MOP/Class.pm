@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.78_01';
+our $VERSION   = '0.78_02';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -79,8 +79,7 @@ sub _construct_class_instance {
     # now create the metaclass
     my $meta;
     if ($class eq 'Class::MOP::Class') {
-        no strict 'refs';
-        $meta = $class->_new($options)
+        $meta = $class->_new($options);
     }
     else {
         # NOTE:
@@ -437,8 +436,10 @@ sub rebless_instance {
         $old_metaclass = $instance->meta;
     }
     else {
-        $old_metaclass = $self->initialize(ref($instance));
+        $old_metaclass = $self->initialize(blessed($instance));
     }
+
+    $old_metaclass->rebless_instance_away($instance, $self, %params);
 
     my $meta_instance = $self->get_meta_instance();
 
@@ -466,6 +467,10 @@ sub rebless_instance {
     }
     
     $instance;
+}
+
+sub rebless_instance_away {
+    # this intentionally does nothing, it is just a hook
 }
 
 # Inheritance
@@ -1000,108 +1005,56 @@ sub is_pristine {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
-# NOTE:
-# Why I changed this (groditi)
-#  - One Metaclass may have many Classes through many Metaclass instances
-#  - One Metaclass should only have one Immutable Transformer instance
-#  - Each Class may have different Immutabilizing options
-#  - Therefore each Metaclass instance may have different Immutabilizing options
-#  - We need to store one Immutable Transformer instance per Metaclass
-#  - We need to store one set of Immutable Transformer options per Class
-#  - Upon make_mutable we may delete the Immutabilizing options
-#  - We could clean the immutable Transformer instance when there is no more
-#      immutable Classes of that type, but we can also keep it in case
-#      another class with this same Metaclass becomes immutable. It is a case
-#      of trading of storing an instance to avoid unnecessary instantiations of
-#      Immutable Transformers. You may view this as a memory leak, however
-#      Because we have few Metaclasses, in practice it seems acceptable
-#  - To allow Immutable Transformers instances to be cleaned up we could weaken
-#      the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
+sub immutable_transformer { $_[0]->{immutable_transformer} }
+sub _set_immutable_transformer { $_[0]->{immutable_transformer} = $_[1] }
 
-{
+sub make_immutable {
+    my $self = shift;
 
-    my %IMMUTABLE_TRANSFORMERS;
-    my %IMMUTABLE_OPTIONS;
+    return if $self->is_immutable;
 
-    sub get_immutable_options {
-        my $self = shift;
-        return if $self->is_mutable;
-        confess "unable to find immutabilizing options"
-            unless exists $IMMUTABLE_OPTIONS{$self->name};
-        my %options = %{$IMMUTABLE_OPTIONS{$self->name}};
-        delete $options{IMMUTABLE_TRANSFORMER};
-        return \%options;
-    }
+    my $transformer = $self->immutable_transformer
+        || $self->_make_immutable_transformer(@_);
 
-    sub get_immutable_transformer {
-        my $self = shift;
-        if( $self->is_mutable ){
-            return $IMMUTABLE_TRANSFORMERS{$self->name} ||= $self->create_immutable_transformer;
-        }
-        confess "unable to find transformer for immutable class"
-            unless exists $IMMUTABLE_OPTIONS{$self->name};
-        return $IMMUTABLE_OPTIONS{$self->name}->{IMMUTABLE_TRANSFORMER};
-    }
+    $self->_set_immutable_transformer($transformer);
 
-    sub make_immutable {
-        my $self = shift;
-        my %options = @_;
-
-        my $transformer = $self->get_immutable_transformer;
-        $transformer->make_metaclass_immutable($self, \%options);
-        $IMMUTABLE_OPTIONS{$self->name} =
-            { %options,  IMMUTABLE_TRANSFORMER => $transformer };
-
-        if( exists $options{debug} && $options{debug} ){
-            print STDERR "# of Metaclass options:      ", keys %IMMUTABLE_OPTIONS;
-            print STDERR "# of Immutable transformers: ", keys %IMMUTABLE_TRANSFORMERS;
-        }
-
-        1;
-    }
-
-    sub make_mutable{
-        my $self = shift;
-        return if $self->is_mutable;
-        my $options = delete $IMMUTABLE_OPTIONS{$self->name};
-        confess "unable to find immutabilizing options" unless ref $options;
-        my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
-        $transformer->make_metaclass_mutable($self, $options);
-        1;
-    }
+    $transformer->make_metaclass_immutable;
 }
 
-sub create_immutable_transformer {
-    my $self = shift;
-    my $class = Class::MOP::Immutable->new($self, {
+{
+    my %Default_Immutable_Options = (
         read_only   => [qw/superclasses/],
-        cannot_call => [qw/
-           add_method
-           alias_method
-           remove_method
-           add_attribute
-           remove_attribute
-           remove_package_symbol
-        /],
-        memoize     => {
-           class_precedence_list             => 'ARRAY',
-           linearized_isa                    => 'ARRAY', # FIXME perl 5.10 memoizes this on its own, no need?
-           get_all_methods                   => 'ARRAY',
-           get_all_method_names              => 'ARRAY',
-           #get_all_attributes               => 'ARRAY', # it's an alias, no need, but maybe in the future
-           compute_all_applicable_attributes => 'ARRAY',
-           get_meta_instance                 => 'SCALAR',
-           get_method_map                    => 'SCALAR',
+        cannot_call => [
+            qw(
+                add_method
+                alias_method
+                remove_method
+                add_attribute
+                remove_attribute
+                remove_package_symbol
+                )
+        ],
+        memoize => {
+            class_precedence_list => 'ARRAY',
+            # FIXME perl 5.10 memoizes this on its own, no need?
+            linearized_isa                    => 'ARRAY',
+            get_all_methods                   => 'ARRAY',
+            get_all_method_names              => 'ARRAY',
+            compute_all_applicable_attributes => 'ARRAY',
+            get_meta_instance                 => 'SCALAR',
+            get_method_map                    => 'SCALAR',
         },
+
         # NOTE:
-        # this is ugly, but so are typeglobs, 
+        # this is ugly, but so are typeglobs,
         # so whattayahgonnadoboutit
         # - SL
-        wrapped => { 
+        wrapped => {
             add_package_symbol => sub {
                 my $original = shift;
-                confess "Cannot add package symbols to an immutable metaclass" 
-                    unless (caller(2))[3] eq 'Class::MOP::Package::get_package_symbol'; 
+                confess "Cannot add package symbols to an immutable metaclass"
+                    unless ( caller(2) )[3] eq
+                    'Class::MOP::Package::get_package_symbol';
 
                 # This is a workaround for a bug in 5.8.1 which thinks that
                 # goto $original->body
@@ -1110,8 +1063,29 @@ sub create_immutable_transformer {
                 goto $body;
             },
         },
-    });
-    return $class;
+    );
+
+    sub _default_immutable_transformer_options {
+        return %Default_Immutable_Options;
+    }
+}
+
+sub _make_immutable_transformer {
+    my $self = shift;
+
+    Class::MOP::Immutable->new(
+        $self,
+        $self->_default_immutable_transformer_options,
+        @_
+    );
+}
+
+sub make_mutable {
+    my $self = shift;
+
+    return if $self->is_mutable;
+
+    $self->immutable_transformer->make_metaclass_mutable;
 }
 
 1;
@@ -1291,6 +1265,12 @@ class. If you pass any additional parameters, these will be treated
 like constructor parameters and used to initialize the object's
 attributes. Any existing attributes that are already set will be
 overwritten.
+
+Before reblessing the instance, this method will call
+C<rebless_instance_away> on the instance's current metaclass. This method
+will be passed the instance, the new metaclass, and any parameters
+specified to C<rebless_instance>. By default, C<rebless_instance_away>
+does nothing; it is merely a hook.
 
 =item B<< $metaclass->new_object(%params) >>
 
@@ -1587,7 +1567,7 @@ documentation.
 
 Calling this method reverse the immutabilization transformation.
 
-=item B<< $metaclass->get_immutable_transformer >>
+=item B<< $metaclass->immutable_transformer >>
 
 If the class has been made immutable previously, this returns the
 L<Class::MOP::Immutable> object that was created to do the

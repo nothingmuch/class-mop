@@ -32,7 +32,7 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.78_01';
+our $VERSION   = '0.78_02';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
@@ -326,6 +326,17 @@ Class::MOP::Class->meta->add_attribute(
             'instance_metaclass' => \&Class::MOP::Class::instance_metaclass
         },
         default  => 'Class::MOP::Instance',
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('immutable_transformer' => (
+        reader   => {
+            'immutable_transformer' => \&Class::MOP::Class::immutable_transformer
+        },
+        writer   => {
+            '_set_immutable_transformer' => \&Class::MOP::Class::_set_immutable_transformer
+        },
     ))
 );
 
