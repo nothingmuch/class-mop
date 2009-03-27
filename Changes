@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+0.79 Fri, March 29, 2009
+    * No changes from 0.78_02.
+
 0.78_02 Thu, March 26, 2009
     * Class::MOP::Class
     * Class::MOP::Immutable
