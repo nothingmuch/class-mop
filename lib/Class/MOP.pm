@@ -137,13 +137,9 @@ sub _is_valid_class_name {
 }
 
 sub class_of {
-    my $self  = shift;
-    my $class = shift;
+    my $class = blessed($_[0]) || $_[0];
 
     return undef if !defined($class);
-
-    $class = blessed($class) || $class;
-
     return get_metaclass_by_name($class);
 }
 
