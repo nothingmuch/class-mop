@@ -177,9 +177,9 @@ sub check_metaclass_compatibility {
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
         ($self->instance_metaclass->isa($super_meta->instance_metaclass))
-            || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
+            || confess "Class::MOP::class_of(" . $self->name . ")->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $superclass_name . "->meta->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
+                       "Class::MOP::class_of(" . $superclass_name . ")->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
     }
 }
 
