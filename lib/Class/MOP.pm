@@ -136,6 +136,15 @@ sub _is_valid_class_name {
     return 0;
 }
 
+sub class_of {
+    my $self  = shift;
+    my $class = shift;
+
+    $class = blessed($class) || $class;
+
+    return get_metaclass_by_name($class);
+}
+
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
 ## ----------------------------------------------------------------------------
