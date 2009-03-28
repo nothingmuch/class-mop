@@ -169,7 +169,7 @@ my %DEFAULT_METHODS = (
         # that has been made immutable and for that we need 
         # to dig a bit ...
         if ($self->isa('Class::MOP::Class')) {
-            return $self->{'___original_class'}->meta;
+            return Class::MOP::class_of($self->{'___original_class'});
         }
         else {
             return $self;
@@ -184,7 +184,7 @@ sub _create_methods_for_immutable_metaclass {
     my $self = shift;
 
     my $metaclass = $self->metaclass;
-    my $meta      = $metaclass->meta;
+    my $meta      = Class::MOP::class_of($metaclass);
 
     return {
         %DEFAULT_METHODS,
@@ -200,7 +200,7 @@ sub _create_methods_for_immutable_metaclass {
 sub _make_read_only_methods {
     my $self = shift;
 
-    my $metameta = $self->metaclass->meta;
+    my $metameta = Class::MOP::class_of($self->metaclass);
 
     my %methods;
     foreach my $read_only_method ( @{ $self->options->{read_only} } ) {
@@ -238,7 +238,7 @@ sub _make_memoized_methods {
 
     my %methods;
 
-    my $metameta = $self->metaclass->meta;
+    my $metameta = Class::MOP::class_of($self->metaclass);
 
     my $memoized_methods = $self->options->{memoize};
     foreach my $method_name ( keys %{$memoized_methods} ) {
@@ -279,7 +279,7 @@ sub _make_wrapped_methods {
 
     my $wrapped_methods = $self->options->{wrapped};
 
-    my $metameta = $self->metaclass->meta;
+    my $metameta = Class::MOP::class_of($self->metaclass);
 
     foreach my $method_name ( keys %{$wrapped_methods} ) {
         my $method = $metameta->find_method_by_name($method_name);
