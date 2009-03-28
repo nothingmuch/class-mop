@@ -169,9 +169,10 @@ sub check_metaclass_compatibility {
             : ref($super_meta);
 
         ($self->isa($super_meta_type))
-            || confess $self->name . "->meta => (" . (ref($self)) . ")" .
-                       " is not compatible with the " .
-                       $superclass_name . "->meta => (" . ($super_meta_type)     . ")";
+            || confess "Class::MOP::class_of(" . $self->name . ") => ("
+                       . (ref($self)) . ")" .  " is not compatible with the " .
+                       "Class::MOP::class_of(".$superclass_name . ") => ("
+                       . ($super_meta_type) . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
