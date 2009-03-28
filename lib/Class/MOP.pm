@@ -10,7 +10,7 @@ use MRO::Compat;
 
 use Carp          'confess';
 use Devel::GlobalDestruction qw( in_global_destruction );
-use Scalar::Util  'weaken', 'reftype';
+use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Sub::Name qw( subname );
 
 use Class::MOP::Class;
@@ -139,6 +139,8 @@ sub _is_valid_class_name {
 sub class_of {
     my $self  = shift;
     my $class = shift;
+
+    return undef if !defined($class);
 
     $class = blessed($class) || $class;
 
