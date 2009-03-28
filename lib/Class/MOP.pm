@@ -59,6 +59,12 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
     sub does_metaclass_exist        { exists $METAS{$_[0]} && defined $METAS{$_[0]} }
     sub remove_metaclass_by_name    { $METAS{$_[0]} = undef }
 
+    # This handles instances as well as class names
+    sub class_of {
+        my $class = blessed($_[0]) || $_[0];
+        return $METAS{$class};
+    }
+
     # NOTE:
     # We only cache metaclasses, meaning instances of
     # Class::MOP::Class. We do not cache instance of
@@ -134,11 +140,6 @@ sub _is_valid_class_name {
     return 1 if $class =~ /^\w+(?:::\w+)*$/;
 
     return 0;
-}
-
-sub class_of {
-    my $class = blessed($_[0]) || $_[0];
-    return get_metaclass_by_name($class);
 }
 
 ## ----------------------------------------------------------------------------
