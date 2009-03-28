@@ -4,7 +4,7 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::*
       - Call user_class->meta in fewer places, with the eventual
         goal of allowing the user to rename or exclude ->meta
-        altogether (Sartak)
+        altogether. Instead uses Class::MOP::class_of. (Sartak)
 
     * Class::MOP
       - New class_of function that should be used to retrieve a
