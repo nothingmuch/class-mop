@@ -138,8 +138,6 @@ sub _is_valid_class_name {
 
 sub class_of {
     my $class = blessed($_[0]) || $_[0];
-
-    return undef if !defined($class);
     return get_metaclass_by_name($class);
 }
 
