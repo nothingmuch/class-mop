@@ -887,6 +887,12 @@ is from and the name of the C<$code> itself. This is used by several
 elements of the MOP to determine where a given C<$code> reference is
 from.
 
+=item B<Class::MOP::class_of($instance_or_class_name)>
+
+This will return the metaclass of the given instance or class name.
+Even if the class lacks a metaclass, no metaclass will be initialized
+and C<undef> will be returned.
+
 =item B<Class::MOP::check_package_cache_flag($pkg)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
