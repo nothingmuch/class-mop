@@ -1,5 +1,16 @@
 Revision history for Perl extension Class-MOP.
 
+0.80
+    * Class::MOP::*
+      - Call user_class->meta in fewer places, with the eventual
+        goal of allowing the user to rename or exclude ->meta
+        altogether (Sartak)
+
+    * Class::MOP
+      - New class_of function that should be used to retrieve a
+        metaclass. This is unlike get_metaclass_by_name in that
+        it accepts instances, not just class names. (Sartak)
+
 0.79 Fri, March 29, 2009
     * No changes from 0.78_02.
 
