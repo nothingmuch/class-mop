@@ -405,22 +405,16 @@ sub clone_instance {
 sub rebless_instance {
     my ($self, $instance, %params) = @_;
 
-    my $old_metaclass;
-    if ($instance->can('meta')) {
-        ($instance->meta->isa('Class::MOP::Class'))
-            || confess 'Cannot rebless instance if ->meta is not an instance of Class::MOP::Class';
-        $old_metaclass = $instance->meta;
-    }
-    else {
-        $old_metaclass = $self->initialize(blessed($instance));
-    }
+    my $old_metaclass = Class::MOP::class_of($instance);
 
-    $old_metaclass->rebless_instance_away($instance, $self, %params);
+    my $old_class = $old_metaclass ? $old_metaclass->name : blessed($instance);
+    $self->name->isa($old_class)
+        || confess "You may rebless only into a subclass of ($old_class), of which (". $self->name .") isn't.";
+
+    $old_metaclass->rebless_instance_away($instance, $self, %params)
+        if $old_metaclass;
 
     my $meta_instance = $self->get_meta_instance();
-
-    $self->name->isa($old_metaclass->name)
-        || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
     # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
