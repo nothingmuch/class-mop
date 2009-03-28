@@ -18,7 +18,7 @@ sub meta {
 }
 
 sub _new {
-    shift->meta->new_object(@_);
+    Class::MOP::class_of(shift)->new_object(@_);
 }
 
 # RANT:
