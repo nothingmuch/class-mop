@@ -56,7 +56,7 @@ throws_ok {
         'FakeClassOhNo', 'SyntaxError', 'Class'
     );
 }
-qr/Missing right curly/, 
+qr/Missing right curly/,
     'load_first_existing_class does not pass over an existing (bad) module';
 
 throws_ok {

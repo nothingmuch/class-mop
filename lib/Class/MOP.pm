@@ -128,7 +128,7 @@ sub _try_load_one_class {
     my $class = shift;
 
     return if is_class_loaded($class);
-    
+
     my $file = _class_to_pmfile($class);
 
     return do {
