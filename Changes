@@ -11,6 +11,12 @@ Revision history for Perl extension Class-MOP.
         metaclass. This is unlike get_metaclass_by_name in that
         it accepts instances, not just class names. (Sartak)
 
+    * Class::MOP
+      - load_first_existing_class didn't actually load the first existing
+        class; instead, it loaded the first existing and compiling class.  It
+        now throws an error if a class exists (in @INC) but fails to compile.
+        (hdp)
+
 0.79 Fri, March 29, 2009
     * No changes from 0.78_02.
 

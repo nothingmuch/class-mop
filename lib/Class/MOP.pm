@@ -72,6 +72,15 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
     # because I don't yet see a good reason to do so.
 }
 
+sub _class_to_pmfile {
+    my $class = shift;
+
+    my $file = $class . '.pm';
+    $file =~ s{::}{/}g;
+
+    return $file;
+}
+
 sub load_first_existing_class {
     my @classes = @_
         or return;
@@ -86,10 +95,12 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
     for my $class (@classes) {
+        my $pmfile = _class_to_pmfile($class);
         my $e = _try_load_one_class($class);
 
         if ($e) {
             $exceptions{$class} = $e;
+            last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
         }
         else {
             $found = $class;
@@ -106,6 +117,9 @@ sub load_first_existing_class {
                 "Could not load class (%s) because : %s", $_,
                 $exceptions{$_}
                 )
+            }
+        grep {
+            exists $exceptions{$_}
             } @classes
     );
 }
@@ -114,9 +128,8 @@ sub _try_load_one_class {
     my $class = shift;
 
     return if is_class_loaded($class);
-
-    my $file = $class . '.pm';
-    $file =~ s{::}{/}g;
+    
+    my $file = _class_to_pmfile($class);
 
     return do {
         local $@;
