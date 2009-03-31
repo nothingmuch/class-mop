@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.80
+    * Class::MOP
+      - HAS_ISAREV is now deprecated. It has always returned 1 so
+        it won't be missed. (Sartak)
+
     * Class::MOP::*
       - Call user_class->meta in fewer places, with the eventual
         goal of allowing the user to rename or exclude ->meta
