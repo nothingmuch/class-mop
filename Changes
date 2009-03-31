@@ -21,6 +21,15 @@ Revision history for Perl extension Class-MOP.
         now throws an error if a class exists (in @INC) but fails to compile.
         (hdp)
 
+    * Class::MOP::Class
+    * Class::MOP
+      - we had some semi-buggy code that purported to provide a
+        HAS_ISAREV based on whether mro had get_isarev (due
+        to an oversight, it always returned 1). Since mro and
+        MRO::Compat have always had get_isarev, HAS_ISAREV was
+        pointless. This insight simplified the subclasses method
+        by deleting the pure-perl fallback. (Sartak)
+
 0.79 Fri, March 29, 2009
     * No changes from 0.78_02.
 
