@@ -24,7 +24,10 @@ BEGIN {
         ? sub () { 0 }
         : sub () { 1 };    
 
-    sub HAVE_ISAREV () { 1 }
+    sub HAVE_ISAREV () {
+        warn "Class::MOP::HAVE_ISAREV is deprecated and will be removed in a future release. It has always returned 1 anyway.";
+        return 1;
+    }
 
     # this is either part of core or set up appropriately by MRO::Compat
     *check_package_cache_flag = \&mro::get_pkg_gen;
