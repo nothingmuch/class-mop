@@ -128,6 +128,7 @@ pluggable
 prechecking
 prepends
 rebless
+reblessing
 runtime
 sigil
 sigils
