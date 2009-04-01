@@ -14,6 +14,7 @@ my @modules = all_modules();
 plan tests => scalar @modules;
 
 my %trustme = (
+    'Class::MOP'            => ['HAVE_ISAREV'],
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
         # deprecated

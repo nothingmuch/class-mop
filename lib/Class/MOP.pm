@@ -862,11 +862,6 @@ We set this constant depending on what version perl we are on, this
 allows us to take advantage of new 5.10 features and stay backwards
 compatible.
 
-=item I<Class::MOP::HAVE_ISAREV>
-
-Whether or not the L<mro> pragma provides C<get_isarev>, a much faster
-way to get all the subclasses of a certain class.
-
 =back
 
 =head2 Utility functions
