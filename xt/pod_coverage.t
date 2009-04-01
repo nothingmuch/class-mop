@@ -45,6 +45,8 @@ my %trustme = (
         # doc'd under get_all_attributes
         'compute_all_applicable_attributes',
 
+        # doc'd with rebless_instance
+        'rebless_instance_away',
     ],
 
     'Class::MOP::Instance' => [
