@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.80
+0.80 Wed, April 1, 2009
     * Class::MOP::*
       - Call user_class->meta in fewer places, with the eventual goal
         of allowing the user to rename or exclude ->meta
