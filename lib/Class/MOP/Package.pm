@@ -8,7 +8,7 @@ use B;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.79';
+our $VERSION   = '0.80';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
