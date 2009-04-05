@@ -89,7 +89,7 @@ use Class::MOP;
     is_deeply([@supers], [$meta->superclasses], '... reset the superclasses okay');
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 
     lives_ok {$meta->make_immutable; } '... changed Baz to be immutable again';
@@ -118,7 +118,7 @@ use Class::MOP;
     dies_ok { $meta->superclasses('Foo') } '... set the superclasses';
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 }
 
@@ -180,7 +180,7 @@ use Class::MOP;
     is_deeply([@supers], [$meta->superclasses], '... reset the superclasses okay');
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 };
 
@@ -213,7 +213,7 @@ use Class::MOP;
     dies_ok { $meta->superclasses('Foo') } '... set the superclasses';
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 }
 
