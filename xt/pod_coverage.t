@@ -18,6 +18,7 @@ my %trustme = (
     'Class::MOP::Class'     => [
         # deprecated
         'alias_method',
+        'compute_all_applicable_attributes',
         'compute_all_applicable_methods',
 
         # unfinished feature
@@ -40,9 +41,6 @@ my %trustme = (
         'reset_package_cache_flag',
         'update_package_cache_flag',
         'wrap_method_body',
-
-        # doc'd under get_all_attributes
-        'compute_all_applicable_attributes',
 
     ],
 

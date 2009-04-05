@@ -135,7 +135,7 @@ use Class::MOP;
 
     my @attributes;
     lives_ok {
-        @attributes = $meta->compute_all_applicable_attributes;
+        @attributes = $meta->get_all_attributes;
     }
     '... got the attribute list okay';
     is_deeply(
@@ -207,7 +207,7 @@ use Class::MOP;
 
     my @attributes;
     lives_ok {
-        @attributes = $meta->compute_all_applicable_attributes;
+        @attributes = $meta->get_all_attributes;
     }
     '... got the attribute list okay';
     is_deeply(
@@ -279,7 +279,7 @@ use Class::MOP;
 
     my @attributes;
     lives_ok {
-        @attributes = $meta->compute_all_applicable_attributes;
+        @attributes = $meta->get_all_attributes;
     }
     '... got the attribute list okay';
     is_deeply(

@@ -352,7 +352,7 @@ sub _construct_instance {
     my $params = @_ == 1 ? $_[0] : {@_};
     my $meta_instance = $class->get_meta_instance();
     my $instance = $meta_instance->create_instance();
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->get_all_attributes()) {
         $attr->initialize_instance_slot($meta_instance, $instance, $params);
     }
     # NOTE:
@@ -387,7 +387,7 @@ sub _create_meta_instance {
     
     my $instance = $self->instance_metaclass->new(
         associated_metaclass => $self,
-        attributes => [ $self->compute_all_applicable_attributes() ],
+        attributes => [ $self->get_all_attributes() ],
     );
 
     $self->add_meta_instance_dependencies()
@@ -422,7 +422,7 @@ sub _clone_instance {
         || confess "You can only clone instances, ($instance) is not a blessed instance";
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->get_all_attributes()) {
         if ( defined( my $init_arg = $attr->init_arg ) ) {
             if (exists $params{$init_arg}) {
                 $attr->set_value($clone, $params{$init_arg});
@@ -456,7 +456,7 @@ sub rebless_instance {
     # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
     $meta_instance->rebless_instance_structure($_[1], $self);
 
-    foreach my $attr ( $self->compute_all_applicable_attributes ) {
+    foreach my $attr ( $self->get_all_attributes ) {
         if ( $attr->has_value($instance) ) {
             if ( defined( my $init_arg = $attr->init_arg ) ) {
                 $params{$init_arg} = $attr->get_value($instance)
@@ -468,7 +468,7 @@ sub rebless_instance {
         }
     }
 
-    foreach my $attr ($self->compute_all_applicable_attributes) {
+    foreach my $attr ($self->get_all_attributes) {
         $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
     
@@ -882,7 +882,7 @@ sub add_meta_instance_dependencies {
 
     $self->remove_meta_instance_dependencies;
 
-    my @attrs = $self->compute_all_applicable_attributes();
+    my @attrs = $self->get_all_attributes();
 
     my %seen;
     my @classes = grep { not $seen{$_->name}++ } map { $_->associated_class } @attrs;
@@ -967,13 +967,16 @@ sub get_attribute_list {
 }
 
 sub get_all_attributes {
-    shift->compute_all_applicable_attributes(@_);
-}
-
-sub compute_all_applicable_attributes {
     my $self = shift;
     my %attrs = map { %{ $self->initialize($_)->get_attribute_map } } reverse $self->linearized_isa;
     return values %attrs;
+}
+
+sub compute_all_applicable_attributes {
+    warn 'The construct_class_instance method has been deprecated.'
+        . " Use get_all_attributes instead.\n";
+
+    shift->get_all_attributes;
 }
 
 sub find_attribute_by_name {
@@ -1502,8 +1505,6 @@ defined in this class.
 
 This will traverse the inheritance hierarchy and return a list of all
 the L<Class::MOP::Attribute> objects for this class and its parents.
-
-This method can also be called as C<compute_all_applicable_attributes>.
 
 =item B<< $metaclass->find_attribute_by_name($attribute_name) >>
 
