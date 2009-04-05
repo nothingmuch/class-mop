@@ -999,12 +999,12 @@ sub make_immutable {
         memoize => {
             class_precedence_list => 'ARRAY',
             # FIXME perl 5.10 memoizes this on its own, no need?
-            linearized_isa                    => 'ARRAY',
-            get_all_methods                   => 'ARRAY',
-            get_all_method_names              => 'ARRAY',
-            compute_all_applicable_attributes => 'ARRAY',
-            get_meta_instance                 => 'SCALAR',
-            get_method_map                    => 'SCALAR',
+            linearized_isa       => 'ARRAY',
+            get_all_methods      => 'ARRAY',
+            get_all_method_names => 'ARRAY',
+            get_all_attributes   => 'ARRAY',
+            get_meta_instance    => 'SCALAR',
+            get_method_map       => 'SCALAR',
         },
 
         # NOTE:
