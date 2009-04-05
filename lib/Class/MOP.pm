@@ -178,7 +178,7 @@ sub _is_valid_class_name {
 
 # We need to add in the meta-attributes here so that
 # any subclass of Class::MOP::* will be able to
-# inherit them using &construct_instance
+# inherit them using _construct_instance
 
 ## --------------------------------------------------------
 ## Class::MOP::Package
@@ -364,7 +364,7 @@ Class::MOP::Class->meta->add_attribute(
 # we don't actually need to tie the knot with
 # Class::MOP::Class here, it is actually handled
 # within Class::MOP::Class itself in the
-# construct_class_instance method.
+# _construct_class_instance method.
 
 ## --------------------------------------------------------
 ## Class::MOP::Attribute
