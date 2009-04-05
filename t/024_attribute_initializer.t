@@ -34,7 +34,7 @@ This checks that the initializer is used to set the initial value.
 can_ok('Foo', 'get_bar');
 can_ok('Foo', 'set_bar');    
 
-my $foo = Foo->meta->construct_instance(bar => 10);
+my $foo = Foo->meta->new_object(bar => 10);
 is($foo->get_bar, 20, "... initial argument was doubled as expected");
 
 $foo->set_bar(30);

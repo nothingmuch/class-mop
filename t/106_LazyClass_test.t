@@ -33,7 +33,7 @@ BEGIN {use Class::MOP;
 
     sub new {
         my $class = shift;
-        bless $class->meta->construct_instance(@_) => $class;
+        bless $class->meta->new_object(@_) => $class;
     }
 }
 

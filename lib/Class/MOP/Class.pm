@@ -45,7 +45,7 @@ sub construct_class_instance {
 }
 
 # NOTE: (meta-circularity)
-# this is a special form of &construct_instance
+# this is a special form of _construct_instance
 # (see below), which is used to construct class
 # meta-object instances for any Class::MOP::*
 # class. All other classes will use the more
@@ -86,7 +86,7 @@ sub _construct_class_instance {
         # it is safe to use meta here because
         # class will always be a subclass of
         # Class::MOP::Class, which defines meta
-        $meta = $class->meta->construct_instance($options)
+        $meta = $class->meta->_construct_instance($options)
     }
 
     # and check the metaclass compatibility
@@ -338,10 +338,16 @@ sub new_object {
     # which will deal with the singletons
     return $class->_construct_class_instance(@_)
         if $class->name->isa('Class::MOP::Class');
-    return $class->construct_instance(@_);
+    return $class->_construct_instance(@_);
 }
 
 sub construct_instance {
+    warn 'The construct_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
+    shift->_construct_instance;
+}
+
+sub _construct_instance {
     my $class = shift;
     my $params = @_ == 1 ? $_[0] : {@_};
     my $meta_instance = $class->get_meta_instance();

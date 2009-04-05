@@ -501,7 +501,7 @@ This is a string value representing the expected key in an
 initialization hash. For instance, if we have an C<init_arg> value of
 C<-foo>, then the following code will Just Work.
 
-  MyClass->meta->construct_instance( -foo => 'Hello There' );
+  MyClass->meta->new_object( -foo => 'Hello There' );
 
 If an init_arg is not assigned, it will automatically use the
 attribute's name. If C<init_arg> is explicitly set to C<undef>, the

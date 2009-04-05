@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 260;
+use Test::More tests => 262;
 use Test::Exception;
 
 use Class::MOP;
@@ -60,7 +60,7 @@ my @class_mop_class_methods = qw(
     instance_metaclass get_meta_instance
     create_meta_instance _create_meta_instance
     new_object clone_object
-    construct_instance
+    construct_instance _construct_instance
     construct_class_instance _construct_class_instance
     clone_instance _clone_instance
     rebless_instance rebless_instance_away

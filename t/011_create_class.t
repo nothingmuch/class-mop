@@ -21,7 +21,7 @@ my $Point = Class::MOP::Class->create('Point' => (
     methods => {
         'new' => sub {
             my $class = shift;
-            my $instance = $class->meta->construct_instance(@_);
+            my $instance = $class->meta->new_object(@_);
             bless $instance => $class;
         },
         'clear' => sub {

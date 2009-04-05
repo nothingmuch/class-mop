@@ -228,14 +228,14 @@ BEGIN {use Class::MOP;use Class::MOP::Immutable;
     ok(!Baz->meta->has_method('new'), '... no constructor was made');
 
     {
-        my $baz = Baz->meta->construct_instance;
+        my $baz = Baz->meta->new_object;
         isa_ok($baz, 'Bar');
         is($baz->bar, 'BAR', '... got the right default value');
         is($baz->baz, 'BAZ', '... got the right default value');
     }
 
     {
-        my $baz = Baz->meta->construct_instance(bar => 'BAZ!', baz => 'BAR!', bah => 'BAH!');
+        my $baz = Baz->meta->new_object(bar => 'BAZ!', baz => 'BAR!', bah => 'BAH!');
         isa_ok($baz, 'Baz');
         is($baz->bar, 'BAZ!', '... got the right parameter value');
         is($baz->baz, 'BAR!', '... got the right parameter value');
