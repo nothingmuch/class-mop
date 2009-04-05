@@ -383,10 +383,10 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
             remove_package_symbol
         /],
         memoize     => {
-            class_precedence_list             => 'ARRAY',
-            compute_all_applicable_attributes => 'ARRAY',
-            get_meta_instance                 => 'SCALAR',
-            get_method_map                    => 'SCALAR',
+            class_precedence_list => 'ARRAY',
+            get_all_attributes    => 'ARRAY',
+            get_meta_instance     => 'SCALAR',
+            get_method_map        => 'SCALAR',
         }
     });
 
