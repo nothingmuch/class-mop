@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.78_02';
+our $VERSION   = '0.80';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -182,16 +182,17 @@ sub _check_metaclass_compatibility {
             : ref($super_meta);
 
         ($self->isa($super_meta_type))
-            || confess $self->name . "->meta => (" . (ref($self)) . ")" .
-                       " is not compatible with the " .
-                       $superclass_name . "->meta => (" . ($super_meta_type)     . ")";
+            || confess "Class::MOP::class_of(" . $self->name . ") => ("
+                       . (ref($self)) . ")" .  " is not compatible with the " .
+                       "Class::MOP::class_of(".$superclass_name . ") => ("
+                       . ($super_meta_type) . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
         ($self->instance_metaclass->isa($super_meta->instance_metaclass))
-            || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
+            || confess "Class::MOP::class_of(" . $self->name . ")->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $superclass_name . "->meta->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
+                       "Class::MOP::class_of(" . $superclass_name . ")->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
     }
 }
 
@@ -435,22 +436,16 @@ sub _clone_instance {
 sub rebless_instance {
     my ($self, $instance, %params) = @_;
 
-    my $old_metaclass;
-    if ($instance->can('meta')) {
-        ($instance->meta->isa('Class::MOP::Class'))
-            || confess 'Cannot rebless instance if ->meta is not an instance of Class::MOP::Class';
-        $old_metaclass = $instance->meta;
-    }
-    else {
-        $old_metaclass = $self->initialize(blessed($instance));
-    }
+    my $old_metaclass = Class::MOP::class_of($instance);
 
-    $old_metaclass->rebless_instance_away($instance, $self, %params);
+    my $old_class = $old_metaclass ? $old_metaclass->name : blessed($instance);
+    $self->name->isa($old_class)
+        || confess "You may rebless only into a subclass of ($old_class), of which (". $self->name .") isn't.";
+
+    $old_metaclass->rebless_instance_away($instance, $self, %params)
+        if $old_metaclass;
 
     my $meta_instance = $self->get_meta_instance();
-
-    $self->name->isa($old_metaclass->name)
-        || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
     # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
@@ -510,51 +505,9 @@ sub superclasses {
 
 sub subclasses {
     my $self = shift;
-
     my $super_class = $self->name;
 
-    if ( Class::MOP::HAVE_ISAREV() ) {
-        return @{ $super_class->mro::get_isarev() };
-    } else {
-        my @derived_classes;
-
-        my $find_derived_classes;
-        $find_derived_classes = sub {
-            my ($outer_class) = @_;
-
-            my $symbol_table_hashref = do { no strict 'refs'; \%{"${outer_class}::"} };
-
-            SYMBOL:
-            for my $symbol ( keys %$symbol_table_hashref ) {
-                next SYMBOL if $symbol !~ /\A (\w+):: \z/x;
-                my $inner_class = $1;
-
-                next SYMBOL if $inner_class eq 'SUPER';    # skip '*::SUPER'
-
-                my $class =
-                $outer_class
-                ? "${outer_class}::$inner_class"
-                : $inner_class;
-
-                if ( $class->isa($super_class) and $class ne $super_class ) {
-                    push @derived_classes, $class;
-                }
-
-                next SYMBOL if $class eq 'main';           # skip 'main::*'
-
-                $find_derived_classes->($class);
-            }
-        };
-
-        my $root_class = q{};
-        $find_derived_classes->($root_class);
-
-        undef $find_derived_classes;
-
-        @derived_classes = sort { $a->isa($b) ? 1 : $b->isa($a) ? -1 : 0 } @derived_classes;
-
-        return @derived_classes;
-    }
+    return @{ $super_class->mro::get_isarev() };
 }
 
 

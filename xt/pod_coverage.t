@@ -14,6 +14,7 @@ my @modules = all_modules();
 plan tests => scalar @modules;
 
 my %trustme = (
+    'Class::MOP'            => ['HAVE_ISAREV'],
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
         # deprecated
@@ -42,6 +43,8 @@ my %trustme = (
         'update_package_cache_flag',
         'wrap_method_body',
 
+        # doc'd with rebless_instance
+        'rebless_instance_away',
     ],
 
     'Class::MOP::Instance' => [

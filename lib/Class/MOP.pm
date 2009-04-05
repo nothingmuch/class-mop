@@ -10,7 +10,7 @@ use MRO::Compat;
 
 use Carp          'confess';
 use Devel::GlobalDestruction qw( in_global_destruction );
-use Scalar::Util  'weaken', 'reftype';
+use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Sub::Name qw( subname );
 
 use Class::MOP::Class;
@@ -24,15 +24,16 @@ BEGIN {
         ? sub () { 0 }
         : sub () { 1 };    
 
-    *HAVE_ISAREV = defined(&mro::get_isarev)
-        ? sub () { 1 }
-        : sub () { 1 };
+    sub HAVE_ISAREV () {
+        warn "Class::MOP::HAVE_ISAREV is deprecated and will be removed in a future release. It has always returned 1 anyway.";
+        return 1;
+    }
 
     # this is either part of core or set up appropriately by MRO::Compat
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.78_02';
+our $VERSION   = '0.80';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';    
@@ -59,11 +60,26 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
     sub does_metaclass_exist        { exists $METAS{$_[0]} && defined $METAS{$_[0]} }
     sub remove_metaclass_by_name    { $METAS{$_[0]} = undef }
 
+    # This handles instances as well as class names
+    sub class_of {
+        my $class = blessed($_[0]) || $_[0];
+        return $METAS{$class};
+    }
+
     # NOTE:
     # We only cache metaclasses, meaning instances of
     # Class::MOP::Class. We do not cache instance of
     # Class::MOP::Package or Class::MOP::Module. Mostly
     # because I don't yet see a good reason to do so.
+}
+
+sub _class_to_pmfile {
+    my $class = shift;
+
+    my $file = $class . '.pm';
+    $file =~ s{::}{/}g;
+
+    return $file;
 }
 
 sub load_first_existing_class {
@@ -80,10 +96,12 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
     for my $class (@classes) {
+        my $pmfile = _class_to_pmfile($class);
         my $e = _try_load_one_class($class);
 
         if ($e) {
             $exceptions{$class} = $e;
+            last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
         }
         else {
             $found = $class;
@@ -100,6 +118,9 @@ sub load_first_existing_class {
                 "Could not load class (%s) because : %s", $_,
                 $exceptions{$_}
                 )
+            }
+        grep {
+            exists $exceptions{$_}
             } @classes
     );
 }
@@ -109,8 +130,7 @@ sub _try_load_one_class {
 
     return if is_class_loaded($class);
 
-    my $file = $class . '.pm';
-    $file =~ s{::}{/}g;
+    my $file = _class_to_pmfile($class);
 
     return do {
         local $@;
@@ -842,11 +862,6 @@ We set this constant depending on what version perl we are on, this
 allows us to take advantage of new 5.10 features and stay backwards
 compatible.
 
-=item I<Class::MOP::HAVE_ISAREV>
-
-Whether or not the L<mro> pragma provides C<get_isarev>, a much faster
-way to get all the subclasses of a certain class.
-
 =back
 
 =head2 Utility functions
@@ -859,7 +874,7 @@ Note that these are all called as B<functions, not methods>.
 
 This will load the specified C<$class_name>. This function can be used
 in place of tricks like C<eval "use $module"> or using C<require>
-unconditionally.
+unconditionally. This will return the metaclass of C<$class_name>.
 
 =item B<Class::MOP::is_class_loaded($class_name)>
 
@@ -877,6 +892,12 @@ This function returns two values, the name of the package the C<$code>
 is from and the name of the C<$code> itself. This is used by several
 elements of the MOP to determine where a given C<$code> reference is
 from.
+
+=item B<Class::MOP::class_of($instance_or_class_name)>
+
+This will return the metaclass of the given instance or class name.
+Even if the class lacks a metaclass, no metaclass will be initialized
+and C<undef> will be returned.
 
 =item B<Class::MOP::check_package_cache_flag($pkg)>
 

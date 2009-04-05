@@ -10,7 +10,8 @@ perl_version '5.008001';
 all_from 'lib/Class/MOP.pm';
 license 'perl';
 
-my $ccflags = ' -I.';
+require Config;
+my $ccflags = ( $Config::Config{ccflags} || '' ) . ' -I.';
 $ccflags .= ' -Wall' if -d '.svn' || -d '.git' || $ENV{MAINTAINER_MODE};
 
 requires 'Carp';
