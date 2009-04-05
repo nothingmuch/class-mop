@@ -926,7 +926,7 @@ sub get_all_attributes {
 }
 
 sub compute_all_applicable_attributes {
-    warn 'The construct_class_instance method has been deprecated.'
+    warn 'The compute_all_applicable_attributes method has been deprecated.'
         . " Use get_all_attributes instead.\n";
 
     shift->get_all_attributes;
