@@ -73,8 +73,8 @@ sub _meta_instance {
 }
 
 sub attributes {
-    warn 'The attributes method is deprecated.'
-        . " Use _attributes instead.\n";
+    warn 'The attributes method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n";
 
     return shift->_attributes;
 }
