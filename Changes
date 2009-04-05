@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.81
+0.80_01 Sun, April 5, 2009
     * Makefile.PL
       - Make sure to preserve any compiler flags already defined in
         Config.pm. Patch by Vincent Pit. RT #44739.
