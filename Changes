@@ -5,12 +5,11 @@ Revision history for Perl extension Class-MOP.
       - Make sure to preserve any compiler flags already defined in
         Config.pm. Patch by Vincent Pit. RT #44739.
 
-    * Everything
-      - Many methods have been renamed with a leading underscore, and
-        a few have been deprecated entirely. The methods with a
-        leading underscore are consider "internals only". People
-        writing subclasses or extensions to Class::MOP should feel
-        free to override them, but they are not for "public" use.
+    * Many methods have been renamed with a leading underscore, and a
+      few have been deprecated entirely. The methods with a leading
+      underscore are consider "internals only". People writing
+      subclasses or extensions to Class::MOP should feel free to
+      override them, but they are not for "public" use.
 
       - Class::MOP::Class
         - construct_class_instance => _construct_class_instance (use new_object)
