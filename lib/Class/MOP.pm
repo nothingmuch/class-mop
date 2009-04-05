@@ -62,6 +62,7 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
 
     # This handles instances as well as class names
     sub class_of {
+        return unless defined $_[0];
         my $class = blessed($_[0]) || $_[0];
         return $METAS{$class};
     }
