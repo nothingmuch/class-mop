@@ -5,6 +5,43 @@ Revision history for Perl extension Class-MOP.
       - Make sure to preserve any compiler flags already defined in
         Config.pm. Patch by Vincent Pit. RT #44739.
 
+    * Everything
+      - Many methods have been renamed with a leading underscore, and
+        a few have been deprecated entirely. The methods with a
+        leading underscore are consider "internals only". People
+        writing subclasses or extensions to Class::MOP should feel
+        free to override them, but they are not for "public" use.
+
+      - Class::MOP::Class
+        - construct_class_instance => _construct_class_instance (use new_object)
+        - construct_instance => _construct_instance (use new_object)
+        - check_metaclass_compatibility => _check_metaclass_compatibility
+        - create_meta_instance => _create_meta_instance (use get_meta_instance)
+        - clone_instance => _clone_instance (use clone_object)
+        - compute_all_applicable_methods is deprecated, use get_all_methods
+        - compute_all_applicable_attributes is deprecated, use get_all_attributes
+
+      - Class::MOP::Instance
+        - bless_instance_structure is deprecated and will be removed
+          in a future release
+
+      - Class::MOP::Module
+        - create has been renamed to _instantiate_module. This method
+          does not construct an object, it evals some code that
+          creates the relevant package in Perl's symbol table.
+
+      - Class::MOP::Method::Accessor
+        - initialize_body => _initialize_body (this is always called
+          when an object is constructed)
+        - /(generate_.*_method(?:_inline)?)/ => '_' . $1
+
+      - Class::MOP::Method::Constructor
+        - initialize_body => _initialize_body (this is always called
+          when an object is constructed)
+        - /(generate_constructor_method(?:_inline)?)/ => '_' . $1
+        - attributes => _attributes
+        - meta_instance => _meta_instance
+
 0.80 Wed, April 1, 2009
     * Class::MOP::*
       - Call user_class->meta in fewer places, with the eventual goal
