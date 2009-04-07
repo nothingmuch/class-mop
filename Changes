@@ -1,5 +1,18 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP
+    * Class::MOP::Class
+    * Class::MOP::Instance
+    * Class::MOP::Attribute
+    * Class::MOP::Method::Accessor
+    * Class::MOP::Method::Constructor
+      - Include stack traces in the deprecation warnings introduced in 0.80_01.
+        (Florian Ragwitz)
+
+    * MOP.xs
+      - Avoid c compiler warnings by declaring some unused function arguments.
+        (Florian Ragwitz)
+
 0.80_01 Sun, April 5, 2009
     * Makefile.PL
       - Make sure to preserve any compiler flags already defined in
