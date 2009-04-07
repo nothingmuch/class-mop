@@ -62,8 +62,8 @@ sub associated_metaclass { (shift)->{'associated_metaclass'} }
 ## cached values ...
 
 sub meta_instance {
-    warn 'The meta_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_meta_instance;
 }
 
@@ -73,8 +73,8 @@ sub _meta_instance {
 }
 
 sub attributes {
-    warn 'The attributes method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The attributes method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
 
     return shift->_attributes;
 }
@@ -87,8 +87,8 @@ sub _attributes {
 ## method
 
 sub initialize_body {
-    warn 'The initialize_body method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_initialize_body;
 }
 
@@ -102,8 +102,8 @@ sub _initialize_body {
 }
 
 sub generate_constructor_method {
-    warn 'The generate_constructor_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The generate_constructor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_generate_constructor_method;
 }
 
@@ -112,8 +112,8 @@ sub _generate_constructor_method {
 }
 
 sub generate_constructor_method_inline {
-    warn 'The generate_constructor_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The generate_constructor_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_generate_constructor_method_inline;
 }
 

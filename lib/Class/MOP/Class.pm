@@ -39,8 +39,8 @@ sub initialize {
 }
 
 sub construct_class_instance {
-    warn 'The construct_class_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The construct_class_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_construct_class_instance;
 }
 
@@ -154,8 +154,8 @@ sub update_package_cache_flag {
 
 
 sub check_metaclass_compatibility {
-    warn 'The check_metaclass_compatibility method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The check_metaclass_compatibility method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_check_metaclass_compatibility;
 }
 
@@ -343,8 +343,8 @@ sub new_object {
 }
 
 sub construct_instance {
-    warn 'The construct_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The construct_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_construct_instance;
 }
 
@@ -378,8 +378,8 @@ sub get_meta_instance {
 }
 
 sub create_meta_instance {
-    warn 'The create_meta_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The create_meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_create_meta_instance;
 }
 
@@ -412,8 +412,8 @@ sub clone_object {
 }
 
 sub clone_instance {
-    warn 'The clone_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n";
+    Carp::cluck('The clone_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
     shift->_clone_instance;
 }
 
@@ -669,7 +669,7 @@ sub add_method {
 }
 
 sub alias_method {
-    warn "The alias_method method is deprecated. Use add_method instead.\n";
+    Carp::cluck("The alias_method method is deprecated. Use add_method instead.\n");
 
     shift->add_method;
 }
@@ -733,8 +733,8 @@ sub get_all_methods {
 }
 
 sub compute_all_applicable_methods {
-    warn 'The compute_all_applicable_methods method is deprecated.'
-        . " Use get_all_methods instead.\n";
+    Carp::cluck('The compute_all_applicable_methods method is deprecated.'
+        . " Use get_all_methods instead.\n");
 
     return map {
         {
@@ -926,8 +926,8 @@ sub get_all_attributes {
 }
 
 sub compute_all_applicable_attributes {
-    warn 'The compute_all_applicable_attributes method has been deprecated.'
-        . " Use get_all_attributes instead.\n";
+    Carp::cluck('The compute_all_applicable_attributes method has been deprecated.'
+        . " Use get_all_attributes instead.\n");
 
     shift->get_all_attributes;
 }

@@ -75,8 +75,8 @@ sub create_instance {
 
 # for compatibility
 sub bless_instance_structure {
-    warn 'The bless_instance_structure method is deprecated.'
-        . " It will be removed in a future release.\n";
+    Carp::cluck('The bless_instance_structure method is deprecated.'
+        . " It will be removed in a future release.\n");
 
     my ($self, $instance_structure) = @_;
     bless $instance_structure, $self->_class_name;
