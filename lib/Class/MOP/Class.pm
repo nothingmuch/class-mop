@@ -41,7 +41,7 @@ sub initialize {
 sub construct_class_instance {
     Carp::cluck('The construct_class_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_construct_class_instance;
+    shift->_construct_class_instance(@_);
 }
 
 # NOTE: (meta-circularity)
@@ -156,7 +156,7 @@ sub update_package_cache_flag {
 sub check_metaclass_compatibility {
     Carp::cluck('The check_metaclass_compatibility method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_check_metaclass_compatibility;
+    shift->_check_metaclass_compatibility(@_);
 }
 
 sub _check_metaclass_compatibility {
@@ -345,7 +345,7 @@ sub new_object {
 sub construct_instance {
     Carp::cluck('The construct_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_construct_instance;
+    shift->_construct_instance(@_);
 }
 
 sub _construct_instance {
@@ -380,7 +380,7 @@ sub get_meta_instance {
 sub create_meta_instance {
     Carp::cluck('The create_meta_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_create_meta_instance;
+    shift->_create_meta_instance(@_);
 }
 
 sub _create_meta_instance {
@@ -414,7 +414,7 @@ sub clone_object {
 sub clone_instance {
     Carp::cluck('The clone_instance method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_clone_instance;
+    shift->_clone_instance(@_);
 }
 
 sub _clone_instance {
@@ -671,7 +671,7 @@ sub add_method {
 sub alias_method {
     Carp::cluck("The alias_method method is deprecated. Use add_method instead.\n");
 
-    shift->add_method;
+    shift->add_method(@_);
 }
 
 sub has_method {
@@ -929,7 +929,7 @@ sub compute_all_applicable_attributes {
     Carp::cluck('The compute_all_applicable_attributes method has been deprecated.'
         . " Use get_all_attributes instead.\n");
 
-    shift->get_all_attributes;
+    shift->get_all_attributes(@_);
 }
 
 sub find_attribute_by_name {
