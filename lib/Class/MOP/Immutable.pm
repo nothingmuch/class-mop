@@ -97,11 +97,18 @@ sub _inline_constructor {
 
     return unless $self->options->{inline_constructor};
 
-    return
-        unless $self->options->{replace_constructor}
-            or !$self->metaclass->has_method(
-                $self->options->{constructor_name}
-            );
+    unless ($self->options->{replace_constructor}
+         or !$self->metaclass->has_method(
+             $self->options->{constructor_name}
+         )) {
+        my $class = $self->metaclass->name;
+        warn "Not inlining a constructor for $class since it defines"
+           . " its own constructor.\n"
+           . "If you are certain you don't need to inline your"
+           . " constructor, specify inline_constructor => 0 in your"
+           . " call to $class->meta->make_immutable\n";
+        return;
+    }
 
     my $constructor_class = $self->options->{constructor_class};
 
