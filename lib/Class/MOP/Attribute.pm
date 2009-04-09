@@ -331,7 +331,7 @@ sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 sub process_accessors {
     Carp::cluck('The process_accessors method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_process_accessors;
+    shift->_process_accessors(@_);
 }
 
 sub _process_accessors {
