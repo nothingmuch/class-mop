@@ -5,6 +5,11 @@ Revision history for Perl extension Class-MOP.
       - The deprecaation wrappers for some renamed methods were not
         passing arguments to the new method. (nothingmuch)
 
+    * Class::MOP::Immutable
+      - Warn during immutablization if the local class provides its own
+        constructor, to parallel the warning in Moose when a superclass
+        provides its own constructor (doy)
+
 0.81 Tue, April 7, 2009
     * Class::MOP
     * Class::MOP::Class
