@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 80;
+use Test::More tests => 75;
 use Test::Exception;
 
 use Class::MOP;
@@ -42,20 +42,11 @@ use Class::MOP;
 
     $meta->make_immutable;
 
-    my $transformer = $meta->immutable_transformer;
-    isa_ok( $transformer, 'Class::MOP::Immutable',
-        '... transformer isa Class::MOP::Immutable' );
-
-    my $immutable_metaclass = $transformer->immutable_metaclass;
-    is( $transformer->metaclass, $meta,
-        '... transformer has correct metaclass' );
-    ok( $transformer->inlined_constructor,
-        '... transformer says it did inline the constructor' );
-    ok( $immutable_metaclass->is_anon_class,
-        '... immutable_metaclass is an anonymous class' );
+    my $immutable_metaclass = $meta->immutable_metaclass->meta;
 
     #I don't understand why i need to ->meta here...
     my $obj = $immutable_metaclass->name;
+
     ok( !$obj->is_mutable,  '... immutable_metaclass is not mutable' );
     ok( $obj->is_immutable, '... immutable_metaclass is immutable' );
     ok( !$obj->make_immutable,
@@ -63,15 +54,8 @@ use Class::MOP;
     is( $obj->meta, $immutable_metaclass,
         '... immutable_metaclass meta hack works' );
 
-    is_deeply(
-        [ $immutable_metaclass->superclasses ],
-        [ $original_metaclass_name ],
-        '... immutable_metaclass superclasses are correct'
-    );
-    ok(
-        $immutable_metaclass->has_method('get_mutable_metaclass_name'),
-        'immutable metaclass has get_mutable_metaclass_name method'
-    );
+    isa_ok( $meta, "Class::MOP::Class::Immutable::Trait" );
+    isa_ok( $meta, "Class::MOP::Class" );
 
 }
 
@@ -81,11 +65,6 @@ use Class::MOP;
 
     ok( !$meta->is_mutable,    '... our class is not mutable' );
     ok( $meta->is_immutable, '... our class is immutable' );
-
-    my $transformer = $meta->immutable_transformer;
-
-    is( $transformer, $meta->immutable_transformer,
-        '... immutable transformer cache works' );
 
     isa_ok( $meta, 'Class::MOP::Class' );
 

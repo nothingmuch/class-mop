@@ -17,8 +17,6 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-use Class::MOP::Immutable;
-
 BEGIN {
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005)
         ? sub () { 0 }
@@ -351,12 +349,37 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('immutable_transformer' => (
+    Class::MOP::Attribute->new('immutable_trait' => (
         reader   => {
-            'immutable_transformer' => \&Class::MOP::Class::immutable_transformer
+            'immutable_trait' => \&Class::MOP::Class::immutable_trait
         },
-        writer   => {
-            '_set_immutable_transformer' => \&Class::MOP::Class::_set_immutable_transformer
+        default => "Class::MOP::Class::Immutable::Trait",
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('constructor_name' => (
+        reader   => {
+            'constructor_name' => \&Class::MOP::Class::constructor_name,
+        },
+        default => "new",
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('constructor_class' => (
+        reader   => {
+            'constructor_class' => \&Class::MOP::Class::constructor_class,
+        },
+        default => "Class::MOP::Method::Constructor",
+    ))
+);
+
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('destructor_class' => (
+        reader   => {
+            'destructor_class' => \&Class::MOP::Class::destructor_class,
         },
     ))
 );
@@ -648,6 +671,7 @@ $_->meta->make_immutable(
     Class::MOP::Package
     Class::MOP::Module
     Class::MOP::Class
+    Class::MOP::Class::Immutable::Trait
 
     Class::MOP::Attribute
     Class::MOP::Method

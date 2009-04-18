@@ -4,9 +4,11 @@ package Class::MOP::Class;
 use strict;
 use warnings;
 
-use Class::MOP::Immutable;
 use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
+use Class::MOP::Method::Accessor;
+use Class::MOP::Method::Constructor;
+use Class::MOP::Class::Immutable;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
@@ -129,14 +131,14 @@ sub _new {
 
         'methods'             => {},
         'attributes'          => {},
-        'attribute_metaclass' => $options->{'attribute_metaclass'}
-            || 'Class::MOP::Attribute',
-        'method_metaclass' => $options->{'method_metaclass'}
-            || 'Class::MOP::Method',
-        'wrapped_method_metaclass' => $options->{'wrapped_method_metaclass'}
-            || 'Class::MOP::Method::Wrapped',
-        'instance_metaclass' => $options->{'instance_metaclass'}
-            || 'Class::MOP::Instance',
+        'attribute_metaclass' => ( $options->{'attribute_metaclass'} || 'Class::MOP::Attribute' ),
+        'method_metaclass' => ( $options->{'method_metaclass'} || 'Class::MOP::Method' ),
+        'wrapped_method_metaclass' => ( $options->{'wrapped_method_metaclass'} || 'Class::MOP::Method::Wrapped' ),
+        'instance_metaclass' => ( $options->{'instance_metaclass'} || 'Class::MOP::Instance' ),
+        'immutable_trait' => ( $options->{'immutable_trait'} || 'Class::MOP::Class::Immutable::Trait' ),
+        'constructor_name' => ( $options->{constructor_name} || 'new' ),
+        'constructor_class' => ( $options->{constructor_class} || 'Class::MOP::Method::Constructor' ),
+        'destructor_class' => $options->{destructor_class},
     }, $class;
 }
 
@@ -326,6 +328,10 @@ sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
 sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
+sub immutable_trait      { $_[0]->{'immutable_trait'}         }
+sub constructor_class        { $_[0]->{'constructor_class'}           }
+sub constructor_name         { $_[0]->{'constructor_name'}            }
+sub destructor_class         { $_[0]->{'destructor_class'}            }
 
 # Instance Construction & Cloning
 
@@ -966,88 +972,192 @@ sub is_pristine {
 
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
+sub immutable_transformer { return }
 
-sub immutable_transformer { $_[0]->{immutable_transformer} }
-sub _set_immutable_transformer { $_[0]->{immutable_transformer} = $_[1] }
+sub _immutable_options {
+    my ( $self, @args ) = @_;
 
-sub make_immutable {
-    my $self = shift;
-
-    return if $self->is_immutable;
-
-    my $transformer = $self->immutable_transformer
-        || $self->_make_immutable_transformer(@_);
-
-    $self->_set_immutable_transformer($transformer);
-
-    $transformer->make_metaclass_immutable;
+    return (
+        inline_accessors   => 1,
+        inline_constructor => 1,
+        inline_destructor  => 0,
+        debug              => 0,
+        immutable_trait   => $self->immutable_trait,
+        constructor_name  => $self->constructor_name,
+        constructor_class => $self->constructor_class,
+        destructor_class  => $self->destructor_class,
+        @args,
+    );
 }
 
-{
-    my %Default_Immutable_Options = (
-        read_only   => [qw/superclasses/],
-        cannot_call => [
-            qw(
-                add_method
-                alias_method
-                remove_method
-                add_attribute
-                remove_attribute
-                remove_package_symbol
-                )
-        ],
-        memoize => {
-            class_precedence_list => 'ARRAY',
-            # FIXME perl 5.10 memoizes this on its own, no need?
-            linearized_isa       => 'ARRAY',
-            get_all_methods      => 'ARRAY',
-            get_all_method_names => 'ARRAY',
-            get_all_attributes   => 'ARRAY',
-            get_meta_instance    => 'SCALAR',
-            get_method_map       => 'SCALAR',
-        },
+sub make_immutable {
+    my ( $self, @args ) = @_;
 
-        # NOTE:
-        # this is ugly, but so are typeglobs,
-        # so whattayahgonnadoboutit
-        # - SL
-        wrapped => {
-            add_package_symbol => sub {
-                my $original = shift;
-                confess "Cannot add package symbols to an immutable metaclass"
-                    unless ( caller(2) )[3] eq
-                    'Class::MOP::Package::get_package_symbol';
-
-                # This is a workaround for a bug in 5.8.1 which thinks that
-                # goto $original->body
-                # is trying to go to a label
-                my $body = $original->body;
-                goto $body;
-            },
-        },
-    );
-
-    sub _default_immutable_transformer_options {
-        return %Default_Immutable_Options;
+    if ( $self->is_mutable ) {
+        $self->_initialize_immutable($self->_immutable_options(@args));
+        $self->_rebless_as_immutable(@args);
+        return $self;
+    } else {
+        return;
     }
 }
 
-sub _make_immutable_transformer {
-    my $self = shift;
-
-    Class::MOP::Immutable->new(
-        $self,
-        $self->_default_immutable_transformer_options,
-        @_
-    );
-}
 
 sub make_mutable {
     my $self = shift;
 
-    return if $self->is_mutable;
+    if ( $self->is_immutable ) {
+        my @args = $self->immutable_options;
+        $self->_rebless_as_mutable();
+        $self->_remove_inlined_code(@args);
+        delete $self->{__immutable};
+        return $self;
+    } else {
+        return;
+    }
+}
 
-    $self->immutable_transformer->make_metaclass_mutable;
+sub immutable_metaclass {
+    my ( $self, %args ) = @_;
+
+    if ( my $class = $args{immutable_metaclass} ) {
+        return $class;
+    }
+
+    my $trait = $args{immutable_trait} = $self->immutable_trait
+        || confess "no immutable trait specified for $self";
+
+    my $class = "Class::MOP::Class::Immutable::" . ref($self);
+
+    if ( Class::MOP::is_class_loaded($class) ) {
+        return $class;
+    } else {
+        my $meta = Class::MOP::Class->initialize($class);
+
+        $meta->superclasses( $trait, ref($self) );
+
+        $meta->make_immutable;
+
+        return $class;
+    }
+}
+
+sub _rebless_as_immutable {
+    my ( $self, @args ) = @_;
+
+    $self->{__immutable}{original_class} = ref $self;
+
+    bless $self => $self->immutable_metaclass(@args);
+}
+
+sub _remove_inlined_code {
+    my $self = shift;
+
+    $self->remove_method($_->name) for $self->_inlined_methods;
+
+    delete $self->{__immutable}{inlined_methods};
+}
+
+sub _inlined_methods { @{ $_[0]{__immutable}{inlined_methods} || [] } };
+
+sub _add_inlined_method {
+    my ( $self, $method ) = @_;
+
+    push @{ $self->{__immutable}{inlined_methods} ||= [] }, $method;
+}
+
+sub _initialize_immutable {
+    my ( $self, %args ) = @_;
+
+    $self->{__immutable}{options} = \%args;
+    $self->_install_inlined_code(%args);
+}
+
+sub _install_inlined_code {
+    my ( $self, %args ) = @_;
+
+    # FIXME
+    $self->_inline_accessors(%args) if $args{inline_accessors};
+    $self->_inline_constructor(%args) if $args{inline_constructor};
+    $self->_inline_destructor(%args) if $args{inline_destructor};
+}
+
+sub _rebless_as_mutable {
+    my $self = shift;
+
+    bless $self, $self->get_mutable_metaclass_name;
+
+    return $self;
+}
+
+sub _inline_accessors {
+    my $self = shift;
+
+    foreach my $attr_name ( $self->get_attribute_list ) {
+        $self->get_attribute($attr_name)->install_accessors(1);
+    }
+}
+
+sub _inline_constructor {
+    my ( $self, %args ) = @_;
+
+    my $name = $args{constructor_name};
+
+    #if ( my $existing = $self->name->can($args{constructor_name}) ) {
+    #    if ( refaddr($existing) == refaddr(\&Moose::Object::new) ) {
+
+    unless ($args{replace_constructor}
+         or !$self->has_method($name) ) {
+        my $class = $self->name;
+        warn "Not inlining a constructor for $class since it defines"
+           . " its own constructor.\n"
+           . "If you are certain you don't need to inline your"
+           . " constructor, specify inline_constructor => 0 in your"
+           . " call to $class->meta->make_immutable\n";
+        return;
+    }
+
+    my $constructor_class = $args{constructor_class};
+
+    Class::MOP::load_class($constructor_class);
+
+    my $constructor = $constructor_class->new(
+        options      => \%args,
+        metaclass    => $self,
+        is_inline    => 1,
+        package_name => $self->name,
+        name         => $name,
+    );
+
+    if ( $args{replace_constructor} or $constructor->can_be_inlined ) {
+        $self->add_method($name => $constructor);
+        $self->_add_inlined_method($constructor);
+    }
+}
+
+sub _inline_destructor {
+    my ( $self, %args ) = @_;
+
+    ( exists $args{destructor_class} )
+        || confess "The 'inline_destructor' option is present, but "
+        . "no destructor class was specified";
+
+    my $destructor_class = $args{destructor_class};
+
+    Class::MOP::load_class($destructor_class);
+
+    return unless $destructor_class->is_needed( $self );
+
+    my $destructor = $destructor_class->new(
+        options      => \%args,
+        metaclass    => $self,
+        package_name => $self->name,
+        name         => 'DESTROY'
+    );
+
+    $self->add_method( 'DESTROY' => $destructor );
+
+    $self->_add_inlined_method($destructor);
 }
 
 1;
