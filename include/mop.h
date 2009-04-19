@@ -74,4 +74,105 @@ typedef bool (*get_package_symbols_cb_t) (const char *, STRLEN, SV *, void *);
 void mop_get_package_symbols(HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud);
 HV *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 
+typedef struct mop_stashed_mg_St mop_stashed_mg_t;
+
+struct mop_stashed_mg_St {
+    void *ptr;
+    void (*destructor)(void *);
+};
+
+
+
+
+
+
+
+
+static int mop_stashed_magic_free(pTHX_ SV *obj, MAGIC *mg) {
+    mop_stashed_mg_t *stashed = (mop_stashed_mg_t *)mg->mg_ptr;
+
+    if ( stashed ) {
+        stashed->destructor(stashed->ptr);
+        Safefree(stashed);
+    }
+
+    return 0;
+}
+
+static MGVTBL mop_stashed_mg_vtbl = {
+    NULL, /* get */
+    NULL, /* set */
+    NULL, /* len */
+    NULL, /* clear */
+    mop_stashed_magic_free, /* free */
+#if MGf_COPY
+    NULL, /* copy */
+#endif /* MGf_COPY */
+#if MGf_DUP
+    NULL, /* dup */
+#endif /* MGf_DUP */
+#if MGf_LOCAL
+    NULL, /* local */
+#endif /* MGf_LOCAL */
+};
+
+
+static MAGIC *mop_stash_in_mg (pTHX_ SV *sv, SV *obj, void *ptr, void (*destructor)(void *)) {
+    mop_stashed_mg_t *stashed = NULL;
+    MAGIC *mg;
+
+    if ( ptr && destructor ) {
+        Newx(stashed, 1, mop_stashed_mg_t);
+
+        stashed->destructor = destructor;
+        stashed->ptr = ptr;
+    }
+
+    mg = sv_magicext(sv, obj, PERL_MAGIC_ext, &mop_stashed_mg_vtbl, (void *)stashed, 0 );
+
+    if ( obj )
+        mg->mg_flags |= MGf_REFCOUNTED;
+
+    return mg;
+}
+
+
+static MAGIC *mop_find_magic(pTHX_ SV *sv) {
+    MAGIC *mg;
+
+    if (SvTYPE(sv) >= SVt_PVMG) {
+        for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+            if ((mg->mg_type == PERL_MAGIC_ext) && (mg->mg_virtual == &mop_stashed_mg_vtbl))
+                break;
+        }
+        if (mg)
+            return mg;
+    }
+
+    return NULL;
+}
+
+static SV *mop_get_stashed_obj_in_mg(pTHX_ SV *sv) {
+    MAGIC *mg = mop_find_magic(aTHX_ sv);
+
+    if ( mg )
+        return mg->mg_obj;
+    else
+        return NULL;
+}
+
+static void *mop_get_stashed_ptr_in_mg(pTHX_ SV *sv) {
+    MAGIC *mg = mop_find_magic(aTHX_ sv);
+
+    if ( mg ) {
+        mop_stashed_mg_t *stashed = (mop_stashed_mg_t *)mg->mg_ptr;
+        return stashed->ptr;
+    }
+    else
+        return NULL;
+}
+
+
+
+
 #endif
