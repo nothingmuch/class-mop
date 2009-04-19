@@ -8,7 +8,7 @@ use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Constructor;
-use Class::MOP::Class::Immutable;
+use Class::MOP::Class::Immutable::Class::MOP::Class;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
@@ -328,7 +328,7 @@ sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
 sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
-sub immutable_trait      { $_[0]->{'immutable_trait'}         }
+sub immutable_trait          { $_[0]->{'immutable_trait'}             }
 sub constructor_class        { $_[0]->{'constructor_class'}           }
 sub constructor_name         { $_[0]->{'constructor_name'}            }
 sub destructor_class         { $_[0]->{'destructor_class'}            }
@@ -1027,18 +1027,33 @@ sub immutable_metaclass {
     my $trait = $args{immutable_trait} = $self->immutable_trait
         || confess "no immutable trait specified for $self";
 
-    my $class = "Class::MOP::Class::Immutable::" . ref($self);
+    my $meta_attr = $self->meta->find_attribute_by_name("immutable_trait");
 
-    if ( Class::MOP::is_class_loaded($class) ) {
-        return $class;
+    my $class_name;
+
+    if ( $meta_attr and $trait eq $meta_attr->default ) {
+        # if the trait is the same as the default we try and pick a predictable
+        # name for the immutable metaclass
+        $class_name = "Class::MOP::Class::Immutable::" . ref($self);
     } else {
-        my $meta = Class::MOP::Class->initialize($class);
+        $class_name = join("::", "Class::MOP::Class::Immutable::CustomTrait", $trait, "ForMetaClass", ref($self));
+    }
 
-        $meta->superclasses( $trait, ref($self) );
+    if ( Class::MOP::is_class_loaded($class_name) ) {
+        if ( $class_name->isa($trait) ) {
+            return $class_name;
+        } else {
+            confess "$class_name is already defined but does not inherit $trait";
+        }
+    } else {
+        my @super = ( $trait, ref($self) );
+
+        my $meta = Class::MOP::Class->initialize($class_name);
+        $meta->superclasses(@super);
 
         $meta->make_immutable;
 
-        return $class;
+        return $class_name;
     }
 }
 

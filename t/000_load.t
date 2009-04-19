@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 49;
+use Test::More tests => 50;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -104,6 +104,11 @@ is_deeply(
 is(
     Class::MOP::Class->meta, Class::MOP::Class->meta->meta,
     '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta'
+);
+
+is(
+    Class::MOP::Class->meta->meta, Class::MOP::Class->meta->meta->meta,
+    '... Class::MOP::Class->meta->meta == Class::MOP::Class->meta->meta->meta'
 );
 
 is(

@@ -672,6 +672,10 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # NOTE: we don't need to inline the the accessors this only lengthens
 # the compile time of the MOP, and gives us no actual benefits.
 
+# this is just nitpicking to ensure Class::MOP::Class->meta == ->meta->meta
+Class::MOP::Class->meta->immutable_metaclass;
+$Class::MOP::Class::immutable_metaclass_cache{"Class::MOP::Class"}{"Class::MOP::Class::Immutable::Trait"} = Class::MOP::Class::Immutable::Class::MOP::Class->meta;
+
 $_->meta->make_immutable(
     inline_constructor  => 1,
     replace_constructor => 1,
@@ -682,6 +686,7 @@ $_->meta->make_immutable(
     Class::MOP::Module
     Class::MOP::Class
     Class::MOP::Class::Immutable::Trait
+    Class::MOP::Class::Immutable::Class::MOP::Class
 
     Class::MOP::Attribute
     Class::MOP::Method
