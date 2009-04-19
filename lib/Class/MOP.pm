@@ -570,6 +570,16 @@ Class::MOP::Method::Generated->meta->add_attribute(
     ))
 );
 
+
+## --------------------------------------------------------
+## Class::MOP::Method::Inlined
+
+Class::MOP::Method::Inlined->meta->add_attribute(
+    Class::MOP::Attribute->new('_expected_method_class' => (
+        reader   => { '_expected_method_class' => \&Class::MOP::Method::Inlined::_expected_method_class },
+    ))
+);
+
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
 
@@ -680,6 +690,7 @@ $_->meta->make_immutable(
     Class::MOP::Object
 
     Class::MOP::Method::Generated
+    Class::MOP::Method::Inlined
 
     Class::MOP::Method::Accessor
     Class::MOP::Method::Constructor
