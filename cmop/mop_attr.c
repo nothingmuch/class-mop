@@ -180,7 +180,7 @@ initialize_default_builder (mop_attr_t *attr, SV *perl_attr)
 	SPAGAIN;
 
 	builder = SvPV (POPs, len);
-	attr->default_value.method = strndup (builder, len);
+	attr->default_value.method = savepvn (builder, len);
 	ATTRFLAGS (attr) |= (mop_attr_default_builder << ATTR_DEFAULT_SHIFT);
 
 	PUTBACK;
