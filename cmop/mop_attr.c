@@ -262,7 +262,7 @@ mop_attr_new_from_perl_attr (SV *perl_attr)
 		XCPT_RETHROW;
 	}
 
-	warn ("creating attr with slow value 0x%x", (unsigned int)attr->slot_sv);
+	warn ("creating attr with slot value 0x%x", (unsigned int)attr->slot_sv);
 
 	return attr;
 }
