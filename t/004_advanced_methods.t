@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 11;
 use Test::Exception;
 
 use Class::MOP;
@@ -105,38 +105,6 @@ is_deeply(
         Class::MOP::Class->initialize('Foo::Bar')->get_method('foobar'),
     ],
     '... got the right list of applicable methods for Foo::Bar');
-
-# test compute_all_applicable_methods once for compat
-is_deeply(
-    [ sort { $a->{name} cmp $b->{name} } Class::MOP::Class->initialize('Foo::Bar::Baz')->compute_all_applicable_methods() ],
-    [
-        {
-            name  => 'BUILD',
-            class => 'Foo::Bar::Baz',
-            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('BUILD')
-        },    
-        {
-            name  => 'bar',
-            class => 'Foo::Bar::Baz',
-            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('bar')
-        },
-        {
-            name  => 'baz',
-            class => 'Baz',
-            code  => Class::MOP::Class->initialize('Baz')->get_method('baz')
-        },        
-        {
-            name  => 'foo',
-            class => 'Foo',
-            code  => Class::MOP::Class->initialize('Foo')->get_method('foo')
-        },   
-        {
-            name  => 'foobarbaz',
-            class => 'Foo::Bar::Baz',
-            code  => Class::MOP::Class->initialize('Foo::Bar::Baz')->get_method('foobarbaz')
-        },            
-    ],
-    '... got the right list of applicable methods for Foo::Bar::Baz');
 
 ## find_all_methods_by_name
 

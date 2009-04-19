@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 33;
+use Test::More tests => 34;
 use Test::Exception;
 
 require Class::MOP;
@@ -49,6 +49,15 @@ throws_ok {
     Class::MOP::load_class('SyntaxError');
 }
 qr/Missing right curly/;
+
+throws_ok {
+    delete $INC{'SyntaxError.pm'};
+    Class::MOP::load_first_existing_class(
+        'FakeClassOhNo', 'SyntaxError', 'Class'
+    );
+}
+qr/Missing right curly/,
+    'load_first_existing_class does not pass over an existing (bad) module';
 
 throws_ok {
     Class::MOP::load_class('This::Does::Not::Exist');

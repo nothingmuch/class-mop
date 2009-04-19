@@ -1,6 +1,122 @@
 Revision history for Perl extension Class-MOP.
 
-0.79
+0.82
+    * Various
+      - The deprecation wrappers for some renamed methods were not
+        passing arguments to the new method. (nothingmuch)
+
+    * Class::MOP::Immutable
+      - Warn during immutablization if the local class provides its own
+        constructor, to parallel the warning in Moose when a superclass
+        provides its own constructor (doy)
+
+0.81 Tue, April 7, 2009
+    * Class::MOP
+    * Class::MOP::Class
+    * Class::MOP::Instance
+    * Class::MOP::Attribute
+    * Class::MOP::Method::Accessor
+    * Class::MOP::Method::Constructor
+      - Include stack traces in the deprecation warnings introduced in
+        0.80_01. (Florian Ragwitz)
+
+    * MOP.xs
+      - Avoid c compiler warnings by declaring some unused function
+        arguments. (Florian Ragwitz)
+
+0.80_01 Sun, April 5, 2009
+    * Makefile.PL
+      - Make sure to preserve any compiler flags already defined in
+        Config.pm. Patch by Vincent Pit. RT #44739.
+
+    * Many methods have been renamed with a leading underscore, and a
+      few have been deprecated entirely. The methods with a leading
+      underscore are consider "internals only". People writing
+      subclasses or extensions to Class::MOP should feel free to
+      override them, but they are not for "public" use.
+
+      - Class::MOP::Class
+        - construct_class_instance => _construct_class_instance (use new_object)
+        - construct_instance => _construct_instance (use new_object)
+        - check_metaclass_compatibility => _check_metaclass_compatibility
+        - create_meta_instance => _create_meta_instance (use get_meta_instance)
+        - clone_instance => _clone_instance (use clone_object)
+        - compute_all_applicable_methods is deprecated, use get_all_methods
+        - compute_all_applicable_attributes is deprecated, use get_all_attributes
+
+      - Class::MOP::Instance
+        - bless_instance_structure is deprecated and will be removed
+          in a future release
+
+      - Class::MOP::Module
+        - create has been renamed to _instantiate_module. This method
+          does not construct an object, it evals some code that
+          creates the relevant package in Perl's symbol table.
+
+      - Class::MOP::Method::Accessor
+        - initialize_body => _initialize_body (this is always called
+          when an object is constructed)
+        - /(generate_.*_method(?:_inline)?)/ => '_' . $1
+
+      - Class::MOP::Method::Constructor
+        - initialize_body => _initialize_body (this is always called
+          when an object is constructed)
+        - /(generate_constructor_method(?:_inline)?)/ => '_' . $1
+        - attributes => _attributes
+        - meta_instance => _meta_instance
+
+0.80 Wed, April 1, 2009
+    * Class::MOP::*
+      - Call user_class->meta in fewer places, with the eventual goal
+        of allowing the user to rename or exclude ->meta
+        altogether. Instead uses Class::MOP::class_of. (Sartak)
+
+    * Class::MOP
+      - New class_of function that should be used to retrieve a
+        metaclass. This is unlike get_metaclass_by_name in that it
+        accepts instances, not just class names. (Sartak)
+
+    * Class::MOP
+      - load_first_existing_class didn't actually load the first
+        existing class; instead, it loaded the first existing and
+        compiling class.  It now throws an error if a class exists (in
+        @INC) but fails to compile.  (hdp)
+
+    * Class::MOP
+    * Class::MOP::Class
+      - we had some semi-buggy code that purported to provide a
+        HAS_ISAREV based on whether mro had get_isarev (due to an
+        oversight, it always returned 1). Since mro and MRO::Compat
+        have always had get_isarev, HAS_ISAREV was pointless. This
+        insight simplified the subclasses method by deleting the
+        pure-perl fallback. HAS_ISAREV is now deprecated. (Sartak)
+
+0.79 Fri, March 29, 2009
+    * No changes from 0.78_02.
+
+0.78_02 Thu, March 26, 2009
+    * Class::MOP::Class
+    * Class::MOP::Immutable
+      - A big backwards-incompatible refactoring of the Immutable API,
+        and the make_immutable/make_mutable pieces of the Class
+        API. The core __PACKAGE__->meta->make_immutable API remains
+        the same, however, so this should only affect the most
+        guts-digging code.
+
+    * XS code
+      - The XS code used a macro, XSPROTO, that's only in 5.10.x. This
+        has been fixed to be backwards compatible with 5.8.x.
+
+    * Class::MOP::Class
+      - Add a hook for rebless_instance_away (Sartak)
+      - Use blessed instead of ref to get an instance's class name
+        in rebless_instance. (Sartak)
+
+0.78_01 Wed, March 18, 2009
+    * Class::MOP::*
+      - Revised and reorganized all of the API documentation. All
+        classes now have (more or less) complete API documentation.
+
     * Class::MOP::Class
     * Class::MOP::Instance
       - Reblessing into a package that supports overloading wasn't
@@ -12,6 +128,11 @@ Revision history for Perl extension Class-MOP.
       - The process_accessors method is now private. A public alias
         exists (and will stick around for a few releases), but it
         warns that calling the public method is deprecated.
+
+    * Class::MOP::Method::Generated
+      - Removed the new and _new methods, since this is an abstract
+        base class, and all existing subclasses implement their own
+        constructors.
 
     * MOP.xs
       - Stop is_class_loaded from thinking a class is loaded if it

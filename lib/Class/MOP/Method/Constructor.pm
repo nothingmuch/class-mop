@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken', 'looks_like_number';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -31,7 +31,7 @@ sub new {
     # needed
     weaken($self->{'associated_metaclass'});
 
-    $self->initialize_body;
+    $self->_initialize_body;
 
     return $self;
 }
@@ -62,20 +62,39 @@ sub associated_metaclass { (shift)->{'associated_metaclass'} }
 ## cached values ...
 
 sub meta_instance {
+    Carp::cluck('The meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_meta_instance;
+}
+
+sub _meta_instance {
     my $self = shift;
     $self->{'meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
 }
 
 sub attributes {
+    Carp::cluck('The attributes method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+
+    return shift->_attributes;
+}
+
+sub _attributes {
     my $self = shift;
-    $self->{'attributes'} ||= [ $self->associated_metaclass->compute_all_applicable_attributes ]
+    $self->{'attributes'} ||= [ $self->associated_metaclass->get_all_attributes ]
 }
 
 ## method
 
 sub initialize_body {
+    Carp::cluck('The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_initialize_body;
+}
+
+sub _initialize_body {
     my $self        = shift;
-    my $method_name = 'generate_constructor_method';
+    my $method_name = '_generate_constructor_method';
 
     $method_name .= '_inline' if $self->is_inline;
 
@@ -83,10 +102,22 @@ sub initialize_body {
 }
 
 sub generate_constructor_method {
+    Carp::cluck('The generate_constructor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_constructor_method;
+}
+
+sub _generate_constructor_method {
     return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
 }
 
 sub generate_constructor_method_inline {
+    Carp::cluck('The generate_constructor_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_constructor_method_inline;
+}
+
+sub _generate_constructor_method_inline {
     my $self = shift;
 
     my $close_over = {};
@@ -99,10 +130,10 @@ sub generate_constructor_method_inline {
 
     $source .= "\n" . 'my $params = @_ == 1 ? $_[0] : {@_};';
 
-    $source .= "\n" . 'my $instance = ' . $self->meta_instance->inline_create_instance('$class');
+    $source .= "\n" . 'my $instance = ' . $self->_meta_instance->inline_create_instance('$class');
     $source .= ";\n" . (join ";\n" => map {
         $self->_generate_slot_initializer($_, $close_over)
-    } 0 .. (@{$self->attributes} - 1));
+    } @{ $self->_attributes });
     $source .= ";\n" . 'return $instance';
     $source .= ";\n" . '}';
     warn $source if $self->options->{debug};
@@ -118,10 +149,8 @@ sub generate_constructor_method_inline {
 
 sub _generate_slot_initializer {
     my $self  = shift;
-    my $index = shift;
+    my $attr  = shift;
     my $close = shift;
-
-    my $attr = $self->attributes->[$index];
 
     my $default;
     if ($attr->has_default) {
@@ -150,12 +179,12 @@ sub _generate_slot_initializer {
     if ( defined $attr->init_arg ) {
       return (
           'if(exists $params->{\'' . $attr->init_arg . '\'}){' . "\n" .
-                $self->meta_instance->inline_set_slot_value(
+                $self->_meta_instance->inline_set_slot_value(
                     '$instance',
                     $attr->name,
                     '$params->{\'' . $attr->init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
-                $self->meta_instance->inline_set_slot_value(
+                $self->_meta_instance->inline_set_slot_value(
                     '$instance',
                     $attr->name,
                      $default ) . "\n" .
@@ -163,7 +192,7 @@ sub _generate_slot_initializer {
         );
     } elsif ( defined $default ) {
         return (
-            $self->meta_instance->inline_set_slot_value(
+            $self->_meta_instance->inline_set_slot_value(
                 '$instance',
                 $attr->name,
                  $default ) . "\n"
@@ -197,58 +226,53 @@ Class::MOP::Method::Constructor - Method Meta Object for constructors
 
 =head1 DESCRIPTION
 
-This is a subclass of C<Class::MOP::Method> which deals with
-class constructors. This is used when making a class immutable
-to generate an optimized constructor.
+This is a subclass of C<Class::MOP::Method> which generates
+constructor methods.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new (metaclass => $meta, options => \%options)>
+=item B<< Class::MOP::Method::Constructor->new(%options) >>
 
-=item B<options>
+This creates a new constructor object. It accepts a hash reference of
+options.
 
-This returns the options HASH which is passed into C<new>.
+=over 8
 
-=item B<associated_metaclass>
+=item * metaclass
 
-This returns the metaclass which is passed into C<new>.
+This should be a L<Class::MOP::Class> object. It is required.
 
-=item B<attributes>
+=item * name
 
-This returns the list of attributes which are associated with the
-metaclass which is passed into C<new>.
+The method name (without a package name). This is required.
 
-=item B<meta_instance>
+=item * package_name
 
-This returns the meta instance which is associated with the
-metaclass which is passed into C<new>.
+The package name for the method. This is required.
 
-=item B<is_inline>
+=item * is_inline
 
-This returns a boolean, but since constructors are very rarely
-not inlined, this always returns true for now.
-
-=item B<can_be_inlined>
-
-This method always returns true in this class. It exists so that
-subclasses (like in Moose) can override and do some sort of checking
-to determine whether or not inlining the constructor is safe.
-
-=item B<initialize_body>
-
-This creates the code reference for the constructor itself.
+This indicates whether or not the constructor should be inlined. This
+defaults to false.
 
 =back
 
-=head2 Method Generators 
+=item B<< $metamethod->is_inline >>
 
-=over 4
+Returns a boolean indicating whether or not the constructor is
+inlined.
 
-=item B<generate_constructor_method>
+=item B<< $metamethod->associated_metaclass >>
 
-=item B<generate_constructor_method_inline>
+This returns the L<Class::MOP::Class> object for the method.
+
+=item B<< $metamethod->can_be_inlined >>
+
+This method always returns true in this class. It exists so that
+subclasses (as in Moose) can do some sort of checking to determine
+whether or not inlining the constructor is safe.
 
 =back
 

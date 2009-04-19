@@ -6,43 +6,23 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
 
-sub new {
-    my $class   = shift;
-    my %options = @_;  
-        
-    ($options{package_name} && $options{name})
-        || confess "You must supply the package_name and name parameters $Class::MOP::Method::UPGRADE_ERROR_TEXT";     
-        
-    my $self = $class->_new(\%options);
-    
-    $self->initialize_body;
-    
-    return $self;
-}
-
-sub _new {
-    my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
-
-    $options->{is_inline} ||= 0;
-    $options->{body} ||= undef;
-
-    bless $options, $class;
-}
-
 ## accessors
+
+sub new {
+    confess __PACKAGE__ . " is an abstract base class, you must provide a constructor.";
+}
 
 sub is_inline { $_[0]{is_inline} }
 
 sub definition_context { $_[0]{definition_context} }
 
-sub initialize_body {
+sub _initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
 }
 
@@ -112,36 +92,11 @@ Class::MOP::Method::Generated - Abstract base class for generated methods
 
 =head1 DESCRIPTION
 
-This is a C<Class::MOP::Method> subclass which is used interally 
-by C<Class::MOP::Method::Accessor> and C<Class::MOP::Method::Constructor>.
+This is a C<Class::MOP::Method> subclass which is subclassed by
+C<Class::MOP::Method::Accessor> and
+C<Class::MOP::Method::Constructor>.
 
-=head1 METHODS
-
-=over 4
-
-=item B<new (%options)>
-
-This creates the method based on the criteria in C<%options>, 
-these options are:
-
-=over 4
-
-=item I<is_inline>
-
-This is a boolean to indicate if the method should be generated
-as a closure, or as a more optimized inline version.
-
-=back
-
-=item B<is_inline>
-
-This returns the boolean which was passed into C<new>.
-
-=item B<initialize_body>
-
-This is an abstract method and will throw an exception if called.
-
-=back
+It is not intended to be used directly.
 
 =head1 AUTHORS
 

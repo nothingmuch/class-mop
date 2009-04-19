@@ -10,7 +10,8 @@ perl_version '5.008001';
 all_from 'lib/Class/MOP.pm';
 license 'perl';
 
-my $ccflags = ' -Iinclude';
+require Config;
+my $ccflags = ( $Config::Config{ccflags} || '' ) . ' -Iinclude';
 $ccflags .= ' -Wall' if -d '.svn' || -d '.git' || $ENV{MAINTAINER_MODE};
 
 requires 'Carp';
@@ -62,7 +63,7 @@ WriteAll();
 # before a release.
 sub check_conflicts {
     my %conflicts = (
-        'Moose' => '0.71',
+        'Moose' => '0.72',
     );
 
     my $found = 0;

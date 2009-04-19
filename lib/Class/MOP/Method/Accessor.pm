@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -36,7 +36,7 @@ sub new {
     # needed
     weaken($self->{'attribute'});
 
-    $self->initialize_body;
+    $self->_initialize_body;
 
     return $self;
 }
@@ -58,10 +58,16 @@ sub accessor_type        { (shift)->{'accessor_type'} }
 ## factory
 
 sub initialize_body {
+    Carp::cluck('The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_initialize_body;
+}
+
+sub _initialize_body {
     my $self = shift;
 
     my $method_name = join "_" => (
-        'generate',
+        '_generate',
         $self->accessor_type,
         'method',
         ($self->is_inline ? 'inline' : ())
@@ -74,6 +80,12 @@ sub initialize_body {
 ## generators
 
 sub generate_accessor_method {
+    Carp::cluck('The generate_accessor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_accessor_method;
+}
+
+sub _generate_accessor_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
@@ -82,6 +94,12 @@ sub generate_accessor_method {
 }
 
 sub generate_reader_method {
+    Carp::cluck('The generate_reader_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_reader_method;
+}
+
+sub _generate_reader_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
@@ -90,6 +108,12 @@ sub generate_reader_method {
 }
 
 sub generate_writer_method {
+    Carp::cluck('The generate_writer_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_writer_method;
+}
+
+sub _generate_writer_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->set_value($_[0], $_[1]);
@@ -97,6 +121,12 @@ sub generate_writer_method {
 }
 
 sub generate_predicate_method {
+    Carp::cluck('The generate_predicate_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_predicate_method;
+}
+
+sub _generate_predicate_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->has_value($_[0])
@@ -104,6 +134,12 @@ sub generate_predicate_method {
 }
 
 sub generate_clearer_method {
+    Carp::cluck('The generate_clearer_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_clearer_method;
+}
+
+sub _generate_clearer_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->clear_value($_[0])
@@ -112,8 +148,13 @@ sub generate_clearer_method {
 
 ## Inline methods
 
-
 sub generate_accessor_method_inline {
+    Carp::cluck('The generate_accessor_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_accessor_method_inline;
+}
+
+sub _generate_accessor_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -133,6 +174,12 @@ sub generate_accessor_method_inline {
 }
 
 sub generate_reader_method_inline {
+    Carp::cluck('The generate_reader_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_reader_method_inline;
+}
+
+sub _generate_reader_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -151,6 +198,12 @@ sub generate_reader_method_inline {
 }
 
 sub generate_writer_method_inline {
+    Carp::cluck('The generate_writer_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_writer_method_inline;
+}
+
+sub _generate_writer_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -167,8 +220,13 @@ sub generate_writer_method_inline {
     return $code;
 }
 
-
 sub generate_predicate_method_inline {
+    Carp::cluck('The generate_predicate_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_predicate_method_inline;
+}
+
+sub _generate_predicate_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -186,6 +244,12 @@ sub generate_predicate_method_inline {
 }
 
 sub generate_clearer_method_inline {
+    Carp::cluck('The generate_clearer_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_clearer_method_inline;
+}
+
+sub _generate_clearer_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -226,86 +290,66 @@ Class::MOP::Method::Accessor - Method Meta Object for accessors
 
 =head1 DESCRIPTION
 
-This is a C<Class::MOP::Method> subclass which is used interally
-by C<Class::MOP::Attribute> to generate accessor code. It can
-handle generation of readers, writers, predicate and clearer
-methods, both as closures and as more optimized inline methods.
+This is a subclass of <Class::MOP::Method> which is used by
+C<Class::MOP::Attribute> to generate accessor code. It handles
+generation of readers, writers, predicates and clearers. For each type
+of method, it can either create a subroutine reference, or actually
+inline code by generating a string and C<eval>'ing it.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new (%options)>
+=item B<< Class::MOP::Method::Accessor->new(%options) >>
 
-This creates the method based on the criteria in C<%options>,
-these options are:
-
-=over 4
-
-=item I<attribute>
-
-This must be an instance of C<Class::MOP::Attribute> which this
-accessor is being generated for. This paramter is B<required>.
-
-=item I<accessor_type>
-
-This is a string from the following set; reader, writer, accessor,
-predicate or clearer. This is used to determine which type of
-method is to be generated.
-
-=item I<is_inline>
-
-This is a boolean to indicate if the method should be generated
-as a closure, or as a more optimized inline version.
-
-=back
-
-=item B<accessor_type>
-
-This returns the accessor type which was passed into C<new>.
-
-=item B<is_inline>
-
-This returns the boolean which was passed into C<new>.
-
-=item B<associated_attribute>
-
-This returns the attribute instance which was passed into C<new>.
-
-=item B<initialize_body>
-
-This will actually generate the method based on the specified
-criteria passed to the constructor.
-
-=back
-
-=head2 Method Generators
-
-These methods will generate appropriate code references for
-the various types of accessors which are supported by
-C<Class::MOP::Attribute>. The names pretty much explain it all.
+This returns a new C<Class::MOP::Method::Accessor> based on the
+C<%options> provided.
 
 =over 4
 
-=item B<generate_accessor_method>
+=item * attribute
 
-=item B<generate_accessor_method_inline>
+This is the C<Class::MOP::Attribute> for which accessors are being
+generated. This option is required.
 
-=item B<generate_clearer_method>
+=item * accessor_type
 
-=item B<generate_clearer_method_inline>
+This is a string which should be one of "reader", "writer",
+"accessor", "predicate", or "clearer". This is the type of method
+being generated. This option is required.
 
-=item B<generate_predicate_method>
+=item * is_inline
 
-=item B<generate_predicate_method_inline>
+This indicates whether or not the accessor should be inlined. This
+defaults to false.
 
-=item B<generate_reader_method>
+=item * name
 
-=item B<generate_reader_method_inline>
+The method name (without a package name). This is required.
 
-=item B<generate_writer_method>
+=item * package_name
 
-=item B<generate_writer_method_inline>
+The package name for the method. This is required.
+
+=back
+
+=item B<< $metamethod->accessor_type >>
+
+Returns the accessor type which was passed to C<new>.
+
+=item B<< $metamethod->is_inline >>
+
+Returns a boolean indicating whether or not the accessor is inlined.
+
+=item B<< $metamethod->associated_attribute >>
+
+This returns the L<Class::MOP::Attribute> object which was passed to
+C<new>.
+
+=item B<< $metamethod->body >>
+
+The method itself is I<generated> when the accessor object is
+constructed.
 
 =back
 

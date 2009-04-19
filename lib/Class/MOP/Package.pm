@@ -8,7 +8,7 @@ use B;
 use Scalar::Util 'blessed';
 use Carp         'confess';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -287,83 +287,84 @@ Class::MOP::Package - Package Meta Object
 
 =head1 DESCRIPTION
 
-This is an abstraction of a Perl 5 package, it is a superclass of
-L<Class::MOP::Class> and provides all of the symbol table 
-introspection methods.
-
-=head1 INHERITANCE
-
-B<Class::MOP::Package> is a subclass of L<Class::MOP::Object>
+The Package Protocol provides an abstraction of a Perl 5 package. A
+package is basically namespace, and this module provides methods for
+looking at and changing that namespace's symbol table.
 
 =head1 METHODS
 
 =over 4
 
-=item B<meta>
+=item B<< Class::MOP::Package->initialize($package_name) >>
 
-Returns a metaclass for this package.
+This method creates a new C<Class::MOP::Package> instance which
+represents specified package. If an existing metaclass object exists
+for the package, that will be returned instead.
 
-=item B<initialize ($package_name)>
+=item B<< Class::MOP::Package->reinitialize($package_name) >>
 
-This will initialize a Class::MOP::Package instance which represents 
-the package of C<$package_name>.
+This method forcibly removes any existing metaclass for the package
+before calling C<initialize>
 
-=item B<reinitialize ($package_name, %options)>
+Do not call this unless you know what you are doing.
 
-This removes the old metaclass, and creates a new one in it's place.
-Do B<not> use this unless you really know what you are doing, it could
-very easily make a very large mess of your program.
+=item B<< $metapackage->name >>
 
-=item B<name>
+This is returns the package's name, as passed to the constructor.
 
-This is a read-only attribute which returns the package name for the 
-given instance.
+=item B<< $metapackage->namespace >>
 
-=item B<namespace>
+This returns a hash reference to the package's symbol table. The keys
+are symbol names and the values are typeglob references.
 
-This returns a HASH reference to the symbol table. The keys of the 
-HASH are the symbol names, and the values are typeglob references.
+=item B<< $metapackage->add_package_symbol($variable_name, $initial_value) >>
 
-=item B<add_package_symbol ($variable_name, ?$initial_value)>
+This method accepts a variable name and an optional initial value. The
+C<$variable_name> must contain a leading sigil.
 
-Given a C<$variable_name>, which must contain a leading sigil, this 
-method will create that variable within the package which houses the 
-class. It also takes an optional C<$initial_value>, which must be a 
-reference of the same type as the sigil of the C<$variable_name> 
-implies.
+This method creates the variable in the package's symbol table, and
+sets it to the initial value if one was provided.
 
-=item B<get_package_symbol ($variable_name)>
+=item B<< $metapackage->get_package_symbol($variable_name) >>
 
-This will return a reference to the package variable in 
-C<$variable_name>. 
+Given a variable name, this method returns the variable as a reference
+or undef if it does not exist. The C<$variable_name> must contain a
+leading sigil.
 
-=item B<has_package_symbol ($variable_name)>
+=item B<< $metapackage->has_package_symbol($variable_name) >>
 
-Returns true (C<1>) if there is a package variable defined for 
-C<$variable_name>, and false (C<0>) otherwise.
+Returns true if there is a package variable defined for
+C<$variable_name>. The C<$variable_name> must contain a leading sigil.
 
-=item B<remove_package_symbol ($variable_name)>
+=item B<< $metapackage->remove_package_symbol($variable_name) >>
 
-This will attempt to remove the package variable at C<$variable_name>.
+This will remove the package variable specified C<$variable_name>. The
+C<$variable_name> must contain a leading sigil.
 
-=item B<remove_package_glob ($glob_name)>
+=item B<< $metapackage->remove_package_glob($glob_name) >>
 
-This will attempt to remove the entire typeglob associated with 
-C<$glob_name> from the package. 
+Given the name of a glob, this will remove that glob from the
+package's symbol table. Glob names do not include a sigil. Removing
+the glob removes all variables and subroutines with the specified
+name.
 
-=item B<list_all_package_symbols (?$type_filter)>
+=item B<< $metapackage->list_all_package_symbols($type_filter) >>
 
-This will list all the glob names associated with the current package. 
-By inspecting the globs returned you can discern all the variables in 
-the package.
+This will list all the glob names associated with the current
+package. These names do not have leading sigils.
 
-By passing a C<$type_filter>, you can limit the list to only those 
-which match the filter (either SCALAR, ARRAY, HASH or CODE).
+You can provide an optional type filter, which should be one of
+'SCALAR', 'ARRAY', 'HASH', or 'CODE'.
 
-=item B<get_all_package_symbols (?$type_filter)>
+=item B<< $metapackage->get_all_package_symbols($type_filter) >>
 
-Works exactly like C<list_all_package_symbols> but returns a HASH of 
-name => thing mapping instead of just an ARRAY of names.
+This works much like C<list_all_package_symbols>, but it returns a
+hash reference. The keys are glob names and the values are references
+to the value for that name.
+
+=item B<< Class::MOP::Package->meta >>
+
+This will return a L<Class::MOP::Class> instance for this class.
 
 =back
 

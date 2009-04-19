@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 244;
+use Test::More tests => 262;
 use Test::Exception;
 
 use Class::MOP;
@@ -40,6 +40,8 @@ my @class_mop_package_methods = qw(
 my @class_mop_module_methods = qw(
     _new
 
+    _instantiate_module
+
     version authority identifier create
 );
 
@@ -55,13 +57,16 @@ my @class_mop_class_methods = qw(
 
     create_anon_class is_anon_class
 
-    instance_metaclass get_meta_instance create_meta_instance
+    instance_metaclass get_meta_instance
+    create_meta_instance _create_meta_instance
     new_object clone_object
-    construct_instance construct_class_instance clone_instance
-    rebless_instance
-    check_metaclass_compatibility
+    construct_instance _construct_instance
+    construct_class_instance _construct_class_instance
+    clone_instance _clone_instance
+    rebless_instance rebless_instance_away
+    check_metaclass_compatibility _check_metaclass_compatibility
 
-    add_meta_instance_dependencies remove_meta_instance_depdendencies update_meta_instance_dependencies
+    add_meta_instance_dependencies remove_meta_instance_dependencies update_meta_instance_dependencies
     add_dependent_meta_instance remove_dependent_meta_instance
     invalidate_meta_instances invalidate_meta_instance
 
@@ -78,8 +83,10 @@ my @class_mop_class_methods = qw(
     has_attribute get_attribute add_attribute remove_attribute
     get_attribute_list get_attribute_map get_all_attributes compute_all_applicable_attributes find_attribute_by_name
 
-    is_mutable is_immutable make_mutable make_immutable create_immutable_transformer
-    get_immutable_options get_immutable_transformer
+    is_mutable is_immutable make_mutable make_immutable
+    immutable_transformer _set_immutable_transformer
+    _make_immutable_transformer
+    _default_immutable_transformer_options
 
     DESTROY
 );
@@ -157,7 +164,8 @@ my @class_mop_class_attributes = (
     'attribute_metaclass',
     'method_metaclass',
     'wrapped_method_metaclass',
-    'instance_metaclass'
+    'instance_metaclass',
+    'immutable_transformer',
 );
 
 # check class

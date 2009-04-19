@@ -8,6 +8,9 @@ static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 {
     bool *found_method = (bool *)ud;
+    PERL_UNUSED_ARG(key);
+    PERL_UNUSED_ARG(keylen);
+    PERL_UNUSED_ARG(val);
     *found_method = TRUE;
     return FALSE;
 }

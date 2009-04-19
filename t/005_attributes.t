@@ -113,7 +113,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     is($meta->find_attribute_by_name('$foo'), $FOO_ATTR, '... got the right attribute for "foo"');
 
     is_deeply(
-        [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
         [
             $BAR_ATTR,
             $BAZ_ATTR,
@@ -122,7 +122,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
         '... got the right list of applicable attributes for Baz');
 
     is_deeply(
-        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
         [ Bar->meta, Baz->meta, Foo->meta ],
         '... got the right list of associated classes from the applicable attributes for Baz');
 
@@ -139,7 +139,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     ok(!$meta->has_method('set_baz'), '... a writer has been removed');
 
     is_deeply(
-        [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
         [
             $BAR_ATTR,
             $FOO_ATTR,
@@ -147,7 +147,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
         '... got the right list of applicable attributes for Baz');
 
     is_deeply(
-        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+        [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
         [ Bar->meta, Foo->meta ],
         '... got the right list of associated classes from the applicable attributes for Baz');
 
@@ -164,7 +164,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
      }
 
      is_deeply(
-         [ sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+         [ sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
          [
              $BAR_ATTR_2,
              $FOO_ATTR,
@@ -172,7 +172,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
          '... got the right list of applicable attributes for Baz');
 
      is_deeply(
-         [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->compute_all_applicable_attributes() ],
+         [ map { $_->associated_class } sort { $a->name cmp $b->name } $meta->get_all_attributes() ],
          [ Foo->meta, Foo->meta ],
          '... got the right list of associated classes from the applicable attributes for Baz');
 

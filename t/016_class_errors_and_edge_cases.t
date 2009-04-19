@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 48;
+use Test::More tests => 43;
 use Test::Exception;
 
 use Class::MOP;
@@ -22,16 +22,16 @@ use Class::MOP;
 
 {
     dies_ok {
-        Class::MOP::Class->construct_class_instance();
-    } '... construct_class_instance requires an :package parameter';
+        Class::MOP::Class->_construct_class_instance();
+    } '... _construct_class_instance requires an :package parameter';
     
     dies_ok {
-        Class::MOP::Class->construct_class_instance(':package' => undef);
-    } '... construct_class_instance requires a defined :package parameter';     
+        Class::MOP::Class->_construct_class_instance(':package' => undef);
+    } '... _construct_class_instance requires a defined :package parameter';     
     
     dies_ok {
-        Class::MOP::Class->construct_class_instance(':package' => '');
-    } '... construct_class_instance requires a valid :package parameter'; 
+        Class::MOP::Class->_construct_class_instance(':package' => '');
+    } '... _construct_class_instance requires a valid :package parameter'; 
 }
 
 
@@ -58,10 +58,6 @@ use Class::MOP;
     dies_ok {
         Class::MOP::Class->clone_object(1);
     } '... can only clone instances';
-    
-    dies_ok {
-        Class::MOP::Class->clone_instance(1);
-    } '... can only clone instances';    
 }
 
 {
@@ -80,24 +76,6 @@ use Class::MOP;
     dies_ok {
         Class::MOP::Class->add_method('foo' => []);
     } '... add_method dies as expected';     
-}
-
-{
-    dies_ok {
-        Class::MOP::Class->alias_method();
-    } '... alias_method dies as expected';
-    
-    dies_ok {
-        Class::MOP::Class->alias_method('');
-    } '... alias_method dies as expected';   
-
-    dies_ok {
-        Class::MOP::Class->alias_method('foo' => 'foo');
-    } '... alias_method dies as expected';
-    
-    dies_ok {
-        Class::MOP::Class->alias_method('foo' => []);
-    } '... alias_method dies as expected';     
 }
 
 {

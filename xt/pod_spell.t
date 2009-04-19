@@ -79,6 +79,7 @@ JVM
 MetaModel
 metamodel
 metaclass
+metaclass's
 BUILDARGS
 MOPs
 Metalevel
@@ -87,6 +88,7 @@ Metalevel
 API
 APIs
 Baz
+clearers
 continutation
 datetimes
 definedness
@@ -95,8 +97,11 @@ destructors
 DWIM
 eval'ing
 hashrefs
+Immutabilization
+immutabilization
 immutabilize
 immutabilized
+Inlinable
 inline
 invocant
 invocant's
@@ -109,6 +114,7 @@ munge
 namespace
 namespaced
 namespaces
+namespace's
 namespacing
 OO
 OOP
@@ -121,8 +127,11 @@ parameterizes
 pluggable
 prechecking
 prepends
+rebless
+reblessing
 runtime
 sigil
+sigils
 stacktrace
 subclassable
 subtyping

@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -165,12 +165,12 @@ __END__
 
 =head1 NAME
 
-Class::MOP::Method::Wrapped - Method Meta Object to handle before/around/after modifiers
+Class::MOP::Method::Wrapped - Method Meta Object for methods with before/after/around modifiers
 
 =head1 DESCRIPTION
 
-This is a L<Class::MOP::Method> subclass which provides the funtionality 
-to wrap a given CODE reference with before, after and around method modifiers.
+This is a L<Class::MOP::Method> subclass which implements before,
+after, and around method modifiers.
 
 =head1 METHODS
 
@@ -178,44 +178,54 @@ to wrap a given CODE reference with before, after and around method modifiers.
 
 =over 4
 
-=item B<wrap ($code)>
+=item B<< Class::MOP::Method::Wrapped->wrap($metamethod, %options) >>
 
-This is the constructor, it will return a B<Class::MOP::Method::Wrapped>
-instance that can be used to add before, after and around modifiers to.
+This is the constructor. It accepts a L<Class::MOP::Method> object and
+a hash of options.
 
-=item B<get_original_method>
+The options are:
 
-This returns the original CODE reference that was provided to the 
+=over 8
+
+=item * name
+
+The method name (without a package name). This will be taken from the
+provided L<Class::MOP::Method> object if it is not provided.
+
+=item * package_name
+
+The package name for the method. This will be taken from the provided
+L<Class::MOP::Method> object if it is not provided.
+
+=item * associated_metaclass
+
+An optional L<Class::MOP::Class> object. This is the metaclass for the
+method's class.
+
+=back
+
+=item B<< $metamethod->get_original_method >>
+
+This returns the L<Class::MOP::Method> object that was passed to the
 constructor.
 
-=back
+=item B<< $metamethod->add_before_modifier($code) >>
 
-=head2 Modifiers
+=item B<< $metamethod->add_after_modifier($code) >>
 
-These three methods will add the method modifiers to the wrapped 
-CODE reference. For more information on how method modifiers work, 
-see the section in L<Class::MOP::Class>.
+=item B<< $metamethod->add_around_modifier($code) >>
 
-=over 4
+These methods all take a subroutine reference and apply it as a
+modifier to the original method.
 
-=item B<add_before_modifier ($code)>
+=item B<< $metamethod->before_modifiers >>
 
-=item B<add_after_modifier ($code)>
+=item B<< $metamethod->after_modifiers >>
 
-=item B<add_around_modifier ($code)>
+=item B<< $metamethod->around_modifiers >>
 
-=back
-
-These three methods each returna list of method modifiers I<in the
-order in which they are run>.
-
-=over 4
-
-=item B<before_modifiers>
-
-=item B<after_modifiers>
-
-=item B<around_modifiers>
+These methods all return a list of subroutine references which are
+acting as the specified type of modifier.
 
 =back
 

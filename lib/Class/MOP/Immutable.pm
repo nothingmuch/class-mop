@@ -9,7 +9,7 @@ use Class::MOP::Method::Constructor;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -18,23 +18,21 @@ use base 'Class::MOP::Object';
 sub new {
     my ($class, @args) = @_;
 
-    my ( $metaclass, $options );
+    unshift @args, 'metaclass' if @args % 2 == 1;
 
-    if ( @args == 2 ) {
-        # compatibility args
-        ( $metaclass, $options ) = @args;
-    } else {
-        unshift @args, "metaclass" if @args % 2 == 1;
-
-        # default named args
-        my %options = @args;
-        $options = \%options;
-        $metaclass = $options{metaclass};
-    }
+    my %options = (
+        inline_accessors   => 1,
+        inline_constructor => 1,
+        inline_destructor  => 0,
+        constructor_name   => 'new',
+        constructor_class  => 'Class::MOP::Method::Constructor',
+        debug              => 0,
+        @args,
+    );
 
     my $self = $class->_new(
-        'metaclass'           => $metaclass,
-        'options'             => $options,
+        'metaclass'           => delete $options{metaclass},
+        'options'             => \%options,
         'immutable_metaclass' => undef,
         'inlined_constructor' => undef,
     );
@@ -52,30 +50,119 @@ sub _new {
 sub immutable_metaclass {
     my $self = shift;
 
-    $self->create_immutable_metaclass unless $self->{'immutable_metaclass'};
-
-    return $self->{'immutable_metaclass'};
+    return $self->{'immutable_metaclass'} ||= $self->_create_immutable_metaclass;
 }
 
 sub metaclass           { (shift)->{'metaclass'}           }
 sub options             { (shift)->{'options'}             }
 sub inlined_constructor { (shift)->{'inlined_constructor'} }
 
-sub create_immutable_metaclass {
+sub _create_immutable_metaclass {
     my $self = shift;
 
-    # NOTE:
-    # The immutable version of the
-    # metaclass is just a anon-class
-    # which shadows the methods
-    # appropriately
-    $self->{'immutable_metaclass'} = Class::MOP::Class->create_anon_class(
+    # NOTE: The immutable version of the metaclass is just a
+    # anon-class which shadows the methods appropriately
+    return Class::MOP::Class->create_anon_class(
         superclasses => [ blessed($self->metaclass) ],
-        methods      => $self->create_methods_for_immutable_metaclass,
+        methods      => $self->_create_methods_for_immutable_metaclass,
     );
 }
 
+sub make_metaclass_immutable {
+    my $self = shift;
 
+    $self->_inline_accessors;
+    $self->_inline_constructor;
+    $self->_inline_destructor;
+    $self->_check_memoized_methods;
+
+    my $metaclass = $self->metaclass;
+
+    $metaclass->{'___original_class'} = blessed($metaclass);
+    bless $metaclass => $self->immutable_metaclass->name;
+}
+
+sub _inline_accessors {
+    my $self = shift;
+
+    return unless $self->options->{inline_accessors};
+
+    foreach my $attr_name ( $self->metaclass->get_attribute_list ) {
+        $self->metaclass->get_attribute($attr_name)->install_accessors(1);
+    }
+}
+
+sub _inline_constructor {
+    my $self = shift;
+
+    return unless $self->options->{inline_constructor};
+
+    unless ($self->options->{replace_constructor}
+         or !$self->metaclass->has_method(
+             $self->options->{constructor_name}
+         )) {
+        my $class = $self->metaclass->name;
+        warn "Not inlining a constructor for $class since it defines"
+           . " its own constructor.\n"
+           . "If you are certain you don't need to inline your"
+           . " constructor, specify inline_constructor => 0 in your"
+           . " call to $class->meta->make_immutable\n";
+        return;
+    }
+
+    my $constructor_class = $self->options->{constructor_class};
+
+    my $constructor = $constructor_class->new(
+        options      => $self->options,
+        metaclass    => $self->metaclass,
+        is_inline    => 1,
+        package_name => $self->metaclass->name,
+        name         => $self->options->{constructor_name},
+    );
+
+    if (   $self->options->{replace_constructor}
+        or $constructor->can_be_inlined ) {
+        $self->metaclass->add_method(
+            $self->options->{constructor_name} => $constructor );
+        $self->{inlined_constructor} = $constructor;
+    }
+}
+
+sub _inline_destructor {
+    my $self = shift;
+
+    return unless $self->options->{inline_destructor};
+
+    ( exists $self->options->{destructor_class} )
+        || confess "The 'inline_destructor' option is present, but "
+        . "no destructor class was specified";
+
+    my $destructor_class = $self->options->{destructor_class};
+
+    return unless $destructor_class->is_needed( $self->metaclass );
+
+    my $destructor = $destructor_class->new(
+        options      => $self->options,
+        metaclass    => $self->metaclass,
+        package_name => $self->metaclass->name,
+        name         => 'DESTROY'
+    );
+
+    $self->metaclass->add_method( 'DESTROY' => $destructor );
+}
+
+sub _check_memoized_methods {
+    my $self = shift;
+
+    my $memoized_methods = $self->options->{memoize};
+    foreach my $method_name ( keys %{$memoized_methods} ) {
+        my $type = $memoized_methods->{$method_name};
+
+        ( $self->metaclass->can($method_name) )
+            || confess "Could not find the method '$method_name' in "
+            . $self->metaclass->name;
+    }
+}
 my %DEFAULT_METHODS = (
     # I don't really understand this, but removing it breaks tests (groditi)
     meta => sub {
@@ -89,7 +176,7 @@ my %DEFAULT_METHODS = (
         # that has been made immutable and for that we need 
         # to dig a bit ...
         if ($self->isa('Class::MOP::Class')) {
-            return $self->{'___original_class'}->meta;
+            return Class::MOP::class_of($self->{'___original_class'});
         }
         else {
             return $self;
@@ -100,140 +187,35 @@ my %DEFAULT_METHODS = (
     make_immutable => sub { () },
 );
 
-# NOTE:
-# this will actually convert the
-# existing metaclass to an immutable
-# version of itself
-sub make_metaclass_immutable {
-    my ($self, $metaclass, $options) = @_;
-
-    my %options = (
-        inline_accessors   => 1,
-        inline_constructor => 1,
-        inline_destructor  => 0,
-        constructor_name   => 'new',
-        debug              => 0,
-        %$options,
-    );
-
-    %$options = %options; # FIXME who the hell is relying on this?!? tests fail =(
-
-    $self->_inline_accessors( $metaclass, \%options );
-    $self->_inline_constructor( $metaclass, \%options );
-    $self->_inline_destructor( $metaclass, \%options );
-    $self->_check_memoized_methods( $metaclass, \%options );
-
-    $metaclass->{'___original_class'} = blessed($metaclass);
-    bless $metaclass => $self->immutable_metaclass->name;
-}
-
-sub _inline_accessors {
-    my ( $self, $metaclass, $options ) = @_;
-
-    return unless $options->{inline_accessors};
-
-    foreach my $attr_name ( $metaclass->get_attribute_list ) {
-        $metaclass->get_attribute($attr_name)->install_accessors(1);
-    }
-}
-
-sub _inline_constructor {
-    my ( $self, $metaclass, $options ) = @_;
-
-    return unless $options->{inline_constructor};
-
-    return
-        unless $options->{replace_constructor}
-            or !$metaclass->has_method( $options->{constructor_name} );
-
-    my $constructor_class = $options->{constructor_class}
-        || 'Class::MOP::Method::Constructor';
-
-    my $constructor = $constructor_class->new(
-        options      => $options,
-        metaclass    => $metaclass,
-        is_inline    => 1,
-        package_name => $metaclass->name,
-        name         => $options->{constructor_name},
-    );
-
-    if ( $options->{replace_constructor} or $constructor->can_be_inlined ) {
-        $metaclass->add_method( $options->{constructor_name} => $constructor );
-        $self->{inlined_constructor} = $constructor;
-    }
-}
-
-sub _inline_destructor {
-    my ( $self, $metaclass, $options ) = @_;
-
-    return unless $options->{inline_destructor};
-
-    ( exists $options->{destructor_class} )
-        || confess "The 'inline_destructor' option is present, but "
-        . "no destructor class was specified";
-
-    my $destructor_class = $options->{destructor_class};
-
-    return unless $destructor_class->is_needed($metaclass);
-
-    my $destructor = $destructor_class->new(
-        options      => $options,
-        metaclass    => $metaclass,
-        package_name => $metaclass->name,
-        name         => 'DESTROY'
-    );
-
-    return unless $destructor->is_needed;
-
-    $metaclass->add_method( 'DESTROY' => $destructor )
-}
-
-sub _check_memoized_methods {
-    my ( $self, $metaclass, $options ) = @_;
-
-    my $memoized_methods = $self->options->{memoize};
-    foreach my $method_name ( keys %{$memoized_methods} ) {
-        my $type = $memoized_methods->{$method_name};
-
-        ( $metaclass->can($method_name) )
-            || confess "Could not find the method '$method_name' in "
-            . $metaclass->name;
-    }
-}
-
-sub create_methods_for_immutable_metaclass {
+sub _create_methods_for_immutable_metaclass {
     my $self = shift;
 
-    my %methods   = %DEFAULT_METHODS;
     my $metaclass = $self->metaclass;
-    my $meta      = $metaclass->meta;
-
-    $methods{get_mutable_metaclass_name}
-        = sub { (shift)->{'___original_class'} };
-
-    $methods{immutable_transformer} = sub {$self};
+    my $meta      = Class::MOP::class_of($metaclass);
 
     return {
         %DEFAULT_METHODS,
-        $self->_make_read_only_methods( $metaclass, $meta ),
-        $self->_make_uncallable_methods( $metaclass, $meta ),
-        $self->_make_memoized_methods( $metaclass, $meta ),
-        $self->_make_wrapped_methods( $metaclass, $meta ),
+        $self->_make_read_only_methods,
+        $self->_make_uncallable_methods,
+        $self->_make_memoized_methods,
+        $self->_make_wrapped_methods,
         get_mutable_metaclass_name => sub { (shift)->{'___original_class'} },
         immutable_transformer      => sub {$self},
     };
 }
 
 sub _make_read_only_methods {
-    my ( $self, $metaclass, $meta ) = @_;
+    my $self = shift;
+
+    my $metameta = Class::MOP::class_of($self->metaclass);
 
     my %methods;
     foreach my $read_only_method ( @{ $self->options->{read_only} } ) {
-        my $method = $meta->find_method_by_name($read_only_method);
+        my $method = $metameta->find_method_by_name($read_only_method);
 
         ( defined $method )
             || confess "Could not find the method '$read_only_method' in "
-            . $metaclass->name;
+            . $self->metaclass->name;
 
         $methods{$read_only_method} = sub {
             confess "This method is read-only" if scalar @_ > 1;
@@ -245,7 +227,7 @@ sub _make_read_only_methods {
 }
 
 sub _make_uncallable_methods {
-    my ( $self, $metaclass, $meta ) = @_;
+    my $self = shift;
 
     my %methods;
     foreach my $cannot_call_method ( @{ $self->options->{cannot_call} } ) {
@@ -259,15 +241,17 @@ sub _make_uncallable_methods {
 }
 
 sub _make_memoized_methods {
-    my ( $self, $metaclass, $meta ) = @_;
+    my $self = shift;
 
     my %methods;
+
+    my $metameta = Class::MOP::class_of($self->metaclass);
 
     my $memoized_methods = $self->options->{memoize};
     foreach my $method_name ( keys %{$memoized_methods} ) {
         my $type   = $memoized_methods->{$method_name};
         my $key    = '___' . $method_name;
-        my $method = $meta->find_method_by_name($method_name);
+        my $method = $metameta->find_method_by_name($method_name);
 
         if ( $type eq 'ARRAY' ) {
             $methods{$method_name} = sub {
@@ -296,18 +280,20 @@ sub _make_memoized_methods {
 }
 
 sub _make_wrapped_methods {
-    my ( $self, $metaclass, $meta ) = @_;
+    my $self = shift;
 
     my %methods;
 
     my $wrapped_methods = $self->options->{wrapped};
 
+    my $metameta = Class::MOP::class_of($self->metaclass);
+
     foreach my $method_name ( keys %{$wrapped_methods} ) {
-        my $method = $meta->find_method_by_name($method_name);
+        my $method = $metameta->find_method_by_name($method_name);
 
         ( defined $method )
             || confess "Could not find the method '$method_name' in "
-            . $metaclass->name;
+            . $self->metaclass->name;
 
         my $wrapper = $wrapped_methods->{$method_name};
 
@@ -318,28 +304,31 @@ sub _make_wrapped_methods {
 }
 
 sub make_metaclass_mutable {
-    my ($self, $immutable, $options) = @_;
+    my $self = shift;
 
-    my %options = %$options;
+    my $metaclass = $self->metaclass;
 
-    my $original_class = $immutable->get_mutable_metaclass_name;
-    delete $immutable->{'___original_class'} ;
-    bless $immutable => $original_class;
+    my $original_class = $metaclass->get_mutable_metaclass_name;
+    delete $metaclass->{'___original_class'};
+    bless $metaclass => $original_class;
 
     my $memoized_methods = $self->options->{memoize};
-    foreach my $method_name (keys %{$memoized_methods}) {
+    foreach my $method_name ( keys %{$memoized_methods} ) {
         my $type = $memoized_methods->{$method_name};
 
-        ($immutable->can($method_name))
-          || confess "Could not find the method '$method_name' in " . $immutable->name;
-        if ($type eq 'SCALAR' || $type eq 'ARRAY' ||  $type eq 'HASH' ) {
-            delete $immutable->{'___' . $method_name};
+        ( $metaclass->can($method_name) )
+            || confess "Could not find the method '$method_name' in "
+            . $metaclass->name;
+        if ( $type eq 'SCALAR' || $type eq 'ARRAY' || $type eq 'HASH' ) {
+            delete $metaclass->{ '___' . $method_name };
         }
     }
 
-    if ($options{inline_destructor} && $immutable->has_method('DESTROY')) {
-        $immutable->remove_method('DESTROY')
-          if blessed($immutable->get_method('DESTROY')) eq $options{destructor_class};
+    if (   $self->options->{inline_destructor}
+        && $metaclass->has_method('DESTROY') ) {
+        $metaclass->remove_method('DESTROY')
+            if blessed( $metaclass->get_method('DESTROY') ) eq
+                $self->options->{destructor_class};
     }
 
     # NOTE:
@@ -359,11 +348,17 @@ sub make_metaclass_mutable {
     # 14:26 <@stevan> the only user of ::Method::Constructor is immutable
     # 14:27 <@stevan> if someone uses it outside of immutable,.. they are either: mst or groditi
     # 14:27 <@stevan> so I am not worried
-    if ($options{inline_constructor}  && $immutable->has_method($options{constructor_name})) {
-        my $constructor_class = $options{constructor_class} || 'Class::MOP::Method::Constructor';
+    if (   $self->options->{inline_constructor}
+        && $metaclass->has_method( $self->options->{constructor_name} ) ) {
+        my $constructor_class = $self->options->{constructor_class}
+            || 'Class::MOP::Method::Constructor';
 
-        if ( blessed($immutable->get_method($options{constructor_name})) eq $constructor_class ) {
-            $immutable->remove_method( $options{constructor_name}  );
+        if (
+            blessed(
+                $metaclass->get_method( $self->options->{constructor_name} )
+            ) eq $constructor_class
+            ) {
+            $metaclass->remove_method( $self->options->{constructor_name} );
             $self->{inlined_constructor} = undef;
         }
     }
@@ -395,77 +390,130 @@ Class::MOP::Immutable - A class to transform Class::MOP::Class metaclasses
             remove_package_symbol
         /],
         memoize     => {
-            class_precedence_list             => 'ARRAY',
-            compute_all_applicable_attributes => 'ARRAY',
-            get_meta_instance                 => 'SCALAR',
-            get_method_map                    => 'SCALAR',
+            class_precedence_list => 'ARRAY',
+            get_all_attributes    => 'ARRAY',
+            get_meta_instance     => 'SCALAR',
+            get_method_map        => 'SCALAR',
         }
     });
 
-    $immutable_metaclass->make_metaclass_immutable(@_)
+    $immutable_metaclass->make_metaclass_immutable;
 
 =head1 DESCRIPTION
 
-This is basically a module for applying a transformation on a given
-metaclass. Current features include making methods read-only,
-making methods un-callable and memoizing methods (in a type specific
-way too).
+This class encapsulates the logic behind immutabilization.
 
-This module is not for the feint of heart, it does some whacky things
-to the metaclass in order to make it immutable. If you are just curious, 
-I suggest you turn back now, there is nothing to see here.
+This class provides generic immutabilization logic. Decisions about
+I<what> gets transformed are up to the caller.
+
+Immutabilization allows for a number of transformations. It can ask
+the calling metaclass to inline methods such as the constructor,
+destructor, or accessors. It can memoize metaclass accessors
+themselves. It can also turn read-write accessors in the metaclass
+into read-only methods, and make attempting to set these values an
+error. Finally, it can make some methods throw an exception when they
+are called. This is used to disable methods that can alter the class.
 
 =head1 METHODS
 
 =over 4
 
-=item B<new ($metaclass, \%options)>
+=item B<< Class::MOP::Immutable->new($metaclass, %options) >>
 
-Given a C<$metaclass> and a set of C<%options> this module will
-prepare an immutable version of the C<$metaclass>, which can then
-be applied to the C<$metaclass> using the C<make_metaclass_immutable>
-method.
+This method takes a metaclass object (typically a L<Class::MOP::Class>
+object) and a hash of options.
 
-=item B<options>
+It returns a new transformer, but does not actually do any
+transforming yet.
 
-Returns the options HASH set in C<new>.
+This method accepts the following options:
 
-=item B<metaclass>
+=over 8
 
-Returns the metaclass set in C<new>.
+=item * inline_accessors
 
-=item B<immutable_metaclass>
+=item * inline_constructor
 
-Returns the immutable metaclass created within C<new>.
+=item * inline_destructor
+
+These are all booleans indicating whether the specified method(s)
+should be inlined.
+
+By default, accessors and the constructor are inlined, but not the
+destructor.
+
+=item * replace_constructor
+
+This is a boolean indicating whether an existing constructor should be
+replaced when inlining a constructor. This defaults to false.
+
+=item * constructor_name
+
+This is the constructor method name. This defaults to "new".
+
+=item * constructor_class
+
+The name of the method metaclass for constructors. It will be used to
+generate the inlined constructor. This defaults to
+"Class::MOP::Method::Constructor".
+
+=item * destructor_class
+
+The name of the method metaclass for destructors. It will be used to
+generate the inlined destructor. This defaults to
+"Class::MOP::Method::Denstructor".
+
+=item * memoize
+
+This option takes a hash reference. They keys are method names to be
+memoized, and the values are the type of data the method returns. This
+can be one of "SCALAR", "ARRAY", or "HASH".
+
+=item * read_only
+
+This option takes an array reference of read-write methods which will
+be made read-only. After they are transformed, attempting to set them
+will throw an error.
+
+=item * cannot_call
+
+This option takes an array reference of methods which cannot be called
+after immutabilization. Attempting to call these methods will throw an
+error.
+
+=item * wrapped
+
+This option takes a hash reference. The keys are method names and the
+body is a subroutine reference which will wrap the named method. This
+allows you to do some sort of custom transformation to a method.
 
 =back
 
-=over 4
+=item B<< $transformer->options >>
 
-=item B<create_immutable_metaclass>
+Returns a hash reference of the options passed to C<new>.
 
-This will create the immutable version of the C<$metaclass>, but will
-not actually change the original metaclass.
+=item B<< $transformer->metaclass >>
 
-=item B<create_methods_for_immutable_metaclass>
+Returns the metaclass object passed to C<new>.
 
-This will create all the methods for the immutable metaclass based
-on the C<%options> passed into C<new>.
+=item B<< $transformer->immutable_metaclass >>
 
-=item B<make_metaclass_immutable (%options)>
+Returns the immutable metaclass object that is created by the
+transformation process.
 
-This will actually change the C<$metaclass> into the immutable version.
-
-=item B<make_metaclass_mutable (%options)>
-
-This will change the C<$metaclass> into the mutable version by reversing
-the immutable process. C<%options> should be the same options that were
-given to make_metaclass_immutable.
-
-=item B<inlined_constructor>
+=item B<< $transformer->inlined_constructor >>
 
 If the constructor was inlined, this returns the constructor method
 object that was created to do this.
+
+=item B<< $transformer->make_metaclass_immutable >>
+
+Makes the transformer's metaclass immutable.
+
+=item B<< $transformer->make_metaclass_mutable >>
+
+Makes the transformer's metaclass mutable.
 
 =back
 

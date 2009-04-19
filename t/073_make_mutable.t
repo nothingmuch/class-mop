@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 114;
+use Test::More tests => 101;
 use Test::Exception;
 
 use Scalar::Util;
@@ -41,7 +41,10 @@ use Class::MOP;
 {
     my $meta = Baz->meta;
     is($meta->name, 'Baz', '... checking the Baz metaclass');
-    my @orig_keys = sort grep { !/^_/ } keys %$meta;
+    my %orig_keys = map { $_ => 1 } grep { !/^_/ } keys %$meta;
+    # Since this has no default it won't be present yet, but it will
+    # be after the class is made immutable.
+    $orig_keys{immutable_transformer} = 1;
 
     lives_ok {$meta->make_immutable; } '... changed Baz to be immutable';
     ok(!$meta->is_mutable,              '... our class is no longer mutable');
@@ -49,7 +52,7 @@ use Class::MOP;
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
     ok($meta->get_method_map->{new},    '... inlined constructor created');
     ok($meta->has_method('new'),        '... inlined constructor created for sure');    
-    ok($meta->get_immutable_transformer->inlined_constructor,
+    ok($meta->immutable_transformer->inlined_constructor,
        '... transformer says it did inline the constructor');
 
     lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
@@ -58,23 +61,16 @@ use Class::MOP;
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
     ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
     ok(!$meta->has_method('new'),        '... inlined constructor removed for sure');    
-    ok(!$meta->get_immutable_transformer->inlined_constructor,
+    ok(!$meta->immutable_transformer->inlined_constructor,
        '... transformer says it did not inline the constructor');
 
-    my @new_keys = sort grep { !/^_/ } keys %$meta;
-    is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
+    my %new_keys = map { $_ => 1 } grep { !/^_/ } keys %$meta;
+    is_deeply(\%orig_keys, \%new_keys, '... no extraneous hashkeys');
 
     isa_ok($meta, 'Class::MOP::Class', '... Baz->meta isa Class::MOP::Class');
 
     ok( $meta->add_method('xyz', sub{'xxx'}), '... added method');
     is( Baz->xyz, 'xxx',                      '... method xyz works');
-
-    ok(! $meta->has_method('zxy')             ,'...  we dont have the aliased method yet');    
-    ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
-    ok( $meta->has_method('zxy')             ,'...  the aliased method does register');    
-    is( Baz->zxy, 'xxx',                      '... method zxy works');
-    ok( $meta->remove_method('xyz'),          '... removed method');
-    ok( $meta->remove_method('zxy'),          '... removed aliased method');
 
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok(Baz->can('fickle'),                '... Baz can fickle');
@@ -93,7 +89,7 @@ use Class::MOP;
     is_deeply([@supers], [$meta->superclasses], '... reset the superclasses okay');
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 
     lives_ok {$meta->make_immutable; } '... changed Baz to be immutable again';
@@ -108,8 +104,6 @@ use Class::MOP;
     lives_ok { $meta->make_immutable() } '... changed Baz to be immutable';
 
     dies_ok{ $meta->add_method('xyz', sub{'xxx'})  } '... exception thrown as expected';
-    dies_ok{ $meta->alias_method('zxy',sub{'xxx'}) } '... exception thrown as expected';
-    dies_ok{ $meta->remove_method('zxy')           } '... exception thrown as expected';
 
     dies_ok {
       $meta->add_attribute('fickle', accessor => 'fickle')
@@ -124,7 +118,7 @@ use Class::MOP;
     dies_ok { $meta->superclasses('Foo') } '... set the superclasses';
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 }
 
@@ -132,9 +126,10 @@ use Class::MOP;
 
     ok(Baz->meta->is_immutable,  'Superclass is immutable');
     my $meta = Baz->meta->create_anon_class(superclasses => ['Baz']);
-    my @orig_keys  = sort grep { !/^_/ } keys %$meta;
-    my @orig_meths = sort { $a->{name} cmp $b->{name} }
-      $meta->compute_all_applicable_methods;
+    my %orig_keys = map { $_ => 1 } grep { !/^_/ } keys %$meta;
+    $orig_keys{immutable_transformer} = 1;
+    my @orig_meths = sort { $a->name cmp $b->name }
+      $meta->get_all_methods;
     ok($meta->is_anon_class,                  'We have an anon metaclass');
     ok($meta->is_mutable,  '... our anon class is mutable');
     ok(!$meta->is_immutable,  '... our anon class is not immutable');
@@ -156,20 +151,17 @@ use Class::MOP;
     ok($meta->is_anon_class,          '... still marked as an anon class');
     my $instance = $meta->new_object;
 
-    my @new_keys  = sort grep { !/^_/ } keys %$meta;
-    my @new_meths = sort { $a->{name} cmp $b->{name} }
-      $meta->compute_all_applicable_methods;
-    is_deeply(\@orig_keys, \@new_keys, '... no straneous hashkeys');
+    my %new_keys  = map { $_ => 1 } grep { !/^_/ } keys %$meta;
+    my @new_meths = sort { $a->name cmp $b->name }
+      $meta->get_all_methods;
+    is_deeply(\%orig_keys, \%new_keys, '... no extraneous hashkeys');
     is_deeply(\@orig_meths, \@new_meths, '... no straneous methods');
 
     isa_ok($meta, 'Class::MOP::Class', '... Anon class isa Class::MOP::Class');
 
     ok( $meta->add_method('xyz', sub{'xxx'}), '... added method');
     is( $instance->xyz , 'xxx',               '... method xyz works');
-    ok( $meta->alias_method('zxy',sub{'xxx'}),'... aliased method');
-    is( $instance->zxy, 'xxx',                '... method zxy works');
     ok( $meta->remove_method('xyz'),          '... removed method');
-    ok( $meta->remove_method('zxy'),          '... removed aliased method');
 
     ok($meta->add_attribute('fickle', accessor => 'fickle'), '... added attribute');
     ok($instance->can('fickle'),          '... instance can fickle');
@@ -188,7 +180,7 @@ use Class::MOP;
     is_deeply([@supers], [$meta->superclasses], '... reset the superclasses okay');
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 };
 
@@ -207,8 +199,6 @@ use Class::MOP;
     lives_ok {$meta->make_immutable  } '... changed class to be immutable';
 
     dies_ok{ $meta->add_method('xyz', sub{'xxx'})  } '... exception thrown as expected';
-    dies_ok{ $meta->alias_method('zxy',sub{'xxx'}) } '... exception thrown as expected';
-    dies_ok{ $meta->remove_method('zxy')           } '... exception thrown as expected';
 
     dies_ok {
       $meta->add_attribute('fickle', accessor => 'fickle')
@@ -223,7 +213,7 @@ use Class::MOP;
     dies_ok { $meta->superclasses('Foo') } '... set the superclasses';
 
     ok( $meta->$_  , "... ${_} works")
-      for qw(get_meta_instance       compute_all_applicable_attributes
+      for qw(get_meta_instance       get_all_attributes
              class_precedence_list  get_method_map );
 }
 
@@ -232,6 +222,6 @@ use Class::MOP;
     Bar->meta->make_immutable;
     Bar->meta->make_mutable;
 
-    isnt( Foo->meta->get_immutable_transformer, Bar->meta->get_immutable_transformer,
+    isnt( Foo->meta->immutable_transformer, Bar->meta->immutable_transformer,
           'Foo and Bar should have different immutable transformer objects' );
 }

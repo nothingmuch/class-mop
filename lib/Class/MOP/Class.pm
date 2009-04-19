@@ -11,7 +11,7 @@ use Class::MOP::Method::Wrapped;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.78';
+our $VERSION   = '0.81';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -35,16 +35,22 @@ sub initialize {
         || confess "You must pass a package name and it cannot be blessed";
 
     return Class::MOP::get_metaclass_by_name($package_name)
-        || $class->construct_class_instance(package => $package_name, @_);
+        || $class->_construct_class_instance(package => $package_name, @_);
+}
+
+sub construct_class_instance {
+    Carp::cluck('The construct_class_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_construct_class_instance(@_);
 }
 
 # NOTE: (meta-circularity)
-# this is a special form of &construct_instance
+# this is a special form of _construct_instance
 # (see below), which is used to construct class
 # meta-object instances for any Class::MOP::*
 # class. All other classes will use the more
 # normal &construct_instance.
-sub construct_class_instance {
+sub _construct_class_instance {
     my $class        = shift;
     my $options      = @_ == 1 ? $_[0] : {@_};
     my $package_name = $options->{package};
@@ -73,19 +79,18 @@ sub construct_class_instance {
     # now create the metaclass
     my $meta;
     if ($class eq 'Class::MOP::Class') {
-        no strict 'refs';
-        $meta = $class->_new($options)
+        $meta = $class->_new($options);
     }
     else {
         # NOTE:
         # it is safe to use meta here because
         # class will always be a subclass of
         # Class::MOP::Class, which defines meta
-        $meta = $class->meta->construct_instance($options)
+        $meta = $class->meta->_construct_instance($options)
     }
 
     # and check the metaclass compatibility
-    $meta->check_metaclass_compatibility();  
+    $meta->_check_metaclass_compatibility();  
 
     Class::MOP::store_metaclass_by_name($package_name, $meta);
 
@@ -147,7 +152,14 @@ sub update_package_cache_flag {
     $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
 }
 
+
 sub check_metaclass_compatibility {
+    Carp::cluck('The check_metaclass_compatibility method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_check_metaclass_compatibility(@_);
+}
+
+sub _check_metaclass_compatibility {
     my $self = shift;
 
     # this is always okay ...
@@ -170,16 +182,17 @@ sub check_metaclass_compatibility {
             : ref($super_meta);
 
         ($self->isa($super_meta_type))
-            || confess $self->name . "->meta => (" . (ref($self)) . ")" .
-                       " is not compatible with the " .
-                       $superclass_name . "->meta => (" . ($super_meta_type)     . ")";
+            || confess "Class::MOP::class_of(" . $self->name . ") => ("
+                       . (ref($self)) . ")" .  " is not compatible with the " .
+                       "Class::MOP::class_of(".$superclass_name . ") => ("
+                       . ($super_meta_type) . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
         ($self->instance_metaclass->isa($super_meta->instance_metaclass))
-            || confess $self->name . "->meta->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
+            || confess "Class::MOP::class_of(" . $self->name . ")->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       $superclass_name . "->meta->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
+                       "Class::MOP::class_of(" . $superclass_name . ")->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
     }
 }
 
@@ -264,8 +277,6 @@ sub create {
         || confess "You must pass a HASH ref of methods"
             if exists $options{methods};                  
 
-    $class->SUPER::create(%options);
-
     my (%initialize_options) = @args;
     delete @initialize_options{qw(
         package
@@ -276,6 +287,8 @@ sub create {
         authority
     )};
     my $meta = $class->initialize( $package_name => %initialize_options );
+
+    $meta->_instantiate_module( $options{version}, $options{authority} );
 
     # FIXME totally lame
     $meta->add_method('meta' => sub {
@@ -324,17 +337,23 @@ sub new_object {
     # Class::MOP::Class singletons here, so we
     # delegate this to &construct_class_instance
     # which will deal with the singletons
-    return $class->construct_class_instance(@_)
+    return $class->_construct_class_instance(@_)
         if $class->name->isa('Class::MOP::Class');
-    return $class->construct_instance(@_);
+    return $class->_construct_instance(@_);
 }
 
 sub construct_instance {
+    Carp::cluck('The construct_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_construct_instance(@_);
+}
+
+sub _construct_instance {
     my $class = shift;
     my $params = @_ == 1 ? $_[0] : {@_};
     my $meta_instance = $class->get_meta_instance();
     my $instance = $meta_instance->create_instance();
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->get_all_attributes()) {
         $attr->initialize_instance_slot($meta_instance, $instance, $params);
     }
     # NOTE:
@@ -355,15 +374,21 @@ sub construct_instance {
 
 sub get_meta_instance {
     my $self = shift;
-    $self->{'_meta_instance'} ||= $self->create_meta_instance();
+    $self->{'_meta_instance'} ||= $self->_create_meta_instance();
 }
 
 sub create_meta_instance {
+    Carp::cluck('The create_meta_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_create_meta_instance(@_);
+}
+
+sub _create_meta_instance {
     my $self = shift;
     
     my $instance = $self->instance_metaclass->new(
         associated_metaclass => $self,
-        attributes => [ $self->compute_all_applicable_attributes() ],
+        attributes => [ $self->get_all_attributes() ],
     );
 
     $self->add_meta_instance_dependencies()
@@ -383,16 +408,22 @@ sub clone_object {
     # Class::MOP::Class singletons here, they
     # should not be cloned.
     return $instance if $instance->isa('Class::MOP::Class');
-    $class->clone_instance($instance, @_);
+    $class->_clone_instance($instance, @_);
 }
 
 sub clone_instance {
+    Carp::cluck('The clone_instance method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_clone_instance(@_);
+}
+
+sub _clone_instance {
     my ($class, $instance, %params) = @_;
     (blessed($instance))
         || confess "You can only clone instances, ($instance) is not a blessed instance";
     my $meta_instance = $class->get_meta_instance();
     my $clone = $meta_instance->clone_instance($instance);
-    foreach my $attr ($class->compute_all_applicable_attributes()) {
+    foreach my $attr ($class->get_all_attributes()) {
         if ( defined( my $init_arg = $attr->init_arg ) ) {
             if (exists $params{$init_arg}) {
                 $attr->set_value($clone, $params{$init_arg});
@@ -405,26 +436,22 @@ sub clone_instance {
 sub rebless_instance {
     my ($self, $instance, %params) = @_;
 
-    my $old_metaclass;
-    if ($instance->can('meta')) {
-        ($instance->meta->isa('Class::MOP::Class'))
-            || confess 'Cannot rebless instance if ->meta is not an instance of Class::MOP::Class';
-        $old_metaclass = $instance->meta;
-    }
-    else {
-        $old_metaclass = $self->initialize(ref($instance));
-    }
+    my $old_metaclass = Class::MOP::class_of($instance);
+
+    my $old_class = $old_metaclass ? $old_metaclass->name : blessed($instance);
+    $self->name->isa($old_class)
+        || confess "You may rebless only into a subclass of ($old_class), of which (". $self->name .") isn't.";
+
+    $old_metaclass->rebless_instance_away($instance, $self, %params)
+        if $old_metaclass;
 
     my $meta_instance = $self->get_meta_instance();
-
-    $self->name->isa($old_metaclass->name)
-        || confess "You may rebless only into a subclass of (". $old_metaclass->name ."), of which (". $self->name .") isn't.";
 
     # rebless!
     # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
     $meta_instance->rebless_instance_structure($_[1], $self);
 
-    foreach my $attr ( $self->compute_all_applicable_attributes ) {
+    foreach my $attr ( $self->get_all_attributes ) {
         if ( $attr->has_value($instance) ) {
             if ( defined( my $init_arg = $attr->init_arg ) ) {
                 $params{$init_arg} = $attr->get_value($instance)
@@ -436,11 +463,15 @@ sub rebless_instance {
         }
     }
 
-    foreach my $attr ($self->compute_all_applicable_attributes) {
+    foreach my $attr ($self->get_all_attributes) {
         $attr->initialize_instance_slot($meta_instance, $instance, \%params);
     }
     
     $instance;
+}
+
+sub rebless_instance_away {
+    # this intentionally does nothing, it is just a hook
 }
 
 # Inheritance
@@ -466,7 +497,7 @@ sub superclasses {
         # not potentially creating an issues
         # we don't know about
 
-        $self->check_metaclass_compatibility();
+        $self->_check_metaclass_compatibility();
         $self->update_meta_instance_dependencies();
     }
     @{$self->get_package_symbol($var_spec)};
@@ -474,51 +505,9 @@ sub superclasses {
 
 sub subclasses {
     my $self = shift;
-
     my $super_class = $self->name;
 
-    if ( Class::MOP::HAVE_ISAREV() ) {
-        return @{ $super_class->mro::get_isarev() };
-    } else {
-        my @derived_classes;
-
-        my $find_derived_classes;
-        $find_derived_classes = sub {
-            my ($outer_class) = @_;
-
-            my $symbol_table_hashref = do { no strict 'refs'; \%{"${outer_class}::"} };
-
-            SYMBOL:
-            for my $symbol ( keys %$symbol_table_hashref ) {
-                next SYMBOL if $symbol !~ /\A (\w+):: \z/x;
-                my $inner_class = $1;
-
-                next SYMBOL if $inner_class eq 'SUPER';    # skip '*::SUPER'
-
-                my $class =
-                $outer_class
-                ? "${outer_class}::$inner_class"
-                : $inner_class;
-
-                if ( $class->isa($super_class) and $class ne $super_class ) {
-                    push @derived_classes, $class;
-                }
-
-                next SYMBOL if $class eq 'main';           # skip 'main::*'
-
-                $find_derived_classes->($class);
-            }
-        };
-
-        my $root_class = q{};
-        $find_derived_classes->($root_class);
-
-        undef $find_derived_classes;
-
-        @derived_classes = sort { $a->isa($b) ? 1 : $b->isa($a) ? -1 : 0 } @derived_classes;
-
-        return @derived_classes;
-    }
+    return @{ $super_class->mro::get_isarev() };
 }
 
 
@@ -680,9 +669,9 @@ sub add_method {
 }
 
 sub alias_method {
-    my $self = shift;
+    Carp::cluck("The alias_method method is deprecated. Use add_method instead.\n");
 
-    $self->add_method(@_);
+    shift->add_method(@_);
 }
 
 sub has_method {
@@ -743,8 +732,10 @@ sub get_all_methods {
     return values %methods;
 }
 
-# compatibility
 sub compute_all_applicable_methods {
+    Carp::cluck('The compute_all_applicable_methods method is deprecated.'
+        . " Use get_all_methods instead.\n");
+
     return map {
         {
             name  => $_->name,
@@ -842,9 +833,9 @@ sub update_meta_instance_dependencies {
 sub add_meta_instance_dependencies {
     my $self = shift;
 
-    $self->remove_meta_instance_depdendencies;
+    $self->remove_meta_instance_dependencies;
 
-    my @attrs = $self->compute_all_applicable_attributes();
+    my @attrs = $self->get_all_attributes();
 
     my %seen;
     my @classes = grep { not $seen{$_->name}++ } map { $_->associated_class } @attrs;
@@ -856,7 +847,7 @@ sub add_meta_instance_dependencies {
     $self->{meta_instance_dependencies} = \@classes;
 }
 
-sub remove_meta_instance_depdendencies {
+sub remove_meta_instance_dependencies {
     my $self = shift;
 
     if ( my $classes = delete $self->{meta_instance_dependencies} ) {
@@ -929,13 +920,16 @@ sub get_attribute_list {
 }
 
 sub get_all_attributes {
-    shift->compute_all_applicable_attributes(@_);
-}
-
-sub compute_all_applicable_attributes {
     my $self = shift;
     my %attrs = map { %{ $self->initialize($_)->get_attribute_map } } reverse $self->linearized_isa;
     return values %attrs;
+}
+
+sub compute_all_applicable_attributes {
+    Carp::cluck('The compute_all_applicable_attributes method has been deprecated.'
+        . " Use get_all_attributes instead.\n");
+
+    shift->get_all_attributes(@_);
 }
 
 sub find_attribute_by_name {
@@ -973,108 +967,56 @@ sub is_pristine {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
-# NOTE:
-# Why I changed this (groditi)
-#  - One Metaclass may have many Classes through many Metaclass instances
-#  - One Metaclass should only have one Immutable Transformer instance
-#  - Each Class may have different Immutabilizing options
-#  - Therefore each Metaclass instance may have different Immutabilizing options
-#  - We need to store one Immutable Transformer instance per Metaclass
-#  - We need to store one set of Immutable Transformer options per Class
-#  - Upon make_mutable we may delete the Immutabilizing options
-#  - We could clean the immutable Transformer instance when there is no more
-#      immutable Classes of that type, but we can also keep it in case
-#      another class with this same Metaclass becomes immutable. It is a case
-#      of trading of storing an instance to avoid unnecessary instantiations of
-#      Immutable Transformers. You may view this as a memory leak, however
-#      Because we have few Metaclasses, in practice it seems acceptable
-#  - To allow Immutable Transformers instances to be cleaned up we could weaken
-#      the reference stored in  $IMMUTABLE_TRANSFORMERS{$class} and ||= should DWIM
+sub immutable_transformer { $_[0]->{immutable_transformer} }
+sub _set_immutable_transformer { $_[0]->{immutable_transformer} = $_[1] }
 
-{
+sub make_immutable {
+    my $self = shift;
 
-    my %IMMUTABLE_TRANSFORMERS;
-    my %IMMUTABLE_OPTIONS;
+    return if $self->is_immutable;
 
-    sub get_immutable_options {
-        my $self = shift;
-        return if $self->is_mutable;
-        confess "unable to find immutabilizing options"
-            unless exists $IMMUTABLE_OPTIONS{$self->name};
-        my %options = %{$IMMUTABLE_OPTIONS{$self->name}};
-        delete $options{IMMUTABLE_TRANSFORMER};
-        return \%options;
-    }
+    my $transformer = $self->immutable_transformer
+        || $self->_make_immutable_transformer(@_);
 
-    sub get_immutable_transformer {
-        my $self = shift;
-        if( $self->is_mutable ){
-            return $IMMUTABLE_TRANSFORMERS{$self->name} ||= $self->create_immutable_transformer;
-        }
-        confess "unable to find transformer for immutable class"
-            unless exists $IMMUTABLE_OPTIONS{$self->name};
-        return $IMMUTABLE_OPTIONS{$self->name}->{IMMUTABLE_TRANSFORMER};
-    }
+    $self->_set_immutable_transformer($transformer);
 
-    sub make_immutable {
-        my $self = shift;
-        my %options = @_;
-
-        my $transformer = $self->get_immutable_transformer;
-        $transformer->make_metaclass_immutable($self, \%options);
-        $IMMUTABLE_OPTIONS{$self->name} =
-            { %options,  IMMUTABLE_TRANSFORMER => $transformer };
-
-        if( exists $options{debug} && $options{debug} ){
-            print STDERR "# of Metaclass options:      ", keys %IMMUTABLE_OPTIONS;
-            print STDERR "# of Immutable transformers: ", keys %IMMUTABLE_TRANSFORMERS;
-        }
-
-        1;
-    }
-
-    sub make_mutable{
-        my $self = shift;
-        return if $self->is_mutable;
-        my $options = delete $IMMUTABLE_OPTIONS{$self->name};
-        confess "unable to find immutabilizing options" unless ref $options;
-        my $transformer = delete $options->{IMMUTABLE_TRANSFORMER};
-        $transformer->make_metaclass_mutable($self, $options);
-        1;
-    }
+    $transformer->make_metaclass_immutable;
 }
 
-sub create_immutable_transformer {
-    my $self = shift;
-    my $class = Class::MOP::Immutable->new($self, {
+{
+    my %Default_Immutable_Options = (
         read_only   => [qw/superclasses/],
-        cannot_call => [qw/
-           add_method
-           alias_method
-           remove_method
-           add_attribute
-           remove_attribute
-           remove_package_symbol
-        /],
-        memoize     => {
-           class_precedence_list             => 'ARRAY',
-           linearized_isa                    => 'ARRAY', # FIXME perl 5.10 memoizes this on its own, no need?
-           get_all_methods                   => 'ARRAY',
-           get_all_method_names              => 'ARRAY',
-           #get_all_attributes               => 'ARRAY', # it's an alias, no need, but maybe in the future
-           compute_all_applicable_attributes => 'ARRAY',
-           get_meta_instance                 => 'SCALAR',
-           get_method_map                    => 'SCALAR',
+        cannot_call => [
+            qw(
+                add_method
+                alias_method
+                remove_method
+                add_attribute
+                remove_attribute
+                remove_package_symbol
+                )
+        ],
+        memoize => {
+            class_precedence_list => 'ARRAY',
+            # FIXME perl 5.10 memoizes this on its own, no need?
+            linearized_isa       => 'ARRAY',
+            get_all_methods      => 'ARRAY',
+            get_all_method_names => 'ARRAY',
+            get_all_attributes   => 'ARRAY',
+            get_meta_instance    => 'SCALAR',
+            get_method_map       => 'SCALAR',
         },
+
         # NOTE:
-        # this is ugly, but so are typeglobs, 
+        # this is ugly, but so are typeglobs,
         # so whattayahgonnadoboutit
         # - SL
-        wrapped => { 
+        wrapped => {
             add_package_symbol => sub {
                 my $original = shift;
-                confess "Cannot add package symbols to an immutable metaclass" 
-                    unless (caller(2))[3] eq 'Class::MOP::Package::get_package_symbol'; 
+                confess "Cannot add package symbols to an immutable metaclass"
+                    unless ( caller(2) )[3] eq
+                    'Class::MOP::Package::get_package_symbol';
 
                 # This is a workaround for a bug in 5.8.1 which thinks that
                 # goto $original->body
@@ -1083,8 +1025,29 @@ sub create_immutable_transformer {
                 goto $body;
             },
         },
-    });
-    return $class;
+    );
+
+    sub _default_immutable_transformer_options {
+        return %Default_Immutable_Options;
+    }
+}
+
+sub _make_immutable_transformer {
+    my $self = shift;
+
+    Class::MOP::Immutable->new(
+        $self,
+        $self->_default_immutable_transformer_options,
+        @_
+    );
+}
+
+sub make_mutable {
+    my $self = shift;
+
+    return if $self->is_mutable;
+
+    $self->immutable_transformer->make_metaclass_mutable;
 }
 
 1;
@@ -1133,254 +1096,187 @@ Class::MOP::Class - Class Meta Object
 
 =head1 DESCRIPTION
 
-This is the largest and currently most complex part of the Perl 5
-meta-object protocol. It controls the introspection and
-manipulation of Perl 5 classes (and it can create them too). The
+The Class Protocol is the largest and most complex part of the
+Class::MOP meta-object protocol. It controls the introspection and
+manipulation of Perl 5 classes, and it can create them as well. The
 best way to understand what this module can do, is to read the
-documentation for each of it's methods.
+documentation for each of its methods.
 
 =head1 INHERITANCE
 
-B<Class::MOP::Class> is a subclass of L<Class::MOP::Module>
+C<Class::MOP::Class> is a subclass of L<Class::MOP::Module>.
 
 =head1 METHODS
 
-=head2 Self Introspection
+=head2 Class construction
+
+These methods all create new C<Class::MOP::Class> objects. These
+objects can represent existing classes, or they can be used to create
+new classes from scratch.
+
+The metaclass object for a given class is a singleton. If you attempt
+to create a metaclass for the same class twice, you will just get the
+existing object.
 
 =over 4
 
-=item B<meta>
+=item B<< Class::MOP::Class->create($package_name, %options) >>
 
-This will return a B<Class::MOP::Class> instance which is related
-to this class. Thereby allowing B<Class::MOP::Class> to actually
-introspect itself.
+This method creates a new C<Class::MOP::Class> object with the given
+package name. It accepts a number of options.
 
-As with B<Class::MOP::Attribute>, B<Class::MOP> will actually
-bootstrap this module by installing a number of attribute meta-objects
-into it's metaclass. This will allow this class to reap all the benifits
-of the MOP when subclassing it.
+=over 8
+
+=item * version
+
+An optional version number for the newly created package.
+
+=item * authority
+
+An optional authority for the newly created package.
+
+=item * superclasses
+
+An optional array reference of superclass names.
+
+=item * methods
+
+An optional hash reference of methods for the class. The keys of the
+hash reference are method names, and values are subroutine references.
+
+=item * attributes
+
+An optional array reference of attributes.
+
+An attribute can be passed as an existing L<Class::MOP::Attribute>
+object, I<or> or as a hash reference of options which will be passed
+to the attribute metaclass's constructor.
 
 =back
 
-=head2 Class construction
+=item B<< Class::MOP::Class->create_anon_class(%options) >>
 
-These methods will handle creating B<Class::MOP::Class> objects,
-which can be used to both create new classes, and analyze
-pre-existing classes.
+This method works just like C<< Class::MOP::Class->create >> but it
+creates an "anonymous" class. In fact, the class does have a name, but
+that name is a unique name generated internally by this module.
 
-This module will internally store references to all the instances
-you create with these methods, so that they do not need to be
-created any more than nessecary. Basically, they are singletons.
+It accepts the same C<superclasses>, C<methods>, and C<attributes>
+parameters that C<create> accepts.
 
-=over 4
+Anonymous classes are destroyed once the metaclass they are attached
+to goes out of scope, and will be removed from Perl's internal symbol
+table.
 
-=item B<create ($package_name,
-                version      =E<gt> ?$version,
-                authority    =E<gt> ?$authority,
-                superclasses =E<gt> ?@superclasses,
-                methods      =E<gt> ?%methods,
-                attributes   =E<gt> ?%attributes)>
+All instances of an anonymous class keep a special reference to the
+metaclass object, which prevents the metaclass from going out of scope
+while any instances exist.
 
-This returns a B<Class::MOP::Class> object, bringing the specified
-C<$package_name> into existence and adding any of the C<$version>,
-C<$authority>, C<@superclasses>, C<%methods> and C<%attributes> to
-it.
+This only works if the instance if based on a hash reference, however.
 
-=item B<create_anon_class (superclasses =E<gt> ?@superclasses,
-                           methods      =E<gt> ?%methods,
-                           attributes   =E<gt> ?%attributes)>
+=item B<< Class::MOP::Class->initialize($package_name, %options) >>
 
-This will create an anonymous class, it works much like C<create> but
-it does not need a C<$package_name>. Instead it will create a suitably
-unique package name for you to stash things into.
+This method will initialize a C<Class::MOP::Class> object for the
+named package. Unlike C<create>, this method I<will not> create a new
+class.
 
-On very important distinction is that anon classes are destroyed once
-the metaclass they are attached to goes out of scope. In the DESTROY
-method, the created package will be removed from the symbol table.
+The purpose of this method is to retrieve a C<Class::MOP::Class>
+object for introspecting an existing class.
 
-It is also worth noting that any instances created with an anon-class
-will keep a special reference to the anon-meta which will prevent the
-anon-class from going out of scope until all instances of it have also
-been destroyed. This however only works for HASH based instance types,
-as we use a special reserved slot (C<__MOP__>) to store this.
+If an existing C<Class::MOP::Class> object exists for the named
+package, it will be returned, and any options provided will be
+ignored!
 
-=item B<initialize ($package_name, %options)>
+If the object does not yet exist, it will be created.
 
-This initializes and returns returns a B<Class::MOP::Class> object for
-a given a C<$package_name>. If a metaclass already exists for the
-package, it simply returns it instead of creating a new one.
-
-=item B<construct_class_instance (%options)>
-
-This will construct an instance of B<Class::MOP::Class>, it is
-here so that we can actually "tie the knot" for B<Class::MOP::Class>
-to use C<construct_instance> once all the bootstrapping is done. This
-method is used internally by C<initialize> and should never be called
-from outside of that method really.
-
-=item B<check_metaclass_compatibility>
-
-This method is called as the very last thing in the
-C<construct_class_instance> method. This will check that the
-metaclass you are creating is compatible with the metaclasses of all
-your ancestors. For more inforamtion about metaclass compatibility
-see the C<About Metaclass compatibility> section in L<Class::MOP>.
-
-=item B<update_package_cache_flag>
-
-This will reset the package cache flag for this particular metaclass
-it is basically the value of the C<Class::MOP::get_package_cache_flag> 
-function. This is very rarely needed from outside of C<Class::MOP::Class>
-but in some cases you might want to use it, so it is here.
-
-=item B<reset_package_cache_flag>
-
-Clears the package cache flag to announce to the internals that we need 
-to rebuild the method map.
-
-=item B<add_meta_instance_dependencies>
-
-Registers this class as dependent on its superclasses.
-
-Only superclasses from which this class inherits attributes will be added.
-
-=item B<remove_meta_instance_depdendencies>
-
-Unregisters this class from its superclasses.
-
-=item B<update_meta_instance_dependencies>
-
-Reregisters if necessary.
-
-=item B<add_dependent_meta_instance> $metaclass
-
-Registers the class as having a meta instance dependent on this class.
-
-=item B<remove_dependent_meta_instance> $metaclass
-
-Remove the class from the list of dependent classes.
-
-=item B<invalidate_meta_instances>
-
-Clears the cached meta instance for this metaclass and all of the registered
-classes with dependent meta instances.
-
-Called by C<add_attribute> and C<remove_attribute> to recalculate the attribute
-slots.
-
-=item B<invalidate_meta_instance>
-
-Used by C<invalidate_meta_instances>.
+The valid options that can be passed to this method are
+C<attribute_metaclass>, C<method_metaclass>,
+C<wrapped_method_metaclass>, and C<instance_metaclass>. These are all
+optional, and default to the appropriate class in the C<Class::MOP>
+distribution.
 
 =back
 
 =head2 Object instance construction and cloning
 
-These methods are B<entirely optional>, it is up to you whether you want
-to use them or not.
+These methods are all related to creating and/or cloning object
+instances.
 
 =over 4
 
-=item B<instance_metaclass>
+=item B<< $metaclass->clone_object($instance, %params) >>
 
-Returns the class name of the instance metaclass, see L<Class::MOP::Instance> 
-for more information on the instance metaclasses.
+This method clones an existing object instance. Any parameters you
+provide are will override existing attribute values in the object.
 
-=item B<get_meta_instance>
+This is a convenience method for cloning an object instance, then
+blessing it into the appropriate package.
 
-Returns an instance of L<Class::MOP::Instance> to be used in the construction 
-of a new instance of the class. 
+You could implement a clone method in your class, using this method:
 
-=item B<create_meta_instance>
-
-Called by C<get_meta_instance> if necessary.
-
-=item B<new_object (%params)>
-
-This is a convience method for creating a new object of the class, and
-blessing it into the appropriate package as well. Ideally your class
-would call a C<new> this method like so:
-
-  sub MyClass::new {
-      my ($class, %param) = @_;
-      $class->meta->new_object(%params);
-  }
-
-=item B<construct_instance (%params)>
-
-This method is used to construct an instance structure suitable for
-C<bless>-ing into your package of choice. It works in conjunction
-with the Attribute protocol to collect all applicable attributes.
-
-This will construct an instance using a HASH ref as storage
-(currently only HASH references are supported). This will collect all
-the applicable attributes and layout out the fields in the HASH ref,
-it will then initialize them using either use the corresponding key
-in C<%params> or any default value or initializer found in the
-attribute meta-object.
-
-=item B<clone_object ($instance, %params)>
-
-This is a convience method for cloning an object instance, then
-blessing it into the appropriate package. This method will call
-C<clone_instance>, which performs a shallow copy of the object,
-see that methods documentation for more details. Ideally your
-class would call a C<clone> this method like so:
-
-  sub MyClass::clone {
-      my ($self, %param) = @_;
+  sub clone {
+      my ($self, %params) = @_;
       $self->meta->clone_object($self, %params);
   }
 
-=item B<clone_instance($instance, %params)>
+=item B<< $metaclass->rebless_instance($instance, %params) >>
 
-This method is a compliment of C<construct_instance> (which means if
-you override C<construct_instance>, you need to override this one too),
-and clones the instance shallowly.
+This method changes the class of C<$instance> to the metaclass's class.
 
-The cloned structure returned is (like with C<construct_instance>) an
-unC<bless>ed HASH reference, it is your responsibility to then bless
-this cloned structure into the right class (which C<clone_object> will
-do for you).
+You can only rebless an instance into a subclass of its current
+class. If you pass any additional parameters, these will be treated
+like constructor parameters and used to initialize the object's
+attributes. Any existing attributes that are already set will be
+overwritten.
 
-As of 0.11, this method will clone the C<$instance> structure shallowly,
-as opposed to the deep cloning implemented in prior versions. After much
-thought, research and discussion, I have decided that anything but basic
-shallow cloning is outside the scope of the meta-object protocol. I
-think Yuval "nothingmuch" Kogman put it best when he said that cloning
-is too I<context-specific> to be part of the MOP.
+Before reblessing the instance, this method will call
+C<rebless_instance_away> on the instance's current metaclass. This method
+will be passed the instance, the new metaclass, and any parameters
+specified to C<rebless_instance>. By default, C<rebless_instance_away>
+does nothing; it is merely a hook.
 
-=item B<rebless_instance($instance, ?%params)>
+=item B<< $metaclass->new_object(%params) >>
 
-This will change the class of C<$instance> to the class of the invoking
-C<Class::MOP::Class>. You may only rebless the instance to a subclass of
-itself. You may pass in optional C<%params> which are like constructor 
-params and will override anything already defined in the instance.
+This method is used to create a new object of the metaclass's
+class. Any parameters you provide are used to initialize the
+instance's attributes.
+
+=item B<< $metaclass->instance_metaclass >>
+
+Returns the class name of the instance metaclass, see
+L<Class::MOP::Instance> for more information on the instance
+metaclass.
+
+=item B<< $metaclass->get_meta_instance >>
+
+Returns an instance of the C<instance_metaclass> to be used in the
+construction of a new instance of the class.
 
 =back
 
-=head2 Informational
+=head2 Informational predicates
 
-These are a few predicate methods for asking information about the class.
+These are a few predicate methods for asking information about the
+class itself.
 
 =over 4
 
-=item B<is_anon_class>
+=item B<< $metaclass->is_anon_class >>
 
-This returns true if the class is a C<Class::MOP::Class> created anon class.
+This returns true if the class was created by calling C<<
+Class::MOP::Class->create_anon_class >>.
 
-=item B<is_mutable>
+=item B<< $metaclass->is_mutable >>
 
 This returns true if the class is still mutable.
 
-=item B<is_immutable>
+=item B<< $metaclass->is_immutable >>
 
 This returns true if the class has been made immutable.
 
-=item B<is_pristine>
+=item B<< $metaclass->is_pristine >>
 
-Checks whether the class has any data that will be lost if C<reinitialize> is
-called.
+A class is I<not> pristine if it has non-inherited attributes or if it
+has any generated methods.
 
 =back
 
@@ -1388,197 +1284,292 @@ called.
 
 =over 4
 
-=item B<superclasses (?@superclasses)>
+=item B<< $metaclass->superclasses(@superclasses) >>
 
-This is a read-write attribute which represents the superclass
-relationships of the class the B<Class::MOP::Class> instance is
-associated with. Basically, it can get and set the C<@ISA> for you.
+This is a read-write accessor which represents the superclass
+relationships of the metaclass's class.
 
-=item B<class_precedence_list>
+This is basically sugar around getting and setting C<@ISA>.
 
-This computes the a list of all the class's ancestors in the same order
-in which method dispatch will be done. This is similair to what 
-B<Class::ISA::super_path> does, but we don't remove duplicate names.
+=item B<< $metaclass->class_precedence_list >>
 
-=item B<linearized_isa>
+This returns a list of all of the class's ancestor classes. The
+classes are returned in method dispatch order.
 
-This returns a list based on C<class_precedence_list> but with all 
+=item B<< $metaclass->linearized_isa >>
+
+This returns a list based on C<class_precedence_list> but with all
 duplicates removed.
 
-=item B<subclasses>
+=item B<< $metaclass->subclasses >>
 
-This returns a list of subclasses for this class. 
+This returns a list of subclasses for this class.
 
 =back
 
-=head2 Methods
+=head2 Method introspection and creation
+
+These methods allow you to introspect a class's methods, as well as
+add, remove, or change methods.
+
+Determining what is truly a method in a Perl 5 class requires some
+heuristics (aka guessing).
+
+Methods defined outside the package with a fully qualified name (C<sub
+Package::name { ... }>) will be included. Similarly, methods named
+with a fully qualified name using L<Sub::Name> are also included.
+
+However, we attempt to ignore imported functions.
+
+Ultimately, we are using heuristics to determine what truly is a
+method in a class, and these heuristics may get the wrong answer in
+some edge cases. However, for most "normal" cases the heuristics work
+correctly.
 
 =over 4
 
-=item B<get_method_map>
+=item B<< $metaclass->get_method($method_name) >>
 
-Returns a HASH ref of name to L<Class::MOP::Method> instance mapping
-for this class.
+This will return a L<Class::MOP::Method> for the specified
+C<$method_name>. If the class does not have the specified method, it
+returns C<undef>
 
-=item B<method_metaclass>
+=item B<< $metaclass->has_method($method_name) >>
 
-Returns the class name of the method metaclass, see L<Class::MOP::Method> 
-for more information on the method metaclasses.
+Returns a boolean indicating whether or not the class defines the
+named method. It does not include methods inherited from parent
+classes.
 
-=item B<wrap_method_body(%attrs)>
+=item B<< $metaclass->get_method_map >>
 
-Wrap a code ref (C<$attrs{body>) with C<method_metaclass>.
+Returns a hash reference representing the methods defined in this
+class. The keys are method names and the values are
+L<Class::MOP::Method> objects.
 
-=item B<add_method ($method_name, $method)>
+=item B<< $metaclass->get_method_list >>
 
-This will take a C<$method_name> and CODE reference or meta method
-objectand install it into the class's package.
+This will return a list of method I<names> for all methods defined in
+this class.
 
-You are strongly encouraged to pass a meta method object instead of a
-code reference. If you do so, that object gets stored as part of the
-class's method map, providing more useful information about the method
-for introspection.
-
-When you provide a method object, this method will clone that object
-if the object's package name does not match the class name. This lets
-us track the original source of any methods added from other classes
-(notably Moose roles).
-
-B<NOTE>:
-This does absolutely nothing special to C<$method>
-other than use B<Sub::Name> to make sure it is tagged with the
-correct name, and therefore show up correctly in stack traces and
-such.
-
-=item B<has_method ($method_name)>
-
-This just provides a simple way to check if the class implements
-a specific C<$method_name>. It will I<not> however, attempt to check
-if the class inherits the method (use C<UNIVERSAL::can> for that).
-
-This will correctly handle functions defined outside of the package
-that use a fully qualified name (C<sub Package::name { ... }>).
-
-This will correctly handle functions renamed with B<Sub::Name> and
-installed using the symbol tables. However, if you are naming the
-subroutine outside of the package scope, you must use the fully
-qualified name, including the package name, for C<has_method> to
-correctly identify it.
-
-This will attempt to correctly ignore functions imported from other
-packages using B<Exporter>. It breaks down if the function imported
-is an C<__ANON__> sub (such as with C<use constant>), which very well
-may be a valid method being applied to the class.
-
-In short, this method cannot always be trusted to determine if the
-C<$method_name> is actually a method. However, it will DWIM about
-90% of the time, so it's a small trade off I think.
-
-=item B<get_method ($method_name)>
-
-This will return a Class::MOP::Method instance related to the specified
-C<$method_name>, or return undef if that method does not exist.
-
-The Class::MOP::Method is codifiable, so you can use it like a normal
-CODE reference, see L<Class::MOP::Method> for more information.
-
-=item B<find_method_by_name ($method_name)>
-
-This will return a L<Class::MOP::Method> instance for the specified
-C<$method_name>, or return undef if that method does not exist.
-
-Unlike C<get_method> this will also look in the superclasses.
-
-=item B<remove_method ($method_name)>
-
-This will attempt to remove a given C<$method_name> from the class.
-It will return the L<Class::MOP::Method> instance that it has removed,
-and will attempt to use B<Sub::Name> to clear the methods associated
-name.
-
-=item B<get_method_list>
-
-This will return a list of method names for all I<locally> defined
-methods. It does B<not> provide a list of all applicable methods,
-including any inherited ones. If you want a list of all applicable
-methods, use the C<compute_all_applicable_methods> method.
-
-=item B<get_all_methods>
+=item B<< $metaclass->get_all_methods >>
 
 This will traverse the inheritance hierarchy and return a list of all
-the applicable L<Class::MOP::Method> objects for this class.
+the L<Class::MOP::Method> objects for this class and its parents.
 
-=item B<compute_all_applicable_methods>
+=item B<< $metaclass->find_method_by_name($method_name) >>
 
-Deprecated.
+This will return a L<Class::MOP::Method> for the specified
+C<$method_name>. If the class does not have the specified method, it
+returns C<undef>
 
-This method returns a list of hashes describing the all the methods of the
-class.
+Unlike C<get_method>, this method I<will> look for the named method in
+superclasses.
 
-Use L<get_all_methods>, which is easier/better/faster. This method predates
-L<Class::MOP::Method>.
+=item B<< $metaclass->get_all_method_names >>
 
-=item B<get_all_method_names>
+This will return a list of method I<names> for all of this class's
+methods, including inherited methods.
 
-This will traverse the inheritance hierarchy and return a list of all the
-applicable method names for this class. Duplicate names are removed, but the
-order the methods come out is not defined.
+=item B<< $metaclass->find_all_methods_by_name($method_name) >>
 
-=item B<find_all_methods_by_name ($method_name)>
+This method looks for the named method in the class and all of its
+parents. It returns every matching method it finds in the inheritance
+tree, so it returns a list of methods.
 
-This will traverse the inheritence hierarchy and locate all methods
-with a given C<$method_name>. Similar to
-C<compute_all_applicable_methods> it returns a list of HASH references
-with the following information; method name (which will always be the
-same as C<$method_name>), the name of the class in which the method
-lives and a CODE reference for the actual method.
+Each method is returned as a hash reference with three keys. The keys
+are C<name>, C<class>, and C<code>. The C<code> key has a
+L<Class::MOP::Method> object as its value.
 
-The list of methods produced is a distinct list, meaning there are no
-duplicates in it. This is especially useful for things like object
-initialization and destruction where you only want the method called
-once, and in the correct order.
+The list of methods is distinct.
 
-=item B<find_next_method_by_name ($method_name)>
+=item B<< $metaclass->find_next_method_by_name($method_name) >>
 
-This will return the first method to match a given C<$method_name> in
-the superclasses, this is basically equivalent to calling
-C<SUPER::$method_name>, but it can be dispatched at runtime.
+This method returns the first method in any superclass matching the
+given name. It is effectively the method that C<SUPER::$method_name>
+would dispatch to.
 
-=item B<alias_method ($method_name, $method)>
+=item B<< $metaclass->add_method($method_name, $method) >>
 
-B<NOTE>: This method is now deprecated. Just use C<add_method>
-instead.
+This method takes a method name and a subroutine reference, and adds
+the method to the class.
+
+The subroutine reference can be a L<Class::MOP::Method>, and you are
+strongly encouraged to pass a meta method object instead of a code
+reference. If you do so, that object gets stored as part of the
+class's method map directly. If not, the meta information will have to
+be recreated later, and may be incorrect.
+
+If you provide a method object, this method will clone that object if
+the object's package name does not match the class name. This lets us
+track the original source of any methods added from other classes
+(notably Moose roles).
+
+=item B<< $metaclass->remove_method($method_name) >>
+
+Remove the named method from the class. This method returns the
+L<Class::MOP::Method> object for the method.
+
+=item B<< $metaclass->method_metaclass >>
+
+Returns the class name of the method metaclass, see
+L<Class::MOP::Method> for more information on the method metaclass.
+
+=item B<< $metaclass->wrapped_method_metaclass >>
+
+Returns the class name of the wrapped method metaclass, see
+L<Class::MOP::Method::Wrapped> for more information on the wrapped
+method metaclass.
+
+=back
+
+=head2 Attribute introspection and creation
+
+Because Perl 5 does not have a core concept of attributes in classes,
+we can only return information about attributes which have been added
+via this class's methods. We cannot discover information about
+attributes which are defined in terms of "regular" Perl 5 methods.
+
+=over 4
+
+=item B<< $metaclass->get_attribute($attribute_name) >>
+
+This will return a L<Class::MOP::Attribute> for the specified
+C<$attribute_name>. If the class does not have the specified
+attribute, it returns C<undef>
+
+=item B<< $metaclass->has_attribute($attribute_name) >>
+
+Returns a boolean indicating whether or not the class defines the
+named attribute. It does not include attributes inherited from parent
+classes.
+
+=item B<< $metaclass->get_attribute_map >>
+
+Returns a hash reference representing the attributes defined in this
+class. The keys are attribute names and the values are
+L<Class::MOP::Attribute> objects.
+
+=item B<< $metaclass->get_attribute_list >>
+
+This will return a list of attributes I<names> for all attributes
+defined in this class.
+
+=item B<< $metaclass->get_all_attributes >>
+
+This will traverse the inheritance hierarchy and return a list of all
+the L<Class::MOP::Attribute> objects for this class and its parents.
+
+=item B<< $metaclass->find_attribute_by_name($attribute_name) >>
+
+This will return a L<Class::MOP::Attribute> for the specified
+C<$attribute_name>. If the class does not have the specified
+attribute, it returns C<undef>
+
+Unlike C<get_attribute>, this attribute I<will> look for the named
+attribute in superclasses.
+
+=item B<< $metaclass->add_attribute(...) >>
+
+This method accepts either an existing L<Class::MOP::Attribute>
+object, or parameters suitable for passing to that class's C<new>
+method.
+
+The attribute provided will be added to the class.
+
+Any accessor methods defined by the attribute will be added to the
+class when the attribute is added.
+
+If an attribute of the same name already exists, the old attribute
+will be removed first.
+
+=item B<< $metaclass->remove_attribute($attribute_name) >>
+
+This will remove the named attribute from the class, and
+L<Class::MOP::Attribute> object.
+
+Removing an attribute also removes any accessor methods defined by the
+attribute.
+
+However, note that removing an attribute will only affect I<future>
+object instances created for this class, not existing instances.
+
+=item B<< $metaclass->attribute_metaclass >>
+
+Returns the class name of the attribute metaclass for this class. By
+default, this is L<Class::MOP::Attribute>.  for more information on
+
+=back
+
+=head2 Class Immutability
+
+Making a class immutable "freezes" the class definition. You can no
+longer call methods which alter the class, such as adding or removing
+methods or attributes.
+
+Making a class immutable lets us optimize the class by inlining some
+methods, and also allows us to optimize some methods on the metaclass
+object itself.
+
+The immutabilization system in L<Moose> takes much greater advantage
+of the inlining features than Class::MOP itself does.
+
+=over 4
+
+=item B<< $metaclass->make_immutable(%options) >>
+
+This method will create an immutable transformer and uses it to make
+the class and its metaclass object immutable.
+
+Details of how immutabilization works are in L<Class::MOP::Immutable>
+documentation.
+
+=item B<< $metaclass->make_mutable >>
+
+Calling this method reverse the immutabilization transformation.
+
+=item B<< $metaclass->immutable_transformer >>
+
+If the class has been made immutable previously, this returns the
+L<Class::MOP::Immutable> object that was created to do the
+transformation.
+
+If the class was never made immutable, this method will die.
 
 =back
 
 =head2 Method Modifiers
 
-Method modifiers are a concept borrowed from CLOS, in which a method
-can be wrapped with I<before>, I<after> and I<around> method modifiers
-that will be called everytime the method is called.
+Method modifiers are hooks which allow a method to be wrapped with
+I<before>, I<after> and I<around> method modifiers. Every time a
+method is called, it's modifiers are also called.
+
+A class can modify its own methods, as well as methods defined in
+parent classes.
 
 =head3 How method modifiers work?
 
-Method modifiers work by wrapping the original method and then replacing
-it in the classes symbol table. The wrappers will handle calling all the
-modifiers in the appropariate orders and preserving the calling context
-for the original method.
+Method modifiers work by wrapping the original method and then
+replacing it in the class's symbol table. The wrappers will handle
+calling all the modifiers in the appropriate order and preserving the
+calling context for the original method.
 
-Each method modifier serves a particular purpose, which may not be
-obvious to users of other method wrapping modules. To start with, the
-return values of I<before> and I<after> modifiers are ignored. This is
-because thier purpose is B<not> to filter the input and output of the
-primary method (this is done with an I<around> modifier). This may seem
-like an odd restriction to some, but doing this allows for simple code
-to be added at the begining or end of a method call without jeapordizing
-the normal functioning of the primary method or placing any extra
-responsibility on the code of the modifier. Of course if you have more
-complex needs, then use the I<around> modifier, which uses a variation
-of continutation passing style to allow for a high degree of flexibility.
+The return values of C<before> and C<after> modifiers are
+ignored. This is because their purpose is B<not> to filter the input
+and output of the primary method (this is done with an I<around>
+modifier).
 
-Before and around modifiers are called in last-defined-first-called order,
-while after modifiers are called in first-defined-first-called order. So
-the call tree might looks something like this:
+This may seem like an odd restriction to some, but doing this allows
+for simple code to be added at the beginning or end of a method call
+without altering the function of the wrapped method or placing any
+extra responsibility on the code of the modifier.
+
+Of course if you have more complex needs, you can use the C<around>
+modifier which allows you to change both the parameters passed to the
+wrapped method, as well as its return value.
+
+Before and around modifiers are called in last-defined-first-called
+order, while after modifiers are called in first-defined-first-called
+order. So the call tree might looks something like this:
 
   before 2
    before 1
@@ -1590,22 +1581,17 @@ the call tree might looks something like this:
    after 1
   after 2
 
-To see examples of using method modifiers, see the following examples
-included in the distribution; F<InstanceCountingClass>, F<Perl6Attribute>,
-F<AttributesWithHistory> and F<C3MethodDispatchOrder>. There is also a
-classic CLOS usage example in the test F<017_add_method_modifier.t>.
-
 =head3 What is the performance impact?
 
-Of course there is a performance cost associated with method modifiers,
-but we have made every effort to make that cost be directly proportional
-to the amount of modifier features you utilize.
+Of course there is a performance cost associated with method
+modifiers, but we have made every effort to make that cost directly
+proportional to the number of modifier features you utilize.
 
 The wrapping method does it's best to B<only> do as much work as it
 absolutely needs to. In order to do this we have moved some of the
 performance costs to set-up time, where they are easier to amortize.
 
-All this said, my benchmarks have indicated the following:
+All this said, our benchmarks have indicated the following:
 
   simple wrapper with no modifiers             100% slower
   simple wrapper with simple before modifier   400% slower
@@ -1614,158 +1600,60 @@ All this said, my benchmarks have indicated the following:
   simple wrapper with all 3 modifiers          1100% slower
 
 These numbers may seem daunting, but you must remember, every feature
-comes with some cost. To put things in perspective, just doing a simple
-C<AUTOLOAD> which does nothing but extract the name of the method called
-and return it costs about 400% over a normal method call.
+comes with some cost. To put things in perspective, just doing a
+simple C<AUTOLOAD> which does nothing but extract the name of the
+method called and return it costs about 400% over a normal method
+call.
 
 =over 4
 
-=item B<add_before_method_modifier ($method_name, $code)>
+=item B<< $metaclass->add_before_method_modifier($method_name, $code) >>
 
-This will wrap the method at C<$method_name> and the supplied C<$code>
-will be passed the C<@_> arguments, and called before the original
-method is called. As specified above, the return value of the I<before>
-method modifiers is ignored, and it's ability to modify C<@_> is
-fairly limited. If you need to do either of these things, use an
-C<around> method modifier.
+This wraps the specified method with the supplied subroutine
+reference. The modifier will be called as a method itself, and will
+receive the same arguments as are passed to the method.
 
-=item B<add_after_method_modifier ($method_name, $code)>
+When the modifier exits, the wrapped method will be called.
 
-This will wrap the method at C<$method_name> so that the original
-method will be called, it's return values stashed, and then the
-supplied C<$code> will be passed the C<@_> arguments, and called.
-As specified above, the return value of the I<after> method
-modifiers is ignored, and it cannot modify the return values of
-the original method. If you need to do either of these things, use an
-C<around> method modifier.
+The return value of the modifier will be ignored.
 
-=item B<add_around_method_modifier ($method_name, $code)>
+=item B<< $metaclass->add_after_method_modifier($method_name, $code) >>
 
-This will wrap the method at C<$method_name> so that C<$code>
-will be called and passed the original method as an extra argument
-at the begining of the C<@_> argument list. This is a variation of
-continuation passing style, where the function prepended to C<@_>
-can be considered a continuation. It is up to C<$code> if it calls
-the original method or not, there is no restriction on what the
-C<$code> can or cannot do.
+This wraps the specified method with the supplied subroutine
+reference. The modifier will be called as a method itself, and will
+receive the same arguments as are passed to the method.
+
+When the wrapped methods exits, the modifier will be called.
+
+The return value of the modifier will be ignored.
+
+=item B<< $metaclass->add_around_method_modifier($method_name, $code) >>
+
+This wraps the specified method with the supplied subroutine
+reference.
+
+The first argument passed to the modifier will be a subroutine
+reference to the wrapped method. The second argument is the object,
+and after that come any arguments passed when the method is called.
+
+The around modifier can choose to call the original method, as well as
+what arguments to pass if it does so.
+
+The return value of the modifier is what will be seen by the caller.
 
 =back
 
-=head2 Attributes
-
-It should be noted that since there is no one consistent way to define
-the attributes of a class in Perl 5. These methods can only work with
-the information given, and can not easily discover information on
-their own. See L<Class::MOP::Attribute> for more details.
+=head2 Introspection
 
 =over 4
 
-=item B<attribute_metaclass>
+=item B<< Class::MOP::Class->meta >>
 
-Returns the class name of the attribute metaclass, see L<Class::MOP::Attribute> 
-for more information on the attribute metaclasses.
+This will return a L<Class::MOP::Class> instance for this class.
 
-=item B<get_attribute_map>
-
-This returns a HASH ref of name to attribute meta-object mapping.
-
-=item B<add_attribute ($attribute_meta_object | ($attribute_name, %attribute_spec))>
-
-This stores the C<$attribute_meta_object> (or creates one from the
-C<$attribute_name> and C<%attribute_spec>) in the B<Class::MOP::Class>
-instance associated with the given class. Unlike methods, attributes
-within the MOP are stored as meta-information only. They will be used
-later to construct instances from (see C<construct_instance> above).
-More details about the attribute meta-objects can be found in the
-L<Class::MOP::Attribute> or the L<Class::MOP/The Attribute protocol>
-section.
-
-It should be noted that any accessor, reader/writer or predicate
-methods which the C<$attribute_meta_object> has will be installed
-into the class at this time.
-
-B<NOTE>
-If an attribute already exists for C<$attribute_name>, the old one
-will be removed (as well as removing all it's accessors), and then
-the new one added.
-
-=item B<has_attribute ($attribute_name)>
-
-Checks to see if this class has an attribute by the name of
-C<$attribute_name> and returns a boolean.
-
-=item B<get_attribute ($attribute_name)>
-
-Returns the attribute meta-object associated with C<$attribute_name>,
-if none is found, it will return undef.
-
-=item B<remove_attribute ($attribute_name)>
-
-This will remove the attribute meta-object stored at
-C<$attribute_name>, then return the removed attribute meta-object.
-
-B<NOTE:>
-Removing an attribute will only affect future instances of
-the class, it will not make any attempt to remove the attribute from
-any existing instances of the class.
-
-It should be noted that any accessor, reader/writer or predicate
-methods which the attribute meta-object stored at C<$attribute_name>
-has will be removed from the class at this time. This B<will> make
-these attributes somewhat inaccessable in previously created
-instances. But if you are crazy enough to do this at runtime, then
-you are crazy enough to deal with something like this :).
-
-=item B<get_attribute_list>
-
-This returns a list of attribute names which are defined in the local
-class. If you want a list of all applicable attributes for a class,
-use the C<compute_all_applicable_attributes> method.
-
-=item B<compute_all_applicable_attributes>
-
-=item B<get_all_attributes>
-
-This will traverse the inheritance hierarchy and return a list of all
-the applicable L<Class::MOP::Attribute> objects for this class.
-
-C<get_all_attributes> is an alias for consistency with C<get_all_methods>.
-
-=item B<find_attribute_by_name ($attr_name)>
-
-This method will traverse the inheritance hierarchy and find the
-first attribute whose name matches C<$attr_name>, then return it.
-It will return undef if nothing is found.
-
-=back
-
-=head2 Class Immutability
-
-=over 4
-
-=item B<make_immutable (%options)>
-
-This method will invoke a tranforamtion upon the class which will
-make it immutable. Details of this transformation can be found in
-the L<Class::MOP::Immutable> documentation.
-
-=item B<make_mutable>
-
-This method will reverse tranforamtion upon the class which
-made it immutable.
-
-=item B<get_immutable_transformer>
-
-Return a transformer suitable for making this class immutable or, if this
-class is immutable, the transformer used to make it immutable.
-
-=item B<get_immutable_options>
-
-If the class is immutable, return the options used to make it immutable.
-
-=item B<create_immutable_transformer>
-
-Create a transformer suitable for making this class immutable
+It should also be noted that L<Class::MOP> will actually bootstrap
+this module by installing a number of attribute meta-objects into its
+metaclass.
 
 =back
 
