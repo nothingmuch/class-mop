@@ -21,7 +21,7 @@ struct mop_attr_St {
 	default_t default_value;
 	CV *initializer;
 
-	SV *perl_attr;
+	SV *perl_attr_rv;
 };
 
 static void
@@ -248,7 +248,7 @@ mop_attr_new_from_perl_attr (SV *perl_attr)
 	dXCPT;
 
 	Newxz (attr, 1, mop_attr_t);
-	attr->perl_attr = newSVsv (perl_attr); /* RAFL IS TEH BEST OMGIGOD */
+	attr->perl_attr_rv = SvRV(perl_attr); /* the attr already refers to us, so don't change the refcnt */
 
 	XCPT_TRY_START {
 		initialize_slots (attr, perl_attr);
@@ -297,8 +297,22 @@ mop_attr_destroy (mop_attr_t *attr)
 			break;
 	}
 
-	SvREFCNT_dec (attr->perl_attr);
 	Safefree (attr);
+}
+
+mop_attr_t *_attr_build_c_instance(SV *perl_attr) {
+    mop_attr_t *attr = mop_attr_new_from_perl_attr(perl_attr);
+    mop_stash_in_mg(SvRV(perl_attr), NULL, (void *)attr, mop_attr_destroy);
+    return attr;
+}
+
+mop_attr_t *mop_attr_get_c_instance (SV *perl_attr) {
+    mop_attr_t *attr = mop_get_stashed_ptr_in_mg(SvRV(perl_attr));
+
+    if ( attr )
+        return attr;
+    else
+        return _attr_build_c_instance(perl_attr);
 }
 
 U32
@@ -310,5 +324,5 @@ mop_attr_get_flags (mop_attr_t *attr)
 SV *
 mop_attr_get_perl_attr (mop_attr_t *attr)
 {
-	return attr->perl_attr;
+	return sv_2mortal(newRV_inc(attr->perl_attr_rv));
 }

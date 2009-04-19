@@ -3,8 +3,7 @@
 struct mop_instance_St {
 	mop_instance_type_t type;
 	HV *stash;
-	UV n_attrs;
-	mop_attr_t **attrs;
+    AV *attrs;
 };
 
 mop_instance_t *
@@ -15,8 +14,7 @@ mop_instance_new (mop_instance_type_t type, HV *stash)
 	Newx (instance, 1, mop_instance_t);
 	instance->type = type;
 	instance->stash = stash;
-	instance->n_attrs = 0;
-	instance->attrs = NULL;
+	instance->attrs = newAV();
 
 	SvREFCNT_inc ((SV *)stash);
 
@@ -42,7 +40,7 @@ initialize_attrs_from_perl_instance (mop_instance_t *instance, SV *perl_instance
 
 	while (count--) {
 		SV *perl_attr = POPs;
-		mop_instance_add_attribute (instance, mop_attr_new_from_perl_attr (perl_attr));
+		mop_instance_add_attribute (instance, perl_attr);
 	}
 
 	PUTBACK;
@@ -94,16 +92,27 @@ mop_instance_new_from_perl_instance (SV *perl_instance)
 void
 mop_instance_destroy (mop_instance_t *instance)
 {
-	U32 i;
+    SvREFCNT_dec (instance->attrs);
 
-	for (i = 0; i < instance->n_attrs; i++) {
-		mop_attr_destroy (instance->attrs[i]);
-	}
-
-	Safefree (instance->attrs);
 	SvREFCNT_dec ((SV *)instance->stash);
 	Safefree (instance);
 }
+
+mop_instance_t *_instance_build_c_instance(SV *perl_instance) {
+    mop_instance_t *instance = mop_instance_new_from_perl_instance(perl_instance);
+    mop_stash_in_mg(SvRV(perl_instance), NULL, (void *)instance, mop_instance_destroy);
+    return instance;
+}
+
+mop_instance_t *mop_instance_get_c_instance (SV *perl_instance) {
+    mop_instance_t *instance = mop_get_stashed_ptr_in_mg(SvRV(perl_instance));
+
+    if ( instance )
+        return instance;
+    else
+        return _instance_build_c_instance(perl_instance);
+}
+
 
 mop_instance_type_t
 mop_instance_get_type (mop_instance_t *instance)
@@ -118,9 +127,9 @@ mop_instance_get_stash (mop_instance_t *instance)
 }
 
 void
-mop_instance_add_attribute (mop_instance_t *instance, mop_attr_t *attr)
+mop_instance_add_attribute (mop_instance_t *instance, SV *perl_attr)
 {
-	Renew (instance->attrs, instance->n_attrs + 1, mop_attr_t *);
-	instance->attrs[instance->n_attrs] = attr;
-	instance->n_attrs++;
+    SV *copy = newSVsv(perl_attr);
+	av_push( instance->attrs, copy );
+    mop_attr_get_c_instance(copy);
 }
