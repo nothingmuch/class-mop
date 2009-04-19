@@ -248,7 +248,7 @@ mop_attr_new_from_perl_attr (SV *perl_attr)
 	dXCPT;
 
 	Newxz (attr, 1, mop_attr_t);
-	attr->perl_attr = newSVsv (perl_attr); /* should we hold onto a reference or copy? */
+	attr->perl_attr = newSVsv (perl_attr); /* RAFL IS TEH BEST OMGIGOD */
 
 	XCPT_TRY_START {
 		initialize_slots (attr, perl_attr);
