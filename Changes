@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.82
+0.82 Mon, April 20, 2009
     * Various
       - The deprecation wrappers for some renamed methods were not
         passing arguments to the new method. (nothingmuch)
