@@ -41,22 +41,6 @@ sub can_be_inlined {
     # compatible with the definition we are replacing it with
     my $expected_method = $expected_class->can( $self->name );
 
-    my $warning
-        = "Not inlining '"
-        . $self->name
-        . "' for $class since it is not"
-        . " inheriting the default ${expected_class}::"
-        . $self->name . "\n";
-
-    if ( $self->isa("Class::MOP::Method::Constructor") ) {
-
-        # FIXME kludge, refactor warning generation to a method
-        $warning
-            .= "If you are certain you don't need to inline your"
-            . " constructor, specify inline_constructor => 0 in your"
-            . " call to $class->meta->make_immutable\n";
-    }
-
     my $actual_method = $class->can( $self->name )
         or return 1;
 
@@ -84,6 +68,22 @@ sub can_be_inlined {
     elsif ( refaddr( $inherited_method->body )
             == refaddr($expected_method) ) {
         return 1;
+    }
+
+    my $warning
+        = "Not inlining '"
+        . $self->name
+        . "' for $class since it is not"
+        . " inheriting the default ${expected_class}::"
+        . $self->name . "\n";
+
+    if ( $self->isa("Class::MOP::Method::Constructor") ) {
+
+        # FIXME kludge, refactor warning generation to a method
+        $warning
+            .= "If you are certain you don't need to inline your"
+            . " constructor, specify inline_constructor => 0 in your"
+            . " call to $class->meta->make_immutable\n";
     }
 
     $warning
