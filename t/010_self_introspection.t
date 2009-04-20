@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 262;
+use Test::More tests => 294;
 use Test::Exception;
 
 use Class::MOP;
@@ -84,9 +84,14 @@ my @class_mop_class_methods = qw(
     get_attribute_list get_attribute_map get_all_attributes compute_all_applicable_attributes find_attribute_by_name
 
     is_mutable is_immutable make_mutable make_immutable
-    immutable_transformer _set_immutable_transformer
-    _make_immutable_transformer
-    _default_immutable_transformer_options
+    _initialize_immutable _install_inlined_code _inlined_methods
+    _add_inlined_method _inline_accessors _inline_constructor
+    _inline_destructor _immutable_options _rebless_as_immutable
+    _rebless_as_mutable _remove_inlined_code
+
+    immutable_metaclass immutable_trait constructor_name constructor_class destructor_class 
+
+    immutable_transformer
 
     DESTROY
 );
@@ -165,7 +170,10 @@ my @class_mop_class_attributes = (
     'method_metaclass',
     'wrapped_method_metaclass',
     'instance_metaclass',
-    'immutable_transformer',
+    'immutable_trait',
+    'constructor_name',
+    'constructor_class',
+    'destructor_class',
 );
 
 # check class

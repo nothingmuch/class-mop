@@ -11,7 +11,7 @@ our $VERSION   = '0.82';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Method::Generated';
+use base 'Class::MOP::Method::Inlined';
 
 sub new {
     my $class   = shift;
@@ -51,8 +51,6 @@ sub _new {
         'is_inline'            => ($options->{is_inline} || 0),
     }, $class;
 }
-
-sub can_be_inlined { 1 }
 
 ## accessors
 

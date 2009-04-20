@@ -17,8 +17,6 @@ use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
 
-use Class::MOP::Immutable;
-
 BEGIN {
     *IS_RUNNING_ON_5_10 = ($] < 5.009_005)
         ? sub () { 0 }
@@ -351,12 +349,37 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('immutable_transformer' => (
+    Class::MOP::Attribute->new('immutable_trait' => (
         reader   => {
-            'immutable_transformer' => \&Class::MOP::Class::immutable_transformer
+            'immutable_trait' => \&Class::MOP::Class::immutable_trait
         },
-        writer   => {
-            '_set_immutable_transformer' => \&Class::MOP::Class::_set_immutable_transformer
+        default => "Class::MOP::Class::Immutable::Trait",
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('constructor_name' => (
+        reader   => {
+            'constructor_name' => \&Class::MOP::Class::constructor_name,
+        },
+        default => "new",
+    ))
+);
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('constructor_class' => (
+        reader   => {
+            'constructor_class' => \&Class::MOP::Class::constructor_class,
+        },
+        default => "Class::MOP::Method::Constructor",
+    ))
+);
+
+
+Class::MOP::Class->meta->add_attribute(
+    Class::MOP::Attribute->new('destructor_class' => (
+        reader   => {
+            'destructor_class' => \&Class::MOP::Class::destructor_class,
         },
     ))
 );
@@ -547,6 +570,16 @@ Class::MOP::Method::Generated->meta->add_attribute(
     ))
 );
 
+
+## --------------------------------------------------------
+## Class::MOP::Method::Inlined
+
+Class::MOP::Method::Inlined->meta->add_attribute(
+    Class::MOP::Attribute->new('_expected_method_class' => (
+        reader   => { '_expected_method_class' => \&Class::MOP::Method::Inlined::_expected_method_class },
+    ))
+);
+
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
 
@@ -639,6 +672,10 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # NOTE: we don't need to inline the the accessors this only lengthens
 # the compile time of the MOP, and gives us no actual benefits.
 
+# this is just nitpicking to ensure Class::MOP::Class->meta == ->meta->meta
+Class::MOP::Class->meta->immutable_metaclass;
+$Class::MOP::Class::immutable_metaclass_cache{"Class::MOP::Class"}{"Class::MOP::Class::Immutable::Trait"} = Class::MOP::Class::Immutable::Class::MOP::Class->meta;
+
 $_->meta->make_immutable(
     inline_constructor  => 1,
     replace_constructor => 1,
@@ -648,6 +685,8 @@ $_->meta->make_immutable(
     Class::MOP::Package
     Class::MOP::Module
     Class::MOP::Class
+    Class::MOP::Class::Immutable::Trait
+    Class::MOP::Class::Immutable::Class::MOP::Class
 
     Class::MOP::Attribute
     Class::MOP::Method
@@ -656,6 +695,7 @@ $_->meta->make_immutable(
     Class::MOP::Object
 
     Class::MOP::Method::Generated
+    Class::MOP::Method::Inlined
 
     Class::MOP::Method::Accessor
     Class::MOP::Method::Constructor

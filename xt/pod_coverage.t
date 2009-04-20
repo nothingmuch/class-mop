@@ -36,7 +36,6 @@ my %trustme = (
         'clone_instance',
         'construct_class_instance',
         'construct_instance',
-        'create_immutable_transformer',
         'create_meta_instance',
         'get_immutable_options',
         'reset_package_cache_flag',
