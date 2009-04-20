@@ -35,7 +35,7 @@ sub get_mutable_metaclass_name { $_[0]{__immutable}{original_class} }
 
 sub immutable_options { %{ $_[0]{__immutable}{options} } }
 
-sub is_mutable { 0 }
+sub is_mutable   { 0 }
 sub is_immutable { 1 }
 
 sub superclasses {
@@ -59,7 +59,7 @@ sub get_all_method_names  { @{ $_[0]{__immutable}{get_all_method_names}  ||= [ s
 sub get_all_attributes    { @{ $_[0]{__immutable}{get_all_attributes}    ||= [ shift->next::method ] } }
 
 sub get_meta_instance     { $_[0]{__immutable}{get_meta_instance} ||= shift->next::method }
-sub get_method_map        { $_[0]{__immutable}{get_method_map} ||= shift->next::method }
+sub get_method_map        { $_[0]{__immutable}{get_method_map}    ||= shift->next::method }
 
 sub add_package_symbol {
     confess "Cannot add package symbols to an immutable metaclass"

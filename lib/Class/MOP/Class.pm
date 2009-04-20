@@ -982,10 +982,10 @@ sub _immutable_options {
         inline_constructor => 1,
         inline_destructor  => 0,
         debug              => 0,
-        immutable_trait   => $self->immutable_trait,
-        constructor_name  => $self->constructor_name,
-        constructor_class => $self->constructor_class,
-        destructor_class  => $self->destructor_class,
+        immutable_trait    => $self->immutable_trait,
+        constructor_name   => $self->constructor_name,
+        constructor_class  => $self->constructor_class,
+        destructor_class   => $self->destructor_class,
         @args,
     );
 }
