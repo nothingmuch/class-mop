@@ -676,7 +676,7 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 Class::MOP::Class->meta->immutable_metaclass;
 $Class::MOP::Class::immutable_metaclass_cache{"Class::MOP::Class"}{"Class::MOP::Class::Immutable::Trait"} = Class::MOP::Class::Immutable::Class::MOP::Class->meta;
 
-$_->meta->make_immutable(
+Class::MOP::Class->initialize($_)->make_immutable(
     inline_constructor  => 1,
     replace_constructor => 1,
     constructor_name    => "_new",

@@ -37,7 +37,7 @@ my %METAS = (
     'Class::MOP::Method::Wrapped' => Class::MOP::Method::Wrapped->meta,
     'Class::MOP::Instance'        => Class::MOP::Instance->meta,
     'Class::MOP::Object'          => Class::MOP::Object->meta,
-    'Class::MOP::Class::Immutable::Trait' => Class::MOP::Class::Immutable::Trait->meta,
+    'Class::MOP::Class::Immutable::Trait' => Class::MOP::Class->initialize('Class::MOP::Class::Immutable::Trait'),
     'Class::MOP::Class::Immutable::Class::MOP::Class' => Class::MOP::Class::Immutable::Class::MOP::Class->meta,
 );
 
@@ -61,7 +61,7 @@ is_deeply(
         Class::MOP::Attribute->meta,
         Class::MOP::Class->meta,
         Class::MOP::Class::Immutable::Class::MOP::Class->meta,
-        Class::MOP::Class::Immutable::Trait->meta,
+        Class::MOP::Class->initialize('Class::MOP::Class::Immutable::Trait'),
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
