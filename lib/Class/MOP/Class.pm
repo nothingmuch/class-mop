@@ -129,15 +129,26 @@ sub _new {
         # defined in Class::MOP::Class
         'superclasses' => \undef,
 
-        'methods'             => {},
-        'attributes'          => {},
-        'attribute_metaclass' => ( $options->{'attribute_metaclass'} || 'Class::MOP::Attribute' ),
-        'method_metaclass' => ( $options->{'method_metaclass'} || 'Class::MOP::Method' ),
-        'wrapped_method_metaclass' => ( $options->{'wrapped_method_metaclass'} || 'Class::MOP::Method::Wrapped' ),
-        'instance_metaclass' => ( $options->{'instance_metaclass'} || 'Class::MOP::Instance' ),
-        'immutable_trait' => ( $options->{'immutable_trait'} || 'Class::MOP::Class::Immutable::Trait' ),
+        'methods'    => {},
+        'attributes' => {},
+        'attribute_metaclass' =>
+            ( $options->{'attribute_metaclass'} || 'Class::MOP::Attribute' ),
+        'method_metaclass' =>
+            ( $options->{'method_metaclass'} || 'Class::MOP::Method' ),
+        'wrapped_method_metaclass' => (
+            $options->{'wrapped_method_metaclass'}
+                || 'Class::MOP::Method::Wrapped'
+        ),
+        'instance_metaclass' =>
+            ( $options->{'instance_metaclass'} || 'Class::MOP::Instance' ),
+        'immutable_trait' => (
+            $options->{'immutable_trait'}
+                || 'Class::MOP::Class::Immutable::Trait'
+        ),
         'constructor_name' => ( $options->{constructor_name} || 'new' ),
-        'constructor_class' => ( $options->{constructor_class} || 'Class::MOP::Method::Constructor' ),
+        'constructor_class' => (
+            $options->{constructor_class} || 'Class::MOP::Method::Constructor'
+        ),
         'destructor_class' => $options->{destructor_class},
     }, $class;
 }
@@ -994,14 +1005,14 @@ sub make_immutable {
     my ( $self, @args ) = @_;
 
     if ( $self->is_mutable ) {
-        $self->_initialize_immutable($self->_immutable_options(@args));
+        $self->_initialize_immutable( $self->_immutable_options(@args) );
         $self->_rebless_as_immutable(@args);
         return $self;
-    } else {
+    }
+    else {
         return;
     }
 }
-
 
 sub make_mutable {
     my $self = shift;
@@ -1012,7 +1023,8 @@ sub make_mutable {
         $self->_remove_inlined_code(@args);
         delete $self->{__immutable};
         return $self;
-    } else {
+    }
+    else {
         return;
     }
 }
@@ -1032,20 +1044,27 @@ sub immutable_metaclass {
     my $class_name;
 
     if ( $meta_attr and $trait eq $meta_attr->default ) {
-        # if the trait is the same as the default we try and pick a predictable
-        # name for the immutable metaclass
+
+       # if the trait is the same as the default we try and pick a predictable
+       # name for the immutable metaclass
         $class_name = "Class::MOP::Class::Immutable::" . ref($self);
-    } else {
-        $class_name = join("::", "Class::MOP::Class::Immutable::CustomTrait", $trait, "ForMetaClass", ref($self));
+    }
+    else {
+        $class_name
+            = join( "::", "Class::MOP::Class::Immutable::CustomTrait", $trait,
+                    "ForMetaClass", ref($self) );
     }
 
     if ( Class::MOP::is_class_loaded($class_name) ) {
         if ( $class_name->isa($trait) ) {
             return $class_name;
-        } else {
-            confess "$class_name is already defined but does not inherit $trait";
         }
-    } else {
+        else {
+            confess
+                "$class_name is already defined but does not inherit $trait";
+        }
+    }
+    else {
         my @super = ( $trait, ref($self) );
 
         my $meta = Class::MOP::Class->initialize($class_name);
@@ -1068,12 +1087,12 @@ sub _rebless_as_immutable {
 sub _remove_inlined_code {
     my $self = shift;
 
-    $self->remove_method($_->name) for $self->_inlined_methods;
+    $self->remove_method( $_->name ) for $self->_inlined_methods;
 
     delete $self->{__immutable}{inlined_methods};
 }
 
-sub _inlined_methods { @{ $_[0]{__immutable}{inlined_methods} || [] } };
+sub _inlined_methods { @{ $_[0]{__immutable}{inlined_methods} || [] } }
 
 sub _add_inlined_method {
     my ( $self, $method ) = @_;
@@ -1092,9 +1111,9 @@ sub _install_inlined_code {
     my ( $self, %args ) = @_;
 
     # FIXME
-    $self->_inline_accessors(%args) if $args{inline_accessors};
+    $self->_inline_accessors(%args)   if $args{inline_accessors};
     $self->_inline_constructor(%args) if $args{inline_constructor};
-    $self->_inline_destructor(%args) if $args{inline_destructor};
+    $self->_inline_destructor(%args)  if $args{inline_destructor};
 }
 
 sub _rebless_as_mutable {
@@ -1121,14 +1140,14 @@ sub _inline_constructor {
     #if ( my $existing = $self->name->can($args{constructor_name}) ) {
     #    if ( refaddr($existing) == refaddr(\&Moose::Object::new) ) {
 
-    unless ($args{replace_constructor}
-         or !$self->has_method($name) ) {
+    unless ( $args{replace_constructor}
+        or !$self->has_method($name) ) {
         my $class = $self->name;
         warn "Not inlining a constructor for $class since it defines"
-           . " its own constructor.\n"
-           . "If you are certain you don't need to inline your"
-           . " constructor, specify inline_constructor => 0 in your"
-           . " call to $class->meta->make_immutable\n";
+            . " its own constructor.\n"
+            . "If you are certain you don't need to inline your"
+            . " constructor, specify inline_constructor => 0 in your"
+            . " call to $class->meta->make_immutable\n";
         return;
     }
 
@@ -1145,7 +1164,7 @@ sub _inline_constructor {
     );
 
     if ( $args{replace_constructor} or $constructor->can_be_inlined ) {
-        $self->add_method($name => $constructor);
+        $self->add_method( $name => $constructor );
         $self->_add_inlined_method($constructor);
     }
 }
@@ -1161,7 +1180,7 @@ sub _inline_destructor {
 
     Class::MOP::load_class($destructor_class);
 
-    return unless $destructor_class->is_needed( $self );
+    return unless $destructor_class->is_needed($self);
 
     my $destructor = $destructor_class->new(
         options      => \%args,
