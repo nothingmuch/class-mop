@@ -92,3 +92,32 @@ sub add_package_symbol {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Class::MOP::Class::Immutable::Trait - Implements immutability for metaclass objects
+
+=head1 DESCRIPTION
+
+This class provides a trait that is applied to immutable metaclass
+objects. This is deep guts.
+
+=head1 AUTHOR
+
+Yuval Kogman E<lt>nothingmuch@cpan.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2009 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
