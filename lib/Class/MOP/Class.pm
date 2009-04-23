@@ -1029,7 +1029,15 @@ sub make_mutable {
     }
 }
 
-sub immutable_metaclass {
+sub _rebless_as_immutable {
+    my ( $self, @args ) = @_;
+
+    $self->{__immutable}{original_class} = ref $self;
+
+    bless $self => $self->_immutable_metaclass(@args);
+}
+
+sub _immutable_metaclass {
     my ( $self, %args ) = @_;
 
     if ( my $class = $args{immutable_metaclass} ) {
@@ -1074,14 +1082,6 @@ sub immutable_metaclass {
 
         return $class_name;
     }
-}
-
-sub _rebless_as_immutable {
-    my ( $self, @args ) = @_;
-
-    $self->{__immutable}{original_class} = ref $self;
-
-    bless $self => $self->immutable_metaclass(@args);
 }
 
 sub _remove_inlined_code {
