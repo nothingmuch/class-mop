@@ -266,12 +266,6 @@ inlined.
 
 This returns the L<Class::MOP::Class> object for the method.
 
-=item B<< $metamethod->can_be_inlined >>
-
-This method always returns true in this class. It exists so that
-subclasses (as in Moose) can do some sort of checking to determine
-whether or not inlining the constructor is safe.
-
 =back
 
 =head1 AUTHORS
