@@ -13,7 +13,7 @@ use Class::MOP::Class::Immutable::Class::MOP::Class;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.82';
+our $VERSION   = '0.82_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
