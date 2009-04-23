@@ -1,7 +1,15 @@
 Revision history for Perl extension Class-MOP.
 
 0.82_01 Thu, April 23, 2009
-
+    * Class::MOP::Immutable (and others)
+      - Refactor the immutability system to use a pre-defined class
+        for the immutable metaclass of Class::MOP::Class::Immutable::$class
+      - Rather than generating methods into this class every time, use
+        a Trait (basic mixin) to supply the cached methods
+      - Remove the hack that returns the mutable metaclass for
+        metacircularity in order to provide consistent meta-metaclasses
+        for the Moose compatibility handling code
+      (mst broke it, nothingmuch fixed it)
 
 0.82 Mon, April 20, 2009
     * Various
