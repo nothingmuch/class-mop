@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+0.82_01 Thu, April 23, 2009
+
+
 0.82 Mon, April 20, 2009
     * Various
       - The deprecation wrappers for some renamed methods were not
