@@ -17,6 +17,7 @@ my %trustme = (
     'Class::MOP'            => ['HAVE_ISAREV'],
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
+
         # deprecated
         'alias_method',
         'compute_all_applicable_attributes',
@@ -45,19 +46,18 @@ my %trustme = (
         # doc'd with rebless_instance
         'rebless_instance_away',
     ],
-
+    'Class::MOP::Class::Immutable::Trait'             => ['.+'],
+    'Class::MOP::Class::Immutable::Class::MOP::Class' => ['.+'],
+    'Class::MOP::Instance'                            => [
+        qw( BUILDARGS
+            bless_instance_structure
+            is_dependent_on_superclasses ),
+    ],
     'Class::MOP::Instance' => [
         qw( BUILDARGS
             bless_instance_structure
             is_dependent_on_superclasses ),
     ],
-
-    'Class::MOP::Instance' => [
-        qw( BUILDARGS
-            bless_instance_structure
-            is_dependent_on_superclasses ),
-    ],
-
     'Class::MOP::Method::Accessor' => [
         qw( generate_accessor_method
             generate_accessor_method_inline
@@ -72,7 +72,6 @@ my %trustme = (
             initialize_body
             )
     ],
-
     'Class::MOP::Method::Constructor' => [
         qw( attributes
             generate_constructor_method
@@ -82,7 +81,6 @@ my %trustme = (
             options
             )
     ],
-
     'Class::MOP::Method::Generated' => [
         qw( new
             definition_context
@@ -90,7 +88,6 @@ my %trustme = (
             initialize_body
             )
     ],
-
     'Class::MOP::Module' => ['create'],
 );
 
