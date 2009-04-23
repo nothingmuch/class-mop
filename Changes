@@ -9,7 +9,7 @@ Revision history for Perl extension Class-MOP.
       - Remove the hack that returns the mutable metaclass for
         metacircularity in order to provide consistent meta-metaclasses
         for the Moose compatibility handling code
-      (mst broke it, nothingmuch fixed it)
+        (mst broke it, nothingmuch fixed it)
 
 0.82 Mon, April 20, 2009
     * Various
