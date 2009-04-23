@@ -89,7 +89,8 @@ my @class_mop_class_methods = qw(
     _inline_destructor _immutable_options _rebless_as_immutable
     _rebless_as_mutable _remove_inlined_code
 
-    immutable_metaclass immutable_trait constructor_name constructor_class destructor_class 
+    _immutable_metaclass
+    immutable_trait constructor_name constructor_class destructor_class
 
     immutable_transformer
 

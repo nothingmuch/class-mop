@@ -673,7 +673,7 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # the compile time of the MOP, and gives us no actual benefits.
 
 # this is just nitpicking to ensure Class::MOP::Class->meta == ->meta->meta
-Class::MOP::Class->meta->immutable_metaclass;
+Class::MOP::Class->meta->_immutable_metaclass;
 $Class::MOP::Class::immutable_metaclass_cache{"Class::MOP::Class"}{"Class::MOP::Class::Immutable::Trait"} = Class::MOP::Class::Immutable::Class::MOP::Class->meta;
 
 $_->meta->make_immutable(

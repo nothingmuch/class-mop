@@ -42,9 +42,8 @@ use Class::MOP;
 
     $meta->make_immutable;
 
-    my $immutable_metaclass = $meta->immutable_metaclass->meta;
+    my $immutable_metaclass = $meta->_immutable_metaclass->meta;
 
-    #I don't understand why i need to ->meta here...
     my $obj = $immutable_metaclass->name;
 
     ok( !$obj->is_mutable,  '... immutable_metaclass is not mutable' );
