@@ -98,3 +98,45 @@ sub can_be_inlined {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Class::MOP::Method::Inlined - Method base class for methods which have been inlined
+
+=head1 DESCRIPTION
+
+This is a L<Class::MOP::Method::Generated> subclass for methods which
+can be inlined.
+
+=head1 METHODS
+
+=over 4
+
+=item B<< $metamethod->can_be_inlined >>
+
+This method returns true if the method in question can be inlined in
+the associated metaclass.
+
+If it cannot be inlined, it spits out a warning and returns false.
+
+=back
+
+=head1 AUTHORS
+
+Stevan Little E<lt>stevan@iinteractive.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006-2009 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
+
