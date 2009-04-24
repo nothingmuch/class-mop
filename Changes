@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.82_02
+    * Tests
+      - Some tests were trying to load Class::MOP::Immutable, which
+        was removed in 0.82_01.
+
 0.82_01 Thu, April 23, 2009
     * Class::MOP::Immutable (and others)
       - Refactor the immutability system to use a pre-defined class

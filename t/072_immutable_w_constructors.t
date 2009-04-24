@@ -4,8 +4,8 @@ use warnings;
 use Test::More tests => 91;
 use Test::Exception;
 
-BEGIN {use Class::MOP;use Class::MOP::Immutable;
-}
+use Class::MOP;
+
 
 {
     package Foo;

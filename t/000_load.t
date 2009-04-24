@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 50;
+use Test::More tests => 49;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -9,7 +9,6 @@ BEGIN {
     use_ok('Class::MOP::Module');
     use_ok('Class::MOP::Class');
     use_ok('Class::MOP::Class::Immutable::Trait');
-    use_ok('Class::MOP::Immutable');
     use_ok('Class::MOP::Attribute');
     use_ok('Class::MOP::Method');
     use_ok('Class::MOP::Method::Wrapped');
