@@ -1096,8 +1096,14 @@ creates are very different from this modules.
 =head1 BUGS
 
 All complex software has bugs lurking in it, and this module is no
-exception. If you find a bug please either email me, or add the bug
-to cpan-RT.
+exception.
+
+Please report any bugs to C<bug-class-mop@rt.cpan.org>, or through the
+web interface at L<http://rt.cpan.org>.
+
+You can also discuss feature requests or possible bugs on the Moose
+mailing list (moose@perl.org) or on IRC at
+L<irc://irc.perl.org/#moose>.
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -1120,6 +1126,8 @@ Brandon (blblack) Black
 Florian (rafl) Ragwitz
 
 Guillermo (groditi) Roditi
+
+Dave (autarch) Rolsky
 
 Matt (mst) Trout
 
