@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.83
+    * Class::MOP::Class
+      - Fix segfault when calling get_method_map on a metaclass for an empty
+        package (doy)
+
 0.82_02 Fri, April 24, 2009
     * Class::MOP::Method::Inlined
       - Don't inline if the expected method is not defined at all (happens with
