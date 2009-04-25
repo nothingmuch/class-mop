@@ -88,12 +88,16 @@ get_method_map(self)
         HV *const obj        = (HV *)SvRV(self);
         SV *const class_name = HeVAL( hv_fetch_ent(obj, KEY_FOR(package), 0, HASH_FOR(package)) );
         HV *const stash      = gv_stashsv(class_name, 0);
+        UV current;
+        SV *cache_flag;
+        SV *map_ref;
+    INIT:
         if (!stash) {
-            return;
+            XSRETURN_EMPTY;
         }
-        UV  const current    = mop_check_package_cache_flag(aTHX_ stash);
-        SV *const cache_flag = HeVAL( hv_fetch_ent(obj, KEY_FOR(package_cache_flag), TRUE, HASH_FOR(package_cache_flag)));
-        SV *const map_ref    = HeVAL( hv_fetch_ent(obj, KEY_FOR(methods), TRUE, HASH_FOR(methods)));
+        current    = mop_check_package_cache_flag(aTHX_ stash);
+        cache_flag = HeVAL( hv_fetch_ent(obj, KEY_FOR(package_cache_flag), TRUE, HASH_FOR(package_cache_flag)));
+        map_ref    = HeVAL( hv_fetch_ent(obj, KEY_FOR(methods), TRUE, HASH_FOR(methods)));
     PPCODE:
         /* in  $self->{methods} does not yet exist (or got deleted) */
         if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
