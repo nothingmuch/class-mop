@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.83 Sat, April 25, 2009
+0.83 Mon, April 27, 2009
     * Class::MOP::Class
       - Fix segfault when calling get_method_map on a metaclass for an empty
         package (doy)
