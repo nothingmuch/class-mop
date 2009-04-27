@@ -128,13 +128,13 @@ sub add_package_symbol {
 
     my ($name, $sigil, $type) = ref $variable eq 'HASH'
         ? @{$variable}{qw[name sigil type]}
-        : $self->_deconstruct_variable_name($variable); 
+        : $self->_deconstruct_variable_name($variable);
 
     my $pkg = $self->{'package'};
 
     no strict 'refs';
-    no warnings 'redefine', 'misc';    
-    *{$pkg . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;      
+    no warnings 'redefine', 'misc', 'prototype';
+    *{$pkg . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;
 }
 
 sub remove_package_glob {

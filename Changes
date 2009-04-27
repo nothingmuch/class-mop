@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Package
+      - Disable prototype mismatch warnings for add_package_symbol.
+        (Florian Ragwitz)
+
 0.83 Mon, April 27, 2009
     * Class::MOP::Class
       - Fix segfault when calling get_method_map on a metaclass for an empty
