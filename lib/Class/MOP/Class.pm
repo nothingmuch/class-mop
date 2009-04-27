@@ -1228,8 +1228,8 @@ Class::MOP::Class - Class Meta Object
           version      => '0.01',
           superclasses => ['Foo'],
           attributes   => [
-              Class::MOP:: : Attribute->new('$bar'),
-              Class::MOP:: : Attribute->new('$baz'),
+              Class::MOP::Attribute->new('$bar'),
+              Class::MOP::Attribute->new('$baz'),
           ],
           methods => {
               calculate_bar => sub {...},
