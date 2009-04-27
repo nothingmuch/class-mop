@@ -1214,12 +1214,12 @@ Class::MOP::Class - Class Meta Object
   # add a method to Foo ...
   Foo->meta->add_method( 'bar' => sub {...} )
 
-      # get a list of all the classes searched
-      # the method dispatcher in the correct order
-      Foo->meta->class_precedence_list()
+  # get a list of all the classes searched
+  # the method dispatcher in the correct order
+  Foo->meta->class_precedence_list()
 
-      # remove a method from Foo
-      Foo->meta->remove_method('bar');
+  # remove a method from Foo
+  Foo->meta->remove_method('bar');
 
   # or use this to actually create classes ...
 
