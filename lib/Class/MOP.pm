@@ -940,6 +940,19 @@ This will return the metaclass of the given instance or class name.
 Even if the class lacks a metaclass, no metaclass will be initialized
 and C<undef> will be returned.
 
+=item B<Class::MOP::in_global_destruction()>
+
+Will return true if we're currently in Global Destruction. This is currently
+passed through from L<Devel::GlobalDestruction|Devel::GlobalDestruction>'s
+function of the same name
+
+=item B<Class::MOP::subname>
+
+Allows you to provide an informative name to a subroutine for things like Carp
+and caller. This allows easier debugging of closures as well as anonymous
+subroutines. Currently this is passed through from L<Sub::Name|Sub::Name>'s
+function of the same name.
+
 =item B<Class::MOP::check_package_cache_flag($pkg)>
 
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
