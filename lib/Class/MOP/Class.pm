@@ -12,8 +12,8 @@ use Class::MOP::Class::Immutable::Class::MOP::Class;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
-use Sub::Name ();
-use Devel::GlobalDestruction ();
+use Sub::Name 'subname';
+use Devel::GlobalDestruction 'in_global_destruction';
 
 our $VERSION   = '0.83';
 $VERSION = eval $VERSION;
@@ -248,7 +248,7 @@ sub _check_metaclass_compatibility {
     sub DESTROY {
         my $self = shift;
 
-        return if Devel::GlobalDestruction::in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
+        return if in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
@@ -612,7 +612,7 @@ sub add_method {
     my $full_method_name = ($self->name . '::' . $method_name);    
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }, 
-        Sub::Name::subname($full_method_name => $body)
+        subname($full_method_name => $body)
     );
 }
 
@@ -649,7 +649,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_before_modifier(
-            Sub::Name::subname(':before' => $method_modifier)
+            subname(':before' => $method_modifier)
         );
     }
 
@@ -659,7 +659,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_after_modifier(
-            Sub::Name::subname(':after' => $method_modifier)
+            subname(':after' => $method_modifier)
         );
     }
 
@@ -669,7 +669,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_around_modifier(
-            Sub::Name::subname(':around' => $method_modifier)
+            subname(':around' => $method_modifier)
         );
     }
 
