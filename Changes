@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP
+      - Remove in_global_destruction and subname re-exporting (perigrin)
+    * Class::MOP::Class
+      - Explicitly use Devel::GlobalDestruction and Sub::Name (perigrin)
     * Class::MOP::Package
       - Disable prototype mismatch warnings for add_package_symbol.
         (Florian Ragwitz)
