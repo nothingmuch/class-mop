@@ -12,6 +12,7 @@ use Class::MOP::Class::Immutable::Class::MOP::Class;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
+use Sub::Name ();
 
 our $VERSION   = '0.83';
 $VERSION = eval $VERSION;
@@ -246,7 +247,7 @@ sub _check_metaclass_compatibility {
     sub DESTROY {
         my $self = shift;
 
-        return if Class::MOP::in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
+        return if Devel::GlobalDestruction::in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
 
         no warnings 'uninitialized';
         return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
@@ -610,7 +611,7 @@ sub add_method {
     my $full_method_name = ($self->name . '::' . $method_name);    
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }, 
-        Class::MOP::subname($full_method_name => $body)
+        Sub::Name::subname($full_method_name => $body)
     );
 }
 
@@ -647,7 +648,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_before_modifier(
-            Class::MOP::subname(':before' => $method_modifier)
+            Sub::Name::subname(':before' => $method_modifier)
         );
     }
 
@@ -657,7 +658,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_after_modifier(
-            Class::MOP::subname(':after' => $method_modifier)
+            Sub::Name::subname(':after' => $method_modifier)
         );
     }
 
@@ -667,7 +668,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_around_modifier(
-            Class::MOP::subname(':around' => $method_modifier)
+            Sub::Name::subname(':around' => $method_modifier)
         );
     }
 
