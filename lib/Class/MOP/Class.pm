@@ -13,6 +13,7 @@ use Class::MOP::Class::Immutable::Class::MOP::Class;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 use Sub::Name ();
+use Devel::GlobalDestruction ();
 
 our $VERSION   = '0.83';
 $VERSION = eval $VERSION;
