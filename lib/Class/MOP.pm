@@ -153,6 +153,18 @@ sub _is_valid_class_name {
     return 0;
 }
 
+sub subname {
+    require Sub::Name;
+    Carp::carp("Class::MOP::subname is deprecated. Please use Sub::Name directly.");
+    goto \&Sub::Name::subname;
+}
+
+sub in_global_destruction {
+    require Devel::GlobalDestruction;
+    Carp::carp("Class::MOP::in_global_destruction is deprecated. Please use Devel::GlobalDestruction directly.");
+    goto \&Devel::GlobalDestruction::in_global_destruction;
+}
+
 ## ----------------------------------------------------------------------------
 ## Setting up our environment ...
 ## ----------------------------------------------------------------------------

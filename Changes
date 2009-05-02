@@ -1,7 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
     * Class::MOP
-      - Remove in_global_destruction and subname re-exporting (perigrin)
+      - Deprecate in_global_destruction and subname re-exporting
+        (perigrin & Sartak)
     * Class::MOP::Class
       - Explicitly use Devel::GlobalDestruction and Sub::Name (perigrin)
     * Class::MOP::Package
