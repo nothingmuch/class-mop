@@ -14,7 +14,7 @@ my @modules = all_modules();
 plan tests => scalar @modules;
 
 my %trustme = (
-    'Class::MOP'            => ['HAVE_ISAREV'],
+    'Class::MOP' => [ 'HAVE_ISAREV', 'subname', 'in_global_destruction' ],
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
 
