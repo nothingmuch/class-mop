@@ -3,6 +3,10 @@ package Class::MOP::Class::Immutable::Class::MOP::Class;
 use strict;
 use warnings;
 
+our $VERSION   = '0.83';
+$VERSION = eval $VERSION;
+our $AUTHORITY = 'cpan:STEVAN';
+
 use base qw(Class::MOP::Class::Immutable::Trait Class::MOP::Class);
 
 1;
