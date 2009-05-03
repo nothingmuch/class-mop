@@ -25,6 +25,8 @@ test_requires 'File::Spec';
 test_requires 'Test::More'      => '0.77';
 test_requires 'Test::Exception' => '0.21';
 
+extra_tests();
+
 makemaker_args( CCFLAGS => $ccflags );
 
 {
