@@ -179,6 +179,7 @@ sub init_arg           { $_[0]->{'init_arg'}    }
 sub initializer        { $_[0]->{'initializer'} }
 sub definition_context { $_[0]->{'definition_context'} }
 sub insertion_order    { $_[0]->{'insertion_order'} }
+sub set_insertion_order { $_[0]->{'insertion_order'} = $_[1] }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
