@@ -507,6 +507,14 @@ Class::MOP::Attribute->meta->add_attribute(
     ))
 );
 
+Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('insertion_order' => (
+        reader      => { 'insertion_order' => \&Class::MOP::Attribute::insertion_order },
+        writer      => { 'set_insertion_order' => \&Class::MOP::Attribute::set_insertion_order },
+        predicate   => { 'has_insertion_order' => \&Class::MOP::Attribute::has_insertion_order },
+    ))
+);
+
 Class::MOP::Attribute->meta->add_method('clone' => sub {
     my $self  = shift;
     $self->meta->clone_object($self, @_);
