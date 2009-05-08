@@ -946,9 +946,9 @@ from.
 
 =item B<Class::MOP::class_of($instance_or_class_name)>
 
-This will return the metaclass of the given instance or class name.
-Even if the class lacks a metaclass, no metaclass will be initialized
-and C<undef> will be returned.
+This will return the metaclass of the given instance or class name.  If the
+class lacks a metaclass, no metaclass will be initialized, and C<undef> will be
+returned.
 
 =item B<Class::MOP::check_package_cache_flag($pkg)>
 
