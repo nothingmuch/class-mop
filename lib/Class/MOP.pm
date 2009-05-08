@@ -923,7 +923,8 @@ Note that these are all called as B<functions, not methods>.
 
 =item B<Class::MOP::load_class($class_name)>
 
-This will load the specified C<$class_name>. This function can be used
+This will load the specified C<$class_name>, if it is not already
+loaded (as reported by C<is_class_loaded>). This function can be used
 in place of tricks like C<eval "use $module"> or using C<require>
 unconditionally. This will return the metaclass of C<$class_name>.
 
@@ -935,7 +936,9 @@ loaded.
 This does a basic check of the symbol table to try and determine as
 best it can if the C<$class_name> is loaded, it is probably correct
 about 99% of the time, but it can be fooled into reporting false
-positives.
+positives. In particular, loading any of the core L<IO> modules will
+cause most of the rest of the core L<IO> modules to falsely report
+having been loaded, due to the way the base L<IO> module works.
 
 =item B<Class::MOP::get_code_info($code)>
 
