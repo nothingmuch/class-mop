@@ -89,7 +89,7 @@ is_class_loaded(klass=&PL_sv_undef)
 
         if (hv_exists_ent (stash, KEY_FOR(ISA), HASH_FOR(ISA))) {
             HE *isa = hv_fetch_ent(stash, KEY_FOR(ISA), 0, HASH_FOR(ISA));
-            if (isa && HeVAL(isa) && GvAV(HeVAL(isa))) {
+            if (isa && HeVAL(isa) && GvAV(HeVAL(isa)) && av_len(GvAV(HeVAL(isa))) != -1) {
                 XSRETURN_YES;
             }
         }

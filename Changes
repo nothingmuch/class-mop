@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
     * Class::MOP
+      - Made is_class_loaded a little stricter. It was reporting that
+        a class was loaded if it merely had an @ISA variable in its
+        stash. Now it checks that the @ISA var has elements in it.
+    * Class::MOP
       - Deprecate in_global_destruction and subname re-exporting
         (perigrin & Sartak)
     * Class::MOP::Class

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 34;
+use Test::More tests => 36;
 use Test::Exception;
 
 require Class::MOP;
@@ -123,3 +123,24 @@ throws_ok {
     ok( Class::MOP::is_class_loaded('TestClassLoaded3'),
         'We see that TestClassLoaded3 is loaded after requiring it (it has an @ISA but no methods or $VERSION)' );
 }
+
+{
+    {
+        package Not::Loaded;
+        our @ISA;
+    }
+
+    ok( ! Class::MOP::is_class_loaded('Not::Loaded'),
+        'the mere existence of an @ISA for a package does not mean a class is loaded' );
+}
+
+{
+    {
+        package Loaded::Ish;
+        our @ISA = 'Foo';
+    }
+
+    ok( Class::MOP::is_class_loaded('Loaded::Ish'),
+        'an @ISA with members does mean a class is loaded' );
+}
+
