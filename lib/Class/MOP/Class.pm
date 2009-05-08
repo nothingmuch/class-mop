@@ -830,7 +830,8 @@ sub add_attribute {
     
     # get our count of previously inserted attributes and
     # increment by one so this attribute knows its order
-    $attribute->insertion_order((scalar keys %{$self->get_attribute_map}) + 1);
+    my $order = (scalar keys %{$self->get_attribute_map}) - 1; 
+    $attribute->insertion_order($order + 1);
 
     # then onto installing the new accessors
     $self->get_attribute_map->{$attribute->name} = $attribute;
