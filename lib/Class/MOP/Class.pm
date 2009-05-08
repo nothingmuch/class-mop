@@ -827,6 +827,10 @@ sub add_attribute {
     } else {
         $self->invalidate_meta_instances();
     }
+    
+    # get our count of previously inserted attributes and
+    # increment by one so this attribute knows its order
+    $attribute->insertion_order((scalar keys %{$self->get_attribute_map}) + 1);
 
     # then onto installing the new accessors
     $self->get_attribute_map->{$attribute->name} = $attribute;
