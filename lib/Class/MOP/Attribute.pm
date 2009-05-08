@@ -760,6 +760,11 @@ writing the attribute's value in the associated class. These methods
 always return a subroutine reference, regardless of whether or not the
 attribute is read- or write-only.
 
+=item B<< $attr->insertion_order >>
+
+If this attribute has been inserted into a class, this returns a zero
+based index regarding the order of insertion.
+
 =back
 
 =head2 Informational predicates
@@ -790,6 +795,10 @@ This will be I<false> if the C<default> was set to C<undef>, since
 C<undef> is the default C<default> anyway.
 
 =item B<< $attr->has_builder >>
+
+=item B<< $attr->has_insertion_order >>
+
+This will be I<false> if this attribute has not be inserted into a class
 
 =back
 
