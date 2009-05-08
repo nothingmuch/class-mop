@@ -77,6 +77,10 @@ sub _new {
         # and a list of the methods
         # associated with this attr
         'associated_methods' => [],
+        # this let's us keep track of
+        # our order inside the associated
+        # class
+        'insertion_order'    => undef,
     }, $class;
 }
 
@@ -163,6 +167,7 @@ sub has_builder     { defined($_[0]->{'builder'}) }
 sub has_init_arg    { defined($_[0]->{'init_arg'}) }
 sub has_default     { defined($_[0]->{'default'}) }
 sub has_initializer { defined($_[0]->{'initializer'}) }
+sub has_insertion_order { defined($_[0]->{'insertion_order'}) }
 
 sub accessor           { $_[0]->{'accessor'}    }
 sub reader             { $_[0]->{'reader'}      }
@@ -173,6 +178,7 @@ sub builder            { $_[0]->{'builder'}     }
 sub init_arg           { $_[0]->{'init_arg'}    }
 sub initializer        { $_[0]->{'initializer'} }
 sub definition_context { $_[0]->{'definition_context'} }
+sub insertion_order    { $_[0]->{'insertion_order'} }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
