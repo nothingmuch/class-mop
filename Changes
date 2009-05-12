@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * Makefile.PL
+      - Depend on Text::Exception 0.27 to avoid failing tests ond old
+        versions (rafl)
+
     * Class::MOP
       - Made is_class_loaded a little stricter. It was reporting that
         a class was loaded if it merely had an @ISA variable in its
