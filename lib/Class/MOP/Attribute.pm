@@ -248,7 +248,9 @@ sub get_write_method_ref {
 }
 
 sub is_default_a_coderef {
-    ('CODE' eq ref($_[0]->{'default'}))
+    my ($value) = $_[0]->{'default'};
+    return unless ref($value);
+    return ref($value) eq 'CODE' || (blessed($value) && $value->isa('Class::MOP::Method'));
 }
 
 sub default {

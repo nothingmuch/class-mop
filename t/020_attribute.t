@@ -3,11 +3,12 @@ use warnings;
 
 use Scalar::Util 'reftype', 'blessed';
 
-use Test::More tests => 100;
+use Test::More tests => 104;
 use Test::Exception;
 
 use Class::MOP;
 use Class::MOP::Attribute;
+use Class::MOP::Method;
 
 
 dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class method};
@@ -224,4 +225,22 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
     ok($attr->has_builder, '... $attr does have a builder');
     is($attr->builder, 'foo_builder', '... $attr->builder == foo_builder');
 
+}
+
+{
+    for my $value ({}, bless({}, 'Foo')) {
+        throws_ok {
+            Class::MOP::Attribute->new('$foo', default => $value);
+        } qr/References are not allowed as default values/;
+    }
+}
+
+{
+    my $attr;
+    lives_ok {
+        my $meth = Class::MOP::Method->wrap(sub {shift}, name => 'foo', package_name => 'bar');
+        $attr = Class::MOP::Attribute->new('$foo', default => $meth);
+    } 'Class::MOP::Methods accepted as default';
+
+    is($attr->default(42), 42, 'passthrough for default on attribute');
 }

@@ -1,5 +1,13 @@
 Revision history for Perl extension Class-MOP.
 
+
+    * Class::MOP::Attribute
+      - Allow default values to be Class::MOP::Methods.
+        (Florian Ragwitz)
+      - Test the above. (Rhesa Rozendaal)
+      - Tweak original commit so the intent matches the accepted behavior
+        (Nicholas Perez)
+
 0.84 Tue, May 12, 2009
     * Makefile.PL
       - Depend on Text::Exception 0.27 to avoid failing tests ond old
