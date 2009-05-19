@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 294;
+use Test::More tests => 296;
 use Test::Exception;
 
 use Class::MOP;
@@ -72,7 +72,8 @@ my @class_mop_class_methods = qw(
 
     attribute_metaclass method_metaclass wrapped_method_metaclass
 
-    superclasses subclasses class_precedence_list linearized_isa
+    superclasses subclasses direct_subclasses class_precedence_list
+    linearized_isa
 
     has_method get_method add_method remove_method alias_method wrap_method_body
     get_method_list get_method_map get_all_method_names get_all_methods compute_all_applicable_methods

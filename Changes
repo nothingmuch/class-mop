@@ -11,6 +11,10 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP
       - Localize $SIG{__DIE__} inside _try_load_one_class (Sartak)
 
+    * Class::MOP::Class
+      - Add direct_subclasses method (Sartak)
+        - Tests for subclasses and direct_subclasses (Sartak)
+
 0.84 Tue, May 12, 2009
     * Makefile.PL
       - Depend on Text::Exception 0.27 to avoid failing tests ond old

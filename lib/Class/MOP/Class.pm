@@ -529,6 +529,16 @@ sub subclasses {
     return @{ $super_class->mro::get_isarev() };
 }
 
+sub direct_subclasses {
+    my $self = shift;
+    my $super_class = $self->name;
+
+    return grep {
+        grep {
+            $_ eq $super_class
+        } Class::MOP::Class->initialize($_)->superclasses
+    } $self->subclasses;
+}
 
 sub linearized_isa {
     return @{ mro::get_linear_isa( (shift)->name ) };
@@ -1454,7 +1464,13 @@ duplicates removed.
 
 =item B<< $metaclass->subclasses >>
 
-This returns a list of subclasses for this class.
+This returns a list of all subclasses for this class, even indirect
+subclasses.
+
+=item B<< $metaclass->direct_subclasses >>
+
+This returns a list of immediate subclasses for this class, which does not
+include indirect subclasses.
 
 =back
 
