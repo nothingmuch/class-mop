@@ -131,6 +131,7 @@ sub _try_load_one_class {
 
     return do {
         local $@;
+        local $SIG{__DIE__};
         eval { require($file) };
         $@;
     };

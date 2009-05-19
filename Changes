@@ -8,6 +8,9 @@ Revision history for Perl extension Class-MOP.
       - Tweak original commit so the intent matches the accepted behavior
         (Nicholas Perez)
 
+    * Class::MOP
+      - Localize $SIG{__DIE__} inside _try_load_one_class (Sartak)
+
 0.84 Tue, May 12, 2009
     * Makefile.PL
       - Depend on Text::Exception 0.27 to avoid failing tests ond old
