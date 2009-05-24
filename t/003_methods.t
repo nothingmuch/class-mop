@@ -200,6 +200,8 @@ lives_ok {
     $Bar->add_method('foo' => sub { 'Bar::foo v2' });
 } '... overwriting a method is fine';
 
+is_deeply( [ Class::MOP::get_code_info($Bar->get_method('foo')->body) ], [ "Bar", "foo" ], "subname applied to anonymous method" );
+
 ok($Bar->has_method('foo'), '... Bar-> (still) has_method(foo)');
 is(Bar->foo, 'Bar::foo v2', '... Bar->foo == "Bar::foo v2"');
 
