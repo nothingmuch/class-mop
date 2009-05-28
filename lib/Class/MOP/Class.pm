@@ -517,9 +517,14 @@ sub superclasses {
         # we don't know about
 
         $self->_check_metaclass_compatibility();
-        $self->update_meta_instance_dependencies();
+        $self->_superclasses_updated();
     }
     @{$self->get_package_symbol($var_spec)};
+}
+
+sub _superclasses_updated {
+    my $self = shift;
+    $self->update_meta_instance_dependencies();
 }
 
 sub subclasses {

@@ -16,6 +16,7 @@ Revision history for Perl extension Class-MOP.
         - Tests for subclasses and direct_subclasses (Sartak)
       - subname is no longer used unconditionally in add_method, but only if
         the code reference's name is '__ANON__' (nothingmuch)
+      - Add a hook for _superclasses_updated (Sartak)
 
 0.84 Tue, May 12, 2009
     * Makefile.PL
