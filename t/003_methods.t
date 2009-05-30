@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 65;
+use Test::More tests => 66;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
