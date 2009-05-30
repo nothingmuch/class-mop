@@ -18,6 +18,9 @@ Revision history for Perl extension Class-MOP.
         the code reference's name is '__ANON__' (nothingmuch)
       - Add a hook for _superclasses_updated (Sartak)
 
+    * Class::MOP::Method
+      - Remove long, old warning about possibly outdated modules (Sartak)
+
 0.84 Tue, May 12, 2009
     * Makefile.PL
       - Depend on Text::Exception 0.27 to avoid failing tests ond old

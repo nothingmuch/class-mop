@@ -18,15 +18,6 @@ use base 'Class::MOP::Object';
 # they should act like CODE refs.
 use overload '&{}' => sub { $_[0]->body }, fallback => 1;
 
-our $UPGRADE_ERROR_TEXT = q{
----------------------------------------------------------
-NOTE: this error is likely not an error, but a regression
-caused by the latest upgrade to Moose/Class::MOP. Consider
-upgrading any MooseX::* modules to their latest versions
-before spending too much time chasing this one down.
----------------------------------------------------------
-};
-
 # construction
 
 sub wrap {
@@ -41,7 +32,7 @@ sub wrap {
         || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
 
     ($params{package_name} && $params{name})
-        || confess "You must supply the package_name and name parameters $UPGRADE_ERROR_TEXT";
+        || confess "You must supply the package_name and name parameters";
 
     my $self = $class->_new(\%params);
 
