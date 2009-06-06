@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-
+0.85 Sat, Jun 6, 2009
     * Class::MOP::Attribute
       - Allow default values to be Class::MOP::Methods.
         (Florian Ragwitz)
