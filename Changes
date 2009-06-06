@@ -2,11 +2,11 @@ Revision history for Perl extension Class-MOP.
 
 0.85 Sat, Jun 6, 2009
     * Class::MOP::Attribute
-      - Allow default values to be Class::MOP::Methods.
-        (Florian Ragwitz)
+      - Allow default values to be Class::MOP::Methods.  (Florian
+        Ragwitz)
       - Test the above. (Rhesa Rozendaal)
-      - Tweak original commit so the intent matches the accepted behavior
-        (Nicholas Perez)
+      - Tweak original commit so the intent matches the accepted
+        behavior (Nicholas Perez)
 
     * Class::MOP
       - Localize $SIG{__DIE__} inside _try_load_one_class (Sartak)
@@ -14,12 +14,13 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Class
       - Add direct_subclasses method (Sartak)
         - Tests for subclasses and direct_subclasses (Sartak)
-      - subname is no longer used unconditionally in add_method, but only if
-        the code reference's name is '__ANON__' (nothingmuch)
+      - subname is no longer used unconditionally in add_method, but
+        only if the code reference's name is '__ANON__' (nothingmuch)
       - Add a hook for _superclasses_updated (Sartak)
 
     * Class::MOP::Method
-      - Remove long, old warning about possibly outdated modules (Sartak)
+      - Remove long, old warning about possibly outdated modules
+        (Sartak)
 
 0.84 Tue, May 12, 2009
     * Makefile.PL
