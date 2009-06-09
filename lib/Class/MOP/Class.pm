@@ -1613,7 +1613,10 @@ attributes which are defined in terms of "regular" Perl 5 methods.
 
 This will return a L<Class::MOP::Attribute> for the specified
 C<$attribute_name>. If the class does not have the specified
-attribute, it returns C<undef>
+attribute, it returns C<undef>.  
+
+NOTE that get_attribute does not search superclasses, for 
+that you need to use C<find_attribute_by_name>.
 
 =item B<< $metaclass->has_attribute($attribute_name) >>
 
