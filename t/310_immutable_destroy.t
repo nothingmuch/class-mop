@@ -4,12 +4,12 @@ use Test::More tests => 1;
 use Class::MOP;
 
 SKIP: {
-    if (not eval { require Moose; 1 }) {
+    unless (eval { require Moose; 1 }) {
         skip 'test requires moose', 1;
         exit 0;
     }
 
-    eval <<FOOBAR;
+    eval <<'EOF';
     package FooBar;
     use Moose;
 
@@ -18,7 +18,7 @@ SKIP: {
     sub DESTROY { shift->name }
 
     __PACKAGE__->meta->make_immutable;
-FOOBAR
+EOF
 
     my $f = FooBar->new( name => 'SUSAN' );
 
