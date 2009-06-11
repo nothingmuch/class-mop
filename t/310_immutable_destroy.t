@@ -3,28 +3,25 @@ use warnings;
 use Test::More tests => 1;
 use Class::MOP;
 
-BEGIN {
-	package FooBar;
-	sub DESTROY { shift->name }
+BEGIN { 
+	if (not Class::MOP::load_class('Moose::Object')) {
+		skip 'test requires moose', 1;
+		exit 0;
+	}
 }
 
-{
-	my $meta = Class::MOP::Class->initialize('FooBar');
-	$meta->add_attribute(
-		Class::MOP::Attribute->new(
-			'name' => (
-				reader => 'name',
-			)
-		)
-	);
 
-    $meta->make_immutable(
-		inline_accessors => 1,
-		inline_constructor => 1,
-		inline_destructor => 1,
-	);
+{
+    package FooBar;
+    use Moose;
+
+    has 'name' => ( is => 'ro' );
+
+    sub DESTROY { shift->name }
+
+    __PACKAGE__->meta->make_immutable;
 }
 
 my $f = FooBar->new( name => 'SUSAN' );
 
-is( $f->DESTROY, 'SUSAN', 'Did class-mop overload DESTROY?' );
+is( $f->DESTROY, 'SUSAN', 'Did moose overload DESTROY?' );
