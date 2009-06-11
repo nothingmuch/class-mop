@@ -22,5 +22,5 @@ FOOBAR
 
 	my $f = FooBar->new( name => 'SUSAN' );
 
-	is( $f->DESTROY, 'SUSAN', 'Did moose overload DESTROY?' );
+	is( $f->DESTROY, 'SUSAN', 'Did Class::MOP::Class overload DESTROY?' );
 }
