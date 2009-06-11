@@ -1204,6 +1204,13 @@ sub _inline_destructor {
         || confess "The 'inline_destructor' option is present, but "
         . "no destructor class was specified";
 
+    if ($self->has_method('DESTROY') ) {
+        my $class = $self->name;
+        warn "Not inlining a destructor for $class since it defines"
+            . " its own destructor.\n";
+        return;
+    }
+
     my $destructor_class = $args{destructor_class};
 
     Class::MOP::load_class($destructor_class);
