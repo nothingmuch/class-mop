@@ -5,7 +5,7 @@ use Class::MOP;
 
 SKIP: {
     unless (eval { require Moose; 1 }) {
-        skip 'test requires moose', 1;
+        skip 'This test requires Moose', 1;
         exit 0;
     }
 
