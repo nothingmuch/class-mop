@@ -4,12 +4,12 @@ use Test::More tests => 1;
 use Class::MOP;
 
 SKIP: {
-	if (not eval { require Moose; 1 }) {
-		skip 'test requires moose', 1;
-		exit 0;
-	}
+    if (not eval { require Moose; 1 }) {
+        skip 'test requires moose', 1;
+        exit 0;
+    }
 
-	eval <<FOOBAR;
+    eval <<FOOBAR;
     package FooBar;
     use Moose;
 
@@ -20,7 +20,7 @@ SKIP: {
     __PACKAGE__->meta->make_immutable;
 FOOBAR
 
-	my $f = FooBar->new( name => 'SUSAN' );
+    my $f = FooBar->new( name => 'SUSAN' );
 
-	is( $f->DESTROY, 'SUSAN', 'Did Class::MOP::Class overload DESTROY?' );
+    is( $f->DESTROY, 'SUSAN', 'Did Class::MOP::Class overload DESTROY?' );
 }
