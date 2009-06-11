@@ -29,7 +29,7 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.85';
+our $VERSION   = '0.86';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
@@ -1159,6 +1159,8 @@ Rob (robkinyon) Kinyon
 Yuval (nothingmuch) Kogman
 
 Scott (konobi) McWhirter
+
+Dylan Hardison
 
 =head1 COPYRIGHT AND LICENSE
 
