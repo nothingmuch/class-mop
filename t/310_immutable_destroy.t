@@ -3,15 +3,13 @@ use warnings;
 use Test::More tests => 1;
 use Class::MOP;
 
-BEGIN { 
-	if (not Class::MOP::load_class('Moose::Object')) {
+SKIP: {
+	if (not eval { require Moose; 1 }) {
 		skip 'test requires moose', 1;
 		exit 0;
 	}
-}
 
-
-{
+	eval <<FOOBAR;
     package FooBar;
     use Moose;
 
@@ -20,8 +18,9 @@ BEGIN {
     sub DESTROY { shift->name }
 
     __PACKAGE__->meta->make_immutable;
+FOOBAR
+
+	my $f = FooBar->new( name => 'SUSAN' );
+
+	is( $f->DESTROY, 'SUSAN', 'Did moose overload DESTROY?' );
 }
-
-my $f = FooBar->new( name => 'SUSAN' );
-
-is( $f->DESTROY, 'SUSAN', 'Did moose overload DESTROY?' );
