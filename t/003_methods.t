@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 66;
+use Test::More tests => 67;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -242,3 +242,46 @@ my $new_method = Bar->meta->get_method('objecty');
 
 isnt( $method, $new_method, 'add_method clones method objects as they are added' );
 is( $new_method->original_method, $method, '... the cloned method has the correct original method' );
+
+{
+
+    package CustomAccessor;
+
+    use Class::MOP;
+
+    my $meta = Class::MOP::Class->initialize(__PACKAGE__);
+
+    $meta->add_attribute(
+        foo => (
+            accessor => 'foo',
+        )
+    );
+
+    {
+        no warnings 'redefine';
+        *foo = sub {
+            my $self = shift;
+            $self->{custom_store} = $_[0];
+        };
+    }
+
+    $meta->add_around_method_modifier(
+        'foo',
+        sub {
+            my $orig = shift;
+            $orig->(@_);
+        }
+    );
+
+    $meta->add_method( 'new', sub { return bless {}, shift } );
+}
+
+{
+    my $o   = CustomAccessor->new;
+    my $str = 'string';
+
+    $o->foo($str);
+
+    is( $o->{custom_store}, $str,
+        'Custom glob-assignment-created accessor is still method modifier is added' );
+}
