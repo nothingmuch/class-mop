@@ -22,5 +22,6 @@ EOF
 
     my $f = FooBar->new( name => 'SUSAN' );
 
-    is( $f->DESTROY, 'SUSAN', 'Did Class::MOP::Class overload DESTROY?' );
+    is( $f->DESTROY, 'SUSAN',
+        'Class::MOP::Class should not override an existing DESTROY method' );
 }
