@@ -258,7 +258,7 @@ is( $new_method->original_method, $method, '... the cloned method has the correc
     );
 
     {
-        no warnings 'redefine';
+        no warnings 'redefine', 'once';
         *foo = sub {
             my $self = shift;
             $self->{custom_store} = $_[0];

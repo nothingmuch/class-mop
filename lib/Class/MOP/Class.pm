@@ -619,11 +619,8 @@ sub add_method {
 
     $method->attach_to_class($self);
 
-    # This used to call get_method_map, which meant we would build all
-    # the method objects for the class just because we added one
-    # method. This is hackier, but quicker too.
-    $self->{methods}{$method_name} = $method;
-    
+    $self->get_method_map->{$method_name} = $method;
+
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
     if ( $current_name eq '__ANON__' ) {
@@ -719,7 +716,7 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    exists $self->{methods}{$method_name} || exists $self->get_method_map->{$method_name};
+    exists $self->get_method_map->{$method_name};
 }
 
 sub get_method {
@@ -727,7 +724,7 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    return $self->{methods}{$method_name} || $self->get_method_map->{$method_name};
+    return $self->get_method_map->{$method_name};
 }
 
 sub remove_method {
