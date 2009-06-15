@@ -29,6 +29,7 @@ ewilhelm
 Goulah
 gphat
 groditi
+Hardison
 jrockway
 Kinyon
 Kinyon's
