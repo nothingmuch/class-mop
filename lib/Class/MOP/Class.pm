@@ -1162,9 +1162,6 @@ sub _inline_constructor {
 
     my $name = $args{constructor_name};
 
-    #if ( my $existing = $self->name->can($args{constructor_name}) ) {
-    #    if ( refaddr($existing) == refaddr(\&Moose::Object::new) ) {
-
     unless ( $args{replace_constructor}
         or !$self->has_method($name) ) {
         my $class = $self->name;
