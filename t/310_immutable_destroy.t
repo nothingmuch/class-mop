@@ -9,7 +9,9 @@ SKIP: {
         exit 0;
     }
 
-    eval <<'EOF';
+    {
+        local $SIG{__WARN__} = sub {};
+        eval <<'EOF';
     package FooBar;
     use Moose;
 
@@ -19,6 +21,7 @@ SKIP: {
 
     __PACKAGE__->meta->make_immutable;
 EOF
+    }
 
     my $f = FooBar->new( name => 'SUSAN' );
 
