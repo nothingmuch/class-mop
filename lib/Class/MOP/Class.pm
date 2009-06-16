@@ -15,7 +15,7 @@ use Scalar::Util 'blessed', 'weaken';
 use Sub::Name 'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 
-our $VERSION   = '0.85';
+our $VERSION   = '0.86';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
