@@ -7,8 +7,8 @@ Revision history for Perl extension Class-MOP.
         the original version of the subroutine
 
     * Class::MOP::Class
-      - make_immutable issues a warning instead of overriding a
-        DESTROY method on immutable classes. (Dylan William Hardison)
+      - make_immutable issues a warning instead of overriding an
+        existing DESTROY method (Dylan William Hardison)
 
 0.85 Sat, Jun 6, 2009
     * Class::MOP::Attribute
