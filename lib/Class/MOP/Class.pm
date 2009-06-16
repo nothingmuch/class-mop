@@ -1162,8 +1162,7 @@ sub _inline_constructor {
 
     my $name = $args{constructor_name};
 
-    unless ( $args{replace_constructor}
-        or !$self->has_method($name) ) {
+    if ( $self->has_method($name) && !$args{replace_constructor} ) {
         my $class = $self->name;
         warn "Not inlining a constructor for $class since it defines"
             . " its own constructor.\n"
@@ -1198,7 +1197,7 @@ sub _inline_destructor {
         || confess "The 'inline_destructor' option is present, but "
         . "no destructor class was specified";
 
-    if ($self->has_method('DESTROY') ) {
+    if ( $self->has_method('DESTROY') ) {
         my $class = $self->name;
         warn "Not inlining a destructor for $class since it defines"
             . " its own destructor.\n";
