@@ -1,19 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
-0.87 Tue, Jun 16, 2009
+0.86 Tue, Jun 16, 2009
     * Class::MOP::Class
       - If you redefined a subroutine at runtime and then wrapped it
         with a method modifier, the modifier could in some cases wrap
         the original version of the subroutine
 
     * Class::MOP::Class
-      - If a class defines its own DESTROY, we will not inline a
-        destructor (Dylan Hardison)
-
-0.86 Thu, Jun 11, 2009
-    * Class::MOP::Class
-      - make_immutable issues a warning instead of overriding a 
-        DESTROY method on immutable classes. (Dylan William Hardison).
+      - make_immutable issues a warning instead of overriding a
+        DESTROY method on immutable classes. (Dylan William Hardison)
 
 0.85 Sat, Jun 6, 2009
     * Class::MOP::Attribute
