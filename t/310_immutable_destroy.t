@@ -1,11 +1,12 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Class::MOP;
 
 SKIP: {
-    unless (eval { require Moose; 1 }) {
-        skip 'This test requires Moose', 1;
+    unless (eval { require Moose; Moose->VERSION(0.72); 1 }) {
+        diag( $@ );
+        skip 'This test requires Moose 0.72', 2;
         exit 0;
     }
 
@@ -13,7 +14,7 @@ SKIP: {
         local $SIG{__WARN__} = sub {};
         eval <<'EOF';
     package FooBar;
-    use Moose;
+    use Moose 0.72;
 
     has 'name' => ( is => 'ro' );
 
@@ -23,6 +24,8 @@ SKIP: {
 EOF
     }
 
+    ok( ! $@, 'evaled FooBar package' )
+      or diag( $@ );
     my $f = FooBar->new( name => 'SUSAN' );
 
     is( $f->DESTROY, 'SUSAN',
