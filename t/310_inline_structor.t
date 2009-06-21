@@ -202,13 +202,15 @@ use Class::MOP;
     sub _inline_destructor {
         my $self = shift;
 
-        my $code = $self->_eval_closure( {}, 'sub { }' );
+        my ( $code, $e ) = $self->_eval_closure( {}, 'sub { }' );
+        die $e if $e;
 
         $self->{body} = $code;
     }
 
     sub is_needed { 1 }
     sub associated_metaclass { $_[0]->{metaclass} }
+    sub body { $_[0]->{body} }
     sub _expected_method_class { 'Base::Class' }
 }
 
