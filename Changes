@@ -5,7 +5,7 @@ Revision history for Perl extension Class-MOP.
       - Moved the __INSTANCE__ parameter to _construct_instance from Moose
         to here. (doy)
 
-0.87
+0.87 Sun, Jun 21, 2009
     * Various
       - Made sure to always local-ize $@ and $SIG{__DIE__} before
         calling an eval. Fixes RT #45973.
