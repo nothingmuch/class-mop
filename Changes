@@ -1,6 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
 0.87
+    * Various
+      - Made sure to always local-ize $@ and $SIG{__DIE__} before
+        calling an eval. Fixes RT #45973.
+
     * Class::MOP::Class
       - Synced docs about immutability with the current reality (which
         changed back in 0.82_01)
@@ -9,17 +13,18 @@ Revision history for Perl extension Class-MOP.
 
     * Tests
       - Got rid of tests which needed Moose and improved testing of
-        constructor/destructor inlining warnings.
+        constructor/destructor inlining warnings. Fixes RT #47119.
 
 0.86 Tue, Jun 16, 2009
     * Class::MOP::Class
       - If you redefined a subroutine at runtime and then wrapped it
         with a method modifier, the modifier could in some cases wrap
-        the original version of the subroutine
+        the original version of the subroutine. Fixes RT #46957.
 
     * Class::MOP::Class
       - make_immutable issues a warning instead of overriding an
-        existing DESTROY method (Dylan William Hardison)
+        existing DESTROY method (Dylan William Hardison). Fixes RT
+        #46854.
 
 0.85 Sat, Jun 6, 2009
     * Class::MOP::Attribute
