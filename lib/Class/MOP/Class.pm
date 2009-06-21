@@ -855,7 +855,12 @@ sub add_attribute {
     $self->get_attribute_map->{$attribute->name} = $attribute;
 
     # invalidate package flag here
-    my $e = do { local $@; eval { $attribute->install_accessors() }; $@ };
+    my $e = do {
+        local $@;
+        local $SIG{__DIE__};
+        eval { $attribute->install_accessors() };
+        $@;
+    };
     if ( $e ) {
         $self->remove_attribute($attribute->name);
         die $e;

@@ -50,8 +50,13 @@ sub _instantiate_module {
     $code .= "\$$package_name\:\:AUTHORITY = '" . $authority . "';"
         if defined $authority;
 
-    eval $code;
-    confess "creation of $package_name failed : $@" if $@;
+    my $e = do {
+        local $@;
+        local $SIG{__DIE__};
+        eval $code;
+        $@;
+    };
+    confess "creation of $package_name failed : $e" if $e;
 }
 
 1;
