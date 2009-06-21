@@ -1,5 +1,16 @@
 Revision history for Perl extension Class-MOP.
 
+0.87
+    * Class::MOP::Class
+      - Synced docs about immutability with the current reality (which
+        changed back in 0.82_01)
+      - Removed the immutable_transformer method, which had been
+        returning undef since 0.82_01 anyway.
+
+    * Tests
+      - Got rid of tests which needed Moose and improved testing of
+        constructor/destructor inlining warnings.
+
 0.86 Tue, Jun 16, 2009
     * Class::MOP::Class
       - If you redefined a subroutine at runtime and then wrapped it
