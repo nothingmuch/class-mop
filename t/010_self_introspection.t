@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 298;
+use Test::More tests => 296;
 use Test::Exception;
 
 use Class::MOP;
@@ -92,8 +92,6 @@ my @class_mop_class_methods = qw(
 
     _immutable_metaclass
     immutable_trait constructor_name constructor_class destructor_class
-
-    immutable_transformer
 
     DESTROY
 );
