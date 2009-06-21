@@ -34,6 +34,22 @@ sub can_be_inlined {
     my $metaclass = $self->associated_metaclass;
     my $class     = $metaclass->name;
 
+    # If we don't find an inherited method, this is a rather weird
+    # case where we have no method in the inheritance chain even
+    # though we're expecting one to be there
+    my $inherited_method
+        = $metaclass->find_next_method_by_name( $self->name );
+
+    if (   $inherited_method
+        && $inherited_method->isa('Class::MOP::Method::Wrapped') ) {
+        warn "Not inlining '"
+            . $self->name
+            . "' for $class since it "
+            . "has method modifiers which would be lost if it were inlined\n";
+
+        return 0;
+    }
+
     my $expected_class = $self->_expected_method_class
         or return 1;
 
@@ -57,15 +73,6 @@ sub can_be_inlined {
     # the method is what we wanted (probably Moose::Object::new)
     return 1
         if refaddr($expected_method) == refaddr($actual_method);
-
-    # If we don't find an inherited method, this is a rather weird
-    # case where we have no method in the inheritance chain even
-    # though we're expecting one to be there
-    #
-    # this returns 1 for backwards compatibility for now
-    my $inherited_method
-        = $metaclass->find_next_method_by_name( $self->name )
-            or return 1;
 
     # otherwise we have to check that the actual method is an inlined
     # version of what we're expecting
@@ -95,12 +102,6 @@ sub can_be_inlined {
             . " constructor, specify inline_constructor => 0 in your"
             . " call to $class->meta->make_immutable\n";
     }
-
-    $warning
-        .= " ('"
-        . $self->name
-        . "' has method modifiers which would be lost if it were inlined)\n"
-        if $inherited_method->isa('Class::MOP::Method::Wrapped');
 
     warn $warning;
 

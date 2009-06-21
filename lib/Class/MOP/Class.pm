@@ -1193,11 +1193,11 @@ sub _inline_constructor {
 sub _inline_destructor {
     my ( $self, %args ) = @_;
 
-    ( exists $args{destructor_class} )
+    ( exists $args{destructor_class} && defined $args{destructor_class} )
         || confess "The 'inline_destructor' option is present, but "
         . "no destructor class was specified";
 
-    if ( $self->has_method('DESTROY') ) {
+    if ( $self->has_method('DESTROY') && ! $args{replace_destructor} ) {
         my $class = $self->name;
         warn "Not inlining a destructor for $class since it defines"
             . " its own destructor.\n";
@@ -1217,9 +1217,10 @@ sub _inline_destructor {
         name         => 'DESTROY'
     );
 
-    $self->add_method( 'DESTROY' => $destructor );
-
-    $self->_add_inlined_method($destructor);
+    if ( $args{replace_destructor} or $destructor->can_be_inlined ) {
+        $self->add_method( 'DESTROY' => $destructor );
+        $self->_add_inlined_method($destructor);
+    }
 }
 
 1;
