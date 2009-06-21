@@ -1008,7 +1008,6 @@ sub is_pristine {
 
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
-sub immutable_transformer { return }
 
 sub _immutable_options {
     my ( $self, @args ) = @_;
@@ -1614,7 +1613,7 @@ attributes which are defined in terms of "regular" Perl 5 methods.
 
 This will return a L<Class::MOP::Attribute> for the specified
 C<$attribute_name>. If the class does not have the specified
-attribute, it returns C<undef>.  
+attribute, it returns C<undef>. 
 
 NOTE that get_attribute does not search superclasses, for 
 that you need to use C<find_attribute_by_name>.
@@ -1692,6 +1691,12 @@ Making a class immutable lets us optimize the class by inlining some
 methods, and also allows us to optimize some methods on the metaclass
 object itself.
 
+After immutabilization, the metaclass object will cache most
+informational methods such as C<get_method_map> and
+C<get_all_attributes>. Methods which would alter the class, such as
+C<add_attribute>, C<add_method>, and so on will throw an error on an
+immutable metaclass object.
+
 The immutabilization system in L<Moose> takes much greater advantage
 of the inlining features than Class::MOP itself does.
 
@@ -1702,20 +1707,62 @@ of the inlining features than Class::MOP itself does.
 This method will create an immutable transformer and uses it to make
 the class and its metaclass object immutable.
 
-Details of how immutabilization works are in L<Class::MOP::Immutable>
-documentation.
+This method accepts the following options:
+
+=over 8
+
+=item * inline_accessors
+
+=item * inline_constructor
+
+=item * inline_destructor
+
+These are all booleans indicating whether the specified method(s)
+should be inlined.
+
+By default, accessors and the constructor are inlined, but not the
+destructor.
+
+=item * immutable_trait
+
+The name of a class which will be used as a parent class for the
+metaclass object being made immutable. This "trait" implements the
+post-immutability functionlity of the metaclass (but not the
+transformation itself).
+
+This defaults to L<Class::MOP::Class::Immutable::Trait>.
+
+=item * constructor_name
+
+This is the constructor method name. This defaults to "new".
+
+=item * constructor_class
+
+The name of the method metaclass for constructors. It will be used to
+generate the inlined constructor. This defaults to
+"Class::MOP::Method::Constructor".
+
+=item * replace_constructor
+
+This is a boolean indicating whether an existing constructor should be
+replaced when inlining a constructor. This defaults to false.
+
+=item * destructor_class
+
+The name of the method metaclass for destructors. It will be used to
+generate the inlined destructor. This defaults to
+"Class::MOP::Method::Denstructor".
+
+=item * replace_destructor
+
+This is a boolean indicating whether an existing destructor should be
+replaced when inlining a destructor. This defaults to false.
+
+=back
 
 =item B<< $metaclass->make_mutable >>
 
 Calling this method reverse the immutabilization transformation.
-
-=item B<< $metaclass->immutable_transformer >>
-
-If the class has been made immutable previously, this returns the
-L<Class::MOP::Immutable> object that was created to do the
-transformation.
-
-If the class was never made immutable, this method will die.
 
 =back
 
