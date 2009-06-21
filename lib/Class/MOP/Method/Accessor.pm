@@ -73,8 +73,7 @@ sub _initialize_body {
         ($self->is_inline ? 'inline' : ())
     );
 
-    eval { $self->{'body'} = $self->$method_name() };
-    die $@ if $@;
+    $self->{'body'} = $self->$method_name();
 }
 
 ## generators
