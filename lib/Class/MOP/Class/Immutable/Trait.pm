@@ -107,8 +107,10 @@ Class::MOP::Class::Immutable::Trait - Implements immutability for metaclass obje
 
 =head1 DESCRIPTION
 
-This class provides a trait that is applied to immutable metaclass
-objects. This is deep guts.
+This class provides a pseudo-trait that is applied to immutable metaclass
+objects. In reality, it is simply a parent class.
+
+It implements caching and read-only-ness for various metaclass methods.
 
 =head1 AUTHOR
 
