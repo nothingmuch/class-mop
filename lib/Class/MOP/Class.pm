@@ -1076,15 +1076,13 @@ sub _immutable_metaclass {
     my $class_name;
 
     if ( $meta_attr and $trait eq $meta_attr->default ) {
-
-       # if the trait is the same as the default we try and pick a predictable
-       # name for the immutable metaclass
-        $class_name = "Class::MOP::Class::Immutable::" . ref($self);
+        # if the trait is the same as the default we try and pick a
+        # predictable name for the immutable metaclass
+        $class_name = 'Class::MOP::Class::Immutable::' . ref($self);
     }
     else {
-        $class_name
-            = join( "::", "Class::MOP::Class::Immutable::CustomTrait", $trait,
-                    "ForMetaClass", ref($self) );
+        $class_name = join '::', 'Class::MOP::Class::Immutable::CustomTrait',
+            $trait, 'ForMetaClass', ref($self);
     }
 
     if ( Class::MOP::is_class_loaded($class_name) ) {
