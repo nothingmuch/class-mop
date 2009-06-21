@@ -1730,7 +1730,7 @@ destructor.
 
 The name of a class which will be used as a parent class for the
 metaclass object being made immutable. This "trait" implements the
-post-immutability functionlity of the metaclass (but not the
+post-immutability functionality of the metaclass (but not the
 transformation itself).
 
 This defaults to L<Class::MOP::Class::Immutable::Trait>.

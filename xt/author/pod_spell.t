@@ -166,6 +166,8 @@ kool
 pre
 # vice versa
 versa
+# foo-ness
+ness
 
 ## slang
 C'mon
