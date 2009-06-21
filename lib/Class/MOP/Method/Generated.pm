@@ -84,7 +84,7 @@ sub _compile_code {
 
     my $code = $self->_add_line_directive(%args);
 
-    $self->_eval_closure($args{environment}, $code);
+    return $self->_eval_closure($args{environment}, $code);
 }
 
 1;
