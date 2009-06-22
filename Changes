@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.88
+    * Class::MOP::Class
+      - Moved the __INSTANCE__ parameter to _construct_instance from Moose
+        to here. (doy)
+
 0.87
     * Various
       - Made sure to always local-ize $@ and $SIG{__DIE__} before
