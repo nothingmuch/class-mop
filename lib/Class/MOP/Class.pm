@@ -1418,10 +1418,10 @@ does nothing; it is merely a hook.
 This method is used to create a new object of the metaclass's
 class. Any parameters you provide are used to initialize the
 instance's attributes. A special C<__INSTANCE__> key can be passed to
-provide an already generated instance, rather than having Moose
+provide an already generated instance, rather than having Class::MOP
 generate it for you. This is mostly useful for using Class::MOP with
 foreign classes, which generally generate instances using their own
-constructor. See L<Moose::Cookbook::Basics::Recipe11> for more information.
+constructor.
 
 =item B<< $metaclass->instance_metaclass >>
 
