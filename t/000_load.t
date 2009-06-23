@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 49;
+use Test::More tests => 50;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -36,15 +36,24 @@ my %METAS = (
     'Class::MOP::Method::Wrapped' => Class::MOP::Method::Wrapped->meta,
     'Class::MOP::Instance'        => Class::MOP::Instance->meta,
     'Class::MOP::Object'          => Class::MOP::Object->meta,
-    'Class::MOP::Class::Immutable::Trait' => Class::MOP::Class::Immutable::Trait->meta,
+    'Class::MOP::Class::Immutable::Trait' => Class::MOP::class_of('Class::MOP::Class::Immutable::Trait'),
     'Class::MOP::Class::Immutable::Class::MOP::Class' => Class::MOP::Class::Immutable::Class::MOP::Class->meta,
 );
 
 ok( Class::MOP::is_class_loaded($_), '... ' . $_ . ' is loaded' )
     for keys %METAS;
 
-ok( $_->is_immutable(), '... ' . $_->name . ' is immutable' )
-    for values %METAS;
+for my $meta (values %METAS) {
+    # the trait shouldn't be made immutable, it doesn't actually do anything,
+    # and it doesn't even matter because it's not a class that will be
+    # instantiated
+    if ($meta->name eq 'Class::MOP::Class::Immutable::Trait') {
+        ok( $meta->is_mutable(), '... ' . $meta->name . ' is mutable' );
+    }
+    else {
+        ok( $meta->is_immutable(), '... ' . $meta->name . ' is immutable' );
+    }
+}
 
 is_deeply(
     {Class::MOP::get_all_metaclasses},
@@ -60,7 +69,7 @@ is_deeply(
         Class::MOP::Attribute->meta,
         Class::MOP::Class->meta,
         Class::MOP::Class::Immutable::Class::MOP::Class->meta,
-        Class::MOP::Class::Immutable::Trait->meta,
+        Class::MOP::class_of('Class::MOP::Class::Immutable::Trait'),
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
@@ -101,22 +110,23 @@ is_deeply(
 # testing the meta-circularity of the system
 
 is(
-    Class::MOP::Class->meta, Class::MOP::Class->meta->meta,
-    '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta'
-);
-
-is(
     Class::MOP::Class->meta->meta, Class::MOP::Class->meta->meta->meta,
     '... Class::MOP::Class->meta->meta == Class::MOP::Class->meta->meta->meta'
 );
 
 is(
-    Class::MOP::Class->meta, Class::MOP::Class->meta->meta->meta,
-    '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta->meta'
+    Class::MOP::Class->meta->meta->meta, Class::MOP::Class->meta->meta->meta->meta,
+    '... Class::MOP::Class->meta->meta->meta == Class::MOP::Class->meta->meta->meta->meta'
 );
 
 is(
-    Class::MOP::Class->meta, Class::MOP::Class->meta->meta->meta->meta,
-    '... Class::MOP::Class->meta == Class::MOP::Class->meta->meta->meta->meta'
+    Class::MOP::Class->meta->meta, Class::MOP::Class->meta->meta->meta->meta,
+    '... Class::MOP::Class->meta->meta == Class::MOP::Class->meta->meta->meta->meta'
 );
 
+is(
+    Class::MOP::Class->meta->meta, Class::MOP::Class->meta->meta->meta->meta->meta,
+    '... Class::MOP::Class->meta->meta == Class::MOP::Class->meta->meta->meta->meta->meta'
+);
+
+isa_ok(Class::MOP::Class->meta, 'Class::MOP::Class');
