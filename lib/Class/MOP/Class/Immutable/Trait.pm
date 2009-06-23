@@ -12,29 +12,6 @@ our $VERSION   = '0.87';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-sub meta {
-    my $self = shift;
-
-    # if it is not blessed, then someone is asking
-    # for the meta of Class::MOP::Class:;Immutable::Trait
-    return Class::MOP::Class->initialize($self) unless blessed($self);
-
-    # otherwise, they are asking for the metaclass
-    # which has been made immutable, which is itself
-    # except in the cases where it is a metaclass itself
-    # that has been made immutable and for that we need
-    # to dig a bit ...
-
-    if ( $self->isa('Class::MOP::Class') ) {
-
-        # except this is a lie... oh well
-        return Class::MOP::class_of( $self->get_mutable_metaclass_name );
-    }
-    else {
-        return $self;
-    }
-}
-
 # the original class of the metaclass instance
 sub get_mutable_metaclass_name { $_[0]{__immutable}{original_class} }
 
