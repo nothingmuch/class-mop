@@ -1106,7 +1106,7 @@ sub _immutable_metaclass {
     else {
         my @super = ( $trait, ref($self) );
 
-        my $meta = Class::MOP::Class->initialize($class_name);
+        my $meta = $self->initialize($class_name);
         $meta->superclasses(@super);
 
         $meta->make_immutable;
