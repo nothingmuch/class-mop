@@ -704,7 +704,6 @@ $_->meta->make_immutable(
     Class::MOP::Package
     Class::MOP::Module
     Class::MOP::Class
-    Class::MOP::Class::Immutable::Trait
     Class::MOP::Class::Immutable::Class::MOP::Class
 
     Class::MOP::Attribute
