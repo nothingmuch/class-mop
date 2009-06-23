@@ -65,7 +65,7 @@ WriteAll();
 # before a release.
 sub check_conflicts {
     my %conflicts = (
-        'Moose' => '0.81',
+        'Moose' => '0.82',
     );
 
     my $found = 0;
