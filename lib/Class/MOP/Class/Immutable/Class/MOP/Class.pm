@@ -3,7 +3,7 @@ package Class::MOP::Class::Immutable::Class::MOP::Class;
 use strict;
 use warnings;
 
-our $VERSION   = '0.87';
+our $VERSION   = '0.88';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
