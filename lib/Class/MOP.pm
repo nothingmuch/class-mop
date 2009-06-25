@@ -43,10 +43,9 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
     # there is no need to worry about destruction though
     # because they should die only when the program dies.
     # After all, do package definitions even get reaped?
+    # Anonymous classes manage their own destruction.
     my %METAS;
 
-    # means of accessing all the metaclasses that have
-    # been initialized thus far (for mugwumps obj browser)
     sub get_all_metaclasses         {        %METAS         }
     sub get_all_metaclass_instances { values %METAS         }
     sub get_all_metaclass_names     { keys   %METAS         }
