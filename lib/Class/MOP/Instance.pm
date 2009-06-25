@@ -390,6 +390,12 @@ The second argument is a slot name.
 The method returns a snippet of code that, when inlined, performs some
 operation on the instance.
 
+=item B<< $metainstance->inline_rebless_instance_structure($instance_variable, $class_variable) >>
+
+This takes the name of a variable that will, when inlined, represent the object
+instance, and the name of a variable that will represent the class to rebless
+into, and returns code to rebless an instance into a class.
+
 =back
 
 =head2 Introspection
