@@ -3,6 +3,7 @@ Revision history for Perl extension Class-MOP.
 0.89
     * Class::MOP::Instance
       - add inline version of rebless_instance_structure. (doy)
+      - change inline_slot_access to use single quotes (gphat)
 
 0.88 Tue, Jun 23, 2009
     * Class::MOP::Class
