@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.89
+    * Class::MOP::Instance
+      - add inline version of rebless_instance_structure. (doy)
+
 0.88 Tue, Jun 23, 2009
     * Class::MOP::Class
       - Moved the __INSTANCE__ parameter to _construct_instance from
