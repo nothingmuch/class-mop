@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 71;
+use Test::More tests => 72;
 use Test::Exception;
 
 use Class::MOP;
@@ -76,6 +76,7 @@ use Class::MOP;
     }
 
     my @attributes = (
+        'lazy',
         'name',
         'accessor',
         'reader',
