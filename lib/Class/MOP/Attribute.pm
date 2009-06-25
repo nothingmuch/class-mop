@@ -75,6 +75,7 @@ sub _new {
         'default'            => $options->{default},
         'initializer'        => $options->{initializer},
         'definition_context' => $options->{definition_context},
+        'lazy'               => $options->{lazy},
         # keep a weakened link to the
         # class we are associated with
         'associated_class' => undef,
@@ -101,40 +102,56 @@ sub clone {
     return bless { %{$self}, %options } => ref($self);
 }
 
+sub _call_builder {
+    my ( $self, $instance ) = @_;
+
+    my $builder = $self->builder();
+
+    return $instance->$builder()
+        if $instance->can( $self->builder );
+
+    $self->throw_error(  blessed($instance)
+            . " does not support builder method '"
+            . $self->builder
+            . "' for attribute '"
+            . $self->name
+            . "'",
+            object => $instance,
+     );
+}
+
 sub initialize_instance_slot {
     my ($self, $meta_instance, $instance, $params) = @_;
     my $init_arg = $self->{'init_arg'};
 
+    my ($val, $value_is_set);
     # try to fetch the init arg from the %params ...
 
     # if nothing was in the %params, we can use the
     # attribute's default value (if it has one)
     if(defined $init_arg and exists $params->{$init_arg}){
-        $self->_set_initial_slot_value(
-            $meta_instance, 
-            $instance,
-            $params->{$init_arg},
-        );
-    } 
-    elsif (defined $self->{'default'}) {
-        $self->_set_initial_slot_value(
-            $meta_instance, 
-            $instance,
-            $self->default($instance),
-        );
-    } 
-    elsif (defined( my $builder = $self->{'builder'})) {
-        if ($builder = $instance->can($builder)) {
-            $self->_set_initial_slot_value(
-                $meta_instance, 
-                $instance,
-                $instance->$builder,
-            );
-        } 
-        else {
-            confess(ref($instance)." does not support builder method '". $self->{'builder'} ."' for attribute '" . $self->name . "'");
+        $val = $params->{$init_arg};
+        $value_is_set = 1;
+    } else {
+         return if $self->is_lazy;
+
+        if($self->has_default){
+            $val = $self->default($instance);
+            $value_is_set = 1;
+        } elsif($self->has_builder){
+            $val = $self->_call_builder($instance);
+            $value_is_set = 1;
         }
     }
+
+    return unless $value_is_set;
+    
+    $self->_set_initial_slot_value(
+        $meta_instance,
+        $instance,
+        $val,
+    );
+
 }
 
 sub _set_initial_slot_value {
@@ -184,6 +201,7 @@ sub initializer        { $_[0]->{'initializer'} }
 sub definition_context { $_[0]->{'definition_context'} }
 sub insertion_order    { $_[0]->{'insertion_order'} }
 sub _set_insertion_order { $_[0]->{'insertion_order'} = $_[1] }
+sub is_lazy            { $_[0]->{'lazy'} }
 
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
@@ -318,6 +336,21 @@ sub set_raw_value {
 
 sub get_raw_value {
     my ($self, $instance) = @_;
+
+    if($self->is_lazy && !$self->has_value($instance)){
+        my $val;
+
+        if($self->has_default){
+            $val = $self->default($instance);
+        } elsif($self->has_builder){
+            $val = $self->_call_builder($instance);
+        }
+       
+        $self->set_initial_value(
+            $instance,
+            $val,
+        );
+    }
 
     Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance

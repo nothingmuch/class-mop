@@ -481,6 +481,12 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
+    Class::MOP::Attribute->new('lazy' => (
+        reader    => { 'is_lazy'     => \&Class::MOP::Attribute::is_lazy     },
+    ))
+);
+
+Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('default' => (
         # default has a custom 'reader' method ...
         predicate => { 'has_default' => \&Class::MOP::Attribute::has_default },
