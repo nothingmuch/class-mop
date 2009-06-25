@@ -214,6 +214,11 @@ sub inline_strengthen_slot_value {
     $self->inline_set_slot_value($instance, $slot_name, $self->inline_slot_access($instance, $slot_name));
 }
 
+sub inline_rebless_instance_structure {
+    my ($self, $instance, $class_variable) = @_;
+    "bless $instance => $class_variable";
+}
+
 1;
 
 __END__
