@@ -381,7 +381,7 @@ sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 sub method_metaclasses {
     {
         reader => 'Class::MOP::Method::Reader',
-        #writer => 'Class::MOP::Method::Writer',
+        writer => 'Class::MOP::Method::Writer',
     }
 }
 
