@@ -386,6 +386,7 @@ sub method_metaclasses {
         writer => 'Class::MOP::Method::Writer',
         predicate => 'Class::MOP::Method::Predicate',
         clearer => 'Class::MOP::Method::Clearer',
+        accessor => 'Class::MOP::Method::Accessor',
     }
 }
 
@@ -424,12 +425,11 @@ sub _process_accessors {
                 $method_ctx->{description} = $desc;
             }
 
-            my $method_metaclass = $self->method_metaclasses->{$type} || $self->accessor_metaclass;
+            my $method_metaclass = $self->method_metaclasses->{$type};
 
             $method = $method_metaclass->new(
                 attribute     => $self,
                 is_inline     => $inline_me,
-                accessor_type => $type,
                 package_name  => $self->associated_class->name,
                 name          => $accessor,
                 definition_context => $method_ctx,

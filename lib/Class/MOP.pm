@@ -603,12 +603,6 @@ Class::MOP::Method::Attribute->meta->add_attribute(
     ))
 );
 
-Class::MOP::Method::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('accessor_type' => (
-        reader   => { 'accessor_type' => \&Class::MOP::Method::Attribute::accessor_type },
-    ))
-);
-
 ## --------------------------------------------------------
 ## Class::MOP::Method::Constructor
 
