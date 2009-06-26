@@ -36,8 +36,6 @@ sub new {
     # needed
     weaken($self->{'attribute'});
 
-    $self->_initialize_body;
-
     return $self;
 }
 

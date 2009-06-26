@@ -517,7 +517,8 @@ Class::MOP::Attribute->meta->add_method('clone' => sub {
 ## Class::MOP::Method
 Class::MOP::Method->meta->add_attribute(
     Class::MOP::Attribute->new('body' => (
-        reader   => { 'body' => \&Class::MOP::Method::body },
+        lazy => 1,
+        default => \&Class::MOP::Method::body,
     ))
 );
 

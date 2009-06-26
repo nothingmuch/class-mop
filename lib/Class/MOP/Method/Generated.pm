@@ -28,6 +28,16 @@ sub _initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
 }
 
+sub body {
+    my $self = shift;
+
+    $self->{'body'} ||= do {
+       $self->_initialize_body; 
+    };
+
+    return $self->{'body'};
+}
+
 sub _eval_closure {
     # my ($self, $captures, $sub_body) = @_;
     my $__captures = $_[1];
