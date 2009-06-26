@@ -593,7 +593,7 @@ Class::MOP::Method::Inlined->meta->add_attribute(
 );
 
 ## --------------------------------------------------------
-## Class::MOP::Method::Accessor
+## Class::MOP::Method::Attribute
 
 Class::MOP::Method::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('attribute' => (
@@ -699,8 +699,12 @@ $_->meta->make_immutable(
 
     Class::MOP::Method::Accessor
     Class::MOP::Method::Attribute
+    Class::MOP::Method::Clearer
     Class::MOP::Method::Constructor
+    Class::MOP::Method::Predicate
+    Class::MOP::Method::Reader
     Class::MOP::Method::Wrapped
+    Class::MOP::Method::Writer
 /;
 
 1;

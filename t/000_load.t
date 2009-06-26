@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 53;
+use Test::More tests => 65;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -16,6 +16,10 @@ BEGIN {
     use_ok('Class::MOP::Method::Generated');
     use_ok('Class::MOP::Method::Accessor');
     use_ok('Class::MOP::Method::Attribute');
+    use_ok('Class::MOP::Method::Reader');
+    use_ok('Class::MOP::Method::Writer');
+    use_ok('Class::MOP::Method::Clearer');
+    use_ok('Class::MOP::Method::Predicate');
     use_ok('Class::MOP::Method::Constructor');
     use_ok('Class::MOP::Instance');
     use_ok('Class::MOP::Object');
@@ -28,6 +32,10 @@ my %METAS = (
     'Class::MOP::Method::Inlined' => Class::MOP::Method::Inlined->meta,
     'Class::MOP::Method::Generated' => Class::MOP::Method::Generated->meta,
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
+    'Class::MOP::Method::Reader'  => Class::MOP::Method::Reader->meta,
+    'Class::MOP::Method::Writer'  => Class::MOP::Method::Writer->meta,
+    'Class::MOP::Method::Clearer'  => Class::MOP::Method::Clearer->meta,
+    'Class::MOP::Method::Predicate'  => Class::MOP::Method::Predicate->meta,
     'Class::MOP::Method::Attribute'  => Class::MOP::Method::Attribute->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
@@ -76,10 +84,14 @@ is_deeply(
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
         Class::MOP::Method::Attribute->meta,
+        Class::MOP::Method::Clearer->meta,
         Class::MOP::Method::Constructor->meta,
         Class::MOP::Method::Generated->meta,
         Class::MOP::Method::Inlined->meta,
+        Class::MOP::Method::Predicate->meta,
+        Class::MOP::Method::Reader->meta,
         Class::MOP::Method::Wrapped->meta,
+        Class::MOP::Method::Writer->meta,
         Class::MOP::Module->meta,
         Class::MOP::Object->meta,
         Class::MOP::Package->meta,
@@ -99,10 +111,14 @@ is_deeply(
             Class::MOP::Method
             Class::MOP::Method::Accessor
             Class::MOP::Method::Attribute
+            Class::MOP::Method::Clearer
             Class::MOP::Method::Constructor
             Class::MOP::Method::Generated
             Class::MOP::Method::Inlined
+            Class::MOP::Method::Predicate
+            Class::MOP::Method::Reader
             Class::MOP::Method::Wrapped
+            Class::MOP::Method::Writer
             Class::MOP::Module
             Class::MOP::Object
             Class::MOP::Package
