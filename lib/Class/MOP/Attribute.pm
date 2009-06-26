@@ -7,6 +7,7 @@ use warnings;
 use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Reader;
 use Class::MOP::Method::Writer;
+use Class::MOP::Method::Predicate;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
@@ -382,6 +383,7 @@ sub method_metaclasses {
     {
         reader => 'Class::MOP::Method::Reader',
         writer => 'Class::MOP::Method::Writer',
+        predicate => 'Class::MOP::Method::Predicate',
     }
 }
 
