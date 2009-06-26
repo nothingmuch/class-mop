@@ -595,17 +595,17 @@ Class::MOP::Method::Inlined->meta->add_attribute(
 ## --------------------------------------------------------
 ## Class::MOP::Method::Accessor
 
-Class::MOP::Method::Accessor->meta->add_attribute(
+Class::MOP::Method::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('attribute' => (
         reader   => {
-            'associated_attribute' => \&Class::MOP::Method::Accessor::associated_attribute
+            'associated_attribute' => \&Class::MOP::Method::Attribute::associated_attribute
         },
     ))
 );
 
-Class::MOP::Method::Accessor->meta->add_attribute(
+Class::MOP::Method::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('accessor_type' => (
-        reader   => { 'accessor_type' => \&Class::MOP::Method::Accessor::accessor_type },
+        reader   => { 'accessor_type' => \&Class::MOP::Method::Attribute::accessor_type },
     ))
 );
 
@@ -704,6 +704,7 @@ $_->meta->make_immutable(
     Class::MOP::Method::Inlined
 
     Class::MOP::Method::Accessor
+    Class::MOP::Method::Attribute
     Class::MOP::Method::Constructor
     Class::MOP::Method::Wrapped
 /;

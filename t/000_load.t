@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 50;
+use Test::More tests => 53;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -15,6 +15,7 @@ BEGIN {
     use_ok('Class::MOP::Method::Inlined');
     use_ok('Class::MOP::Method::Generated');
     use_ok('Class::MOP::Method::Accessor');
+    use_ok('Class::MOP::Method::Attribute');
     use_ok('Class::MOP::Method::Constructor');
     use_ok('Class::MOP::Instance');
     use_ok('Class::MOP::Object');
@@ -27,6 +28,7 @@ my %METAS = (
     'Class::MOP::Method::Inlined' => Class::MOP::Method::Inlined->meta,
     'Class::MOP::Method::Generated' => Class::MOP::Method::Generated->meta,
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
+    'Class::MOP::Method::Attribute'  => Class::MOP::Method::Attribute->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
     'Class::MOP::Package'         => Class::MOP::Package->meta,
@@ -73,6 +75,7 @@ is_deeply(
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
+        Class::MOP::Method::Attribute->meta,
         Class::MOP::Method::Constructor->meta,
         Class::MOP::Method::Generated->meta,
         Class::MOP::Method::Inlined->meta,
@@ -95,6 +98,7 @@ is_deeply(
             Class::MOP::Instance
             Class::MOP::Method
             Class::MOP::Method::Accessor
+            Class::MOP::Method::Attribute
             Class::MOP::Method::Constructor
             Class::MOP::Method::Generated
             Class::MOP::Method::Inlined

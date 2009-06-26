@@ -5,6 +5,8 @@ use strict;
 use warnings;
 
 use Class::MOP::Method::Accessor;
+use Class::MOP::Method::Reader;
+use Class::MOP::Method::Writer;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
@@ -376,6 +378,12 @@ sub clear_value {
 ## load em up ...
 
 sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
+sub method_metaclasses {
+    {
+        reader => 'Class::MOP::Method::Reader',
+        #writer => 'Class::MOP::Method::Writer',
+    }
+}
 
 sub _process_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
@@ -412,7 +420,9 @@ sub _process_accessors {
                 $method_ctx->{description} = $desc;
             }
 
-            $method = $self->accessor_metaclass->new(
+            my $method_metaclass = $self->method_metaclasses->{$type} || $self->accessor_metaclass;
+
+            $method = $method_metaclass->new(
                 attribute     => $self,
                 is_inline     => $inline_me,
                 accessor_type => $type,
@@ -463,7 +473,7 @@ sub install_accessors {
         }
         my $method = $class->get_method($accessor);
         $class->remove_method($accessor)
-            if (ref($method) && $method->isa('Class::MOP::Method::Accessor'));
+            if (ref($method) && $method->isa('Class::MOP::Method::Attribute'));
     };
 
     sub remove_accessors {

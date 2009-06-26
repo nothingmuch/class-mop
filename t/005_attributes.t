@@ -83,7 +83,7 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     ::ok($meta->has_method('get_baz'), '... a reader has been created');
     ::ok($meta->has_method('set_baz'), '... a writer has been created');
 
-    ::isa_ok($meta->get_method('get_baz'), 'Class::MOP::Method::Accessor');
+    ::isa_ok($meta->get_method('get_baz'), 'Class::MOP::Method::Reader');
     ::isa_ok($meta->get_method('set_baz'), 'Class::MOP::Method::Accessor');
 }
 

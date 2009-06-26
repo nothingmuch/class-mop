@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 72;
+use Test::More tests => 73;
 use Test::Exception;
 
 use Class::MOP;
@@ -23,6 +23,7 @@ use Class::MOP;
         _set_initial_slot_value
 
         is_lazy
+        method_metaclasses
         name
         has_accessor      accessor
         has_writer        writer

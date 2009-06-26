@@ -1,5 +1,5 @@
 
-package Class::MOP::Method::Accessor;
+package Class::MOP::Method::Reader;
 
 use strict;
 use warnings;
@@ -7,18 +7,21 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.94';
+our $VERSION   = '0.88';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Attribute';
+
+sub associated_attribute { (shift)->{'attribute'}     }
+
+## factory
 
 sub _initialize_body {
     my $self = shift;
 
     my $method_name = join "_" => (
         '_generate',
-        $self->accessor_type,
         'method',
         ($self->is_inline ? 'inline' : ())
     );
@@ -28,15 +31,13 @@ sub _initialize_body {
 
 ## generators
 
-sub _generate_accessor_method {
-    my $attr = (shift)->associated_attribute;
-    return sub {
-        $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
-        $attr->get_value($_[0]);
-    };
+sub generate_method {
+    Carp::cluck('The generate_reader_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_method;
 }
 
-sub _generate_reader_method {
+sub _generate_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
@@ -44,50 +45,15 @@ sub _generate_reader_method {
     };
 }
 
-
-sub _generate_writer_method {
-    my $attr = (shift)->associated_attribute;
-    return sub {
-        $attr->set_value($_[0], $_[1]);
-    };
-}
-
-sub _generate_predicate_method {
-    my $attr = (shift)->associated_attribute;
-    return sub {
-        $attr->has_value($_[0])
-    };
-}
-
-sub _generate_clearer_method {
-    my $attr = (shift)->associated_attribute;
-    return sub {
-        $attr->clear_value($_[0])
-    };
-}
-
 ## Inline methods
 
-sub _generate_accessor_method_inline {
-    my $self          = shift;
-    my $attr          = $self->associated_attribute;
-    my $attr_name     = $attr->name;
-    my $meta_instance = $attr->associated_class->instance_metaclass;
-
-    my ( $code, $e ) = $self->_eval_closure(
-        {},
-        'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
-        . ' if scalar(@_) == 2; '
-        . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
-        . '}'
-    );
-    confess "Could not generate inline accessor because : $e" if $e;
-
-    return $code;
+sub generate_method_inline {
+    Carp::cluck('The generate_reader_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_method_inline;
 }
 
-sub _generate_reader_method_inline {
+sub _generate_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
     my $attr_name     = $attr->name;
@@ -105,76 +71,25 @@ sub _generate_reader_method_inline {
     return $code;
 }
 
-sub _generate_writer_method_inline {
-    my $self          = shift;
-    my $attr          = $self->associated_attribute;
-    my $attr_name     = $attr->name;
-    my $meta_instance = $attr->associated_class->instance_metaclass;
-
-    my ( $code, $e ) = $self->_eval_closure(
-        {},
-        'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
-        . '}'
-    );
-    confess "Could not generate inline writer because : $e" if $e;
-
-    return $code;
-}
-
-sub _generate_predicate_method_inline {
-    my $self          = shift;
-    my $attr          = $self->associated_attribute;
-    my $attr_name     = $attr->name;
-    my $meta_instance = $attr->associated_class->instance_metaclass;
-
-    my ( $code, $e ) = $self->_eval_closure(
-        {},
-       'sub {'
-       . $meta_instance->inline_is_slot_initialized('$_[0]', $attr_name)
-       . '}'
-    );
-    confess "Could not generate inline predicate because : $e" if $e;
-
-    return $code;
-}
-
-sub _generate_clearer_method_inline {
-    my $self          = shift;
-    my $attr          = $self->associated_attribute;
-    my $attr_name     = $attr->name;
-    my $meta_instance = $attr->associated_class->instance_metaclass;
-
-    my ( $code, $e ) = $self->_eval_closure(
-        {},
-        'sub {'
-        . $meta_instance->inline_deinitialize_slot('$_[0]', $attr_name)
-        . '}'
-    );
-    confess "Could not generate inline clearer because : $e" if $e;
-
-    return $code;
-}
-
 1;
 
 # XXX - UPDATE DOCS
 __END__
 
+
 =pod
 
 =head1 NAME
 
-Class::MOP::Method::Accessor - Method Meta Object for accessors
+Class::MOP::Method::Reader - Method Meta Object for accessors
 
 =head1 SYNOPSIS
 
-    use Class::MOP::Method::Accessor;
+    use Class::MOP::Method::Reader;
 
-    my $reader = Class::MOP::Method::Accessor->new(
+    my $reader = Class::MOP::Method::Reader->new(
         attribute     => $attribute,
         is_inline     => 1,
-        accessor_type => 'reader',
     );
 
     $reader->body->execute($instance); # call the reader method
