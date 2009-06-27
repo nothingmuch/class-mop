@@ -5,77 +5,77 @@ use Test::More tests => 88;
 use File::Spec;
 use Scalar::Util 'reftype';
 
-BEGIN {use Class::MOP;    
+BEGIN {use Class::MOP;
     require_ok(File::Spec->catfile('examples', 'InsideOutClass.pod'));
 }
 
 {
     package Foo;
-    
+
     use strict;
-    use warnings;    
-    
+    use warnings;
+
     use metaclass (
         'attribute_metaclass' => 'InsideOutClass::Attribute',
         'instance_metaclass'  => 'InsideOutClass::Instance'
     );
-    
+
     Foo->meta->add_attribute('foo' => (
         accessor  => 'foo',
         predicate => 'has_foo',
     ));
-    
+
     Foo->meta->add_attribute('bar' => (
         reader  => 'get_bar',
         writer  => 'set_bar',
-        default => 'FOO is BAR'            
+        default => 'FOO is BAR'
     ));
-    
+
     sub new  {
         my $class = shift;
         $class->meta->new_object(@_);
     }
-    
+
     package Bar;
     use metaclass (
         'attribute_metaclass' => 'InsideOutClass::Attribute',
         'instance_metaclass'  => 'InsideOutClass::Instance'
     );
-    
+
     use strict;
     use warnings;
-    
+
     use base 'Foo';
-    
+
     Bar->meta->add_attribute('baz' => (
         accessor  => 'baz',
         predicate => 'has_baz',
-    ));   
-    
+    ));
+
     package Baz;
-    
+
     use strict;
     use warnings;
-    use metaclass (     
+    use metaclass (
         'attribute_metaclass' => 'InsideOutClass::Attribute',
         'instance_metaclass'  => 'InsideOutClass::Instance'
     );
-    
+
     Baz->meta->add_attribute('bling' => (
         accessor  => 'bling',
         default   => 'Baz::bling'
-    ));     
-    
+    ));
+
     package Bar::Baz;
     use metaclass (
         'attribute_metaclass' => 'InsideOutClass::Attribute',
         'instance_metaclass'  => 'InsideOutClass::Instance'
     );
-    
+
     use strict;
     use warnings;
-    
-    use base 'Bar', 'Baz';    
+
+    use base 'Bar', 'Baz';
 }
 
 my $foo = Foo->new();
@@ -191,32 +191,32 @@ is($baz->bling(), 'Baz::bling', '... Bar::Baz::bling has been initialized');
 
 {
     no strict 'refs';
-    
+
     ok(*{'Foo::foo'}{HASH}, '... there is a foo package variable in Foo');
     ok(*{'Foo::bar'}{HASH}, '... there is a bar package variable in Foo');
 
-    is(scalar(keys(%{'Foo::foo'})), 4, '... got the right number of entries for Foo::foo');
-    is(scalar(keys(%{'Foo::bar'})), 4, '... got the right number of entries for Foo::bar');    
+    is(scalar(keys(%{'Foo::foo'})), 1, '... got the right number of entries for Foo::foo');
+    is(scalar(keys(%{'Foo::bar'})), 2, '... got the right number of entries for Foo::bar');
 
-    ok(!*{'Bar::foo'}{HASH}, '... no foo package variable in Bar');
-    ok(!*{'Bar::bar'}{HASH}, '... no bar package variable in Bar');
+    ok(*{'Bar::foo'}{HASH}, '... no foo package variable in Bar');
+    ok(*{'Bar::bar'}{HASH}, '... no bar package variable in Bar');
     ok(*{'Bar::baz'}{HASH}, '... there is a baz package variable in Bar');
 
-    is(scalar(keys(%{'Bar::foo'})), 0, '... got the right number of entries for Bar::foo');
-    is(scalar(keys(%{'Bar::bar'})), 0, '... got the right number of entries for Bar::bar');
-    is(scalar(keys(%{'Bar::baz'})), 2, '... got the right number of entries for Bar::baz');
-    
+    is(scalar(keys(%{'Bar::foo'})), 1, '... got the right number of entries for Bar::foo');
+    is(scalar(keys(%{'Bar::bar'})), 1, '... got the right number of entries for Bar::bar');
+    is(scalar(keys(%{'Bar::baz'})), 1, '... got the right number of entries for Bar::baz');
+
     ok(*{'Baz::bling'}{HASH}, '... there is a bar package variable in Baz');
 
-    is(scalar(keys(%{'Baz::bling'})), 1, '... got the right number of entries for Baz::bling');        
-    
-    ok(!*{'Bar::Baz::foo'}{HASH}, '... no foo package variable in Bar::Baz');
-    ok(!*{'Bar::Baz::bar'}{HASH}, '... no bar package variable in Bar::Baz');
-    ok(!*{'Bar::Baz::baz'}{HASH}, '... no baz package variable in Bar::Baz');
-    ok(!*{'Bar::Baz::bling'}{HASH}, '... no bar package variable in Baz::Baz');
+    is(scalar(keys(%{'Baz::bling'})), 0, '... got the right number of entries for Baz::bling');
 
-    is(scalar(keys(%{'Bar::Baz::foo'})), 0, '... got the right number of entries for Bar::Baz::foo');
-    is(scalar(keys(%{'Bar::Baz::bar'})), 0, '... got the right number of entries for Bar::Baz::bar');
-    is(scalar(keys(%{'Bar::Baz::baz'})), 0, '... got the right number of entries for Bar::Baz::baz');    
-    is(scalar(keys(%{'Bar::Baz::bling'})), 0, '... got the right number of entries for Bar::Baz::bling');        
+    ok(*{'Bar::Baz::foo'}{HASH}, '... no foo package variable in Bar::Baz');
+    ok(*{'Bar::Baz::bar'}{HASH}, '... no bar package variable in Bar::Baz');
+    ok(*{'Bar::Baz::baz'}{HASH}, '... no baz package variable in Bar::Baz');
+    ok(*{'Bar::Baz::bling'}{HASH}, '... no bar package variable in Baz::Baz');
+
+    is(scalar(keys(%{'Bar::Baz::foo'})), 1, '... got the right number of entries for Bar::Baz::foo');
+    is(scalar(keys(%{'Bar::Baz::bar'})), 1, '... got the right number of entries for Bar::Baz::bar');
+    is(scalar(keys(%{'Bar::Baz::baz'})), 1, '... got the right number of entries for Bar::Baz::baz');
+    is(scalar(keys(%{'Bar::Baz::bling'})), 1, '... got the right number of entries for Bar::Baz::bling');
 }
