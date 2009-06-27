@@ -13,25 +13,7 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Attribute';
 
-sub _initialize_body {
-    my $self = shift;
-
-    my $method_name = join "_" => (
-        '_generate',
-        'method',
-        ($self->is_inline ? 'inline' : ())
-    );
-
-    $self->{'body'} = $self->$method_name();
-}
-
 ## generators
-
-sub generate_method {
-    Carp::cluck('The generate_clearer_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_method;
-}
 
 sub _generate_method {
     my $attr = (shift)->associated_attribute;
@@ -41,12 +23,6 @@ sub _generate_method {
 }
 
 ## Inline methods
-
-sub generate_method_inline {
-    Carp::cluck('The generate_clearer_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_method_inline;
-}
 
 sub _generate_method_inline {
     my $self          = shift;

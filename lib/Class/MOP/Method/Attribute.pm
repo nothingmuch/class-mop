@@ -11,7 +11,7 @@ our $VERSION   = '0.88';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Method::Generated';
+use base 'Class::MOP::Method::Inlined';
 
 sub new {
     my $class   = shift;
@@ -50,12 +50,6 @@ sub _new {
 sub associated_attribute { (shift)->{'attribute'}     }
 
 ## factory
-
-sub initialize_body {
-    Carp::cluck('The initialize_body method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_initialize_body;
-}
 
 1;
 

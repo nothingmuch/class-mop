@@ -16,13 +16,11 @@ use constant _PRINT_SOURCE => $ENV{MOP_PRINT_SOURCE} ? 1 : 0;
 
 ## accessors
 
+# FIXME refactor into a trait when those are introduced to Class::MOP
+
 sub new {
     confess __PACKAGE__ . " is an abstract base class, you must provide a constructor.";
 }
-
-sub is_inline { $_[0]{is_inline} }
-
-sub definition_context { $_[0]{definition_context} }
 
 sub _initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
@@ -31,11 +29,7 @@ sub _initialize_body {
 sub body {
     my $self = shift;
 
-    $self->{'body'} ||= do {
-       $self->_initialize_body; 
-    };
-
-    return $self->{'body'};
+    $self->{'body'} ||= $self->_initialize_body;
 }
 
 sub _eval_closure {
@@ -100,6 +94,25 @@ sub _compile_code {
 
     return $self->_eval_closure($args{environment}, $code);
 }
+
+sub generate_method {
+    Carp::cluck('The generate_reader_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_method;
+}
+
+sub generate_method_inline {
+    Carp::cluck('The generate_reader_method_inline method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_method_inline;
+}
+
+sub initialize_body {
+    Carp::cluck('The initialize_body method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_initialize_body;
+}
+
 
 1;
 

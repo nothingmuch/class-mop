@@ -12,6 +12,30 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Generated';
 
+# FIXME refactor into a trait when those are introduced to Class::MOP
+
+sub generate_method_inline {
+    confess "No inline body to generate, " . __PACKAGE__ . " is an abstract base class";
+}
+
+sub _generate_method {
+    confess "No body to generate, " . __PACKAGE__ . " is an abstract base class";
+}
+
+sub is_inline { $_[0]{is_inline} }
+
+sub definition_context { $_[0]{definition_context} }
+
+sub _initialize_body {
+    my $self = shift;
+
+    if ( $self->is_inline ) {
+        return $self->_generate_method_inline;
+    } else {
+        return $self->_generate_method;
+    }
+}
+
 sub _expected_method_class { $_[0]{_expected_method_class} }
 
 sub _uninlined_body {
