@@ -100,7 +100,7 @@ get_method_map(self)
         current    = mop_check_package_cache_flag(aTHX_ stash);
         cache_flag = HeVAL( hv_fetch_ent(obj, KEY_FOR(package_cache_flag), TRUE, HASH_FOR(package_cache_flag)));
         map_ref    = HeVAL( hv_fetch_ent(obj, KEY_FOR(methods), TRUE, HASH_FOR(methods)));
-    PPCODE:
+
         /* $self->{methods} does not yet exist (or got deleted) */
         if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
             SV *new_map_ref = newRV_noinc((SV *)newHV());
