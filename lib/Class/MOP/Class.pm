@@ -8,7 +8,6 @@ use Class::MOP::Instance;
 use Class::MOP::Method::Wrapped;
 use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Constructor;
-use Class::MOP::Class::Immutable::Class::MOP::Class;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
@@ -180,6 +179,8 @@ sub _check_metaclass_compatibility {
     # this is always okay ...
     return if ref($self)                eq 'Class::MOP::Class'   &&
               $self->instance_metaclass eq 'Class::MOP::Instance';
+
+    return if $self->can('get_mutable_metaclass_name');
 
     my @class_list = $self->linearized_isa;
     shift @class_list; # shift off $self->name
@@ -1094,23 +1095,27 @@ sub _immutable_metaclass {
             $trait, 'ForMetaClass', ref($self);
     }
 
-    if ( Class::MOP::is_class_loaded($class_name) ) {
-        if ( $class_name->isa($trait) ) {
-            return $class_name;
+    return $class_name
+        if Class::MOP::is_class_loaded($class_name);
+
+    my $meta = Class::MOP::Class->create(
+        $class_name,
+        superclasses => [ ref $self ],
+    );
+
+    Class::MOP::load_class($trait);
+    for my $meth ( Class::MOP::Class->initialize($trait)->get_all_methods ) {
+        next if $meta->has_method( $meth->name );
+
+        if ( $meta->find_method_by_name( $meth->name ) ) {
+            $meta->add_around_method_modifier( $meth->name, $meth->body );
         }
         else {
-            confess
-                "$class_name is already defined but does not inherit $trait";
+            $meta->add_method( $meth->name, $meth->clone );
         }
     }
-    else {
-        my @super = ( $trait, ref($self) );
 
-        my $meta = $self->initialize($class_name);
-        $meta->superclasses(@super);
-
-        return $class_name;
-    }
+    return $class_name;
 }
 
 sub _remove_inlined_code {

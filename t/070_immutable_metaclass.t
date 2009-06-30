@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 75;
+use Test::More tests => 73;
 use Test::Exception;
 
 use Class::MOP;
@@ -51,9 +51,7 @@ use Class::MOP;
     is( $immutable_class_name->meta, $immutable_metaclass,
         '... immutable_metaclass meta hack works' );
 
-    isa_ok( $meta, "Class::MOP::Class::Immutable::Trait" );
     isa_ok( $meta, "Class::MOP::Class" );
-
 }
 
 {
