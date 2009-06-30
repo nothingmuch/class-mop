@@ -1115,6 +1115,8 @@ sub _immutable_metaclass {
         }
     }
 
+    $meta->make_immutable;
+
     return $class_name;
 }
 
