@@ -1098,7 +1098,16 @@ sub _immutable_metaclass {
     return $class_name
         if Class::MOP::is_class_loaded($class_name);
 
-    my $meta = (ref $self)->create(
+    # If the metaclass is a subclass of CMOP::Class which has had
+    # metaclass roles applied (via Moose), then we want to make sure
+    # that we preserve that anonymous class (see Fey::ORM for an
+    # example of where this matters).
+    my $meta_name
+        = $self->meta->is_immutable
+        ? $self->meta->get_mutable_metaclass_name
+        : ref $self->meta;
+
+    my $meta = $meta_name->create(
         $class_name,
         superclasses => [ ref $self ],
     );
@@ -1115,7 +1124,7 @@ sub _immutable_metaclass {
         }
     }
 
-    $meta->make_immutable;
+    $meta->make_immutable( inline_constructor => 0 );
 
     return $class_name;
 }
