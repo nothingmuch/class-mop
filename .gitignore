@@ -3,6 +3,7 @@ t/pp_*.t
 !.gitignore
 !.shipit
 xs/*.c
+xs/*.xsc
 *.o
 *.bs
 Makefile*
