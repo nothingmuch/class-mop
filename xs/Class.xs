@@ -93,8 +93,8 @@ get_method_map(self)
         SV *map_ref;
     PPCODE:
         if (!stash) {
-			mXPUSHs(newRV_noinc((SV *)newHV()));
-			return;
+             mXPUSHs(newRV_noinc((SV *)newHV()));
+             return;
         }
 
         current    = mop_check_package_cache_flag(aTHX_ stash);
