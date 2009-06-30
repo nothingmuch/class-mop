@@ -20,6 +20,8 @@ sub immutable_options { %{ $_[0]{__immutable}{options} } }
 sub is_mutable   { 0 }
 sub is_immutable { 1 }
 
+sub _immutable_metaclass { ref $_[1] }
+
 sub superclasses {
     my $orig = shift;
     my $self = shift;

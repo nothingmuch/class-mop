@@ -1098,7 +1098,7 @@ sub _immutable_metaclass {
     return $class_name
         if Class::MOP::is_class_loaded($class_name);
 
-    my $meta = Class::MOP::Class->create(
+    my $meta = (ref $self)->create(
         $class_name,
         superclasses => [ ref $self ],
     );
