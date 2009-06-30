@@ -197,17 +197,17 @@ sub _check_metaclass_compatibility {
             : ref($super_meta);
 
         ($self->isa($super_meta_type))
-            || confess "Class::MOP::class_of(" . $self->name . ") => ("
+            || confess "The metaclass of " . $self->name . " ("
                        . (ref($self)) . ")" .  " is not compatible with the " .
-                       "Class::MOP::class_of(".$superclass_name . ") => ("
+                       "metaclass of its superclass, ".$superclass_name . " ("
                        . ($super_meta_type) . ")";
         # NOTE:
         # we also need to check that instance metaclasses
         # are compatibile in the same the class.
         ($self->instance_metaclass->isa($super_meta->instance_metaclass))
-            || confess "Class::MOP::class_of(" . $self->name . ")->instance_metaclass => (" . ($self->instance_metaclass) . ")" .
+            || confess "The instance metaclass for " . $self->name . " (" . ($self->instance_metaclass) . ")" .
                        " is not compatible with the " .
-                       "Class::MOP::class_of(" . $superclass_name . ")->instance_metaclass => (" . ($super_meta->instance_metaclass) . ")";
+                       "instance metaclass of its superclass, " . $superclass_name . " (" . ($super_meta->instance_metaclass) . ")";
     }
 }
 
