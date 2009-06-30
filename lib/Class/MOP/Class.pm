@@ -1109,8 +1109,6 @@ sub _immutable_metaclass {
         my $meta = $self->initialize($class_name);
         $meta->superclasses(@super);
 
-        $meta->make_immutable;
-
         return $class_name;
     }
 }
