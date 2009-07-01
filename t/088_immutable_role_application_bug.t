@@ -28,8 +28,5 @@ BEGIN {
     __PACKAGE__->meta->make_immutable;
 }
 
-TODO: {
-    local $TODO = 'This broke as of 07302fb';
-    ok( $My::Meta::Trait::HAS_METH, 'Can find method' );
-}
+ok( $My::Meta::Trait::HAS_METH, 'Can find method' );
 
