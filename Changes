@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+0.90
+    * Class::MOP::Method
+      - Allow a blessed code reference as the method body. Fixes a
+        problem interaction with MooseX::Types. (ash)
+
 0.89
     * Class::MOP::Instance
       - add inline version of rebless_instance_structure. (doy)
@@ -79,6 +84,9 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Package
       - Disable prototype mismatch warnings for add_package_symbol.
         (Florian Ragwitz)
+    * Tests
+      - Add test for finding methods from $meta->name->meta before immutable,
+        (t0m)
 
 0.83 Mon, April 27, 2009
     * Class::MOP::Class
