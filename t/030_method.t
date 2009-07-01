@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 46;
+use Test::More tests => 47;
 use Test::Exception;
 
 use Class::MOP;
@@ -69,6 +69,10 @@ dies_ok {
 dies_ok {
     Class::MOP::Method->wrap(sub { 'FAIL' }, name => '__ANON__')
 } '... bad args for &wrap';
+
+lives_ok {
+    Class::MOP::Method->wrap(bless(sub { 'FAIL' }, "Foo"), name => '__ANON__', package_name => 'Foo::Bar')
+} '... blessed coderef to &wrap';
 
 my $clone = $method->clone(
     package_name => 'NewPackage',

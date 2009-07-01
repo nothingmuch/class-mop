@@ -1,5 +1,8 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Method
+      - Fix bug from MooseX::Types passing blessed code references
+
 0.89
     * Class::MOP::Instance
       - add inline version of rebless_instance_structure. (doy)
