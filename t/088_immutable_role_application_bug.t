@@ -30,6 +30,6 @@ BEGIN {
 
 TODO: {
     local $TODO = 'This broke as of 07302fb';
-    is $My::Meta::Trait::FAILED, 0, 'Can find method';
+    is( $My::Meta::Trait::FAILED, 0, 'Can find method' );
 }
 
