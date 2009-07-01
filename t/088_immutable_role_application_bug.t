@@ -8,13 +8,13 @@ BEGIN {
     package My::Meta::Trait;
     use Moose::Role;
 
-    our $FAILED = 0;
+    our $HAS_METH = 0;
 
     before 'make_immutable' => sub {
         my ($meta) = @_;
 
         # $meta->name->meta should have the correct methods on it..
-        $FAILED++ unless $meta->name->meta->get_method('some_method');
+        $HAS_METH++ if $meta->name->meta->get_method('some_method');
     };
 }
 
@@ -30,6 +30,6 @@ BEGIN {
 
 TODO: {
     local $TODO = 'This broke as of 07302fb';
-    is( $My::Meta::Trait::FAILED, 0, 'Can find method' );
+    ok( $My::Meta::Trait::HAS_METH, 'Can find method' );
 }
 
