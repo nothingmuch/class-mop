@@ -19,65 +19,82 @@ my @calls;
 
     sub method { push @calls, 'Parent::method' }
 
-	package Child;
+    package Child;
 
-	use strict;
-	use warnings;
+    use strict;
+    use warnings;
     use metaclass;
 
-	use base 'Parent';
+    use base 'Parent';
 
-	Child->meta->add_around_method_modifier('method' => sub {
-        my $orig = shift;
-        push @calls, 'before Child::method';
-        $orig->(@_);
-        push @calls, 'after Child::method';
-	});
+    Child->meta->add_around_method_modifier(
+        'method' => sub {
+            my $orig = shift;
+            push @calls, 'before Child::method';
+            $orig->(@_);
+            push @calls, 'after Child::method';
+        }
+    );
 }
 
 Parent->method;
 
-is_deeply([splice @calls], [
-    'Parent::method',
-]);
+is_deeply(
+    [ splice @calls ],
+    [
+        'Parent::method',
+    ]
+);
 
 Child->method;
 
-is_deeply([splice @calls], [
-    'before Child::method',
-    'Parent::method',
-    'after Child::method',
-]);
+is_deeply(
+    [ splice @calls ],
+    [
+        'before Child::method',
+        'Parent::method',
+        'after Child::method',
+    ]
+);
 
 {
     package Parent;
 
-	Parent->meta->add_around_method_modifier('method' => sub {
-        my $orig = shift;
-        push @calls, 'before Parent::method';
-        $orig->(@_);
-        push @calls, 'after Parent::method';
-	});
+    Parent->meta->add_around_method_modifier(
+        'method' => sub {
+            my $orig = shift;
+            push @calls, 'before Parent::method';
+            $orig->(@_);
+            push @calls, 'after Parent::method';
+        }
+    );
 }
 
 Parent->method;
 
-is_deeply([splice @calls], [
-    'before Parent::method',
-    'Parent::method',
-    'after Parent::method',
-]);
+is_deeply(
+    [ splice @calls ],
+    [
+        'before Parent::method',
+        'Parent::method',
+        'after Parent::method',
+    ]
+);
 
 Child->method;
 
 TODO: {
     local $TODO = "pending fix";
-    is_deeply([splice @calls], [
-        'before Child::method',
-        'before Parent::method',
-        'Parent::method',
-        'after Parent::method',
-        'after Child::method',
-    ], "cache is correctly invalidated when the parent method is wrapped");
+    is_deeply(
+        [ splice @calls ],
+        [
+            'before Child::method',
+            'before Parent::method',
+            'Parent::method',
+            'after Parent::method',
+            'after Child::method',
+        ],
+        "cache is correctly invalidated when the parent method is wrapped"
+    );
 }
 

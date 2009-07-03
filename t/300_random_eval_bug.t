@@ -22,26 +22,27 @@ Moral of the story:
     use strict;
     use warnings;
     use metaclass;
-    
+
     sub new {
         my ($class) = @_;
         return bless {} => $class;
-    }  
-    
+    }
+
     sub employees {
         die "This didnt work";
     }
-    
+
     sub DESTROY {
-    	my $self = shift;
-    	foreach my $method ($self->meta->find_all_methods_by_name('DEMOLISH')) {
-    		$method->{code}->($self);
-    	}        
+        my $self = shift;
+        foreach
+            my $method ( $self->meta->find_all_methods_by_name('DEMOLISH') ) {
+            $method->{code}->($self);
+        }
     }
 }
 
-eval {        
-    my $c = Company->new();    
+eval {
+    my $c = Company->new();
     $c->employees();
-};  
-ok($@, '... we die correctly with bad args');
+};
+ok( $@, '... we die correctly with bad args' );
