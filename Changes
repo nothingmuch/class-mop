@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.89 Thu Jul 2, 2009
+0.89 Fri Jul 3, 2009
     * Class::MOP::Class
     * Class::MOP::Class::Immutable::Trait
       - Made the Trait act like a role with a bunch of "around"
