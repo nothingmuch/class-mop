@@ -180,8 +180,6 @@ sub _check_metaclass_compatibility {
     return if ref($self)                eq 'Class::MOP::Class'   &&
               $self->instance_metaclass eq 'Class::MOP::Instance';
 
-    return if $self->can('get_mutable_metaclass_name');
-
     my @class_list = $self->linearized_isa;
     shift @class_list; # shift off $self->name
 
