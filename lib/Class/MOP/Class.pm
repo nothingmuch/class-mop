@@ -250,21 +250,23 @@ sub _check_metaclass_compatibility {
         return if in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
 
         no warnings 'uninitialized';
-        return unless $self->name =~ /^$ANON_CLASS_PREFIX/;
+        my $name = $self->name;
+        return unless $name =~ /^$ANON_CLASS_PREFIX/;
         # Moose does a weird thing where it replaces the metaclass for
         # class when fixing metaclass incompatibility. In that case,
         # we don't want to clean out the namespace now. We can detect
         # that because Moose will explicitly update the singleton
         # cache in Class::MOP.
-        my $current_meta = Class::MOP::get_metaclass_by_name($self->name);
+        my $current_meta = Class::MOP::get_metaclass_by_name($name);
         return if $current_meta ne $self;
 
-        my ($serial_id) = ($self->name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/);
         no strict 'refs';
-        foreach my $key (keys %{$ANON_CLASS_PREFIX . $serial_id}) {
-            delete ${$ANON_CLASS_PREFIX . $serial_id}{$key};
-        }
-        delete ${'main::' . $ANON_CLASS_PREFIX}{$serial_id . '::'};
+        @{$name . '::ISA'} = ();
+        %{$name . '::'}    = ();
+        delete ${$ANON_CLASS_PREFIX}{$serial_id . '::'};
+
+        Class::MOP::remove_metaclass_by_name($name);
     }
 
 }

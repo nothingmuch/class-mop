@@ -47,8 +47,8 @@ get_code_info(coderef)
     PPCODE:
         if (mop_get_code_info(coderef, &pkg, &name)) {
             EXTEND(SP, 2);
-            PUSHs(newSVpv(pkg, 0));
-            PUSHs(newSVpv(name, 0));
+            mPUSHs(newSVpv(pkg, 0));
+            mPUSHs(newSVpv(name, 0));
         }
 
 # This is some pretty grotty logic. It _should_ be parallel to the

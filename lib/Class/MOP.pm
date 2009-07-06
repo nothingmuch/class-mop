@@ -53,7 +53,7 @@ XSLoader::load( __PACKAGE__, $XS_VERSION );
     sub store_metaclass_by_name     { $METAS{$_[0]} = $_[1] }
     sub weaken_metaclass            { weaken($METAS{$_[0]}) }
     sub does_metaclass_exist        { exists $METAS{$_[0]} && defined $METAS{$_[0]} }
-    sub remove_metaclass_by_name    { $METAS{$_[0]} = undef }
+    sub remove_metaclass_by_name    { delete $METAS{$_[0]}; return }
 
     # This handles instances as well as class names
     sub class_of {

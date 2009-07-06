@@ -149,7 +149,7 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
                            but that's the API */
                         key = HePV(he, keylen);
                         package = HvNAME(stash);
-                        fq = newSVpvf("%s::%s", package, key);
+                        fq = sv_2mortal(newSVpvf("%s::%s", package, key));
                         sv = (SV *)get_cv(SvPV_nolen(fq), 0);
                         break;
                     }

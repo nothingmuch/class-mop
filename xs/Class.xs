@@ -12,7 +12,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
     dSP;
 
     symbols = mop_get_all_package_symbols(stash, TYPE_FILTER_CODE);
-
+    sv_2mortal((SV*)symbols);
     (void)hv_iterinit(symbols);
     while ( (coderef = hv_iternextsv(symbols, &method_name, &method_name_len)) ) {
         CV *cv = (CV *)SvRV(coderef);
