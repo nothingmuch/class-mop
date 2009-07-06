@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+0.90
+    * Class::MOP::Class
+    * XS
+      - Anonymous classes were not destroyed properly when they went
+        out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
+
+
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
     * Class::MOP::Class::Immutable::Trait
