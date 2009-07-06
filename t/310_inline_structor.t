@@ -6,7 +6,7 @@ use Test::More;
 BEGIN {
     eval "use Test::Output;";
     plan skip_all => "Test::Output is required for this test" if $@;
-    plan 'no_plan';
+    plan tests => 15;
 }
 
 use Class::MOP;
