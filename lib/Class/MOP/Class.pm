@@ -672,7 +672,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_before_modifier(
-            subname(':before-' . $method_name => $method_modifier)
+            subname(':before' => $method_modifier)
         );
     }
 
@@ -682,7 +682,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_after_modifier(
-            subname(':after-' . $method_name => $method_modifier)
+            subname(':after' => $method_modifier)
         );
     }
 
@@ -692,7 +692,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_around_modifier(
-            subname(':around-' . $method_name => $method_modifier)
+            subname(':around' => $method_modifier)
         );
     }
 

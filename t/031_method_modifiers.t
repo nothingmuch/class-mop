@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 28;
 use Test::Exception;
 
 use Class::MOP;
@@ -206,25 +206,3 @@ use Class::MOP::Method;
                'check around_modifiers' );
 }
 
-# unique names for each modifier
-{
-    package Foo;
-
-    sub orig1 {
-        return (caller(1))[3];
-    }
-
-    sub orig2 {
-        return (caller(1))[3];
-    }
-
-    my $meta = Class::MOP::Class->initialize(__PACKAGE__);
-
-    $meta->add_around_method_modifier( 'orig1', sub { $_[0]->( $_[1] ) } );
-    $meta->add_around_method_modifier( 'orig2', sub { $_[0]->( $_[1] ) } );
-}
-
-{
-    is( Foo->orig1, 'Class::MOP::Class:::around-orig1', 'each modifier gets a unique name' );
-    is( Foo->orig2, 'Class::MOP::Class:::around-orig2', 'each modifier gets a unique name' );
-}
