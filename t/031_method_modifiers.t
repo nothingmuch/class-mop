@@ -225,6 +225,6 @@ use Class::MOP::Method;
 }
 
 {
-    is( Foo->orig1, 'Class::MOP::Class:::around-18-orig1', 'each modifier gets a unique name' );
-    is( Foo->orig2, 'Class::MOP::Class:::around-19-orig2', 'each modifier gets a unique name' );
+    is( Foo->orig1, 'Class::MOP::Class:::around-orig1', 'each modifier gets a unique name' );
+    is( Foo->orig2, 'Class::MOP::Class:::around-orig2', 'each modifier gets a unique name' );
 }
