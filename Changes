@@ -6,6 +6,10 @@ Revision history for Perl extension Class-MOP.
       - Anonymous classes were not destroyed properly when they went
         out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
 
+    * Class::MOP::Class
+      - Give method modifiers unique names as they are added so that
+        introspection of caller() gives you something more useful.
+
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
