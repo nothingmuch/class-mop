@@ -666,13 +666,14 @@ sub add_method {
         return $method;
     };
 
+    my $counter = 0;
     sub add_before_method_modifier {
         my ($self, $method_name, $method_modifier) = @_;
         (defined $method_name && $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_before_modifier(
-            subname(':before-' . $method_name => $method_modifier)
+            subname(':before-' . $counter++ . q{-} . $method_name => $method_modifier)
         );
     }
 
@@ -682,7 +683,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_after_modifier(
-            subname(':after-' . $method_name => $method_modifier)
+            subname(':after-' . $counter++ . q{-} . $method_name => $method_modifier)
         );
     }
 
@@ -692,7 +693,7 @@ sub add_method {
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_around_modifier(
-            subname(':around-' . $method_name => $method_modifier)
+            subname(':around-' . $counter++ . q{-} . $method_name => $method_modifier)
         );
     }
 
