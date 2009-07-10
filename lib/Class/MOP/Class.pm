@@ -719,12 +719,20 @@ sub alias_method {
     shift->add_method(@_);
 }
 
+sub _code_is_mine{
+    my($self, $code) = @_;
+    my($code_package, $code_name) = Class::MOP::get_code_info($code);
+    return  $code_package
+        &&  $code_package eq $self->name
+        || ($code_package eq 'constant' && $code_name eq '__ANON__');
+}
+
 sub has_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    defined $self->get_method($method_name);
+    return defined($self->get_method($method_name));
 }
 
 sub get_method {
@@ -732,82 +740,28 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    my $class_name = $self->name;
-    my $method_map = $self->_method_map;
-
+    my $method_map    = $self->_method_map;
     my $method_object = $method_map->{$method_name};
 
-    if(!$method_object){
-        my $glob = $self->namespace->{$method_name};
+    if(!($method_object && $method_object->_is_valid_generation)){
+        my $code = $self->get_package_symbol({
+            name  => $method_name,
+            sigil => '&',
+            type  => 'CODE',
+        });
 
-        if(!defined $glob){
+        if(!($code && $self->_code_is_mine($code))){
+            delete $method_map->{$method_name};
             return undef;
         }
-
-        my $code;
-        if(ref(\$glob) eq 'GLOB'){
-            $code = *{$glob}{CODE};
-            if(!defined $code){
-                return undef;
-            }
-            my($code_package, $code_name) = Class::MOP::get_code_info($code);
-
-            if(!$code_package
-                    || ( !($code_package eq 'constant' && $code_name eq '__ANON__')
-                            && $code_package ne $class_name ) ){
-                return undef;
-            }
-        }
-        else{ # stubs or constants
-            no strict 'refs';
-            $code = \&{$class_name . '::' . $method_name};
-        }
-        $method_object = $method_map->{$method_name} = $self->wrap_method_body(
-            body                 => $code,
-            name                 => $method_name,
-            associated_metaclass => $self,
-       );
+        if(!($method_object && $method_object->body == $code)){
+           $method_object = $method_map->{$method_name} = $self->wrap_method_body(
+               body                 => $code,
+               name                 => $method_name,
+               associated_metaclass => $self,
+           );
+       }
        $method_object->_update_generation();
-    }
-    else{ # $method_object already exists
-        if(!$method_object->_is_valid_generation){
-            my $glob = $self->namespace->{$method_name};
-            if(!defined $glob){
-                delete $method_map->{$method_name};
-                return undef;
-            }
-
-            my $code;
-            if(ref(\$glob) eq 'GLOB'){
-                $code = *{$glob}{CODE};
-                if(!defined($code)){
-                    delete $method_map->{$method_name};
-                    return undef;
-                }
-            }
-            else{ # stubs or constants
-                no strict 'refs';
-                $code = \&{$class_name . '::' . $method_name};
-            }
-
-            if($method_object->body != $code){ # changed for some reason
-                 my($code_package, $code_name) = Class::MOP::get_code_info($code);
-                 if(!$code_package
-                         || ( !($code_package eq 'constant' && $code_name eq '__ANON__')
-                                 && $code_package ne $class_name ) ){
-                     delete $method_map->{$method_name};
-                     return undef;
-                 }
-
-                 # update $method_map
-                 $method_object = $method_map->{$method_name} = $self->wrap_method_body(
-                     body                 => $code,
-                     name                 => $method_name,
-                     associated_metaclass => $self,
-                );
-            }
-            $method_object->_update_generation();
-        }
     }
 
     return $method_object;
