@@ -55,7 +55,7 @@ sub _new {
 
 ## accessors
 
-sub associated_metaclass { shift->{'associated_metaclass'} }
+#sub associated_metaclass { shift->{'associated_metaclass'} }
 
 sub attach_to_class {
     my ( $self, $class ) = @_;
@@ -73,7 +73,7 @@ sub fully_qualified_name {
     $self->package_name . '::' . $self->name;
 }
 
-sub original_method { (shift)->{'original_method'} }
+#sub original_method { (shift)->{'original_method'} }
 
 sub _set_original_method { $_[0]->{'original_method'} = $_[1] }
 

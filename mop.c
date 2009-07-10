@@ -9,7 +9,7 @@ mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark)
     PUTBACK;
 }
 
-#if PERL_VERSION >= 10
+#if PERL_BCDVERSION >= 0x5010000
 UV
 mop_check_package_cache_flag (pTHX_ HV *stash)
 {
@@ -132,7 +132,6 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
         char *key;
         STRLEN keylen;
         char *package;
-        SV *fq;
 
         switch( SvTYPE(gv) ) {
 #ifndef SVt_RV
@@ -145,6 +144,7 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
                  * return CODE symbols */
                 if (filter == TYPE_FILTER_CODE) {
                     if (SvROK(gv)) {
+                        SV* fq;
                         /* we don't really care about the length,
                            but that's the API */
                         key = HePV(he, keylen);
@@ -202,59 +202,40 @@ mop_get_all_package_symbols (HV *stash, type_filter_t filter)
     return ret;
 }
 
-#define DECLARE_KEY(name)                    { #name, #name, NULL, 0 }
-#define DECLARE_KEY_WITH_VALUE(name, value)  { #name, value, NULL, 0 }
-
-/* the order of these has to match with those in mop.h */
-static struct {
-    const char *name;
-    const char *value;
-    SV *key;
-    U32 hash;
-} prehashed_keys[key_last] = {
-    DECLARE_KEY(name),
-    DECLARE_KEY(package),
-    DECLARE_KEY(package_name),
-    DECLARE_KEY(body),
-    DECLARE_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag"),
-    DECLARE_KEY(methods),
-    DECLARE_KEY(VERSION),
-    DECLARE_KEY(ISA)
-};
-
-SV *
-mop_prehashed_key_for (mop_prehashed_key_t key)
-{
-    return prehashed_keys[key].key;
-}
-
-U32
-mop_prehashed_hash_for (mop_prehashed_key_t key)
-{
-    return prehashed_keys[key].hash;
-}
+static MGVTBL mop_accessor_vtbl; /* the MAGIC identity */
 
 void
-mop_prehash_keys ()
-{
-    int i;
-    for (i = 0; i < key_last; i++) {
-        const char *value = prehashed_keys[i].value;
-        prehashed_keys[i].key = newSVpv(value, strlen(value));
-        PERL_HASH(prehashed_keys[i].hash, value, strlen(value));
+mop_install_simple_reader(const char* const fq_name, const char* const key, const int accessor_type){
+    CV* const xsub  = newXS((char*)fq_name, mop_xs_simple_reader, __FILE__);
+    SV* const keysv = newSVpvn_share(key, strlen(key), 0U);
+
+    sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, NULL, 0);
+    SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
+
+    CvXSUBANY(xsub).any_i32 = accessor_type;
+}
+
+static MAGIC*
+mop_mg_find_by_vtbl(SV* const sv, const MGVTBL* const vtbl){
+    MAGIC* mg;
+
+    assert(sv != NULL);
+    for(mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic){
+        if(mg->mg_virtual == vtbl){
+            break;
+        }
     }
+    return mg;
 }
 
 XS(mop_xs_simple_reader)
 {
-#ifdef dVAR
     dVAR; dXSARGS;
-#else
-    dXSARGS;
-#endif
+    MAGIC* const mg = mop_mg_find_by_vtbl((SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
     register HE *he;
-    mop_prehashed_key_t key = (mop_prehashed_key_t)CvXSUBANY(cv).any_i32;
     SV *self;
+    SV *retval;
 
     if (items != 1) {
         croak("expected exactly one argument");
@@ -263,20 +244,30 @@ XS(mop_xs_simple_reader)
     self = ST(0);
 
     if (!SvROK(self)) {
-        croak("can't call %s as a class method", prehashed_keys[key].name);
+        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
     }
 
     if (SvTYPE(SvRV(self)) != SVt_PVHV) {
         croak("object is not a hashref");
     }
 
-    if ((he = hv_fetch_ent((HV *)SvRV(self), prehashed_keys[key].key, 0, prehashed_keys[key].hash))) {
-        ST(0) = HeVAL(he);
+    if ((he = hv_fetch_ent((HV *)SvRV(self), key, 0, 0U))) {
+        switch(XSANY.any_i32){
+        case SIMPLE_READER:
+            retval = HeVAL(he);
+            break;
+        case SIMPLE_PREDICATE:
+            retval = boolSV(SvOK(HeVAL(he)));
+            break;
+        default:
+            croak("panic: not reached");
+            retval = NULL; /* -W */
+        }
     }
     else {
-        ST(0) = &PL_sv_undef;
+        retval = &PL_sv_undef;
     }
 
+    ST(0) = retval;
     XSRETURN(1);
 }
-

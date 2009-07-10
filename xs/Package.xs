@@ -23,7 +23,7 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
 
         PUTBACK;
 
-        if ( (he = hv_fetch_ent((HV *)SvRV(self), KEY_FOR(package), 0, HASH_FOR(package))) ) {
+        if ( (he = hv_fetch_ent((HV *)SvRV(self), mop_package, 0, 0U)) ) {
             stash = gv_stashsv(HeVAL(he), 0);
         }
 

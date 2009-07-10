@@ -34,7 +34,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
 
         method_slot = *hv_fetch(map, method_name, method_name_len, TRUE);
         if ( SvOK(method_slot) ) {
-            SV *const body = mop_call0(aTHX_ method_slot, KEY_FOR(body)); /* $method_object->body() */
+            SV *const body = mop_call0(aTHX_ method_slot, mop_body); /* $method_object->body() */
             if ( SvROK(body) && ((CV *) SvRV(body)) == cv ) {
                 continue;
             }
@@ -59,9 +59,9 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
         mPUSHs(newRV_inc((SV *)cv));
         PUSHs(mop_associated_metaclass);
         PUSHs(self);
-        PUSHs(KEY_FOR(package_name));
+        PUSHs(mop_package_name);
         PUSHs(class_name);
-        PUSHs(KEY_FOR(name));
+        PUSHs(mop_name);
         mPUSHs(newSVpv(method_name, method_name_len));
         PUTBACK;
 
@@ -79,6 +79,19 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
 
 MODULE = Class::MOP::Class    PACKAGE = Class::MOP::Class
 
+BOOT:
+    INSTALL_SIMPLE_READER_WITH_KEY(Class, get_attribute_map, attributes);
+    /* INSTALL_SIMPLE_READER_WITH_KEY(Class, _method_map, methods); */
+    INSTALL_SIMPLE_READER(Class, attribute_metaclass);
+    INSTALL_SIMPLE_READER(Class, method_metaclass);
+    INSTALL_SIMPLE_READER(Class, wrapped_method_metaclass);
+    INSTALL_SIMPLE_READER(Class, instance_metaclass);
+    INSTALL_SIMPLE_READER(Class, immutable_trait);
+    INSTALL_SIMPLE_READER(Class, constructor_name);
+    INSTALL_SIMPLE_READER(Class, constructor_class);
+    INSTALL_SIMPLE_READER(Class, destructor_class);
+
+
 PROTOTYPES: DISABLE
 
 void
@@ -86,7 +99,7 @@ get_method_map(self)
     SV *self
     PREINIT:
         HV *const obj        = (HV *)SvRV(self);
-        SV *const class_name = HeVAL( hv_fetch_ent(obj, KEY_FOR(package), 0, HASH_FOR(package)) );
+        SV *const class_name = HeVAL( hv_fetch_ent(obj, mop_package, 0, 0U) );
         HV *const stash      = gv_stashsv(class_name, 0);
         UV current;
         SV *cache_flag;
@@ -98,8 +111,8 @@ get_method_map(self)
         }
 
         current    = mop_check_package_cache_flag(aTHX_ stash);
-        cache_flag = HeVAL( hv_fetch_ent(obj, KEY_FOR(package_cache_flag), TRUE, HASH_FOR(package_cache_flag)));
-        map_ref    = HeVAL( hv_fetch_ent(obj, KEY_FOR(methods), TRUE, HASH_FOR(methods)));
+        cache_flag = HeVAL( hv_fetch_ent(obj, mop_package_cache_flag, TRUE, 0U));
+        map_ref    = HeVAL( hv_fetch_ent(obj, mop_methods, TRUE, 0U));
 
         /* $self->{methods} does not yet exist (or got deleted) */
         if ( !SvROK(map_ref) || SvTYPE(SvRV(map_ref)) != SVt_PVHV ) {
