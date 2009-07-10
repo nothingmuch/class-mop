@@ -57,6 +57,25 @@ sub _new {
 
 sub associated_metaclass { shift->{'associated_metaclass'} }
 
+sub _is_valid_generation{
+    my($self) = @_;
+    my $metaclass = $self->associated_metaclass;
+
+    if($metaclass){
+        return( ($self->{_generation} || 0) == Class::MOP::check_package_cache_flag($metaclass->name) );
+    }
+    else{
+        return 1;
+    }
+}
+
+sub _update_generation {
+    my($self) = @_;
+    my $metaclass = $self->associated_metaclass
+        or confess("No metaclass associated to the method " . $self->name);
+    $self->{_generation} = Class::MOP::check_package_cache_flag($metaclass->name);
+}
+
 sub attach_to_class {
     my ( $self, $class ) = @_;
     $self->{associated_metaclass} = $class;

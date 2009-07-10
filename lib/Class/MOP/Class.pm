@@ -347,6 +347,8 @@ sub constructor_class        { $_[0]->{'constructor_class'}           }
 sub constructor_name         { $_[0]->{'constructor_name'}            }
 sub destructor_class         { $_[0]->{'destructor_class'}            }
 
+sub _method_map              { $_[0]->{'methods'}                     }
+
 # Instance Construction & Cloning
 
 sub new_object {
@@ -616,15 +618,16 @@ sub add_method {
                 name         => $method_name            
             ) if $method->can('clone');
         }
+
+        $method->attach_to_class($self);
+        $self->_method_map->{$method_name} = $method;
     }
     else {
+        # If a raw code reference is supplied, its method object is not created.
+        # The method object won't be created until required.
         $body = $method;
-        $method = $self->wrap_method_body( body => $body, name => $method_name );
     }
 
-    $method->attach_to_class($self);
-
-    $self->get_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
@@ -721,7 +724,7 @@ sub has_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    exists $self->get_method_map->{$method_name};
+    defined $self->get_method($method_name);
 }
 
 sub get_method {
@@ -729,7 +732,85 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    return $self->get_method_map->{$method_name};
+    my $class_name = $self->name;
+    my $method_map = $self->_method_map;
+
+    my $method_object = $method_map->{$method_name};
+
+    if(!$method_object){
+        my $glob = $self->namespace->{$method_name};
+
+        if(!defined $glob){
+            return undef;
+        }
+
+        my $code;
+        if(ref(\$glob) eq 'GLOB'){
+            $code = *{$glob}{CODE};
+            if(!defined $code){
+                return undef;
+            }
+            my($code_package, $code_name) = Class::MOP::get_code_info($code);
+
+            if(!$code_package
+                    || ( !($code_package eq 'constant' && $code_name eq '__ANON__')
+                            && $code_package ne $class_name ) ){
+                return undef;
+            }
+        }
+        else{ # stubs or constants
+            no strict 'refs';
+            $code = \&{$class_name . '::' . $method_name};
+        }
+        $method_object = $method_map->{$method_name} = $self->wrap_method_body(
+            body                 => $code,
+            name                 => $method_name,
+            associated_metaclass => $self,
+       );
+       $method_object->_update_generation();
+    }
+    else{ # $method_object already exists
+        if(!$method_object->_is_valid_generation){
+            my $glob = $self->namespace->{$method_name};
+            if(!defined $glob){
+                delete $method_map->{$method_name};
+                return undef;
+            }
+
+            my $code;
+            if(ref(\$glob) eq 'GLOB'){
+                $code = *{$glob}{CODE};
+                if(!defined($code)){
+                    delete $method_map->{$method_name};
+                    return undef;
+                }
+            }
+            else{ # stubs or constants
+                no strict 'refs';
+                $code = \&{$class_name . '::' . $method_name};
+            }
+
+            if($method_object->body != $code){ # changed for some reason
+                 my($code_package, $code_name) = Class::MOP::get_code_info($code);
+                 if(!$code_package
+                         || ( !($code_package eq 'constant' && $code_name eq '__ANON__')
+                                 && $code_package ne $class_name ) ){
+                     delete $method_map->{$method_name};
+                     return undef;
+                 }
+
+                 # update $method_map
+                 $method_object = $method_map->{$method_name} = $self->wrap_method_body(
+                     body                 => $code,
+                     name                 => $method_name,
+                     associated_metaclass => $self,
+                );
+            }
+            $method_object->_update_generation();
+        }
+    }
+
+    return $method_object;
 }
 
 sub remove_method {
