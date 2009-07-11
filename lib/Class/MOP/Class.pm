@@ -1339,11 +1339,7 @@ hash reference are method names, and values are subroutine references.
 
 =item * attributes
 
-An optional array reference of attributes.
-
-An attribute can be passed as an existing L<Class::MOP::Attribute>
-object, I<or> or as a hash reference of options which will be passed
-to the attribute metaclass's constructor.
+An optional array reference of L<Class::MOP::Attribute> objects.
 
 =back
 
