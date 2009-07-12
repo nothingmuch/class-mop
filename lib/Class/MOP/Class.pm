@@ -785,7 +785,7 @@ sub remove_method {
 
 sub get_method_list {
     my $self = shift;
-    keys %{$self->get_method_map};
+    return grep { $self->has_method($_) } keys %{ $self->namespace };
 }
 
 sub find_method_by_name {
