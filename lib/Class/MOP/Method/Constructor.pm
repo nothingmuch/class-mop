@@ -174,13 +174,13 @@ sub _generate_slot_initializer {
         $default = '$instance->'.$attr->builder;
     }
 
-    if ( defined $attr->init_arg ) {
+    if ( defined(my $init_arg = $attr->init_arg) ) {
       return (
-          'if(exists $params->{\'' . $attr->init_arg . '\'}){' . "\n" .
+          'if(exists $params->{\'' . $init_arg . '\'}){' . "\n" .
                 $self->_meta_instance->inline_set_slot_value(
                     '$instance',
                     $attr->name,
-                    '$params->{\'' . $attr->init_arg . '\'}' ) . "\n" .
+                    '$params->{\'' . $init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
                 $self->_meta_instance->inline_set_slot_value(
                     '$instance',
