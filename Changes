@@ -6,6 +6,9 @@ Revision history for Perl extension Class-MOP.
       - Anonymous classes were not destroyed properly when they went
         out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
 
+    * Class::MOP::Class
+    * Class::MOP::Package
+      - Move get_method_map and its various scaffolding into Package. (hdp)
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class

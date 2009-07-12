@@ -11,7 +11,7 @@ use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
-use Sub::Name 'subname';
+use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 
 our $VERSION   = '0.89';
@@ -339,8 +339,6 @@ sub create {
 
 sub get_attribute_map        { $_[0]->{'attributes'}                  }
 sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
-sub method_metaclass         { $_[0]->{'method_metaclass'}            }
-sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
 sub immutable_trait          { $_[0]->{'immutable_trait'}             }
 sub constructor_class        { $_[0]->{'constructor_class'}           }
@@ -590,55 +588,6 @@ sub class_precedence_list {
 
 ## Methods
 
-sub wrap_method_body {
-    my ( $self, %args ) = @_;
-
-    ('CODE' eq ref $args{body})
-        || confess "Your code block must be a CODE reference";
-
-    $self->method_metaclass->wrap(
-        package_name => $self->name,
-        %args,
-    );
-}
-
-sub add_method {
-    my ($self, $method_name, $method) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
-
-    my $body;
-    if (blessed($method)) {
-        $body = $method->body;
-        if ($method->package_name ne $self->name) {
-            $method = $method->clone(
-                package_name => $self->name,
-                name         => $method_name            
-            ) if $method->can('clone');
-        }
-    }
-    else {
-        $body = $method;
-        $method = $self->wrap_method_body( body => $body, name => $method_name );
-    }
-
-    $method->attach_to_class($self);
-
-    $self->get_method_map->{$method_name} = $method;
-
-    my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
-
-    if ( !defined $current_name || $current_name eq '__ANON__' ) {
-        my $full_method_name = ($self->name . '::' . $method_name);
-        subname($full_method_name => $body);
-    }
-
-    $self->add_package_symbol(
-        { sigil => '&', type => 'CODE', name => $method_name },
-        $body,
-    );
-}
-
 {
     my $fetch_and_prepare_method = sub {
         my ($self, $method_name) = @_;
@@ -714,45 +663,6 @@ sub alias_method {
     Carp::cluck("The alias_method method is deprecated. Use add_method instead.\n");
 
     shift->add_method(@_);
-}
-
-sub has_method {
-    my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
-
-    exists $self->get_method_map->{$method_name};
-}
-
-sub get_method {
-    my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
-
-    return $self->get_method_map->{$method_name};
-}
-
-sub remove_method {
-    my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
-        || confess "You must define a method name";
-
-    my $removed_method = delete $self->get_method_map->{$method_name};
-    
-    $self->remove_package_symbol(
-        { sigil => '&', type => 'CODE', name => $method_name }
-    );
-
-    $removed_method->detach_from_class if $removed_method;
-
-    $self->update_package_cache_flag; # still valid, since we just removed the method from the map
-
-    return $removed_method;
-}
-
-sub get_method_list {
-    my $self = shift;
-    keys %{$self->get_method_map};
 }
 
 sub find_method_by_name {
@@ -1508,49 +1418,13 @@ include indirect subclasses.
 
 =back
 
-=head2 Method introspection and creation
+=head2 Method introspection
 
-These methods allow you to introspect a class's methods, as well as
-add, remove, or change methods.
-
-Determining what is truly a method in a Perl 5 class requires some
-heuristics (aka guessing).
-
-Methods defined outside the package with a fully qualified name (C<sub
-Package::name { ... }>) will be included. Similarly, methods named
-with a fully qualified name using L<Sub::Name> are also included.
-
-However, we attempt to ignore imported functions.
-
-Ultimately, we are using heuristics to determine what truly is a
-method in a class, and these heuristics may get the wrong answer in
-some edge cases. However, for most "normal" cases the heuristics work
-correctly.
+See L<Class::MOP::Package/Method introspection and creation> for
+methods that operate only on the current class.  Class::MOP::Class adds
+introspection capabilities that take inheritance into account.
 
 =over 4
-
-=item B<< $metaclass->get_method($method_name) >>
-
-This will return a L<Class::MOP::Method> for the specified
-C<$method_name>. If the class does not have the specified method, it
-returns C<undef>
-
-=item B<< $metaclass->has_method($method_name) >>
-
-Returns a boolean indicating whether or not the class defines the
-named method. It does not include methods inherited from parent
-classes.
-
-=item B<< $metaclass->get_method_map >>
-
-Returns a hash reference representing the methods defined in this
-class. The keys are method names and the values are
-L<Class::MOP::Method> objects.
-
-=item B<< $metaclass->get_method_list >>
-
-This will return a list of method I<names> for all methods defined in
-this class.
 
 =item B<< $metaclass->get_all_methods >>
 
@@ -1588,38 +1462,6 @@ The list of methods is distinct.
 This method returns the first method in any superclass matching the
 given name. It is effectively the method that C<SUPER::$method_name>
 would dispatch to.
-
-=item B<< $metaclass->add_method($method_name, $method) >>
-
-This method takes a method name and a subroutine reference, and adds
-the method to the class.
-
-The subroutine reference can be a L<Class::MOP::Method>, and you are
-strongly encouraged to pass a meta method object instead of a code
-reference. If you do so, that object gets stored as part of the
-class's method map directly. If not, the meta information will have to
-be recreated later, and may be incorrect.
-
-If you provide a method object, this method will clone that object if
-the object's package name does not match the class name. This lets us
-track the original source of any methods added from other classes
-(notably Moose roles).
-
-=item B<< $metaclass->remove_method($method_name) >>
-
-Remove the named method from the class. This method returns the
-L<Class::MOP::Method> object for the method.
-
-=item B<< $metaclass->method_metaclass >>
-
-Returns the class name of the method metaclass, see
-L<Class::MOP::Method> for more information on the method metaclass.
-
-=item B<< $metaclass->wrapped_method_metaclass >>
-
-Returns the class name of the wrapped method metaclass, see
-L<Class::MOP::Method::Wrapped> for more information on the wrapped
-method metaclass.
 
 =back
 

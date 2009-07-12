@@ -16,7 +16,6 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 }
 
 EXTERN_C XS(boot_Class__MOP__Package);
-EXTERN_C XS(boot_Class__MOP__Class);
 EXTERN_C XS(boot_Class__MOP__Attribute);
 EXTERN_C XS(boot_Class__MOP__Method);
 
@@ -32,7 +31,6 @@ BOOT:
     mop_associated_metaclass = newSVpvs("associated_metaclass");
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
-    MOP_CALL_BOOT (boot_Class__MOP__Class);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
     MOP_CALL_BOOT (boot_Class__MOP__Method);
 

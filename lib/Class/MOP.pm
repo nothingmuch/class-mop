@@ -219,6 +219,42 @@ Class::MOP::Package->meta->add_attribute(
     ))
 );
 
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('methods' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'get_method_map' => \&Class::MOP::Package::get_method_map
+        },
+        default => sub { {} }
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'method_metaclass' => \&Class::MOP::Package::method_metaclass
+        },
+        default  => 'Class::MOP::Method',
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'wrapped_method_metaclass' => \&Class::MOP::Package::wrapped_method_metaclass
+        },
+        default  => 'Class::MOP::Method::Wrapped',
+    ))
+);
+
 ## --------------------------------------------------------
 ## Class::MOP::Module
 
@@ -283,18 +319,6 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('methods' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'get_method_map' => \&Class::MOP::Class::get_method_map
-        },
-        default => sub { {} }
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('superclasses' => (
         accessor => {
             # NOTE:
@@ -316,30 +340,6 @@ Class::MOP::Class->meta->add_attribute(
             'attribute_metaclass' => \&Class::MOP::Class::attribute_metaclass
         },
         default  => 'Class::MOP::Attribute',
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'method_metaclass' => \&Class::MOP::Class::method_metaclass
-        },
-        default  => 'Class::MOP::Method',
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'wrapped_method_metaclass' => \&Class::MOP::Class::wrapped_method_metaclass
-        },
-        default  => 'Class::MOP::Method::Wrapped',
     ))
 );
 
