@@ -58,18 +58,25 @@ sub reinitialize {
 
 sub _new {
     my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
 
-    # NOTE:
-    # because of issues with the Perl API 
-    # to the typeglob in some versions, we 
-    # need to just always grab a new 
-    # reference to the hash in the accessor. 
-    # Ideally we could just store a ref and 
-    # it would Just Work, but oh well :\
-    $options->{namespace} ||= \undef;
+    my $params = @_ == 1 ? $_[0] : {@_};
 
-    bless $options, $class;
+    return bless {
+        package   => $params->{package},
+
+        # NOTE:
+        # because of issues with the Perl API
+        # to the typeglob in some versions, we
+        # need to just always grab a new
+        # reference to the hash in the accessor.
+        # Ideally we could just store a ref and
+        # it would Just Work, but oh well :\
+
+        namespace => \undef,
+
+    } => $class;
 }
 
 # Attributes

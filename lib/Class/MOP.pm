@@ -691,8 +691,7 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # the compile time of the MOP, and gives us no actual benefits.
 
 $_->meta->make_immutable(
-    inline_constructor  => 1,
-    replace_constructor => 1,
+    inline_constructor  => 0,
     constructor_name    => "_new",
     inline_accessors => 0,
 ) for qw/

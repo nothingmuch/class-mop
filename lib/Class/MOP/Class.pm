@@ -107,9 +107,12 @@ sub _construct_class_instance {
 
 sub _new {
     my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
+
     my $options = @_ == 1 ? $_[0] : {@_};
 
-    bless {
+    return bless {
         # inherited from Class::MOP::Package
         'package' => $options->{package},
 

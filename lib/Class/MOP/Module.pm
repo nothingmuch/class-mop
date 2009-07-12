@@ -13,6 +13,23 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Package';
 
+sub _new{
+    my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
+
+    my $params = @_ == 1 ? $_[0] : {@_};
+    return bless {
+        # from Class::MOP::Package
+        package   => $params->{package},
+        namespace => \undef,
+
+        # attributes
+        version   => \undef,
+        authority => \undef
+    } => $class;
+}
+
 sub version {  
     my $self = shift;
     ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'VERSION' })};
