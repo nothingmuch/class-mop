@@ -41,7 +41,6 @@ my %trustme = (
         'get_immutable_options',
         'reset_package_cache_flag',
         'update_package_cache_flag',
-        'wrap_method_body',
 
         # doc'd with rebless_instance
         'rebless_instance_away',
@@ -89,6 +88,7 @@ my %trustme = (
             )
     ],
     'Class::MOP::Module' => ['create'],
+    'Class::MOP::Package' => ['wrap_method_body'],
 );
 
 for my $module ( sort @modules ) {
