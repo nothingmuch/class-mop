@@ -742,26 +742,24 @@ sub get_method {
 
     my $method_map    = $self->_method_map;
     my $method_object = $method_map->{$method_name};
+    my $code = $self->get_package_symbol({
+        name  => $method_name,
+        sigil => '&',
+        type  => 'CODE',
+    });
 
-    if(!($method_object && $method_object->_is_valid_generation)){
-        my $code = $self->get_package_symbol({
-            name  => $method_name,
-            sigil => '&',
-            type  => 'CODE',
-        });
-
-        if(!($code && $self->_code_is_mine($code))){
-            delete $method_map->{$method_name};
-            return undef;
-        }
-        if(!($method_object && $method_object->body == $code)){
+    if (!($method_object && $method_object->body == ($code || 0))){
+        if ($code && $self->_code_is_mine($code)) {
            $method_object = $method_map->{$method_name} = $self->wrap_method_body(
                body                 => $code,
                name                 => $method_name,
                associated_metaclass => $self,
            );
-       }
-       $method_object->_update_generation();
+        }
+        else {
+            delete $method_map->{$method_name};
+            return undef;
+        }
     }
 
     return $method_object;
