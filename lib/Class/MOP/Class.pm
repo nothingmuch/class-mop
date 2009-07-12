@@ -841,23 +841,25 @@ sub add_attribute {
     # about the class which it is attached to
     $attribute->attach_to_class($self);
 
+    my $attr_name = $attribute->name;
+
     # then we remove attributes of a conflicting
     # name here so that we can properly detach
     # the old attr object, and remove any
     # accessors it would have generated
-    if ( $self->has_attribute($attribute->name) ) {
-        $self->remove_attribute($attribute->name);
+    if ( $self->has_attribute($attr_name) ) {
+        $self->remove_attribute($attr_name);
     } else {
         $self->invalidate_meta_instances();
     }
     
     # get our count of previously inserted attributes and
     # increment by one so this attribute knows its order
-    my $order = (scalar keys %{$self->get_attribute_map}) - 1; 
-    $attribute->_set_insertion_order($order + 1);
+    my $order = (scalar keys %{$self->get_attribute_map});
+    $attribute->_set_insertion_order($order);
 
     # then onto installing the new accessors
-    $self->get_attribute_map->{$attribute->name} = $attribute;
+    $self->get_attribute_map->{$attr_name} = $attribute;
 
     # invalidate package flag here
     my $e = do {
@@ -867,7 +869,7 @@ sub add_attribute {
         $@;
     };
     if ( $e ) {
-        $self->remove_attribute($attribute->name);
+        $self->remove_attribute($attr_name);
         die $e;
     }
 
