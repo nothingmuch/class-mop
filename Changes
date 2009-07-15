@@ -6,6 +6,10 @@ Revision history for Perl extension Class-MOP.
       - Anonymous classes were not destroyed properly when they went
         out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
 
+    * Class::MOP::Class
+      - get_method, has_method, and add_method no longer use get_method_map.
+        Methods are more lazily instantiated to improve performance pretty
+        significantly (Goro Fuji)
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
