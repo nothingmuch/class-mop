@@ -96,7 +96,8 @@ mop_get_code_info (SV *coderef, char **pkg, char **name)
 #ifdef isGV_with_GP
     if ( isGV_with_GP(CvGV(coderef)) ) {
 #endif
-        *pkg     = HvNAME( GvSTASH(CvGV(coderef)) );
+        GV *gv   = CvGV(coderef);
+        *pkg     = HvNAME( GvSTASH(gv) ? GvSTASH(gv) : CvSTASH(coderef) );
         *name    = GvNAME( CvGV(coderef) );
 #ifdef isGV_with_GP
     } else {
