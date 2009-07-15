@@ -1153,7 +1153,6 @@ sub _immutable_metaclass {
     Class::MOP::load_class($trait);
     for my $meth ( Class::MOP::Class->initialize($trait)->get_all_methods ) {
         my $meth_name = $meth->name;
-        next if $immutable_meta->has_method( $meth_name );
 
         if ( $immutable_meta->find_method_by_name( $meth_name ) ) {
             $immutable_meta->add_around_method_modifier( $meth_name, $meth->body );
