@@ -799,10 +799,8 @@ sub find_method_by_name {
     (defined $method_name && $method_name)
         || confess "You must define a method name to find";
     foreach my $class ($self->linearized_isa) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_method($method_name)
-            if $meta->has_method($method_name);
+        my $method = $self->initialize($class)->get_method($method_name);
+        return $method if defined $method;
     }
     return;
 }
@@ -856,10 +854,8 @@ sub find_next_method_by_name {
     my @cpl = $self->linearized_isa;
     shift @cpl; # discard ourselves
     foreach my $class (@cpl) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_method($method_name)
-            if $meta->has_method($method_name);
+        my $method = $self->initialize($class)->get_method($method_name);
+        return $method if defined $method;
     }
     return;
 }
