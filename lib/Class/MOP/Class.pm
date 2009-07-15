@@ -826,7 +826,7 @@ sub compute_all_applicable_methods {
 sub get_all_method_names {
     my $self = shift;
     my %uniq;
-    grep { $uniq{$_}++ == 0 } map { $_->name } $self->get_all_methods;
+    return grep { !$uniq{$_}++ } map { $self->initialize($_)->get_method_list } $self->linearized_isa;
 }
 
 sub find_all_methods_by_name {
