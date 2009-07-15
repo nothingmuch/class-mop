@@ -19,7 +19,7 @@ Revision history for Perl extension Class-MOP.
 
     * All classes
       - Inline fewer metaclass-level constructors since the ones we have are
-        perfectly fine. This reduces the numbr of string evals (Goro Fuji)
+        perfectly fine. This reduces the number of string evals (Goro Fuji)
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
