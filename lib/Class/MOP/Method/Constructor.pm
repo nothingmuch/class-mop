@@ -38,17 +38,29 @@ sub new {
 
 sub _new {
     my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
 
-    bless {
-        # from our superclass
-        'body'                 => undef,
-        'package_name'         => $options->{package_name},
-        'name'                 => $options->{name},        
-        # specific to this subclass
-        'options'              => $options->{options} || {},
-        'associated_metaclass' => $options->{metaclass},
-        'is_inline'            => ($options->{is_inline} || 0),
+    my $params = @_ == 1 ? $_[0] : {@_};
+
+    return bless {
+        # inherited from Class::MOP::Method
+        body                 => $params->{body},
+        # associated_metaclass => $params->{associated_metaclass}, # overriden
+        package_name         => $params->{package_name},
+        name                 => $params->{name},
+        original_method      => $params->{original_method},
+
+        # inherited from Class::MOP::Generated
+        is_inline            => $params->{is_inline} || 0,
+        definition_context   => $params->{definition_context},
+
+        # inherited from Class::MOP::Inlined
+        _expected_method_class => $params->{_expected_method_class},
+
+        # defined in this subclass
+        options              => $params->{options} || {},
+        associated_metaclass => $params->{metaclass},
     }, $class;
 }
 

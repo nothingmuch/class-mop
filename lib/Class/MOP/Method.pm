@@ -43,13 +43,17 @@ sub wrap {
 
 sub _new {
     my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
+
     my $params = @_ == 1 ? $_[0] : {@_};
 
-    my $self = bless {
+    return bless {
         'body'                 => $params->{body},
         'associated_metaclass' => $params->{associated_metaclass},
         'package_name'         => $params->{package_name},
         'name'                 => $params->{name},
+        'original_method'      => $params->{original_method},
     } => $class;
 }
 
