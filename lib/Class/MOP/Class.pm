@@ -10,7 +10,7 @@ use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'weaken';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name 'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 
@@ -107,8 +107,9 @@ sub _construct_class_instance {
 
 sub _new {
     my $class = shift;
+
     return Class::MOP::Class->initialize($class)->new_object(@_)
-      if $class ne __PACKAGE__;
+        if $class ne __PACKAGE__;
 
     my $options = @_ == 1 ? $_[0] : {@_};
 
@@ -388,7 +389,7 @@ sub _construct_instance {
     # NOTE:
     # this will only work for a HASH instance type
     if ($class->is_anon_class) {
-        (Scalar::Util::reftype($instance) eq 'HASH')
+        (reftype($instance) eq 'HASH')
             || confess "Currently only HASH based instances are supported with instance of anon-classes";
         # NOTE:
         # At some point we should make this official
@@ -722,12 +723,13 @@ sub alias_method {
     shift->add_method(@_);
 }
 
-sub _code_is_mine{
-    my($self, $code) = @_;
-    my($code_package, $code_name) = Class::MOP::get_code_info($code);
-    return  $code_package
-        &&  $code_package eq $self->name
-        || ($code_package eq 'constant' && $code_name eq '__ANON__');
+sub _code_is_mine {
+    my ( $self, $code ) = @_;
+
+    my ( $code_package, $code_name ) = Class::MOP::get_code_info($code);
+
+    return $code_package && $code_package eq $self->name
+        || ( $code_package eq 'constant' && $code_name eq '__ANON__' );
 }
 
 sub has_method {
@@ -751,13 +753,14 @@ sub get_method {
         type  => 'CODE',
     });
 
-    if (!($method_object && $method_object->body == ($code || 0))){
-        if ($code && $self->_code_is_mine($code)) {
-           $method_object = $method_map->{$method_name} = $self->wrap_method_body(
-               body                 => $code,
-               name                 => $method_name,
-               associated_metaclass => $self,
-           );
+    unless ( $method_object && $method_object->body == ( $code || 0 ) ) {
+        if ( $code && $self->_code_is_mine($code) ) {
+            $method_object = $method_map->{$method_name}
+                = $self->wrap_method_body(
+                body                 => $code,
+                name                 => $method_name,
+                associated_metaclass => $self,
+                );
         }
         else {
             delete $method_map->{$method_name};

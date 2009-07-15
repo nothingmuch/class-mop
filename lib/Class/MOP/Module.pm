@@ -13,13 +13,14 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Package';
 
-sub _new{
+sub _new {
     my $class = shift;
     return Class::MOP::Class->initialize($class)->new_object(@_)
-      if $class ne __PACKAGE__;
+        if $class ne __PACKAGE__;
 
     my $params = @_ == 1 ? $_[0] : {@_};
     return bless {
+
         # from Class::MOP::Package
         package   => $params->{package},
         namespace => \undef,

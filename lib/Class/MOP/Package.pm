@@ -4,7 +4,7 @@ package Class::MOP::Package;
 use strict;
 use warnings;
 
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'reftype';
 use Carp         'confess';
 
 our $VERSION   = '0.89';
@@ -58,8 +58,9 @@ sub reinitialize {
 
 sub _new {
     my $class = shift;
+
     return Class::MOP::Class->initialize($class)->new_object(@_)
-      if $class ne __PACKAGE__;
+        if $class ne __PACKAGE__;
 
     my $params = @_ == 1 ? $_[0] : {@_};
 
@@ -152,29 +153,31 @@ sub remove_package_glob {
 # ... these functions deal with stuff on the namespace level
 
 sub has_package_symbol {
-    my ($self, $variable) = @_;
+    my ( $self, $variable ) = @_;
 
-    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+    my ( $name, $sigil, $type )
+        = ref $variable eq 'HASH'
         ? @{$variable}{qw[name sigil type]}
         : $self->_deconstruct_variable_name($variable);
-    
+
     my $namespace = $self->namespace;
-    
-    return 0 unless exists $namespace->{$name};   
-    
+
+    return 0 unless exists $namespace->{$name};
+
     my $entry_ref = \$namespace->{$name};
-    if (ref($entry_ref) eq 'GLOB') {
-        if ($type eq 'SCALAR') {
-            return defined(${ *{$entry_ref}{SCALAR} });
+    if ( reftype($entry_ref) eq 'GLOB' ) {
+        if ( $type eq 'SCALAR' ) {
+            return defined( ${ *{$entry_ref}{SCALAR} } );
         }
         else {
-            return defined(*{$entry_ref}{$type});
+            return defined( *{$entry_ref}{$type} );
         }
-     }
-     else {
-         # a symbol table entry can be -1 (stub), string (stub with prototype),
-         # or reference (constant)
-         return $type eq 'CODE';
+    }
+    else {
+
+        # a symbol table entry can be -1 (stub), string (stub with prototype),
+        # or reference (constant)
+        return $type eq 'CODE';
     }
 }
 
@@ -193,15 +196,15 @@ sub get_package_symbol {
 
     my $entry_ref = \$namespace->{$name};
 
-    if (ref($entry_ref) eq 'GLOB') {
+    if ( ref($entry_ref) eq 'GLOB' ) {
         return *{$entry_ref}{$type};
     }
-    else{
-        if($type eq 'CODE'){
+    else {
+        if ( $type eq 'CODE' ) {
             no strict 'refs';
-            return \&{$self->name . '::' . $name};
+            return \&{ $self->name . '::' . $name };
         }
-        else{
+        else {
             return undef;
         }
     }

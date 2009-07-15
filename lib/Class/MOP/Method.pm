@@ -43,8 +43,9 @@ sub wrap {
 
 sub _new {
     my $class = shift;
+
     return Class::MOP::Class->initialize($class)->new_object(@_)
-      if $class ne __PACKAGE__;
+        if $class ne __PACKAGE__;
 
     my $params = @_ == 1 ? $_[0] : {@_};
 
