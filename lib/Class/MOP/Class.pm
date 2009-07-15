@@ -34,7 +34,7 @@ sub initialize {
         $package_name = $options{package};
     }
 
-    (defined $package_name && $package_name && !ref($package_name))
+    ($package_name && !ref($package_name))
         || confess "You must pass a package name and it cannot be blessed";
 
     return Class::MOP::get_metaclass_by_name($package_name)
@@ -232,7 +232,7 @@ sub _check_metaclass_compatibility {
     sub is_anon_class {
         my $self = shift;
         no warnings 'uninitialized';
-        $self->name =~ /^$ANON_CLASS_PREFIX/;
+        $self->name =~ /^$ANON_CLASS_PREFIX/o;
     }
 
     sub create_anon_class {
@@ -254,7 +254,7 @@ sub _check_metaclass_compatibility {
 
         no warnings 'uninitialized';
         my $name = $self->name;
-        return unless $name =~ /^$ANON_CLASS_PREFIX/;
+        return unless $name =~ /^$ANON_CLASS_PREFIX/o;
         # Moose does a weird thing where it replaces the metaclass for
         # class when fixing metaclass incompatibility. In that case,
         # we don't want to clean out the namespace now. We can detect
@@ -263,7 +263,7 @@ sub _check_metaclass_compatibility {
         my $current_meta = Class::MOP::get_metaclass_by_name($name);
         return if $current_meta ne $self;
 
-        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/o);
         no strict 'refs';
         @{$name . '::ISA'} = ();
         %{$name . '::'}    = ();
@@ -1119,7 +1119,8 @@ sub _immutable_metaclass {
     my $trait = $args{immutable_trait} = $self->immutable_trait
         || confess "no immutable trait specified for $self";
 
-    my $meta_attr = $self->meta->find_attribute_by_name("immutable_trait");
+    my $meta      = $self->meta;
+    my $meta_attr = $meta->find_attribute_by_name("immutable_trait");
 
     my $class_name;
 
@@ -1141,28 +1142,32 @@ sub _immutable_metaclass {
     # that we preserve that anonymous class (see Fey::ORM for an
     # example of where this matters).
     my $meta_name
-        = $self->meta->is_immutable
-        ? $self->meta->get_mutable_metaclass_name
-        : ref $self->meta;
+        = $meta->is_immutable
+        ? $meta->get_mutable_metaclass_name
+        : ref $meta;
 
-    my $meta = $meta_name->create(
+    my $immutable_meta = $meta_name->create(
         $class_name,
         superclasses => [ ref $self ],
     );
 
     Class::MOP::load_class($trait);
     for my $meth ( Class::MOP::Class->initialize($trait)->get_all_methods ) {
-        next if $meta->has_method( $meth->name );
+        my $meth_name = $meth->name;
+        next if $immutable_meta->has_method( $meth_name );
 
-        if ( $meta->find_method_by_name( $meth->name ) ) {
-            $meta->add_around_method_modifier( $meth->name, $meth->body );
+        if ( $immutable_meta->find_method_by_name( $meth_name ) ) {
+            $immutable_meta->add_around_method_modifier( $meth_name, $meth->body );
         }
         else {
-            $meta->add_method( $meth->name, $meth->clone );
+            $immutable_meta->add_method( $meth_name, $meth->clone );
         }
     }
 
-    $meta->make_immutable( inline_constructor => 0 );
+    $immutable_meta->make_immutable(
+        inline_constructor => 0,
+        inline_accessors   => 0,
+    );
 
     return $class_name;
 }
