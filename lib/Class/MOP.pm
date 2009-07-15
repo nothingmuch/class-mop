@@ -92,10 +92,10 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
     for my $class (@classes) {
-        my $pmfile = _class_to_pmfile($class);
         my $e = _try_load_one_class($class);
 
         if ($e) {
+            my $pmfile = _class_to_pmfile($class);
             $exceptions{$class} = $e;
             last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
         }
