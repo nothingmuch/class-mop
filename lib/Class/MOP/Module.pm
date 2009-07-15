@@ -62,9 +62,9 @@ sub _instantiate_module {
         || confess "creation of $package_name failed: invalid package name";
 
     no strict 'refs';
-    scalar %{$package_name . '::'}; # touch the stash
-    ${$package_name . '::VERSION'}   = $version   if defined $version;
-    ${$package_name . '::AUTHORITY'} = $authority if defined $authority;
+    scalar %{ $package_name . '::' };    # touch the stash
+    ${ $package_name . '::VERSION' }   = $version   if defined $version;
+    ${ $package_name . '::AUTHORITY' } = $authority if defined $authority;
 
     return;
 }
