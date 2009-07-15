@@ -155,24 +155,19 @@ sub has_package_symbol {
     
     return 0 unless exists $namespace->{$name};   
     
-    # FIXME:
-    # For some really stupid reason 
-    # a typeglob will have a default
-    # value of \undef in the SCALAR 
-    # slot, so we need to work around
-    # this. Which of course means that 
-    # if you put \undef in your scalar
-    # then this is broken.
-
-    if (ref($namespace->{$name}) eq 'SCALAR') {
-        return ($type eq 'CODE');
-    }
-    elsif ($type eq 'SCALAR') {    
-        my $val = *{$namespace->{$name}}{$type};
-        return defined(${$val});
-    }
-    else {
-        defined(*{$namespace->{$name}}{$type});
+    my $entry_ref = \$namespace->{$name};
+    if (ref($entry_ref) eq 'GLOB') {
+        if ($type eq 'SCALAR') {
+            return defined(${ *{$entry_ref}{SCALAR} });
+        }
+        else {
+            return defined(*{$entry_ref}{$type});
+        }
+     }
+     else {
+         # a symbol table entry can be -1 (stub), string (stub with prototype),
+         # or reference (constant)
+         return $type eq 'CODE';
     }
 }
 
@@ -185,20 +180,23 @@ sub get_package_symbol {
 
     my $namespace = $self->namespace;
 
+    # FIXME
     $self->add_package_symbol($variable)
         unless exists $namespace->{$name};
 
-    if (ref($namespace->{$name}) eq 'SCALAR') {
-        if ($type eq 'CODE') {
+    my $entry_ref = \$namespace->{$name};
+
+    if (ref($entry_ref) eq 'GLOB') {
+        return *{$entry_ref}{$type};
+    }
+    else{
+        if($type eq 'CODE'){
             no strict 'refs';
-            return \&{$self->name.'::'.$name};
+            return \&{$self->name . '::' . $name};
         }
-        else {
+        else{
             return undef;
         }
-    }
-    else {
-        return *{$namespace->{$name}}{$type};
     }
 }
 

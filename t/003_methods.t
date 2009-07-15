@@ -288,7 +288,8 @@ my $new_method = Bar->meta->get_method('objecty');
 isnt( $method, $new_method,
     'add_method clones method objects as they are added' );
 is( $new_method->original_method, $method,
-    '... the cloned method has the correct original method' );
+    '... the cloned method has the correct original method' )
+        or diag $new_method->dump;
 
 {
     package CustomAccessor;

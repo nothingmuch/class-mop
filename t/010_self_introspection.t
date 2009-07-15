@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 296;
+use Test::More tests => 300;
 use Test::Exception;
 
 use Class::MOP;
@@ -75,6 +75,8 @@ my @class_mop_class_methods = qw(
     superclasses subclasses direct_subclasses class_precedence_list
     linearized_isa _superclasses_updated
 
+    _method_map
+    _code_is_mine
     has_method get_method add_method remove_method alias_method wrap_method_body
     get_method_list get_method_map get_all_method_names get_all_methods compute_all_applicable_methods
         find_method_by_name find_all_methods_by_name find_next_method_by_name

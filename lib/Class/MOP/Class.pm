@@ -347,6 +347,8 @@ sub constructor_class        { $_[0]->{'constructor_class'}           }
 sub constructor_name         { $_[0]->{'constructor_name'}            }
 sub destructor_class         { $_[0]->{'destructor_class'}            }
 
+sub _method_map              { $_[0]->{'methods'}                     }
+
 # Instance Construction & Cloning
 
 sub new_object {
@@ -616,15 +618,16 @@ sub add_method {
                 name         => $method_name            
             ) if $method->can('clone');
         }
+
+        $method->attach_to_class($self);
+        $self->_method_map->{$method_name} = $method;
     }
     else {
+        # If a raw code reference is supplied, its method object is not created.
+        # The method object won't be created until required.
         $body = $method;
-        $method = $self->wrap_method_body( body => $body, name => $method_name );
     }
 
-    $method->attach_to_class($self);
-
-    $self->get_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
@@ -716,12 +719,20 @@ sub alias_method {
     shift->add_method(@_);
 }
 
+sub _code_is_mine{
+    my($self, $code) = @_;
+    my($code_package, $code_name) = Class::MOP::get_code_info($code);
+    return  $code_package
+        &&  $code_package eq $self->name
+        || ($code_package eq 'constant' && $code_name eq '__ANON__');
+}
+
 sub has_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    exists $self->get_method_map->{$method_name};
+    return defined($self->get_method($method_name));
 }
 
 sub get_method {
@@ -729,7 +740,29 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    return $self->get_method_map->{$method_name};
+    my $method_map    = $self->_method_map;
+    my $method_object = $method_map->{$method_name};
+    my $code = $self->get_package_symbol({
+        name  => $method_name,
+        sigil => '&',
+        type  => 'CODE',
+    });
+
+    if (!($method_object && $method_object->body == ($code || 0))){
+        if ($code && $self->_code_is_mine($code)) {
+           $method_object = $method_map->{$method_name} = $self->wrap_method_body(
+               body                 => $code,
+               name                 => $method_name,
+               associated_metaclass => $self,
+           );
+        }
+        else {
+            delete $method_map->{$method_name};
+            return undef;
+        }
+    }
+
+    return $method_object;
 }
 
 sub remove_method {
@@ -752,7 +785,7 @@ sub remove_method {
 
 sub get_method_list {
     my $self = shift;
-    keys %{$self->get_method_map};
+    return grep { $self->has_method($_) } keys %{ $self->namespace };
 }
 
 sub find_method_by_name {
