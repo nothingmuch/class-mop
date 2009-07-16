@@ -130,6 +130,8 @@ sub namespace {
 
 # ... these functions have to touch the symbol table itself,.. yuk
 
+
+
 sub add_package_symbol {
     my ($self, $variable, $initial_value) = @_;
 
