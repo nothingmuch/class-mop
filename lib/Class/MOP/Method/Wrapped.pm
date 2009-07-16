@@ -85,15 +85,35 @@ sub wrap {
         },
     };
     $_build_wrapped_method->($modifier_table);
-    my $method = $class->SUPER::wrap(
+    return $class->SUPER::wrap(
         sub { $modifier_table->{cache}->(@_) },
         # get these from the original 
         # unless explicitly overriden
-        package_name => $params{package_name} || $code->package_name,
-        name         => $params{name}         || $code->name,
+        package_name   => $params{package_name} || $code->package_name,
+        name           => $params{name}         || $code->name,
+
+        modifier_table => $modifier_table,
     );
-    $method->{'modifier_table'} = $modifier_table;
-    $method;
+}
+
+sub _new {
+    my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
+
+    my $params = @_ == 1 ? $_[0] : {@_};
+
+    return bless {
+        # inherited from Class::MOP::Method
+        'body'                 => $params->{body},
+        'associated_metaclass' => $params->{associated_metaclass},
+        'package_name'         => $params->{package_name},
+        'name'                 => $params->{name},
+        'original_method'      => $params->{original_method},
+
+        # defined in this class
+        'modifier_table'       => $params->{modifier_table}
+    } => $class;
 }
 
 sub get_original_method {

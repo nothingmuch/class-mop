@@ -662,12 +662,17 @@ sub add_method {
             # and now make sure to wrap it
             # even if it is already wrapped
             # because we need a new sub ref
-            $method = $wrapped_metaclass->wrap($method);
+            $method = $wrapped_metaclass->wrap($method,
+                package_name => $self->name,
+                name         => $method_name,
+            );
         }
         else {
             # now make sure we wrap it properly
-            $method = $wrapped_metaclass->wrap($method)
-                unless $method->isa($wrapped_metaclass);
+            $method = $wrapped_metaclass->wrap($method,
+                package_name => $self->name,
+                name         => $method_name,
+            ) unless $method->isa($wrapped_metaclass);
         }
         $self->add_method($method_name => $method);
         return $method;
