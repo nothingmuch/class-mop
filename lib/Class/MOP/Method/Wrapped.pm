@@ -26,9 +26,10 @@ my $_build_wrapped_method = sub {
         $modifier_table->{after},
         $modifier_table->{around},
     );
+    my $c;
     if (@$before && @$after) {
         $modifier_table->{cache} = sub {
-            $_->(@_) for @{$before};
+            for $c (@$before) { $c->(@_) };
             my @rval;
             ((defined wantarray) ?
                 ((wantarray) ?
@@ -37,14 +38,14 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            $_->(@_) for @{$after};
+            for $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
     }
     elsif (@$before && !@$after) {
         $modifier_table->{cache} = sub {
-            $_->(@_) for @{$before};
+            for $c (@$before) { $c->(@_) };
             return $around->{cache}->(@_);
         }
     }
@@ -58,7 +59,7 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            $_->(@_) for @{$after};
+            for $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
