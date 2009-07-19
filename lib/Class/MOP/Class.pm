@@ -264,13 +264,17 @@ sub _check_metaclass_compatibility {
         my $current_meta = Class::MOP::get_metaclass_by_name($name);
         return if $current_meta ne $self;
 
+
+        @{$self->get_package_symbol({name => 'ISA', type => 'ARRAY', sigil => '$', create => 1 })} = ();
+        %{ $self->namespace } = ();
+
         my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/o);
-        no strict 'refs';
-        @{$name . '::ISA'} = ();
-        %{$name . '::'}    = ();
-        delete ${$ANON_CLASS_PREFIX}{$serial_id . '::'};
 
         Class::MOP::remove_metaclass_by_name($name);
+
+        no strict 'refs';
+        delete ${$ANON_CLASS_PREFIX}{$serial_id . '::'};
+        return;
     }
 
 }
@@ -508,7 +512,7 @@ sub rebless_instance_away {
 
 sub superclasses {
     my $self     = shift;
-    my $var_spec = { sigil => '@', type => 'ARRAY', name => 'ISA' };
+    my $var_spec = { sigil => '@', type => 'ARRAY', name => 'ISA', create => 1 };
     if (@_) {
         my @supers = @_;
         @{$self->get_package_symbol($var_spec)} = @supers;
