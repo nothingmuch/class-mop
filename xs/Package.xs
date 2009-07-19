@@ -5,9 +5,13 @@
 #define VARIABLE_CREATE 0x02
 
 
-static const char*
-mop_deconstruct_variable_name(pTHX_ SV* const variable, svtype* const type, const char** const type_name, I32* const flags) {
-	const char* name;
+static void
+mop_deconstruct_variable_name(pTHX_ SV* const variable,
+    const char** const var_name, STRLEN* const var_name_len,
+    svtype* const type,
+    const char** const type_name,
+    I32* const flags) {
+
 
 	if(SvROK(variable) && SvTYPE(SvRV(variable)) == SVt_PVHV){
 		/* e.g. variable = { type => "SCALAR", name => "foo" } */
@@ -20,7 +24,8 @@ mop_deconstruct_variable_name(pTHX_ SV* const variable, svtype* const type, cons
 		if(!(svp && SvOK(*svp))){
 			croak("You must pass a variable name");
 		}
-		name = SvPV_const(*svp, len);
+		*var_name     = SvPV_const(*svp, len);
+		*var_name_len = len;
 		if(len < 1){
 			croak("You must pass a variable name");
 		}
@@ -70,6 +75,9 @@ mop_deconstruct_variable_name(pTHX_ SV* const variable, svtype* const type, cons
 			croak("You must pass a variable name including a sigil");
 		}
 
+		*var_name     = pv  + 1;
+		*var_name_len = len - 1;
+
 		switch(pv[0]){
 		case '$':
 			*type      = SVt_PV; /* for all the types of scalars */
@@ -94,11 +102,7 @@ mop_deconstruct_variable_name(pTHX_ SV* const variable, svtype* const type, cons
 		default:
 			croak("I do not recognize that sigil '%c'", pv[0]);
 		}
-
-		name = pv + 1;
 	}
-
-	return name;
 }
 
 MODULE = Class::MOP::Package   PACKAGE = Class::MOP::Package
@@ -143,6 +147,7 @@ BOOT:
 #define S_GET 0
 #define S_ADD GV_ADDMULTI
 
+
 SV*
 add_package_symbol(SV* self, SV* variable, SV* ref = &PL_sv_undef)
 ALIAS:
@@ -153,25 +158,49 @@ PREINIT:
 	svtype type;
 	const char* type_name;
 	const char* var_name;
-	SV* package_name;
-	const char* fq_name;
-	I32 flags = 0; /* not used */
+	STRLEN var_name_len;
+	I32 flags = 0;
+	GV** gvp;
+	GV* gv;
 CODE:
-	var_name = mop_deconstruct_variable_name(aTHX_ variable, &type, &type_name, &flags);
-
-	package_name = mop_call0(aTHX_ self, KEY_FOR(name));
-	if(!SvOK(package_name)){
-		croak("name() did not return a defined value");
-	}
-	fq_name = Perl_form(aTHX_ "%"SVf"::%s", package_name, var_name);
-
 	if(items == 3 && ix != S_ADD){
 		croak("Too many arguments for %s", GvNAME(CvGV(cv)));
 	}
 
-	if(SvOK(ref)){ /* add_package_symbol with a value */
-		GV* gv;
+	mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name, &flags);
 
+
+	if(ix != S_ADD){ /* for shortcut fetching */
+		SV* const ns = mop_call0(aTHX_ self, mop_namespace);
+		HV* stash;
+		if(!(SvROK(ns) && SvTYPE(SvRV(ns)) == SVt_PVHV)){
+			croak("namespace() did not return a hash reference");
+		}
+		stash = (HV*)SvRV(ns);
+		gvp = (GV**)hv_fetch(stash, var_name, var_name_len, FALSE);
+	}
+	else{
+		gvp = NULL;
+	}
+
+	if(gvp && isGV(*gvp)){
+		gv = *gvp;
+	}
+	else{
+		SV* const package_name = mop_call0(aTHX_ self, KEY_FOR(name));
+		const char* fq_name;
+
+		if(!SvOK(package_name)){
+			croak("name() did not return a defined value");
+		}
+		fq_name = Perl_form(aTHX_ "%"SVf"::%s", package_name, var_name);
+
+		gv = gv_fetchpv(fq_name, ix | (flags & GLOB_CREATE ? GV_ADDMULTI : 0), type);
+	}
+
+
+
+	if(SvOK(ref)){ /* add_package_symbol with a value */
 		if(type == SVt_PV){
 			if(!SvROK(ref)){
 				ref = newRV_noinc(newSVsv(ref));
@@ -181,7 +210,6 @@ CODE:
 		else if(!(SvROK(ref) && SvTYPE(SvRV(ref)) == type)){
 			croak("You must pass a reference of %s for the value of %s", type_name, GvNAME(CvGV(cv)));
 		}
-		gv = gv_fetchpv(fq_name, GV_ADDMULTI, type);
 
 		if(type == SVt_PVCV && GvCV(gv)){
 			/* XXX: should introduce an option { redefine => 1 } ? */
@@ -192,7 +220,6 @@ CODE:
 		RETVAL = ref;
 	}
 	else { /* no values */
-		GV* const gv = gv_fetchpv(fq_name, ix | (flags & GLOB_CREATE ? GV_ADDMULTI : 0), type);
 		SV* sv;
 
 		if(!gv){

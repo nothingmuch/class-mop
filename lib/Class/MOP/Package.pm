@@ -95,6 +95,7 @@ sub namespace {
     # we could just store a ref and it would
     # Just Work, but oh well :\    
     no strict 'refs';    
+    no warnings 'uninitialized';
     \%{$_[0]->{'package'} . '::'} 
 }
 
