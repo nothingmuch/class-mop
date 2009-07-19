@@ -132,8 +132,7 @@ sub namespace {
 
 sub remove_package_glob {
     my ($self, $name) = @_;
-    no strict 'refs';        
-    delete ${$self->name . '::'}{$name};     
+    delete $self->namespace->{$name};
 }
 
 sub remove_package_symbol {
