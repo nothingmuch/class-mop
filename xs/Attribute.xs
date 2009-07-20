@@ -28,3 +28,4 @@ BOOT:
     INSTALL_SIMPLE_PREDICATE(Attribute, init_arg);
     INSTALL_SIMPLE_PREDICATE(Attribute, initializer);
     INSTALL_SIMPLE_PREDICATE(Attribute, default);
+

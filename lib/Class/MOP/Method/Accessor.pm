@@ -72,6 +72,18 @@ sub _new {
 sub associated_attribute { (shift)->{'attribute'}     }
 sub accessor_type        { (shift)->{'accessor_type'} }
 
+
+sub can_xs {
+    my($self, $method_name) = @_;
+    # don't use $method_name here, but there may be cases it is required.
+
+    # FIXME: I didn't know how to detect it properly (gfx)
+    return ref($self) eq __PACKAGE__
+           && $self->associated_attribute->associated_class->instance_metaclass eq 'Class::MOP::Instance';
+}
+
+sub attribute_name{ (shift)->associated_attribute->name }
+
 ## factory
 
 sub _initialize_body {
@@ -80,9 +92,15 @@ sub _initialize_body {
     my $method_name = join "_" => (
         '_generate',
         $self->accessor_type,
-        'method',
-        ($self->is_inline ? 'inline' : ())
+        'method'
     );
+
+    if($self->can_xs($method_name)){
+        $method_name .= '_xs';
+    }
+    elsif($self->is_inline){
+        $method_name .= '_inline';
+    }
 
     $self->{'body'} = $self->$method_name();
 }
