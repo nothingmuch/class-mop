@@ -21,19 +21,21 @@ void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
 
 #define MAKE_KEYSV(name) newSVpvn_share(#name, sizeof(#name)-1, 0U)
 
-void mop_install_simple_reader(const char* const fq_name, const char* const key, const int accessor_type);
-
-#define SIMPLE_READER    1
-#define SIMPLE_PREDICATE 2
+CV* mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl));
 
 #define INSTALL_SIMPLE_READER(klass, name)  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
-#define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) mop_install_simple_reader("Class::MOP::" #klass "::" #name, #key, SIMPLE_READER)
+#define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_reader)
 
 #define INSTALL_SIMPLE_PREDICATE(klass, name)  INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, name)
-#define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) mop_install_simple_reader("Class::MOP::" #klass "::has_" #name, #key, SIMPLE_PREDICATE)
+#define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::has_" #name, #key, sizeof(#key)-1, mop_xs_simple_predicate_for_metaclass)
 
 
+XS(mop_xs_simple_accessor);
 XS(mop_xs_simple_reader);
+XS(mop_xs_simple_writer);
+XS(mop_xs_simple_predicate);
+XS(mop_xs_simple_predicate_for_metaclass);
+XS(mop_xs_simple_clearer);
 
 extern SV *mop_method_metaclass;
 extern SV *mop_associated_metaclass;

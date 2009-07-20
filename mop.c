@@ -204,19 +204,18 @@ mop_get_all_package_symbols (HV *stash, type_filter_t filter)
 
 static MGVTBL mop_accessor_vtbl; /* the MAGIC identity */
 
-void
-mop_install_simple_reader(const char* const fq_name, const char* const key, const int accessor_type){
-    CV* const xsub  = newXS((char*)fq_name, mop_xs_simple_reader, __FILE__);
-    SV* const keysv = newSVpvn_share(key, strlen(key), 0U);
+CV*
+mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl)){
+    CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
+    SV* const keysv = newSVpvn_share(key, keylen, 0U);
 
     sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, NULL, 0);
     SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
-
-    CvXSUBANY(xsub).any_i32 = accessor_type;
+    return xsub;
 }
 
 static MAGIC*
-mop_mg_find_by_vtbl(SV* const sv, const MGVTBL* const vtbl){
+mop_mg_find_by_vtbl(pTHX_ SV* const sv, const MGVTBL* const vtbl){
     MAGIC* mg;
 
     assert(sv != NULL);
@@ -228,46 +227,135 @@ mop_mg_find_by_vtbl(SV* const sv, const MGVTBL* const vtbl){
     return mg;
 }
 
+static SV*
+mop_fetch_attr(pTHX_ SV* const self, SV* const key, I32 const create, CV* const cv){
+    HE* he;
+    if (!SvROK(self)) {
+        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
+    }
+    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
+        croak("object is not a hashref");
+    }
+    if((he = hv_fetch_ent((HV*)SvRV(self), key, create, 0U))){
+        return HeVAL(he);
+    }
+    return NULL;
+}
+static SV*
+mop_delete_attr(pTHX_ SV* const self, SV* const key, CV* const cv){
+    SV* sv;
+    if (!SvROK(self)) {
+        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
+    }
+    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
+        croak("object is not a hashref");
+    }
+    if((sv = hv_delete_ent((HV*)SvRV(self), key, 0, 0U))){
+        return sv;
+    }
+    return NULL;
+}
+
+XS(mop_xs_simple_accessor)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+    if(items == 1){ /* reader */
+        attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    }
+    else if (items == 2){ /* writer */
+        attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
+        sv_setsv(attr, ST(1));
+    }
+    else{
+        croak("expected exactly one or two argument");
+    }
+    ST(0) = attr ? attr : &PL_sv_undef;
+    XSRETURN(1);
+}
+
+
 XS(mop_xs_simple_reader)
 {
     dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl((SV*)cv, &mop_accessor_vtbl);
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
     SV* const key   = mg->mg_obj;
-    register HE *he;
-    SV *self;
-    SV *retval;
+    SV* attr;
 
     if (items != 1) {
         croak("expected exactly one argument");
     }
 
-    self = ST(0);
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = attr ? attr : &PL_sv_undef;
+    XSRETURN(1);
+}
 
-    if (!SvROK(self)) {
-        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
+XS(mop_xs_simple_writer)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 2) {
+        croak("expected exactly two argument");
     }
 
-    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
-        croak("object is not a hashref");
+    attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
+    sv_setsv(attr, ST(1));
+    ST(0) = attr;
+    XSRETURN(1);
+}
+
+XS(mop_xs_simple_clearer)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
     }
 
-    if ((he = hv_fetch_ent((HV *)SvRV(self), key, 0, 0U))) {
-        switch(XSANY.any_i32){
-        case SIMPLE_READER:
-            retval = HeVAL(he);
-            break;
-        case SIMPLE_PREDICATE:
-            retval = boolSV(SvOK(HeVAL(he)));
-            break;
-        default:
-            croak("panic: not reached");
-            retval = NULL; /* -W */
-        }
-    }
-    else {
-        retval = &PL_sv_undef;
+    attr = mop_delete_attr(aTHX_ ST(0), key, cv);
+    ST(0) = attr ? attr : &PL_sv_undef;
+    XSRETURN(1);
+}
+
+
+XS(mop_xs_simple_predicate)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
     }
 
-    ST(0) = retval;
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = boolSV(attr); /* exists */
+    XSRETURN(1);
+}
+
+
+XS(mop_xs_simple_predicate_for_metaclass)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
+    }
+
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = boolSV(attr && SvOK(attr)); /* defined */
     XSRETURN(1);
 }
