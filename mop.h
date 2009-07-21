@@ -26,6 +26,9 @@ CV* mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* con
 #define INSTALL_SIMPLE_READER(klass, name)  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_reader)
 
+#define INSTALL_SIMPLE_WRITER(klass, name)  INSTALL_SIMPLE_WRITER_WITH_KEY(klass, name, name)
+#define INSTALL_SIMPLE_WRITER_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_writer)
+
 #define INSTALL_SIMPLE_PREDICATE(klass, name)  INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::has_" #name, #key, sizeof(#key)-1, mop_xs_simple_predicate_for_metaclass)
 
