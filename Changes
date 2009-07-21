@@ -1,25 +1,33 @@
 Revision history for Perl extension Class-MOP.
 
 0.90
-    Japan Perl Association has sponsored Goro Fuji to improve
-    startup performance of Class::MOP and Moose. These enhancements
-    may break backwards compatibility if you're doing (or using)
-    complex metaprogramming, so, as always, test your code!
+    Japan Perl Association has sponsored Goro Fuji to improve startup
+    performance of Class::MOP and Moose. These enhancements may break
+    backwards compatibility if you're doing (or using) complex
+    metaprogramming, so, as always, test your code!
     http://blog.perlassociation.org/2009/07/jpa-sponsors-moose-class-mop-work.html
 
     * Class::MOP::Class
     * XS
-      - Anonymous classes were not destroyed properly when they went
-        out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
+      - Anonymous classes were not completely destroyed when they went
+        out of scope, leading to a memory leak. RT #47480. (Goro
+        Fuji).
 
     * Class::MOP::Class
-      - get_method, has_method, and add_method no longer use get_method_map.
-        Methods are more lazily instantiated to improve performance pretty
-        significantly (Goro Fuji)
+      - The get_method, has_method, and add_method methods no longer
+        use get_method_map. Method objects are instantiated
+        lazily. This significantly improves Class::MOP's load
+        time. (Goro Fuji)
 
     * All classes
-      - Inline fewer metaclass-level constructors since the ones we have are
-        perfectly fine. This reduces the number of string evals (Goro Fuji)
+      - Inline fewer metaclass-level constructors since the ones we
+        have are perfectly fine. This reduces the number of string
+        evals. (Goro Fuji)
+
+    * Class::MOP::Method::Wrapped
+      - If a method modifier set $_, this caused the modifier to blow
+        up, because of some weird internals. (Jeremy Stashewsky)
+
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
