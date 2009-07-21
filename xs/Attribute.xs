@@ -19,6 +19,8 @@ BOOT:
     INSTALL_SIMPLE_READER(Attribute, insertion_order);
     INSTALL_SIMPLE_READER(Attribute, definition_context);
 
+    INSTALL_SIMPLE_WRITER_WITH_KEY(Attribute, _set_insertion_order, insertion_order);
+
     INSTALL_SIMPLE_PREDICATE(Attribute, accessor);
     INSTALL_SIMPLE_PREDICATE(Attribute, reader);
     INSTALL_SIMPLE_PREDICATE(Attribute, writer);

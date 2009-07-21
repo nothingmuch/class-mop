@@ -10,3 +10,5 @@ BOOT:
     INSTALL_SIMPLE_READER(Method, body);
     INSTALL_SIMPLE_READER(Method, associated_metaclass);
     INSTALL_SIMPLE_READER(Method, original_method);
+
+    INSTALL_SIMPLE_WRITER_WITH_KEY(Method, _set_original_method, original_method);
