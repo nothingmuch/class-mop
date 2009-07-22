@@ -10,11 +10,11 @@ use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'weaken';
+use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -34,7 +34,7 @@ sub initialize {
         $package_name = $options{package};
     }
 
-    (defined $package_name && $package_name && !ref($package_name))
+    ($package_name && !ref($package_name))
         || confess "You must pass a package name and it cannot be blessed";
 
     return Class::MOP::get_metaclass_by_name($package_name)
@@ -107,9 +107,13 @@ sub _construct_class_instance {
 
 sub _new {
     my $class = shift;
+
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
+
     my $options = @_ == 1 ? $_[0] : {@_};
 
-    bless {
+    return bless {
         # inherited from Class::MOP::Package
         'package' => $options->{package},
 
@@ -229,7 +233,7 @@ sub _check_metaclass_compatibility {
     sub is_anon_class {
         my $self = shift;
         no warnings 'uninitialized';
-        $self->name =~ /^$ANON_CLASS_PREFIX/;
+        $self->name =~ /^$ANON_CLASS_PREFIX/o;
     }
 
     sub create_anon_class {
@@ -251,7 +255,7 @@ sub _check_metaclass_compatibility {
 
         no warnings 'uninitialized';
         my $name = $self->name;
-        return unless $name =~ /^$ANON_CLASS_PREFIX/;
+        return unless $name =~ /^$ANON_CLASS_PREFIX/o;
         # Moose does a weird thing where it replaces the metaclass for
         # class when fixing metaclass incompatibility. In that case,
         # we don't want to clean out the namespace now. We can detect
@@ -260,7 +264,7 @@ sub _check_metaclass_compatibility {
         my $current_meta = Class::MOP::get_metaclass_by_name($name);
         return if $current_meta ne $self;
 
-        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/);
+        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/o);
         no strict 'refs';
         @{$name . '::ISA'} = ();
         %{$name . '::'}    = ();
@@ -381,7 +385,7 @@ sub _construct_instance {
     # NOTE:
     # this will only work for a HASH instance type
     if ($class->is_anon_class) {
-        (Scalar::Util::reftype($instance) eq 'HASH')
+        (reftype($instance) eq 'HASH')
             || confess "Currently only HASH based instances are supported with instance of anon-classes";
         # NOTE:
         # At some point we should make this official
@@ -604,12 +608,17 @@ sub class_precedence_list {
             # and now make sure to wrap it
             # even if it is already wrapped
             # because we need a new sub ref
-            $method = $wrapped_metaclass->wrap($method);
+            $method = $wrapped_metaclass->wrap($method,
+                package_name => $self->name,
+                name         => $method_name,
+            );
         }
         else {
             # now make sure we wrap it properly
-            $method = $wrapped_metaclass->wrap($method)
-                unless $method->isa($wrapped_metaclass);
+            $method = $wrapped_metaclass->wrap($method,
+                package_name => $self->name,
+                name         => $method_name,
+            ) unless $method->isa($wrapped_metaclass);
         }
         $self->add_method($method_name => $method);
         return $method;
@@ -670,10 +679,8 @@ sub find_method_by_name {
     (defined $method_name && $method_name)
         || confess "You must define a method name to find";
     foreach my $class ($self->linearized_isa) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_method($method_name)
-            if $meta->has_method($method_name);
+        my $method = $self->initialize($class)->get_method($method_name);
+        return $method if defined $method;
     }
     return;
 }
@@ -700,7 +707,7 @@ sub compute_all_applicable_methods {
 sub get_all_method_names {
     my $self = shift;
     my %uniq;
-    grep { $uniq{$_}++ == 0 } map { $_->name } $self->get_all_methods;
+    return grep { !$uniq{$_}++ } map { $self->initialize($_)->get_method_list } $self->linearized_isa;
 }
 
 sub find_all_methods_by_name {
@@ -727,10 +734,8 @@ sub find_next_method_by_name {
     my @cpl = $self->linearized_isa;
     shift @cpl; # discard ourselves
     foreach my $class (@cpl) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_method($method_name)
-            if $meta->has_method($method_name);
+        my $method = $self->initialize($class)->get_method($method_name);
+        return $method if defined $method;
     }
     return;
 }
@@ -993,7 +998,8 @@ sub _immutable_metaclass {
     my $trait = $args{immutable_trait} = $self->immutable_trait
         || confess "no immutable trait specified for $self";
 
-    my $meta_attr = $self->meta->find_attribute_by_name("immutable_trait");
+    my $meta      = $self->meta;
+    my $meta_attr = $meta->find_attribute_by_name("immutable_trait");
 
     my $class_name;
 
@@ -1015,28 +1021,31 @@ sub _immutable_metaclass {
     # that we preserve that anonymous class (see Fey::ORM for an
     # example of where this matters).
     my $meta_name
-        = $self->meta->is_immutable
-        ? $self->meta->get_mutable_metaclass_name
-        : ref $self->meta;
+        = $meta->is_immutable
+        ? $meta->get_mutable_metaclass_name
+        : ref $meta;
 
-    my $meta = $meta_name->create(
+    my $immutable_meta = $meta_name->create(
         $class_name,
         superclasses => [ ref $self ],
     );
 
     Class::MOP::load_class($trait);
     for my $meth ( Class::MOP::Class->initialize($trait)->get_all_methods ) {
-        next if $meta->has_method( $meth->name );
+        my $meth_name = $meth->name;
 
-        if ( $meta->find_method_by_name( $meth->name ) ) {
-            $meta->add_around_method_modifier( $meth->name, $meth->body );
+        if ( $immutable_meta->find_method_by_name( $meth_name ) ) {
+            $immutable_meta->add_around_method_modifier( $meth_name, $meth->body );
         }
         else {
-            $meta->add_method( $meth->name, $meth->clone );
+            $immutable_meta->add_method( $meth_name, $meth->clone );
         }
     }
 
-    $meta->make_immutable( inline_constructor => 0 );
+    $immutable_meta->make_immutable(
+        inline_constructor => 0,
+        inline_accessors   => 0,
+    );
 
     return $class_name;
 }

@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -57,6 +57,10 @@ sub new {
 
 sub _new {
     my $class = shift;
+
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
+
     my $options = @_ == 1 ? $_[0] : {@_};
 
     bless {

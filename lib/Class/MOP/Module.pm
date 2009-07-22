@@ -7,11 +7,29 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Package';
+
+sub _new {
+    my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
+
+    my $params = @_ == 1 ? $_[0] : {@_};
+    return bless {
+
+        # from Class::MOP::Package
+        package   => $params->{package},
+        namespace => \undef,
+
+        # attributes
+        version   => \undef,
+        authority => \undef
+    } => $class;
+}
 
 sub version {  
     my $self = shift;
@@ -37,26 +55,18 @@ sub create {
 }
 
 sub _instantiate_module {
-    my $self      = shift;
-    my $version   = shift;
-    my $authority = shift;
-
+    my($self, $version, $authority) = @_;
     my $package_name = $self->name;
 
-    my $code = "package $package_name;";
+    Class::MOP::_is_valid_class_name($package_name)
+        || confess "creation of $package_name failed: invalid package name";
 
-    $code .= "\$$package_name\:\:VERSION = '" . $version . "';"
-        if defined $version;
-    $code .= "\$$package_name\:\:AUTHORITY = '" . $authority . "';"
-        if defined $authority;
+    no strict 'refs';
+    scalar %{ $package_name . '::' };    # touch the stash
+    ${ $package_name . '::VERSION' }   = $version   if defined $version;
+    ${ $package_name . '::AUTHORITY' } = $authority if defined $authority;
 
-    my $e = do {
-        local $@;
-        local $SIG{__DIE__};
-        eval $code;
-        $@;
-    };
-    confess "creation of $package_name failed : $e" if $e;
+    return;
 }
 
 1;

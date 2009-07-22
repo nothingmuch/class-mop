@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 296;
+use Test::More tests => 300;
 use Test::Exception;
 
 use Class::MOP;
@@ -36,6 +36,8 @@ my @class_mop_package_methods = qw(
 
     method_metaclass wrapped_method_metaclass
 
+    _method_map
+    _code_is_mine
     has_method get_method add_method remove_method wrap_method_body
     get_method_list get_method_map
 

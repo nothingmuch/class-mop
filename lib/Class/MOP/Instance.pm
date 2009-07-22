@@ -6,7 +6,7 @@ use warnings;
 
 use Scalar::Util 'weaken', 'blessed';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -45,8 +45,12 @@ sub new {
 }
 
 sub _new {
-    my ( $class, %options ) = @_;
-    bless {
+    my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+      if $class ne __PACKAGE__;
+
+    my $params = @_ == 1 ? $_[0] : {@_};
+    return bless {
         # NOTE:
         # I am not sure that it makes
         # sense to pass in the meta
@@ -57,10 +61,10 @@ sub _new {
         # which is *probably* a safe
         # assumption,.. but you can
         # never tell <:)
-        'associated_metaclass' => $options{associated_metaclass},
-        'attributes'           => $options{attributes},
-        'slots'                => $options{slots},
-        'slot_hash'            => $options{slot_hash},
+        'associated_metaclass' => $params->{associated_metaclass},
+        'attributes'           => $params->{attributes},
+        'slots'                => $params->{slots},
+        'slot_hash'            => $params->{slot_hash},
     } => $class;
 }
 

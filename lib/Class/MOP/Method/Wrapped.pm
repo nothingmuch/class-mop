@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -26,9 +26,10 @@ my $_build_wrapped_method = sub {
         $modifier_table->{after},
         $modifier_table->{around},
     );
+    my $c;
     if (@$before && @$after) {
         $modifier_table->{cache} = sub {
-            $_->(@_) for @{$before};
+            for $c (@$before) { $c->(@_) };
             my @rval;
             ((defined wantarray) ?
                 ((wantarray) ?
@@ -37,14 +38,14 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            $_->(@_) for @{$after};
+            for $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
     }
     elsif (@$before && !@$after) {
         $modifier_table->{cache} = sub {
-            $_->(@_) for @{$before};
+            for $c (@$before) { $c->(@_) };
             return $around->{cache}->(@_);
         }
     }
@@ -58,7 +59,7 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            $_->(@_) for @{$after};
+            for $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
@@ -85,15 +86,35 @@ sub wrap {
         },
     };
     $_build_wrapped_method->($modifier_table);
-    my $method = $class->SUPER::wrap(
+    return $class->SUPER::wrap(
         sub { $modifier_table->{cache}->(@_) },
         # get these from the original 
         # unless explicitly overriden
-        package_name => $params{package_name} || $code->package_name,
-        name         => $params{name}         || $code->name,
+        package_name   => $params{package_name} || $code->package_name,
+        name           => $params{name}         || $code->name,
+
+        modifier_table => $modifier_table,
     );
-    $method->{'modifier_table'} = $modifier_table;
-    $method;
+}
+
+sub _new {
+    my $class = shift;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
+
+    my $params = @_ == 1 ? $_[0] : {@_};
+
+    return bless {
+        # inherited from Class::MOP::Method
+        'body'                 => $params->{body},
+        'associated_metaclass' => $params->{associated_metaclass},
+        'package_name'         => $params->{package_name},
+        'name'                 => $params->{name},
+        'original_method'      => $params->{original_method},
+
+        # defined in this class
+        'modifier_table'       => $params->{modifier_table}
+    } => $class;
 }
 
 sub get_original_method {

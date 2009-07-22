@@ -32,7 +32,7 @@ BEGIN {use Class::MOP;
     
         my $glob = gensym();
         *{$glob} = $initial_value if defined $initial_value;
-        $self->namespace->{$name} = $glob;    
+        $self->namespace->{$name} = *{$glob};    
     }       
 }
 

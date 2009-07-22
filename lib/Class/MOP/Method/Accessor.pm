@@ -7,7 +7,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -43,11 +43,28 @@ sub new {
 
 sub _new {
     my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
 
-    $options->{is_inline} ||= 0;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
 
-    return bless $options, $class;
+    my $params = @_ == 1 ? $_[0] : {@_};
+
+    return bless {
+        # inherited from Class::MOP::Method
+        body                 => $params->{body},
+        associated_metaclass => $params->{associated_metaclass},
+        package_name         => $params->{package_name},
+        name                 => $params->{name},
+        original_method      => $params->{original_method},
+
+        # inherit from Class::MOP::Generated
+        is_inline            => $params->{is_inline} || 0,
+        definition_context   => $params->{definition_context},
+
+        # defined in this class
+        attribute            => $params->{attribute},
+        accessor_type        => $params->{accessor_type},
+    } => $class;
 }
 
 ## accessors

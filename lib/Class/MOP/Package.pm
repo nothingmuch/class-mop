@@ -4,11 +4,11 @@ package Class::MOP::Package;
 use strict;
 use warnings;
 
-use Scalar::Util 'blessed';
+use Scalar::Util 'blessed', 'reftype';
 use Carp         'confess';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -59,18 +59,26 @@ sub reinitialize {
 
 sub _new {
     my $class = shift;
-    my $options = @_ == 1 ? $_[0] : {@_};
 
-    # NOTE:
-    # because of issues with the Perl API 
-    # to the typeglob in some versions, we 
-    # need to just always grab a new 
-    # reference to the hash in the accessor. 
-    # Ideally we could just store a ref and 
-    # it would Just Work, but oh well :\
-    $options->{namespace} ||= \undef;
+    return Class::MOP::Class->initialize($class)->new_object(@_)
+        if $class ne __PACKAGE__;
 
-    bless $options, $class;
+    my $params = @_ == 1 ? $_[0] : {@_};
+
+    return bless {
+        package   => $params->{package},
+
+        # NOTE:
+        # because of issues with the Perl API
+        # to the typeglob in some versions, we
+        # need to just always grab a new
+        # reference to the hash in the accessor.
+        # Ideally we could just store a ref and
+        # it would Just Work, but oh well :\
+
+        namespace => \undef,
+
+    } => $class;
 }
 
 # Attributes
@@ -93,6 +101,8 @@ sub namespace {
 
 sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
+
+sub _method_map              { $_[0]->{'methods'}                     }
 
 # utility methods
 
@@ -149,34 +159,31 @@ sub remove_package_glob {
 # ... these functions deal with stuff on the namespace level
 
 sub has_package_symbol {
-    my ($self, $variable) = @_;
+    my ( $self, $variable ) = @_;
 
-    my ($name, $sigil, $type) = ref $variable eq 'HASH'
+    my ( $name, $sigil, $type )
+        = ref $variable eq 'HASH'
         ? @{$variable}{qw[name sigil type]}
         : $self->_deconstruct_variable_name($variable);
-    
-    my $namespace = $self->namespace;
-    
-    return 0 unless exists $namespace->{$name};   
-    
-    # FIXME:
-    # For some really stupid reason 
-    # a typeglob will have a default
-    # value of \undef in the SCALAR 
-    # slot, so we need to work around
-    # this. Which of course means that 
-    # if you put \undef in your scalar
-    # then this is broken.
 
-    if (ref($namespace->{$name}) eq 'SCALAR') {
-        return ($type eq 'CODE');
-    }
-    elsif ($type eq 'SCALAR') {    
-        my $val = *{$namespace->{$name}}{$type};
-        return defined(${$val});
+    my $namespace = $self->namespace;
+
+    return 0 unless exists $namespace->{$name};
+
+    my $entry_ref = \$namespace->{$name};
+    if ( reftype($entry_ref) eq 'GLOB' ) {
+        if ( $type eq 'SCALAR' ) {
+            return defined( ${ *{$entry_ref}{SCALAR} } );
+        }
+        else {
+            return defined( *{$entry_ref}{$type} );
+        }
     }
     else {
-        defined(*{$namespace->{$name}}{$type});
+
+        # a symbol table entry can be -1 (stub), string (stub with prototype),
+        # or reference (constant)
+        return $type eq 'CODE';
     }
 }
 
@@ -189,20 +196,23 @@ sub get_package_symbol {
 
     my $namespace = $self->namespace;
 
+    # FIXME
     $self->add_package_symbol($variable)
         unless exists $namespace->{$name};
 
-    if (ref($namespace->{$name}) eq 'SCALAR') {
-        if ($type eq 'CODE') {
+    my $entry_ref = \$namespace->{$name};
+
+    if ( ref($entry_ref) eq 'GLOB' ) {
+        return *{$entry_ref}{$type};
+    }
+    else {
+        if ( $type eq 'CODE' ) {
             no strict 'refs';
-            return \&{$self->name.'::'.$name};
+            return \&{ $self->name . '::' . $name };
         }
         else {
             return undef;
         }
-    }
-    else {
-        return *{$namespace->{$name}}{$type};
     }
 }
 
@@ -303,18 +313,19 @@ sub add_method {
         if ($method->package_name ne $self->name) {
             $method = $method->clone(
                 package_name => $self->name,
-                name         => $method_name
+                name         => $method_name            
             ) if $method->can('clone');
         }
+
+        $method->attach_to_class($self);
+        $self->_method_map->{$method_name} = $method;
     }
     else {
+        # If a raw code reference is supplied, its method object is not created.
+        # The method object won't be created until required.
         $body = $method;
-        $method = $self->wrap_method_body( body => $body, name => $method_name );
     }
 
-    $method->attach_to_class($self);
-
-    $self->get_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
@@ -329,12 +340,21 @@ sub add_method {
     );
 }
 
+sub _code_is_mine {
+    my ( $self, $code ) = @_;
+
+    my ( $code_package, $code_name ) = Class::MOP::get_code_info($code);
+
+    return $code_package && $code_package eq $self->name
+        || ( $code_package eq 'constant' && $code_name eq '__ANON__' );
+}
+
 sub has_method {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    exists $self->get_method_map->{$method_name};
+    return defined($self->get_method($method_name));
 }
 
 sub get_method {
@@ -342,7 +362,30 @@ sub get_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    return $self->get_method_map->{$method_name};
+    my $method_map    = $self->_method_map;
+    my $method_object = $method_map->{$method_name};
+    my $code = $self->get_package_symbol({
+        name  => $method_name,
+        sigil => '&',
+        type  => 'CODE',
+    });
+
+    unless ( $method_object && $method_object->body == ( $code || 0 ) ) {
+        if ( $code && $self->_code_is_mine($code) ) {
+            $method_object = $method_map->{$method_name}
+                = $self->wrap_method_body(
+                body                 => $code,
+                name                 => $method_name,
+                associated_metaclass => $self,
+                );
+        }
+        else {
+            delete $method_map->{$method_name};
+            return undef;
+        }
+    }
+
+    return $method_object;
 }
 
 sub remove_method {
@@ -351,7 +394,7 @@ sub remove_method {
         || confess "You must define a method name";
 
     my $removed_method = delete $self->get_method_map->{$method_name};
-
+    
     $self->remove_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }
     );
@@ -365,9 +408,8 @@ sub remove_method {
 
 sub get_method_list {
     my $self = shift;
-    keys %{$self->get_method_map};
+    return grep { $self->has_method($_) } keys %{ $self->namespace };
 }
-
 
 1;
 
