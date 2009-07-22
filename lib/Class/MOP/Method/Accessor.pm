@@ -95,11 +95,8 @@ sub _initialize_body {
         'method'
     );
 
-    if($self->can_xs($method_name)){
-        $method_name .= '_xs';
-    }
-    elsif($self->is_inline){
-        $method_name .= '_inline';
+    if($self->is_inline){
+        $method_name .= $self->can_xs($method_name) ? '_xs' : '_inline';
     }
 
     $self->{'body'} = $self->$method_name();
