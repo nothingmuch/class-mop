@@ -636,14 +636,6 @@ sub add_method {
         $body = $method;
     }
 
-
-    my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
-
-    if ( !defined $current_name || $current_name eq '__ANON__' ) {
-        my $full_method_name = ($self->name . '::' . $method_name);
-        subname($full_method_name => $body);
-    }
-
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name },
         $body,

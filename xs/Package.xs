@@ -197,7 +197,7 @@ CODE:
 
 		gv = gv_fetchpv(fq_name, ix | (flags & GLOB_CREATE ? GV_ADDMULTI : 0), type);
 	}
-
+	assert(isGV_with_GP(gv));
 
 
 	if(SvOK(ref)){ /* add_package_symbol with a value */
@@ -217,6 +217,17 @@ CODE:
 			GvCV(gv) = NULL;
 		}
 		sv_setsv_mg((SV*)gv, ref); /* *glob = $ref */
+
+		if(type == SVt_PVCV){
+			CV* const subr = (CV*)SvRV(ref);
+			if(CvANON(subr)
+				&& CvGV(subr)
+				&& isGV(CvGV(subr))
+				&& strEQ(GvNAME(CvGV(subr)), "__ANON__")){
+				CvGV(subr) = gv;
+				CvANON_off(subr);
+			}
+		}
 		RETVAL = ref;
 	}
 	else { /* no values */
