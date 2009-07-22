@@ -20,9 +20,8 @@ sub new {
     confess __PACKAGE__ . " is an abstract base class, you must provide a constructor.";
 }
 
-sub is_inline { $_[0]{is_inline} }
-
-sub definition_context { $_[0]{definition_context} }
+#sub is_inline { $_[0]{is_inline} }
+#sub definition_context { $_[0]{definition_context} }
 
 sub _initialize_body {
     confess "No body to initialize, " . __PACKAGE__ . " is an abstract base class";
