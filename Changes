@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.91
+
+    * Class::MOP::Class
+    * Class::MOP::Package
+      - Move get_method_map and its various scaffolding into Package. (hdp)
+
 0.90 Tue Jul 21, 2009
     Japan Perl Association has sponsored Goro Fuji to improve startup
     performance of Class::MOP and Moose. These enhancements may break
@@ -27,10 +33,6 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Method::Wrapped
       - If a method modifier set $_, this caused the modifier to blow
         up, because of some weird internals. (Jeremy Stashewsky)
-
-    * Class::MOP::Class
-    * Class::MOP::Package
-      - Move get_method_map and its various scaffolding into Package. (hdp)
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
