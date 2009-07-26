@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'weaken', 'reftype';
+use Scalar::Util 'weaken', 'reftype', 'blessed';
 
 our $VERSION   = '0.90';
 $VERSION = eval $VERSION;
@@ -28,8 +28,15 @@ sub wrap {
     my %params = @args;
     my $code = $params{body};
 
-    (ref $code && 'CODE' eq reftype($code))
-        || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+    if (blessed($code) && $code->isa(__PACKAGE__)) {
+        my $method = $code->clone;
+        delete $params{body};
+        Class::MOP::class_of($class)->rebless_instance($method, %params);
+        return $method;
+    }
+    elsif (!ref $code || 'CODE' ne reftype($code)) {
+        confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+    }
 
     ($params{package_name} && $params{name})
         || confess "You must supply the package_name and name parameters";
