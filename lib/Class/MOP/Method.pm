@@ -151,8 +151,9 @@ introspection interface.
 
 =item B<< Class::MOP::Method->wrap($code, %options) >>
 
-This is the constructor. It accepts a subroutine reference and a hash
-of options.
+This is the constructor. It accepts a method body in the form of
+either a code reference or a L<Class::MOP::Method> instance, followed
+by a hash of options.
 
 The options are:
 
@@ -160,11 +161,13 @@ The options are:
 
 =item * name
 
-The method name (without a package name). This is required.
+The method name (without a package name). This is required if C<$code>
+is a coderef.
 
 =item * package_name
 
-The package name for the method. This is required.
+The package name for the method. This is required if C<$code> is a
+coderef.
 
 =item * associated_metaclass
 
