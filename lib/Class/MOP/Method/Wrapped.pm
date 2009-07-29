@@ -26,10 +26,9 @@ my $_build_wrapped_method = sub {
         $modifier_table->{after},
         $modifier_table->{around},
     );
-    my $c;
     if (@$before && @$after) {
         $modifier_table->{cache} = sub {
-            for $c (@$before) { $c->(@_) };
+            for my $c (@$before) { $c->(@_) };
             my @rval;
             ((defined wantarray) ?
                 ((wantarray) ?
@@ -38,14 +37,14 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            for $c (@$after) { $c->(@_) };
+            for my $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
     }
     elsif (@$before && !@$after) {
         $modifier_table->{cache} = sub {
-            for $c (@$before) { $c->(@_) };
+            for my $c (@$before) { $c->(@_) };
             return $around->{cache}->(@_);
         }
     }
@@ -59,7 +58,7 @@ my $_build_wrapped_method = sub {
                     ($rval[0] = $around->{cache}->(@_)))
                 :
                 $around->{cache}->(@_));
-            for $c (@$after) { $c->(@_) };
+            for my $c (@$after) { $c->(@_) };
             return unless defined wantarray;
             return wantarray ? @rval : $rval[0];
         }
@@ -71,10 +70,10 @@ my $_build_wrapped_method = sub {
 
 sub wrap {
     my ( $class, $code, %params ) = @_;
-    
+
     (blessed($code) && $code->isa('Class::MOP::Method'))
         || confess "Can only wrap blessed CODE";
-        
+
     my $modifier_table = {
         cache  => undef,
         orig   => $code,
@@ -88,7 +87,7 @@ sub wrap {
     $_build_wrapped_method->($modifier_table);
     return $class->SUPER::wrap(
         sub { $modifier_table->{cache}->(@_) },
-        # get these from the original 
+        # get these from the original
         # unless explicitly overriden
         package_name   => $params{package_name} || $code->package_name,
         name           => $params{name}         || $code->name,
