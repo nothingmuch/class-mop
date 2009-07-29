@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-0.91
+0.92
     * Class::MOP::Class
     * Class::MOP::Package
       - Move get_method_map and its various scaffolding into
@@ -11,10 +11,10 @@ Revision history for Perl extension Class-MOP.
         object as the first argument, rather than just a
         coderef. (doy)
 
+0.91 Wed Jul 29, 2009
     * Class::MOP::Method::Wrapped
-      - Fixing variable usage issues with the patch from previous
-        version, not properly using lexicals in the for
-        loops. (stevan)
+      - Fixing variable usage issues with the patch from previous version,
+        not properly using lexicals in the for loops. (stevan)
 
 0.90 Tue Jul 21, 2009
     Japan Perl Association has sponsored Goro Fuji to improve startup
