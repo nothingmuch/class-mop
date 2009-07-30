@@ -49,8 +49,12 @@ sub reinitialize {
     my %options = @args;
     my $package_name = delete $options{package};
 
-    (defined $package_name && $package_name && !blessed($package_name))
-        || confess "You must pass a package name and it cannot be blessed";
+    (defined $package_name && $package_name
+      && (!blessed $package_name || $package_name->isa('Class::MOP::Package')))
+        || confess "You must pass a package name or an existing Class::MOP::Package instance";
+
+    $package_name = $package_name->name
+        if blessed $package_name;
 
     Class::MOP::remove_metaclass_by_name($package_name);
 
@@ -437,10 +441,12 @@ This method creates a new C<Class::MOP::Package> instance which
 represents specified package. If an existing metaclass object exists
 for the package, that will be returned instead.
 
-=item B<< Class::MOP::Package->reinitialize($package_name) >>
+=item B<< Class::MOP::Package->reinitialize($package) >>
 
 This method forcibly removes any existing metaclass for the package
-before calling C<initialize>
+before calling C<initialize>. In contrast to C<initialize>, you may
+also pass an existing C<Class::MOP::Package> instance instead of just
+a package name as C<$package>.
 
 Do not call this unless you know what you are doing.
 

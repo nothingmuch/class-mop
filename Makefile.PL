@@ -22,7 +22,7 @@ requires 'Sub::Name'    => '0.04';
 requires 'Task::Weaken';
 
 test_requires 'File::Spec';
-test_requires 'Test::More'      => '0.77';
+test_requires 'Test::More'      => '0.88';
 test_requires 'Test::Exception' => '0.27';
 
 extra_tests();
