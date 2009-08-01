@@ -122,6 +122,19 @@ sub _generate_constructor_method {
     return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
 }
 
+sub _inline_set_slot_value{
+    my($self,$attr, $instance, $attr_var, $value) = @_;
+
+    if($attr->has_trigger){
+        return sprintf q{ my $value = %s; %s->call_trigger(%s, $value); },
+            $self->_meta_instance->inline_set_slot_value($instance, $attr->name, $value),
+            $attr_var, $instance, $value;
+    }
+    else{
+        return $self->_meta_instance->inline_set_slot_value($instance, $attr->name, $value);
+    }
+}
+
 sub generate_constructor_method_inline {
     Carp::cluck('The generate_constructor_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
@@ -163,6 +176,13 @@ sub _generate_slot_initializer {
     my $attr  = shift;
     my $close = shift;
 
+
+    my $attr_var = do{
+        my $attrs = ($close->{'@attrs'} ||= []);
+        push @{$attrs}, $attr;
+        sprintf q{$attrs[%d]}, scalar(@{$attrs}) - 1;
+    };
+
     my $default;
     if ($attr->has_default) {
         # NOTE:
@@ -190,22 +210,25 @@ sub _generate_slot_initializer {
     if ( defined(my $init_arg = $attr->init_arg) ) {
       return (
           'if(exists $params->{\'' . $init_arg . '\'}){' . "\n" .
-                $self->_meta_instance->inline_set_slot_value(
+                $self->_inline_set_slot_value(
+                    $attr,
                     '$instance',
-                    $attr->name,
+                    $attr_var,
                     '$params->{\'' . $init_arg . '\'}' ) . "\n" .
            '} ' . (!defined $default ? '' : 'else {' . "\n" .
-                $self->_meta_instance->inline_set_slot_value(
+                $self->_inline_set_slot_value(
+                    $attr,
                     '$instance',
-                    $attr->name,
+                    $attr_var,
                      $default ) . "\n" .
            '}')
         );
     } elsif ( defined $default ) {
         return (
-            $self->_meta_instance->inline_set_slot_value(
+            $self->_inline_set_slot_value(
+                $attr,
                 '$instance',
-                $attr->name,
+                $attr_var,
                  $default ) . "\n"
         );
     } else { return '' }

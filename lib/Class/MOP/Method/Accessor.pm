@@ -164,6 +164,16 @@ sub _generate_clearer_method {
 
 ## Inline methods
 
+
+sub _inline_call_trigger {
+    my ($self, $attr, $instance, $value) = @_;
+    return '' unless $attr->has_trigger;
+    return defined($value)
+        ? sprintf('$attr->call_trigger(%s, %s);', $instance, $value)
+        : sprintf('$attr->call_trigger(%s);', $instance);
+}
+
+
 sub generate_accessor_method_inline {
     Carp::cluck('The generate_accessor_method_inline method has been made private.'
         . " The public version is deprecated and will be removed in a future release.\n");
@@ -177,10 +187,12 @@ sub _generate_accessor_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my ( $code, $e ) = $self->_eval_closure(
-        {},
+        {'$attr' => \$attr},
         'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
-        . ' if scalar(@_) == 2; '
+        . 'if(scalar(@_) == 2){'
+        . 'my $value = ' . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]') . ';'
+        . $self->_inline_call_trigger($attr, '$_[0]', '$value')
+        . '}'
         . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
         . '}'
     );
@@ -226,9 +238,11 @@ sub _generate_writer_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my ( $code, $e ) = $self->_eval_closure(
-        {},
+        {'$attr' => \$attr},
         'sub {'
-        . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]')
+        . 'my $value = ' . $meta_instance->inline_set_slot_value('$_[0]', $attr_name, '$_[1]') . ';'
+        . $self->_inline_call_trigger($attr, '$_[0]', '$value')
+        . 'return $value;'
         . '}'
     );
     confess "Could not generate inline writer because : $e" if $e;
@@ -272,10 +286,12 @@ sub _generate_clearer_method_inline {
     my $meta_instance = $attr->associated_class->instance_metaclass;
 
     my ( $code, $e ) = $self->_eval_closure(
-        {},
+        {'$attr' => \$attr},
         'sub {'
-        . $meta_instance->inline_deinitialize_slot('$_[0]', $attr_name)
-        . '}'
+        . $meta_instance->inline_deinitialize_slot('$_[0]', $attr_name) . ';'
+        . $self->_inline_call_trigger($attr, '$_[0]')
+        . 'return;'
+        . '}',
     );
     confess "Could not generate inline clearer because : $e" if $e;
 

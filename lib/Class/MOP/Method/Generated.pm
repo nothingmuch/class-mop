@@ -12,6 +12,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
 
+use constant _EVAL_REPORT => $ENV{MOP_EVAL_REPORT} ? 1 : 0;
+
 ## accessors
 
 sub new {
@@ -31,11 +33,12 @@ sub _eval_closure {
     my $__captures = $_[1];
 
     my $code;
+    my $src;
 
     my $e = do {
         local $@;
         local $SIG{__DIE__};
-        $code = eval join
+        $code = eval($src = join
             "\n", (
             map {
                 /^([\@\%\$])/
@@ -47,9 +50,11 @@ sub _eval_closure {
                     . $_ . q['}};];
                 } keys %$__captures
             ),
-            $_[2];
+            $_[2]);
         $@;
     };
+
+    print '#', $_[0]->name, "\n", $src , "\n" if _EVAL_REPORT;
 
     return ( $code, $e );
 }

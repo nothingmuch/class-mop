@@ -52,6 +52,13 @@ sub new {
         confess("A required attribute must have either 'init_arg', 'builder', or 'default'");
     }
 
+    if(exists $options{trigger}){
+        ( ref($options{trigger})
+            ? (ref($options{trigger}) eq 'CODE')
+            :(defined $options{trigger} && length $options{trigger}) )
+                || confess("Trigger must be a CODE ref or method name on attribute ($name)");
+    }
+
     $class->_new(\%options);
 }
 
@@ -75,6 +82,7 @@ sub _new {
         'default'            => $options->{default},
         'initializer'        => $options->{initializer},
         'definition_context' => $options->{definition_context},
+        'trigger'            => $options->{trigger},
         # keep a weakened link to the
         # class we are associated with
         'associated_class' => undef,
@@ -142,8 +150,11 @@ sub _set_initial_slot_value {
 
     my $slot_name = $self->name;
 
-    return $meta_instance->set_slot_value($instance, $slot_name, $value)
-        unless $self->has_initializer;
+    unless($self->has_initializer){
+        $meta_instance->set_slot_value($instance, $slot_name, $value);
+        $self->call_trigger($instance, $value);
+        return;
+    }
 
     my $callback = sub {
         $meta_instance->set_slot_value($instance, $slot_name, $_[0]);
@@ -153,6 +164,8 @@ sub _set_initial_slot_value {
 
     # most things will just want to set a value, so make it first arg
     $instance->$initializer($value, $callback, $self);
+    $self->call_trigger($instance, $value);
+    return;
 }
 
 # NOTE:
@@ -172,6 +185,7 @@ sub has_init_arg    { defined($_[0]->{'init_arg'}) }
 sub has_default     { defined($_[0]->{'default'}) }
 sub has_initializer { defined($_[0]->{'initializer'}) }
 sub has_insertion_order { defined($_[0]->{'insertion_order'}) }
+sub has_trigger     { defined($_[0]->{'trigger'}) }
 
 sub accessor           { $_[0]->{'accessor'}    }
 sub reader             { $_[0]->{'reader'}      }
@@ -184,12 +198,23 @@ sub initializer        { $_[0]->{'initializer'} }
 sub definition_context { $_[0]->{'definition_context'} }
 sub insertion_order    { $_[0]->{'insertion_order'} }
 sub _set_insertion_order { $_[0]->{'insertion_order'} = $_[1] }
+sub trigger            { $_[0]->{'trigger'} }
 
+sub call_trigger{
+    my($self, $instance, $value) = @_;
+
+    if(defined(my $trigger = $self->{trigger})){
+        $instance->$trigger($value);
+    }
+    return;
+}
 # end bootstrapped away method section.
 # (all methods below here are kept intact)
 
 sub has_read_method  { $_[0]->has_reader || $_[0]->has_accessor }
 sub has_write_method { $_[0]->has_writer || $_[0]->has_accessor }
+
+
 
 sub get_read_method  { 
     my $self   = shift;    
@@ -303,6 +328,7 @@ sub set_initial_value {
         $instance,
         $value
     );
+    return;
 }
 
 sub set_value {
@@ -311,6 +337,8 @@ sub set_value {
     Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->set_slot_value($instance, $self->name, $value);
+    $self->call_trigger($instance, $value);
+    return;
 }
 
 sub get_value {
@@ -335,6 +363,8 @@ sub clear_value {
     Class::MOP::Class->initialize(ref($instance))
                      ->get_meta_instance
                      ->deinitialize_slot($instance, $self->name);
+    $self->call_trigger($instance);
+    return;
 }
 
 ## load em up ...
