@@ -364,7 +364,7 @@ sub clear_value {
                      ->get_meta_instance
                      ->deinitialize_slot($instance, $self->name);
     $self->call_trigger($instance);
-    return;
+    return 1;
 }
 
 ## load em up ...

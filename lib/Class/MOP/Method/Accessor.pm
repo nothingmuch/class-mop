@@ -290,7 +290,7 @@ sub _generate_clearer_method_inline {
         'sub {'
         . $meta_instance->inline_deinitialize_slot('$_[0]', $attr_name) . ';'
         . $self->_inline_call_trigger($attr, '$_[0]')
-        . 'return;'
+        . 'return 1;'
         . '}',
     );
     confess "Could not generate inline clearer because : $e" if $e;
