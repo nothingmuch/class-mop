@@ -1,11 +1,49 @@
 Revision history for Perl extension Class-MOP.
 
-0.90
+0.92
+    * Class::MOP::Class
+    * Class::MOP::Package
+      - Move get_method_map and its various scaffolding into
+        Package. (hdp)
+
+    * Class::MOP::Method
+      - Allow Class::MOP::Method->wrap to take a Class::MOP::Method
+        object as the first argument, rather than just a
+        coderef. (doy)
+
+0.91 Wed Jul 29, 2009
+    * Class::MOP::Method::Wrapped
+      - Fixing variable usage issues with the patch from previous
+        version, not properly using lexicals in the for
+        loops. (stevan)
+
+0.90 Tue Jul 21, 2009
+    Japan Perl Association has sponsored Goro Fuji to improve startup
+    performance of Class::MOP and Moose. These enhancements may break
+    backwards compatibility if you're doing (or using) complex
+    metaprogramming, so, as always, test your code!
+    http://blog.perlassociation.org/2009/07/jpa-sponsors-moose-class-mop-work.html
+
     * Class::MOP::Class
     * XS
-      - Anonymous classes were not destroyed properly when they went
-        out of scope, leading to a memory leak. RT #47480 (Goro Fuji).
+      - Anonymous classes were not completely destroyed when they went
+        out of scope, leading to a memory leak. RT #47480. (Goro
+        Fuji).
 
+    * Class::MOP::Class
+      - The get_method, has_method, and add_method methods no longer
+        use get_method_map. Method objects are instantiated
+        lazily. This significantly improves Class::MOP's load
+        time. (Goro Fuji)
+
+    * All classes
+      - Inline fewer metaclass-level constructors since the ones we
+        have are perfectly fine. This reduces the number of string
+        evals. (Goro Fuji)
+
+    * Class::MOP::Method::Wrapped
+      - If a method modifier set $_, this caused the modifier to blow
+        up, because of some weird internals. (Jeremy Stashewsky)
 
 0.89 Fri Jul 3, 2009
     * Class::MOP::Class
@@ -604,7 +642,7 @@ Revision history for Perl extension Class-MOP.
       the symbol table as methods (these are optimized constant subs)
 
 0.61 Fri. June 13, 2008
-    - Okay, lets give this another try and see if PAUSE 
+    - Okay, lets give this another try and see if PAUSE
       recognizes it correct this time.
 
 0.60 Thurs. Jun 12, 2008
@@ -615,21 +653,21 @@ Revision history for Perl extension Class-MOP.
     !! Several fixes resulting in yet another 25-30% speedup !!
 
     * Class::MOP::Class
-      - now stores the instance of the instance 
+      - now stores the instance of the instance
         metaclass to avoid needless recomputation
         and deletes it when the cache is blown
-      - introduce methods to query Class::MOP::Class for 
+      - introduce methods to query Class::MOP::Class for
         the options used to make it immutable as well as
-        the proper immutable transformer. (groditi)        
+        the proper immutable transformer. (groditi)
 
     * Class::MOP::Package
-      - {add, has, get, remove}_package_symbol all 
+      - {add, has, get, remove}_package_symbol all
         now accept a HASH ref argument as well as the
         string. All internal usages now use the HASH
         ref version.
 
     * Class::MOP
-      - MOP.xs does sanity checks on the coderef 
+      - MOP.xs does sanity checks on the coderef
         to avoid a segfault
       - is_class_loaded check now uses code that
         was improved in Moose's ClassName type
@@ -639,19 +677,19 @@ Revision history for Perl extension Class-MOP.
         load_class (Sartak)
         - tests for this and other aspects of
           load_class (Sartak)
-    
+
     * Class::MOP
-      Class::MOP::Class      
+      Class::MOP::Class
       Class::MOP::Method
       Class::MOP::Method::Wrapped
       Class::MOP::Attribute
-      - switched usage of reftype to ref because 
+      - switched usage of reftype to ref because
         it is much faster
 
 0.58 Thurs. May 29, 2008
     (late night release engineering)--
-    
-    - fixing the version is META.yml, no functional 
+
+    - fixing the version is META.yml, no functional
       changes in this release
 
 0.57 Wed. May 28, 2008
@@ -663,13 +701,13 @@ Revision history for Perl extension Class-MOP.
         instead of manually grabbing each symbol
       - streamlining &initialize somewhat, since it gets
         called so much
-        
+
     * Class::MOP::Package
-      - made {get, has}_package_symbol not call 
-        &namespace so much 
-      - inlining a few calls to &name with 
+      - made {get, has}_package_symbol not call
+        &namespace so much
+      - inlining a few calls to &name with
         direct HASH access key access
-      - added get_all_package_symbols to fetch 
+      - added get_all_package_symbols to fetch
         a HASH of items based on a type filter
         similar to list_all_package_symbols
         - added tests for this
@@ -678,7 +716,7 @@ Revision history for Perl extension Class-MOP.
       Class::MOP::Method::Constructor
       Class::MOP::Method::Generated
       Class::MOP::Method::Accessor
-      - added more descriptive error message to help 
+      - added more descriptive error message to help
         keep people from wasting time tracking an error
         that is easily fixed by upgrading.
 
@@ -691,7 +729,7 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP
       - we now get the &check_package_cache_flag
         function from MRO::Compat
-      - All XS based functionality now has a 
+      - All XS based functionality now has a
         Pure Perl alternative
         - the CLASS_MOP_NO_XS environment variable
           can now be used to force non-XS versions
@@ -726,15 +764,15 @@ Revision history for Perl extension Class-MOP.
       Class::MOP::Method::Generated
       Class::MOP::Method::Accessor
       Class::MOP::Method::Consructor
-      - the &wrap constructor method now requires that a 
-        'package_name' and 'name' attribute are passed. This 
-        is to help support the no-XS version, and will 
-        throw an error if these are not supplied.      
+      - the &wrap constructor method now requires that a
+        'package_name' and 'name' attribute are passed. This
+        is to help support the no-XS version, and will
+        throw an error if these are not supplied.
       - all these classes are now bootstrapped properly
         and now store the package_name and name attributes
-        correctly as well        
+        correctly as well
 
-    ~ Build.PL has been removed since the 
+    ~ Build.PL has been removed since the
       Module::Install support has been removed
 
 0.55 Mon. April 28, 2008

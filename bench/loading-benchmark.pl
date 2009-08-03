@@ -2,9 +2,11 @@
 use strict;
 use Benchmark qw(:all);
 
-my $module = 'Moose';
+my($count, $module) = @ARGV;
+$count  ||= 10;
+$module ||= 'Moose';
 
-cmpthese timethese 10 => {
+cmpthese timethese $count => {
     released => sub {
         system( $^X, '-e', "require $module" ) == 0 or die;
     },

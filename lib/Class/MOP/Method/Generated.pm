@@ -6,7 +6,7 @@ use warnings;
 
 use Carp 'confess';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.91';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 

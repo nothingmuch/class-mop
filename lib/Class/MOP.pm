@@ -29,7 +29,7 @@ BEGIN {
     *check_package_cache_flag = \&mro::get_pkg_gen;
 }
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.91';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
@@ -92,10 +92,10 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
     for my $class (@classes) {
-        my $pmfile = _class_to_pmfile($class);
         my $e = _try_load_one_class($class);
 
         if ($e) {
+            my $pmfile = _class_to_pmfile($class);
             $exceptions{$class} = $e;
             last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
         }
@@ -219,6 +219,42 @@ Class::MOP::Package->meta->add_attribute(
     ))
 );
 
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('methods' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'get_method_map' => \&Class::MOP::Package::get_method_map
+        },
+        default => sub { {} }
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'method_metaclass' => \&Class::MOP::Package::method_metaclass
+        },
+        default  => 'Class::MOP::Method',
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'wrapped_method_metaclass' => \&Class::MOP::Package::wrapped_method_metaclass
+        },
+        default  => 'Class::MOP::Method::Wrapped',
+    ))
+);
+
 ## --------------------------------------------------------
 ## Class::MOP::Module
 
@@ -283,18 +319,6 @@ Class::MOP::Class->meta->add_attribute(
 );
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('methods' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'get_method_map' => \&Class::MOP::Class::get_method_map
-        },
-        default => sub { {} }
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('superclasses' => (
         accessor => {
             # NOTE:
@@ -316,30 +340,6 @@ Class::MOP::Class->meta->add_attribute(
             'attribute_metaclass' => \&Class::MOP::Class::attribute_metaclass
         },
         default  => 'Class::MOP::Attribute',
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'method_metaclass' => \&Class::MOP::Class::method_metaclass
-        },
-        default  => 'Class::MOP::Method',
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'wrapped_method_metaclass' => \&Class::MOP::Class::wrapped_method_metaclass
-        },
-        default  => 'Class::MOP::Method::Wrapped',
     ))
 );
 
@@ -691,8 +691,7 @@ undef Class::MOP::Instance->meta->{_package_cache_flag};
 # the compile time of the MOP, and gives us no actual benefits.
 
 $_->meta->make_immutable(
-    inline_constructor  => 1,
-    replace_constructor => 1,
+    inline_constructor  => 0,
     constructor_name    => "_new",
     inline_accessors => 0,
 ) for qw/
