@@ -32,7 +32,7 @@ sub new {
 
     my $name = $options{name};
 
-    (defined $name && $name)
+    (defined $name)
         || confess "You must provide a name for the attribute";
 
     $options{init_arg} = $name

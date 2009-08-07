@@ -854,14 +854,14 @@ sub invalidate_meta_instance {
 
 sub has_attribute {
     my ($self, $attribute_name) = @_;
-    (defined $attribute_name && $attribute_name)
+    (defined $attribute_name)
         || confess "You must define an attribute name";
     exists $self->get_attribute_map->{$attribute_name};
 }
 
 sub get_attribute {
     my ($self, $attribute_name) = @_;
-    (defined $attribute_name && $attribute_name)
+    (defined $attribute_name)
         || confess "You must define an attribute name";
     return $self->get_attribute_map->{$attribute_name}
     # NOTE:
@@ -872,7 +872,7 @@ sub get_attribute {
 
 sub remove_attribute {
     my ($self, $attribute_name) = @_;
-    (defined $attribute_name && $attribute_name)
+    (defined $attribute_name)
         || confess "You must define an attribute name";
     my $removed_attribute = $self->get_attribute_map->{$attribute_name};
     return unless defined $removed_attribute;
