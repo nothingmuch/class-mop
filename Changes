@@ -11,6 +11,11 @@ Revision history for Perl extension Class-MOP.
         object as the first argument, rather than just a
         coderef. (doy)
 
+    * Class::MOP::Attribute
+    * Class::MOP::Class
+      - Allow attribute names to be false (while still requiring them to be
+        defined). (rafl)
+
 0.91 Wed Jul 29, 2009
     * Class::MOP::Method::Wrapped
       - Fixing variable usage issues with the patch from previous
