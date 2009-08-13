@@ -43,6 +43,8 @@ use Scalar::Util 'refaddr';
 
 use base 'Class::MOP::Method::Accessor';
 
+sub is_inline{ 0 }
+
 ## Method generation helpers
 
 sub _generate_accessor_method {
