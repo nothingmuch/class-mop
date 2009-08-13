@@ -34,13 +34,6 @@ my @class_mop_package_methods = qw(
     add_package_symbol get_package_symbol has_package_symbol remove_package_symbol
     list_all_package_symbols get_all_package_symbols remove_package_glob
 
-    method_metaclass wrapped_method_metaclass
-
-    _method_map
-    _code_is_mine
-    has_method get_method add_method remove_method wrap_method_body
-    get_method_list get_method_map
-
     _deconstruct_variable_name
 );
 
@@ -50,6 +43,13 @@ my @class_mop_module_methods = qw(
     _instantiate_module
 
     version authority identifier create
+
+    method_metaclass wrapped_method_metaclass
+
+    _method_map
+    _code_is_mine
+    has_method get_method add_method remove_method wrap_method_body
+    get_method_list get_method_map
 );
 
 my @class_mop_class_methods = qw(
