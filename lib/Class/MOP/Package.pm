@@ -7,6 +7,7 @@ use warnings;
 use Scalar::Util 'blessed', 'reftype';
 use Carp         'confess';
 use Sub::Name    'subname';
+use Devel::GlobalDestruction 'in_global_destruction';
 
 our $VERSION   = '0.91';
 $VERSION = eval $VERSION;
@@ -23,7 +24,6 @@ sub initialize {
 
     my %options = @args;
     my $package_name = $options{package};
-
 
     # we hand-construct the class 
     # until we can bootstrap it
@@ -64,9 +64,11 @@ sub _new {
         if $class ne __PACKAGE__;
 
     my $params = @_ == 1 ? $_[0] : {@_};
+    $params->{anonymous} = 0 unless defined $params->{anonymous};
 
     return bless {
         package   => $params->{package},
+        anonymous => $params->{anonymous},
 
         # NOTE:
         # because of issues with the Perl API
@@ -79,6 +81,42 @@ sub _new {
         namespace => \undef,
 
     } => $class;
+}
+
+# Anonymous Packages
+
+my $ANON_PACKAGE_SERIAL = 0;
+sub anonymous_package_postfix { ++$ANON_PACKAGE_SERIAL }
+sub anonymous_package_prefix { undef }
+
+# NOTE:
+# this will only get called for
+# anon-packages, all other calls
+# are assumed to occur during
+# global destruction and so don't
+# really need to be handled explicitly
+sub DESTROY {
+    my $self = shift;
+
+    return if in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
+
+    my $name = $self->name;
+    return unless $self->is_anonymous; 
+    # Moose does a weird thing where it replaces the metaclass for
+    # class when fixing metaclass incompatibility. In that case,
+    # we don't want to clean out the namespace now. We can detect
+    # that because Moose will explicitly update the singleton
+    # cache in Class::MOP.
+    my $current_meta = Class::MOP::get_metaclass_by_name($name);
+    return if $current_meta ne $self;
+    my $prefix = $self->anonymous_package_prefix . '::';
+    my ($postfix) = ($name =~ /^$prefix(.+)/o);
+    no strict 'refs';
+    @{$name . '::ISA'} = ();
+    %{$name . '::'}    = ();
+    delete ${$prefix}{$postfix . '::'};
+
+    Class::MOP::remove_metaclass_by_name($name);
 }
 
 # Attributes
@@ -103,6 +141,7 @@ sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 
 sub _method_map              { $_[0]->{'methods'}                     }
+sub is_anonymous             { $_[0]->{'anonymous'}                   }
 
 # utility methods
 

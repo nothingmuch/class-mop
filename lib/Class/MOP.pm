@@ -207,6 +207,18 @@ Class::MOP::Package->meta->add_attribute(
 );
 
 Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('anonymous' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'is_anonymous' => \&Class::MOP::Package::is_anonymous
+        },
+        default => 0,
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
     Class::MOP::Attribute->new('namespace' => (
         reader => {
             # NOTE:

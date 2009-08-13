@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 300;
+use Test::More tests => 310;
 use Test::Exception;
 
 use Class::MOP;
@@ -42,6 +42,12 @@ my @class_mop_package_methods = qw(
     get_method_list get_method_map
 
     _deconstruct_variable_name
+
+    anonymous_package_prefix anonymous_package_postfix
+
+    is_anonymous
+    
+    DESTROY
 );
 
 my @class_mop_module_methods = qw(
@@ -98,8 +104,10 @@ my @class_mop_class_methods = qw(
 
     _immutable_metaclass
     immutable_trait constructor_name constructor_class destructor_class
+    
+    anonymous_package_prefix
 
-    DESTROY
+
 );
 
 # check the class ...
@@ -164,6 +172,7 @@ my @class_mop_package_attributes = (
     'methods',
     'method_metaclass',
     'wrapped_method_metaclass',
+    'anonymous',
 );
 
 my @class_mop_module_attributes = (

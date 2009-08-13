@@ -115,7 +115,8 @@ sub _new {
 
     return bless {
         # inherited from Class::MOP::Package
-        'package' => $options->{package},
+        'package'   => $options->{package},
+        'anonymous' => $options->{anonymous},
 
         # NOTE:
         # since the following attributes will
@@ -214,65 +215,23 @@ sub _check_metaclass_compatibility {
     }
 }
 
-## ANON classes
+# Anonymous Classes
 
-{
-    # NOTE:
-    # this should be sufficient, if you have a
-    # use case where it is not, write a test and
-    # I will change it.
-    my $ANON_CLASS_SERIAL = 0;
+sub is_anon_class {
+    return shift->is_anonymous;
+}
 
-    # NOTE:
-    # we need a sufficiently annoying prefix
-    # this should suffice for now, this is
-    # used in a couple of places below, so
-    # need to put it up here for now.
-    my $ANON_CLASS_PREFIX = 'Class::MOP::Class::__ANON__::SERIAL::';
+sub anonymous_package_prefix { 'Class::MOP::Class::__ANON__::SERIAL' }
 
-    sub is_anon_class {
-        my $self = shift;
-        no warnings 'uninitialized';
-        $self->name =~ /^$ANON_CLASS_PREFIX/o;
-    }
-
-    sub create_anon_class {
-        my ($class, %options) = @_;
-        my $package_name = $ANON_CLASS_PREFIX . ++$ANON_CLASS_SERIAL;
-        return $class->create($package_name, %options);
-    }
-
-    # NOTE:
-    # this will only get called for
-    # anon-classes, all other calls
-    # are assumed to occur during
-    # global destruction and so don't
-    # really need to be handled explicitly
-    sub DESTROY {
-        my $self = shift;
-
-        return if in_global_destruction(); # it'll happen soon anyway and this just makes things more complicated
-
-        no warnings 'uninitialized';
-        my $name = $self->name;
-        return unless $name =~ /^$ANON_CLASS_PREFIX/o;
-        # Moose does a weird thing where it replaces the metaclass for
-        # class when fixing metaclass incompatibility. In that case,
-        # we don't want to clean out the namespace now. We can detect
-        # that because Moose will explicitly update the singleton
-        # cache in Class::MOP.
-        my $current_meta = Class::MOP::get_metaclass_by_name($name);
-        return if $current_meta ne $self;
-
-        my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/o);
-        no strict 'refs';
-        @{$name . '::ISA'} = ();
-        %{$name . '::'}    = ();
-        delete ${$ANON_CLASS_PREFIX}{$serial_id . '::'};
-
-        Class::MOP::remove_metaclass_by_name($name);
-    }
-
+sub create_anon_class {
+    my ($class, %options) = @_;
+    my $package_name = sprintf (
+        '%s::%s', 
+        Class::MOP::Class->anonymous_package_prefix(), 
+        Class::MOP::Class->anonymous_package_postfix()
+    );
+    $options{anonymous} = 1;
+    return $class->create($package_name, %options);
 }
 
 # creating classes with MOP ...
