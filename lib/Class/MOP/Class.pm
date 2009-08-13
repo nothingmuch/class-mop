@@ -940,7 +940,7 @@ sub _immutable_options {
     my ( $self, @args ) = @_;
 
     return (
-        inline_accessors   => 0,
+        inline_accessors   => 1,
         inline_constructor => 1,
         inline_destructor  => 0,
         debug              => 0,
