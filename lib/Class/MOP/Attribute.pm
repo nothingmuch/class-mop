@@ -402,6 +402,8 @@ sub install_accessors {
     my $inline = shift;
     my $class  = $self->associated_class;
 
+    $inline = 1 unless defined $inline;
+
     $class->add_method(
         $self->_process_accessors('accessor' => $self->accessor(), $inline)
     ) if $self->has_accessor();
