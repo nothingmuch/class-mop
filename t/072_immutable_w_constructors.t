@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 79;
+use Test::More tests => 91;
 use Test::Exception;
 
 use Class::MOP;
@@ -76,7 +76,7 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
     }
 
     ok(!$meta->is_immutable, '... our class is not immutable');
@@ -122,7 +122,7 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
     }
 }
 
@@ -135,13 +135,13 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
 
         my $baz_accessor = $meta->get_method('baz');
         isa_ok($baz_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($baz_accessor, 'Class::MOP::Method');
 
-#        ok(!$baz_accessor->is_inline, '... the baz accessor is not inlined');
+        ok(!$baz_accessor->is_inline, '... the baz accessor is not inlined');
     }
 
     ok(!$meta->is_immutable, '... our class is not immutable');
@@ -179,13 +179,13 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
 
         my $baz_accessor = $meta->get_method('baz');
         isa_ok($baz_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($baz_accessor, 'Class::MOP::Method');
 
-#        ok($baz_accessor->is_inline, '... the baz accessor is not inlined');
+        ok($baz_accessor->is_inline, '... the baz accessor is not inlined');
     }
 }
 
@@ -198,19 +198,19 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is not inlined');
 
         my $baz_accessor = $meta->find_method_by_name('baz');
         isa_ok($baz_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($baz_accessor, 'Class::MOP::Method');
 
-#        ok($baz_accessor->is_inline, '... the baz accessor is inlined');
+        ok($baz_accessor->is_inline, '... the baz accessor is inlined');
 
         my $bah_accessor = $meta->get_method('bah');
         isa_ok($bah_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bah_accessor, 'Class::MOP::Method');
 
-#        ok(!$bah_accessor->is_inline, '... the baz accessor is not inlined');
+        ok(!$bah_accessor->is_inline, '... the baz accessor is not inlined');
     }
 
     ok(!$meta->is_immutable, '... our class is not immutable');
@@ -248,19 +248,19 @@ use Class::MOP;
         isa_ok($bar_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bar_accessor, 'Class::MOP::Method');
 
-#        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
+        ok(!$bar_accessor->is_inline, '... the bar accessor is still not inlined');
 
         my $baz_accessor = $meta->find_method_by_name('baz');
         isa_ok($baz_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($baz_accessor, 'Class::MOP::Method');
 
-#        ok($baz_accessor->is_inline, '... the baz accessor is not inlined');
+        ok($baz_accessor->is_inline, '... the baz accessor is not inlined');
 
         my $bah_accessor = $meta->get_method('bah');
         isa_ok($bah_accessor, 'Class::MOP::Method::Accessor');
         isa_ok($bah_accessor, 'Class::MOP::Method');
 
-#        ok($bah_accessor->is_inline, '... the baz accessor is not inlined');
+        ok($bah_accessor->is_inline, '... the baz accessor is not inlined');
     }
 }
 

@@ -45,8 +45,6 @@ our $VERSION = '0.01';
 
 use base 'Class::MOP::Method::Accessor';
 
-sub is_inline{ 0 }
-
 # generate the methods
 
 sub _generate_history_accessor_method {
