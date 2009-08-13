@@ -181,7 +181,8 @@ sub inline_create_instance {
 
 sub inline_slot_access {
     my ($self, $instance, $slot_name) = @_;
-    sprintf q[%s->{'%s'}], $instance, quotemeta($slot_name);
+    $slot_name =~ s/(['\\])/\\$1/g; # In '', only "'" and "\\" are meta characters.
+    sprintf q[%s->{'%s'}], $instance, $slot_name;
 }
 
 sub inline_get_slot_value {
