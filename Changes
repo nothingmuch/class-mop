@@ -3,13 +3,11 @@ Revision history for Perl extension Class-MOP.
 0.92
     * Class::MOP::Class
     * Class::MOP::Package
-      - Move get_method_map and its various scaffolding into
-        Package. (hdp)
+      - Move get_method_map and its various scaffolding into Package. (hdp)
 
     * Class::MOP::Method
-      - Allow Class::MOP::Method->wrap to take a Class::MOP::Method
-        object as the first argument, rather than just a
-        coderef. (doy)
+      - Allow Class::MOP::Method->wrap to take a Class::MOP::Method object as
+        the first argument, rather than just a coderef. (doy)
 
     * Class::MOP::Attribute
     * Class::MOP::Class
