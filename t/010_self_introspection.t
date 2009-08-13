@@ -161,14 +161,15 @@ foreach my $non_method_name (qw(
 my @class_mop_package_attributes = (
     'package',
     'namespace',
-    'methods',
-    'method_metaclass',
-    'wrapped_method_metaclass',
 );
 
 my @class_mop_module_attributes = (
     'version',
-    'authority'
+    'authority',
+
+    'methods',
+    'method_metaclass',
+    'wrapped_method_metaclass',
 );
 
 my @class_mop_class_attributes = (
@@ -244,35 +245,37 @@ is(ref($class_mop_package_meta->get_attribute('package')->reader), 'HASH', '... 
 ok($class_mop_package_meta->get_attribute('package')->has_init_arg, '... Class::MOP::Class package has a init_arg');
 is($class_mop_package_meta->get_attribute('package')->init_arg, 'package', '... Class::MOP::Class package\'s a init_arg is package');
 
-ok($class_mop_package_meta->get_attribute('method_metaclass')->has_reader, '... Class::MOP::Package method_metaclass has a reader');
-is_deeply($class_mop_package_meta->get_attribute('method_metaclass')->reader,
-   { 'method_metaclass' => \&Class::MOP::Package::method_metaclass },
-   '... Class::MOP::Package method_metaclass\'s a reader is &method_metaclass');
+# ... module
 
-ok($class_mop_package_meta->get_attribute('method_metaclass')->has_init_arg, '... Class::MOP::Package method_metaclass has a init_arg');
-is($class_mop_package_meta->get_attribute('method_metaclass')->init_arg,
+ok($class_mop_module_meta->get_attribute('method_metaclass')->has_reader, '... Class::MOP::Module method_metaclass has a reader');
+is_deeply($class_mop_module_meta->get_attribute('method_metaclass')->reader,
+   { 'method_metaclass' => \&Class::MOP::Module::method_metaclass },
+   '... Class::MOP::Module method_metaclass\'s a reader is &method_metaclass');
+
+ok($class_mop_module_meta->get_attribute('method_metaclass')->has_init_arg, '... Class::MOP::Module method_metaclass has a init_arg');
+is($class_mop_module_meta->get_attribute('method_metaclass')->init_arg,
   'method_metaclass',
-  '... Class::MOP::Package method_metaclass\'s init_arg is method_metaclass');
+  '... Class::MOP::Module method_metaclass\'s init_arg is method_metaclass');
 
-ok($class_mop_package_meta->get_attribute('method_metaclass')->has_default, '... Class::MOP::Package method_metaclass has a default');
-is($class_mop_package_meta->get_attribute('method_metaclass')->default,
+ok($class_mop_module_meta->get_attribute('method_metaclass')->has_default, '... Class::MOP::Module method_metaclass has a default');
+is($class_mop_module_meta->get_attribute('method_metaclass')->default,
    'Class::MOP::Method',
-  '... Class::MOP::Package method_metaclass\'s a default is Class::MOP:::Method');
+  '... Class::MOP::Module method_metaclass\'s a default is Class::MOP:::Method');
 
-ok($class_mop_package_meta->get_attribute('wrapped_method_metaclass')->has_reader, '... Class::MOP::Package wrapped_method_metaclass has a reader');
-is_deeply($class_mop_package_meta->get_attribute('wrapped_method_metaclass')->reader,
-   { 'wrapped_method_metaclass' => \&Class::MOP::Package::wrapped_method_metaclass },
-   '... Class::MOP::Package wrapped_method_metaclass\'s a reader is &wrapped_method_metaclass');
+ok($class_mop_module_meta->get_attribute('wrapped_method_metaclass')->has_reader, '... Class::MOP::Module wrapped_method_metaclass has a reader');
+is_deeply($class_mop_module_meta->get_attribute('wrapped_method_metaclass')->reader,
+   { 'wrapped_method_metaclass' => \&Class::MOP::Module::wrapped_method_metaclass },
+   '... Class::MOP::Module wrapped_method_metaclass\'s a reader is &wrapped_method_metaclass');
 
-ok($class_mop_package_meta->get_attribute('wrapped_method_metaclass')->has_init_arg, '... Class::MOP::Package wrapped_method_metaclass has a init_arg');
-is($class_mop_package_meta->get_attribute('wrapped_method_metaclass')->init_arg,
+ok($class_mop_module_meta->get_attribute('wrapped_method_metaclass')->has_init_arg, '... Class::MOP::Module wrapped_method_metaclass has a init_arg');
+is($class_mop_module_meta->get_attribute('wrapped_method_metaclass')->init_arg,
   'wrapped_method_metaclass',
-  '... Class::MOP::Package wrapped_method_metaclass\'s init_arg is wrapped_method_metaclass');
+  '... Class::MOP::Module wrapped_method_metaclass\'s init_arg is wrapped_method_metaclass');
 
-ok($class_mop_package_meta->get_attribute('method_metaclass')->has_default, '... Class::MOP::Package method_metaclass has a default');
-is($class_mop_package_meta->get_attribute('method_metaclass')->default,
+ok($class_mop_module_meta->get_attribute('method_metaclass')->has_default, '... Class::MOP::Module method_metaclass has a default');
+is($class_mop_module_meta->get_attribute('method_metaclass')->default,
    'Class::MOP::Method',
-  '... Class::MOP::Package method_metaclass\'s a default is Class::MOP:::Method');
+  '... Class::MOP::Module method_metaclass\'s a default is Class::MOP:::Method');
 
 
 # ... class
