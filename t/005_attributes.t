@@ -256,5 +256,5 @@ for(1 .. 2){
   ::ok($buzz4->has_bah, '...bah is set');
   ::is($buzz4->bah, undef, '...bah is undef');
 
-  Buzz->meta->make_immutable(inline_constructor => 1, replace_constructor => 1);
+  Buzz->meta->make_immutable();
 }
