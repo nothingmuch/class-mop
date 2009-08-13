@@ -12,6 +12,8 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method';
 
+use constant _PRINT_SOURCE => $ENV{MOP_PRINT_SOURCE} ? 1 : 0;
+
 ## accessors
 
 sub new {
@@ -35,7 +37,7 @@ sub _eval_closure {
     my $e = do {
         local $@;
         local $SIG{__DIE__};
-        $code = eval join
+        my $source = join
             "\n", (
             map {
                 /^([\@\%\$])/
@@ -48,6 +50,8 @@ sub _eval_closure {
                 } keys %$__captures
             ),
             $_[2];
+        print STDERR $_[0]->name, ' ', $source, "\n" if _PRINT_SOURCE;
+        $code = eval $source;
         $@;
     };
 
