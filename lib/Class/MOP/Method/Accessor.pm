@@ -35,6 +35,7 @@ sub new {
     # a cycle in the code, if not
     # needed
     weaken($self->{'attribute'});
+    weaken($self->{'associated_metaclass'});
 
     $self->_initialize_body;
 
@@ -58,8 +59,7 @@ sub _new {
         original_method      => $params->{original_method},
 
         # inherit from Class::MOP::Generated
-        is_inline            => ($params->{associated_metaclass}
-                                && $params->{associated_metaclass}->instance_metaclass->is_inlinable),
+        is_inline            => $params->{associated_metaclass}->instance_metaclass->is_inlinable,
         definition_context   => $params->{definition_context},
 
         # defined in this class
