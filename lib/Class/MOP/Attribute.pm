@@ -370,7 +370,6 @@ sub _process_accessors {
         return ($name, $method);
     }
     else {
-        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
         my $method;
         eval {
             if ( $method_ctx ) {
@@ -384,7 +383,6 @@ sub _process_accessors {
 
             $method = $self->accessor_metaclass->new(
                 attribute     => $self,
-                is_inline     => $inline_me,
                 accessor_type => $type,
                 package_name  => $self->associated_class->name,
                 name          => $accessor,

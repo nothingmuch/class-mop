@@ -940,7 +940,6 @@ sub _immutable_options {
     my ( $self, @args ) = @_;
 
     return (
-        inline_accessors   => 1,
         inline_constructor => 1,
         inline_destructor  => 0,
         debug              => 0,
@@ -1044,7 +1043,6 @@ sub _immutable_metaclass {
 
     $immutable_meta->make_immutable(
         inline_constructor => 0,
-        inline_accessors   => 0,
     );
 
     return $class_name;
@@ -1077,7 +1075,6 @@ sub _install_inlined_code {
     my ( $self, %args ) = @_;
 
     # FIXME
-    $self->_inline_accessors(%args)   if $args{inline_accessors};
     $self->_inline_constructor(%args) if $args{inline_constructor};
     $self->_inline_destructor(%args)  if $args{inline_destructor};
 }
@@ -1091,6 +1088,8 @@ sub _rebless_as_mutable {
 }
 
 sub _inline_accessors {
+    Carp::cluck("The _inline_accessors method is deprecated and will be removed in a future release.\n");
+
     my $self = shift;
 
     foreach my $attr_name ( $self->get_attribute_list ) {
@@ -1584,8 +1583,6 @@ the class and its metaclass object immutable.
 This method accepts the following options:
 
 =over 8
-
-=item * inline_accessors
 
 =item * inline_constructor
 
