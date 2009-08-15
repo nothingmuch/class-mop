@@ -58,7 +58,8 @@ sub _new {
         original_method      => $params->{original_method},
 
         # inherit from Class::MOP::Generated
-        is_inline            => $params->{is_inline} || 0,
+        is_inline            => ($params->{associated_metaclass}
+                                && $params->{associated_metaclass}->instance_metaclass->is_inlinable),
         definition_context   => $params->{definition_context},
 
         # defined in this class
