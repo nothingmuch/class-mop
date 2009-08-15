@@ -356,15 +356,19 @@ sub _process_accessors {
         $method_ctx = { %$ctx };
     }
 
+    my $metaclass = $self->associated_class;
+
     if (ref($accessor)) {
         (ref($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
+
         $method = $self->accessor_metaclass->wrap(
-            $method,
-            package_name => $self->associated_class->name,
-            name         => $name,
-            definition_context => $method_ctx,
+            body                 => $method,
+            associated_metaclass => $metaclass,
+            package_name         => $metaclass->name,
+            name                 => $name,
+            definition_context   => $method_ctx,
         );
         $self->associate_method($method);
         return ($name, $method);
@@ -382,11 +386,12 @@ sub _process_accessors {
             }
 
             $method = $self->accessor_metaclass->new(
-                attribute     => $self,
-                accessor_type => $type,
-                package_name  => $self->associated_class->name,
-                name          => $accessor,
-                definition_context => $method_ctx,
+                attribute            => $self,
+                accessor_type        => $type,
+                associated_metaclass => $metaclass,
+                package_name         => $metaclass->name,
+                name                 => $accessor,
+                definition_context   => $method_ctx,
             );
         };
         confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;
