@@ -18,37 +18,40 @@
 
 void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
 
-typedef enum {
-    KEY_name,
-    KEY_package,
-    KEY_package_name,
-    KEY_body,
-    KEY_package_cache_flag,
-    KEY_methods,
-    KEY_VERSION,
-    KEY_ISA,
-    key_last,
-} mop_prehashed_key_t;
 
-#define KEY_FOR(name)  mop_prehashed_key_for(KEY_ ##name)
-#define HASH_FOR(name) mop_prehashed_hash_for(KEY_ ##name)
+#define MAKE_KEYSV(name) newSVpvn_share(#name, sizeof(#name)-1, 0U)
 
-void mop_prehash_keys (void);
-SV *mop_prehashed_key_for (mop_prehashed_key_t key);
-U32 mop_prehashed_hash_for (mop_prehashed_key_t key);
+CV* mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl));
 
 #define INSTALL_SIMPLE_READER(klass, name)  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
-#define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) \
-    { \
-        CV *cv = newXS("Class::MOP::" #klass "::" #name, mop_xs_simple_reader, __FILE__); \
-        CvXSUBANY(cv).any_i32 = KEY_ ##key; \
-    }
+#define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_reader)
 
+#define INSTALL_SIMPLE_WRITER(klass, name)  INSTALL_SIMPLE_WRITER_WITH_KEY(klass, name, name)
+#define INSTALL_SIMPLE_WRITER_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_writer)
+
+#define INSTALL_SIMPLE_PREDICATE(klass, name)  INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, name)
+#define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) (void)mop_install_simple_accessor(aTHX_ "Class::MOP::" #klass "::has_" #name, #key, sizeof(#key)-1, mop_xs_simple_predicate_for_metaclass)
+
+
+XS(mop_xs_simple_accessor);
 XS(mop_xs_simple_reader);
+XS(mop_xs_simple_writer);
+XS(mop_xs_simple_predicate);
+XS(mop_xs_simple_predicate_for_metaclass);
+XS(mop_xs_simple_clearer);
 
 extern SV *mop_method_metaclass;
 extern SV *mop_associated_metaclass;
+extern SV *mop_associated_attribute;
 extern SV *mop_wrap;
+extern SV *mop_methods;
+extern SV *mop_name;
+extern SV *mop_body;
+extern SV *mop_package;
+extern SV *mop_package_name;
+extern SV *mop_package_cache_flag;
+extern SV *mop_VERSION;
+extern SV *mop_ISA;
 
 UV mop_check_package_cache_flag(pTHX_ HV *stash);
 int mop_get_code_info (SV *coderef, char **pkg, char **name);

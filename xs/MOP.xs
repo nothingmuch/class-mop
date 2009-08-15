@@ -2,7 +2,17 @@
 
 SV *mop_method_metaclass;
 SV *mop_associated_metaclass;
+SV *mop_associated_attribute;
 SV *mop_wrap;
+SV *mop_methods;
+SV *mop_name;
+SV *mop_body;
+SV *mop_package;
+SV *mop_package_name;
+SV *mop_package_cache_flag;
+
+SV *mop_VERSION;
+SV *mop_ISA;
 
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
@@ -16,23 +26,36 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 }
 
 EXTERN_C XS(boot_Class__MOP__Package);
+EXTERN_C XS(boot_Class__MOP__Class);
 EXTERN_C XS(boot_Class__MOP__Attribute);
 EXTERN_C XS(boot_Class__MOP__Method);
+EXTERN_C XS(boot_Class__MOP__Instance);
+EXTERN_C XS(boot_Class__MOP__Method__Accessor);
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 PROTOTYPES: DISABLE
 
 BOOT:
-    mop_prehash_keys();
-
-    mop_method_metaclass     = newSVpvs("method_metaclass");
-    mop_wrap                 = newSVpvs("wrap");
-    mop_associated_metaclass = newSVpvs("associated_metaclass");
+    mop_method_metaclass     = MAKE_KEYSV(method_metaclass);
+    mop_wrap                 = MAKE_KEYSV(wrap);
+    mop_associated_metaclass = MAKE_KEYSV(associated_metaclass);
+    mop_associated_attribute = MAKE_KEYSV(associated_attribute);
+    mop_methods              = MAKE_KEYSV(methods);
+    mop_name                 = MAKE_KEYSV(name);
+    mop_body                 = MAKE_KEYSV(body);
+    mop_package              = MAKE_KEYSV(package);
+    mop_package_name         = MAKE_KEYSV(package_name);
+    mop_package_cache_flag   = MAKE_KEYSV(_package_cache_flag);
+    mop_VERSION              = MAKE_KEYSV(VERSION);
+    mop_ISA                  = MAKE_KEYSV(ISA);
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
+    MOP_CALL_BOOT (boot_Class__MOP__Class);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
     MOP_CALL_BOOT (boot_Class__MOP__Method);
+    MOP_CALL_BOOT (boot_Class__MOP__Instance);
+    MOP_CALL_BOOT (boot_Class__MOP__Method__Accessor);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
 void
@@ -68,8 +91,8 @@ is_class_loaded(klass=&PL_sv_undef)
             XSRETURN_NO;
         }
 
-        if (hv_exists_ent (stash, KEY_FOR(VERSION), HASH_FOR(VERSION))) {
-            HE *version = hv_fetch_ent(stash, KEY_FOR(VERSION), 0, HASH_FOR(VERSION));
+        if (hv_exists_ent (stash, mop_VERSION, 0U)) {
+            HE *version = hv_fetch_ent(stash, mop_VERSION, 0, 0U);
             SV *version_sv;
             if (version && HeVAL(version) && (version_sv = GvSV(HeVAL(version)))) {
                 if (SvROK(version_sv)) {
@@ -85,8 +108,8 @@ is_class_loaded(klass=&PL_sv_undef)
             }
         }
 
-        if (hv_exists_ent (stash, KEY_FOR(ISA), HASH_FOR(ISA))) {
-            HE *isa = hv_fetch_ent(stash, KEY_FOR(ISA), 0, HASH_FOR(ISA));
+        if (hv_exists_ent (stash, mop_ISA, 0U)) {
+            HE *isa = hv_fetch_ent(stash, mop_ISA, 0, 0U);
             if (isa && HeVAL(isa) && GvAV(HeVAL(isa)) && av_len(GvAV(HeVAL(isa))) != -1) {
                 XSRETURN_YES;
             }

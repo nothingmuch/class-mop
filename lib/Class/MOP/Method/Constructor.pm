@@ -67,8 +67,8 @@ sub _new {
 
 ## accessors
 
-sub options              { (shift)->{'options'}              }
-sub associated_metaclass { (shift)->{'associated_metaclass'} }
+#sub options              { (shift)->{'options'}              }
+#sub associated_metaclass { (shift)->{'associated_metaclass'} }
 
 ## cached values ...
 

@@ -9,7 +9,7 @@ mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark)
     PUTBACK;
 }
 
-#if PERL_VERSION >= 10
+#if PERL_BCDVERSION >= 0x5010000
 UV
 mop_check_package_cache_flag (pTHX_ HV *stash)
 {
@@ -130,7 +130,6 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
         char *key;
         STRLEN keylen;
         char *package;
-        SV *fq;
 
         switch( SvTYPE(gv) ) {
 #ifndef SVt_RV
@@ -143,6 +142,7 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
                  * return CODE symbols */
                 if (filter == TYPE_FILTER_CODE) {
                     if (SvROK(gv)) {
+                        SV* fq;
                         /* we don't really care about the length,
                            but that's the API */
                         key = HePV(he, keylen);
@@ -200,81 +200,160 @@ mop_get_all_package_symbols (HV *stash, type_filter_t filter)
     return ret;
 }
 
-#define DECLARE_KEY(name)                    { #name, #name, NULL, 0 }
-#define DECLARE_KEY_WITH_VALUE(name, value)  { #name, value, NULL, 0 }
+static MGVTBL mop_accessor_vtbl; /* the MAGIC identity */
 
-/* the order of these has to match with those in mop.h */
-static struct {
-    const char *name;
-    const char *value;
-    SV *key;
-    U32 hash;
-} prehashed_keys[key_last] = {
-    DECLARE_KEY(name),
-    DECLARE_KEY(package),
-    DECLARE_KEY(package_name),
-    DECLARE_KEY(body),
-    DECLARE_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag"),
-    DECLARE_KEY(methods),
-    DECLARE_KEY(VERSION),
-    DECLARE_KEY(ISA)
-};
+CV*
+mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl)){
+    CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
+    SV* const keysv = newSVpvn_share(key, keylen, 0U);
 
-SV *
-mop_prehashed_key_for (mop_prehashed_key_t key)
-{
-    return prehashed_keys[key].key;
+    sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, NULL, 0);
+    SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
+    return xsub;
 }
 
-U32
-mop_prehashed_hash_for (mop_prehashed_key_t key)
-{
-    return prehashed_keys[key].hash;
-}
+static MAGIC*
+mop_mg_find_by_vtbl(pTHX_ SV* const sv, const MGVTBL* const vtbl){
+    MAGIC* mg;
 
-void
-mop_prehash_keys ()
-{
-    int i;
-    for (i = 0; i < key_last; i++) {
-        const char *value = prehashed_keys[i].value;
-        prehashed_keys[i].key = newSVpv(value, strlen(value));
-        PERL_HASH(prehashed_keys[i].hash, value, strlen(value));
+    assert(sv != NULL);
+    for(mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic){
+        if(mg->mg_virtual == vtbl){
+            break;
+        }
     }
+    return mg;
 }
+
+static SV*
+mop_fetch_attr(pTHX_ SV* const self, SV* const key, I32 const create, CV* const cv){
+    HE* he;
+    if (!SvROK(self)) {
+        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
+    }
+    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
+        croak("object is not a hashref");
+    }
+    if((he = hv_fetch_ent((HV*)SvRV(self), key, create, 0U))){
+        return HeVAL(he);
+    }
+    return NULL;
+}
+static SV*
+mop_delete_attr(pTHX_ SV* const self, SV* const key, CV* const cv){
+    SV* sv;
+    if (!SvROK(self)) {
+        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
+    }
+    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
+        croak("object is not a hashref");
+    }
+    if((sv = hv_delete_ent((HV*)SvRV(self), key, 0, 0U))){
+        return sv;
+    }
+    return NULL;
+}
+
+XS(mop_xs_simple_accessor)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+    if(items == 1){ /* reader */
+        attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    }
+    else if (items == 2){ /* writer */
+        attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
+        sv_setsv(attr, ST(1));
+    }
+    else{
+        croak("expected exactly one or two argument");
+    }
+    ST(0) = attr ? attr : &PL_sv_undef;
+    XSRETURN(1);
+}
+
 
 XS(mop_xs_simple_reader)
 {
-#ifdef dVAR
     dVAR; dXSARGS;
-#else
-    dXSARGS;
-#endif
-    register HE *he;
-    mop_prehashed_key_t key = (mop_prehashed_key_t)CvXSUBANY(cv).any_i32;
-    SV *self;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
 
     if (items != 1) {
         croak("expected exactly one argument");
     }
 
-    self = ST(0);
-
-    if (!SvROK(self)) {
-        croak("can't call %s as a class method", prehashed_keys[key].name);
-    }
-
-    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
-        croak("object is not a hashref");
-    }
-
-    if ((he = hv_fetch_ent((HV *)SvRV(self), prehashed_keys[key].key, 0, prehashed_keys[key].hash))) {
-        ST(0) = HeVAL(he);
-    }
-    else {
-        ST(0) = &PL_sv_undef;
-    }
-
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = attr ? attr : &PL_sv_undef;
     XSRETURN(1);
 }
 
+XS(mop_xs_simple_writer)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 2) {
+        croak("expected exactly two argument");
+    }
+
+    attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
+    sv_setsv(attr, ST(1));
+    ST(0) = attr;
+    XSRETURN(1);
+}
+
+XS(mop_xs_simple_clearer)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
+    }
+
+    attr = mop_delete_attr(aTHX_ ST(0), key, cv);
+    ST(0) = attr ? attr : &PL_sv_undef;
+    XSRETURN(1);
+}
+
+
+XS(mop_xs_simple_predicate)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
+    }
+
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = boolSV(attr); /* exists */
+    XSRETURN(1);
+}
+
+
+XS(mop_xs_simple_predicate_for_metaclass)
+{
+    dVAR; dXSARGS;
+    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
+    SV* const key   = mg->mg_obj;
+    SV* attr;
+
+    if (items != 1) {
+        croak("expected exactly one argument");
+    }
+
+    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
+    ST(0) = boolSV(attr && SvOK(attr)); /* defined */
+    XSRETURN(1);
+}
