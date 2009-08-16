@@ -33,12 +33,12 @@ sub _new {
 
 sub version {  
     my $self = shift;
-    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'VERSION', create => 1 })};
+    ${$self->get_package_symbol('$VERSION', create => 1)};
 }
 
 sub authority {  
     my $self = shift;
-    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'AUTHORITY', create => 1 })};
+    ${$self->get_package_symbol('$AUTHORITY', create => 1)};
 }
 
 sub identifier {

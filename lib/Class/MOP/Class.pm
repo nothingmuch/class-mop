@@ -264,8 +264,10 @@ sub _check_metaclass_compatibility {
         my $current_meta = Class::MOP::get_metaclass_by_name($name);
         return if $current_meta ne $self;
 
+        if(my $isa_ref = $self->get_package_symbol('@ISA')){
+            @{$isa_ref} = ();
+        }
 
-        @{$self->get_package_symbol({name => 'ISA', type => 'ARRAY', sigil => '$', create => 1 })} = ();
         %{ $self->namespace } = ();
 
         my ($serial_id) = ($name =~ /^$ANON_CLASS_PREFIX(\d+)/o);
@@ -512,10 +514,9 @@ sub rebless_instance_away {
 
 sub superclasses {
     my $self     = shift;
-    my $var_spec = { sigil => '@', type => 'ARRAY', name => 'ISA', create => 1 };
     if (@_) {
         my @supers = @_;
-        @{$self->get_package_symbol($var_spec)} = @supers;
+        @{$self->get_package_symbol('@ISA', create => 1)} = @supers;
 
         # NOTE:
         # on 5.8 and below, we need to call
@@ -534,7 +535,7 @@ sub superclasses {
         $self->_check_metaclass_compatibility();
         $self->_superclasses_updated();
     }
-    @{$self->get_package_symbol($var_spec)};
+    @{$self->get_package_symbol('@ISA', create => 1)};
 }
 
 sub _superclasses_updated {
