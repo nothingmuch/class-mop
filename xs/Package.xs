@@ -9,150 +9,150 @@ mop_deconstruct_variable_name(pTHX_ SV* const variable,
     const char** const type_name) {
 
 
-	if(SvROK(variable) && SvTYPE(SvRV(variable)) == SVt_PVHV){
-		/* e.g. variable = { type => "SCALAR", name => "foo" } */
-		HV* const hv = (HV*)SvRV(variable);
-		SV** svp;
-		STRLEN len;
-		const char* pv;
+    if(SvROK(variable) && SvTYPE(SvRV(variable)) == SVt_PVHV){
+        /* e.g. variable = { type => "SCALAR", name => "foo" } */
+        HV* const hv = (HV*)SvRV(variable);
+        SV** svp;
+        STRLEN len;
+        const char* pv;
 
-		svp = hv_fetchs(hv, "name", FALSE);
-		if(!(svp && SvOK(*svp))){
-			croak("You must pass a variable name");
-		}
-		*var_name     = SvPV_const(*svp, len);
-		*var_name_len = len;
-		if(len < 1){
-			croak("You must pass a variable name");
-		}
+        svp = hv_fetchs(hv, "name", FALSE);
+        if(!(svp && SvOK(*svp))){
+            croak("You must pass a variable name");
+        }
+        *var_name     = SvPV_const(*svp, len);
+        *var_name_len = len;
+        if(len < 1){
+            croak("You must pass a variable name");
+        }
 
-		svp = hv_fetchs(hv, "type", FALSE);
-		if(!(svp && SvOK(*svp))) {
-			croak("You must pass a variable type");
-		}
-		pv = SvPV_nolen_const(*svp);
-		if(strEQ(pv, "SCALAR")){
-			*type = SVt_PV; /* for all the type of scalars */
-		}
-		else if(strEQ(pv, "ARRAY")){
-			*type = SVt_PVAV;
-		}
-		else if(strEQ(pv, "HASH")){
-			*type = SVt_PVHV;
-		}
-		else if(strEQ(pv, "CODE")){
-			*type = SVt_PVCV;
-		}
-		else if(strEQ(pv, "GLOB")){
-			*type = SVt_PVGV;
-		}
-		else if(strEQ(pv, "IO")){
-			*type = SVt_PVIO;
-		}
-		else{
-			croak("I do not recognize that type '%s'", pv);
-		}
-		*type_name = pv;
-	}
-	else {
-		STRLEN len;
-		const char* pv;
-		/* e.g. variable = '$foo' */
-		if(!SvOK(variable)) {
-			croak("You must pass a variable name");
-		}
-		pv = SvPV_const(variable, len);
-		if(len < 2){
-			croak("You must pass a variable name including a sigil");
-		}
+        svp = hv_fetchs(hv, "type", FALSE);
+        if(!(svp && SvOK(*svp))) {
+            croak("You must pass a variable type");
+        }
+        pv = SvPV_nolen_const(*svp);
+        if(strEQ(pv, "SCALAR")){
+            *type = SVt_PV; /* for all the type of scalars */
+        }
+        else if(strEQ(pv, "ARRAY")){
+            *type = SVt_PVAV;
+        }
+        else if(strEQ(pv, "HASH")){
+            *type = SVt_PVHV;
+        }
+        else if(strEQ(pv, "CODE")){
+            *type = SVt_PVCV;
+        }
+        else if(strEQ(pv, "GLOB")){
+            *type = SVt_PVGV;
+        }
+        else if(strEQ(pv, "IO")){
+            *type = SVt_PVIO;
+        }
+        else{
+            croak("I do not recognize that type '%s'", pv);
+        }
+        *type_name = pv;
+    }
+    else {
+        STRLEN len;
+        const char* pv;
+        /* e.g. variable = '$foo' */
+        if(!SvOK(variable)) {
+            croak("You must pass a variable name");
+        }
+        pv = SvPV_const(variable, len);
+        if(len < 2){
+            croak("You must pass a variable name including a sigil");
+        }
 
-		*var_name     = pv  + 1;
-		*var_name_len = len - 1;
+        *var_name     = pv  + 1;
+        *var_name_len = len - 1;
 
-		switch(pv[0]){
-		case '$':
-			*type      = SVt_PV; /* for all the types of scalars */
-			*type_name = "SCALAR";
-			break;
-		case '@':
-			*type      = SVt_PVAV;
-			*type_name = "ARRAY";
-			break;
-		case '%':
-			*type      = SVt_PVHV;
-			*type_name = "HASH";
-			break;
-		case '&':
-			*type      = SVt_PVCV;
-			*type_name = "CODE";
-			break;
-		case '*':
-			*type      = SVt_PVGV;
-			*type_name = "GLOB";
-			break;
-		default:
-			croak("I do not recognize that sigil '%c'", pv[0]);
-		}
-	}
+        switch(pv[0]){
+        case '$':
+            *type      = SVt_PV; /* for all the types of scalars */
+            *type_name = "SCALAR";
+            break;
+        case '@':
+            *type      = SVt_PVAV;
+            *type_name = "ARRAY";
+            break;
+        case '%':
+            *type      = SVt_PVHV;
+            *type_name = "HASH";
+            break;
+        case '&':
+            *type      = SVt_PVCV;
+            *type_name = "CODE";
+            break;
+        case '*':
+            *type      = SVt_PVGV;
+            *type_name = "GLOB";
+            break;
+        default:
+            croak("I do not recognize that sigil '%c'", pv[0]);
+        }
+    }
 }
 
 static GV*
 mop_get_gv(pTHX_ SV* const self, svtype const type, const char* const var_name, I32 const var_name_len, I32 const flags){
-	SV* package_name;
+    SV* package_name;
 
-	if(!(flags & ~GV_NOADD_MASK)){ /* for shortcut fetching */
-		SV* const ns = mop_call0(aTHX_ self, mop_namespace);
-		GV** gvp;
-		if(!(SvROK(ns) && SvTYPE(SvRV(ns)) == SVt_PVHV)){
-			croak("namespace() did not return a hash reference");
-		}
-		gvp = (GV**)hv_fetch((HV*)SvRV(ns), var_name, var_name_len, FALSE);
-		if(gvp && isGV_with_GP(*gvp)){
-			return *gvp;
-		}
-	}
+    if(!(flags & ~GV_NOADD_MASK)){ /* for shortcut fetching */
+        SV* const ns = mop_call0(aTHX_ self, mop_namespace);
+        GV** gvp;
+        if(!(SvROK(ns) && SvTYPE(SvRV(ns)) == SVt_PVHV)){
+            croak("namespace() did not return a hash reference");
+        }
+        gvp = (GV**)hv_fetch((HV*)SvRV(ns), var_name, var_name_len, FALSE);
+        if(gvp && isGV_with_GP(*gvp)){
+            return *gvp;
+        }
+    }
 
-	package_name = mop_call0(aTHX_ self, KEY_FOR(name));
+    package_name = mop_call0(aTHX_ self, KEY_FOR(name));
 
-	if(!SvOK(package_name)){
-		croak("name() did not return a defined value");
-	}
+    if(!SvOK(package_name)){
+        croak("name() did not return a defined value");
+    }
 
-	return gv_fetchpv(Perl_form(aTHX_ "%"SVf"::%s", package_name, var_name), flags, type);
+    return gv_fetchpv(Perl_form(aTHX_ "%"SVf"::%s", package_name, var_name), flags, type);
 }
 
 static SV*
 mop_gv_elem(pTHX_ GV* const gv, svtype const type, I32 const add){
-	SV* sv;
+    SV* sv;
 
-	if(!gv){
-		return NULL;
-	}
+    if(!gv){
+        return NULL;
+    }
 
-	assert(isGV_with_GP(gv));
+    assert(isGV_with_GP(gv));
 
-	switch(type){
-	case SVt_PVAV:
-		sv = (SV*)(add ? GvAVn(gv) : GvAV(gv));
-		break;
-	case SVt_PVHV:
-		sv = (SV*)(add ? GvHVn(gv) : GvHV(gv));
-		break;
-	case SVt_PVCV:
-		sv = (SV*)GvCV(gv);
-		break;
-	case SVt_PVIO:
-		sv = (SV*)(add ? GvIOn(gv) : GvIO(gv));
-		break;
-	case SVt_PVGV:
-		sv = (SV*)gv;
-		break;
-	default: /* SCALAR */
-		sv =       add ? GvSVn(gv) : GvSV(gv);
-		break;
-	}
+    switch(type){
+    case SVt_PVAV:
+        sv = (SV*)(add ? GvAVn(gv) : GvAV(gv));
+        break;
+    case SVt_PVHV:
+        sv = (SV*)(add ? GvHVn(gv) : GvHV(gv));
+        break;
+    case SVt_PVCV:
+        sv = (SV*)GvCV(gv);
+        break;
+    case SVt_PVIO:
+        sv = (SV*)(add ? GvIOn(gv) : GvIO(gv));
+        break;
+    case SVt_PVGV:
+        sv = (SV*)gv;
+        break;
+    default: /* SCALAR */
+        sv =       add ? GvSVn(gv) : GvSV(gv);
+        break;
+    }
 
-	return sv;
+    return sv;
 }
 
 
@@ -198,105 +198,105 @@ BOOT:
 SV*
 add_package_symbol(SV* self, SV* variable, SV* ref = &PL_sv_undef)
 PREINIT:
-	svtype type;
-	const char* type_name;
-	const char* var_name;
-	STRLEN var_name_len;
-	GV* gv;
+    svtype type;
+    const char* type_name;
+    const char* var_name;
+    STRLEN var_name_len;
+    GV* gv;
 CODE:
-	mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
-	gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, GV_ADDMULTI);
+    mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
+    gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, GV_ADDMULTI);
 
-	if(SvOK(ref)){ /* add_package_symbol with a value */
-		if(type == SVt_PV){
-			if(!SvROK(ref)){
-				ref = newRV_noinc(newSVsv(ref));
-				sv_2mortal(ref);
-			}
-		}
-		else if(!(SvROK(ref) && SvTYPE(SvRV(ref)) == type)){
-			croak("You must pass a reference of %s for the value of %s", type_name, GvNAME(CvGV(cv)));
-		}
+    if(SvOK(ref)){ /* add_package_symbol with a value */
+        if(type == SVt_PV){
+            if(!SvROK(ref)){
+                ref = newRV_noinc(newSVsv(ref));
+                sv_2mortal(ref);
+            }
+        }
+        else if(!(SvROK(ref) && SvTYPE(SvRV(ref)) == type)){
+            croak("You must pass a reference of %s for the value of %s", type_name, GvNAME(CvGV(cv)));
+        }
 
-		if(type == SVt_PVCV && GvCV(gv)){
-			/* XXX: clear it before redefinition */
-			SvREFCNT_dec(GvCV(gv));
-			GvCV(gv) = NULL;
-		}
-		sv_setsv_mg((SV*)gv, ref); /* magical assignment into type glob (*glob = $ref) */
+        if(type == SVt_PVCV && GvCV(gv)){
+            /* XXX: clear it before redefinition */
+            SvREFCNT_dec(GvCV(gv));
+            GvCV(gv) = NULL;
+        }
+        sv_setsv_mg((SV*)gv, ref); /* magical assignment into type glob (*glob = $ref) */
 
-		if(type == SVt_PVCV){ /* name a subroutine */
-			CV* const subr = (CV*)SvRV(ref);
-			if(CvANON(subr)
-				&& CvGV(subr)
-				&& isGV(CvGV(subr))
-				&& strEQ(GvNAME(CvGV(subr)), "__ANON__")){
+        if(type == SVt_PVCV){ /* name a subroutine */
+            CV* const subr = (CV*)SvRV(ref);
+            if(CvANON(subr)
+                && CvGV(subr)
+                && isGV(CvGV(subr))
+                && strEQ(GvNAME(CvGV(subr)), "__ANON__")){
 
-				CvGV(subr) = gv;
-				CvANON_off(subr);
-			}
-		}
-		RETVAL = ref;
-		SvREFCNT_inc_simple_void_NN(ref);
-	}
-	else{
-		SV* const sv = mop_gv_elem(aTHX_ gv, type, GV_ADDMULTI);
-		RETVAL = (sv && GIMME_V != G_VOID) ? newRV_inc(sv) : &PL_sv_undef;
-	}
+                CvGV(subr) = gv;
+                CvANON_off(subr);
+            }
+        }
+        RETVAL = ref;
+        SvREFCNT_inc_simple_void_NN(ref);
+    }
+    else{
+        SV* const sv = mop_gv_elem(aTHX_ gv, type, GV_ADDMULTI);
+        RETVAL = (sv && GIMME_V != G_VOID) ? newRV_inc(sv) : &PL_sv_undef;
+    }
 OUTPUT:
-	RETVAL
+    RETVAL
 
 bool
 has_package_symbol(SV* self, SV* variable)
 PREINIT:
-	svtype type;
-	const char* type_name;
-	const char* var_name;
-	STRLEN var_name_len;
-	GV* gv;
+    svtype type;
+    const char* type_name;
+    const char* var_name;
+    STRLEN var_name_len;
+    GV* gv;
 CODE:
-	mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
-	gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, 0);
-	RETVAL = mop_gv_elem(aTHX_ gv, type, FALSE) ? TRUE : FALSE;
+    mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
+    gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, 0);
+    RETVAL = mop_gv_elem(aTHX_ gv, type, FALSE) ? TRUE : FALSE;
 OUTPUT:
-	RETVAL
+    RETVAL
 
 SV*
 get_package_symbol(SV* self, SV* variable, ...)
 PREINIT:
-	svtype type;
-	const char* type_name;
-	const char* var_name;
-	STRLEN var_name_len;
-	I32 flags = 0;
-	GV* gv;
-	SV* sv;
+    svtype type;
+    const char* type_name;
+    const char* var_name;
+    STRLEN var_name_len;
+    I32 flags = 0;
+    GV* gv;
+    SV* sv;
 CODE:
-	{ /* parse options */
-		I32 i;
-		if((items % 2) != 0){
-			croak("Odd number of arguments for get_package_symbol()");
-		}
-		for(i = 2; i < items; i += 2){
-			SV* const opt = ST(i);
-			SV* const val = ST(i+1);
-			if(strEQ(SvPV_nolen_const(opt), "create")){
-				if(SvTRUE(val)){
-					flags |= GV_ADDMULTI;
-				}
-				else{
-					flags &= ~GV_ADDMULTI;
-				}
-			}
-			else{
-				warn("Unknown option \"%"SVf"\" for get_package_symbol()", opt);
-			}
-		}
-	}
-	mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
-	gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, flags);
-	sv = mop_gv_elem(aTHX_ gv, type, FALSE);
+    { /* parse options */
+        I32 i;
+        if((items % 2) != 0){
+            croak("Odd number of arguments for get_package_symbol()");
+        }
+        for(i = 2; i < items; i += 2){
+            SV* const opt = ST(i);
+            SV* const val = ST(i+1);
+            if(strEQ(SvPV_nolen_const(opt), "create")){
+                if(SvTRUE(val)){
+                    flags |= GV_ADDMULTI;
+                }
+                else{
+                    flags &= ~GV_ADDMULTI;
+                }
+            }
+            else{
+                warn("Unknown option \"%"SVf"\" for get_package_symbol()", opt);
+            }
+        }
+    }
+    mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
+    gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, flags);
+    sv = mop_gv_elem(aTHX_ gv, type, FALSE);
 
-	RETVAL = sv ? newRV_inc(sv) : &PL_sv_undef;
+    RETVAL = sv ? newRV_inc(sv) : &PL_sv_undef;
 OUTPUT:
-	RETVAL
+    RETVAL
