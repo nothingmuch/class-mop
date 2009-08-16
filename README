@@ -1,4 +1,4 @@
-Class::MOP version 0.89
+Class::MOP version 0.92
 ===========================
 
 See the individual module documentation for more information
@@ -15,11 +15,12 @@ To install this module type the following:
 DEPENDENCIES
 
 This module requires these other modules and libraries:
-    
+
+    Devel::GlobalDestruction
+    MRO::Compat
     Scalar::Util
     Sub::Name
-    Carp
-    B   
+    Task::Weaken
 
 COPYRIGHT AND LICENCE
 

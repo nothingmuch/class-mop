@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 47;
+use Test::More tests => 53;
 use Test::Exception;
 
 use Class::MOP;
@@ -137,3 +137,25 @@ is( $clone2->original_name, '__ANON__',
     '... original_name follows clone chain' );
 is( $clone2->original_fully_qualified_name, 'main::__ANON__',
     '... original_fully_qualified_name follows clone chain' );
+
+Class::MOP::Class->create(
+    'Method::Subclass',
+    superclasses => ['Class::MOP::Method'],
+    attributes   => [
+        Class::MOP::Attribute->new(
+            foo => (
+                accessor => 'foo',
+            )
+        ),
+    ],
+);
+
+my $wrapped = Method::Subclass->wrap($method, foo => 'bar');
+isa_ok($wrapped, 'Method::Subclass');
+isa_ok($wrapped, 'Class::MOP::Method');
+is($wrapped->foo, 'bar', 'attribute set properly');
+is($wrapped->package_name, 'main', 'package_name copied properly');
+is($wrapped->name, '__ANON__', 'method name copied properly');
+
+my $wrapped2 = Method::Subclass->wrap($method, foo => 'baz', name => 'FOO');
+is($wrapped2->name, 'FOO', 'got a new method name');

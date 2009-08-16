@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 73;
+use Test::More tests => 90;
 use Test::Exception;
 
 use Class::MOP;
@@ -225,7 +225,9 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     } '... we added a method to Buzz successfully';
 }
 
-{
+
+
+for(1 .. 2){
   my $buzz;
   ::lives_ok { $buzz = Buzz->meta->new_object } '...Buzz instantiated successfully';
   ::is($buzz->foo, 'Buzz', '...foo builder works as expected');
@@ -244,17 +246,15 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
   ::ok($buzz2->has_bar, '...bar is set');
   ::is($buzz2->bar, undef, '...bar is undef');
 
-}
+  my $buzz3;
+  ::lives_ok { $buzz3 = Buzz->meta->new_object } '...Buzz instantiated successfully';
+  ::ok($buzz3->has_bah, '...bah is set');
+  ::is($buzz3->bah, 'BAH', '...bah returns "BAH" ');
 
-{
-  my $buzz;
-  ::lives_ok { $buzz = Buzz->meta->new_object } '...Buzz instantiated successfully';
-  ::ok($buzz->has_bah, '...bah is set');
-  ::is($buzz->bah, 'BAH', '...bah returns "BAH" ');
+  my $buzz4;
+  ::lives_ok { $buzz4 = Buzz->meta->new_object('$bah' => undef) } '...Buzz instantiated successfully';
+  ::ok($buzz4->has_bah, '...bah is set');
+  ::is($buzz4->bah, undef, '...bah is undef');
 
-  my $buzz2;
-  ::lives_ok { $buzz2 = Buzz->meta->new_object('$bah' => undef) } '...Buzz instantiated successfully';
-  ::ok($buzz2->has_bah, '...bah is set');
-  ::is($buzz2->bah, undef, '...bah is undef');
-
+  Buzz->meta->make_immutable();
 }

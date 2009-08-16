@@ -89,11 +89,12 @@ BEGIN {use Class::MOP;use Class::MOP::Attribute;
         Class::MOP::Attribute->new();
     } '... no name argument';
 
-    dies_ok {
+    # These are no longer errors
+    lives_ok {
         Class::MOP::Attribute->new('');
     } '... bad name argument';
 
-    dies_ok {
+    lives_ok {
         Class::MOP::Attribute->new(0);
     } '... bad name argument';
 }

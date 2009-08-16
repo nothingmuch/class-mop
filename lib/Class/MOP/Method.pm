@@ -5,9 +5,9 @@ use strict;
 use warnings;
 
 use Carp         'confess';
-use Scalar::Util 'weaken', 'reftype';
+use Scalar::Util 'weaken', 'reftype', 'blessed';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.92';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -28,8 +28,15 @@ sub wrap {
     my %params = @args;
     my $code = $params{body};
 
-    (ref $code && 'CODE' eq reftype($code))
-        || confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+    if (blessed($code) && $code->isa(__PACKAGE__)) {
+        my $method = $code->clone;
+        delete $params{body};
+        Class::MOP::class_of($class)->rebless_instance($method, %params);
+        return $method;
+    }
+    elsif (!ref $code || 'CODE' ne reftype($code)) {
+        confess "You must supply a CODE reference to bless, not (" . ($code || 'undef') . ")";
+    }
 
     ($params{package_name} && $params{name})
         || confess "You must supply the package_name and name parameters";
@@ -144,8 +151,9 @@ introspection interface.
 
 =item B<< Class::MOP::Method->wrap($code, %options) >>
 
-This is the constructor. It accepts a subroutine reference and a hash
-of options.
+This is the constructor. It accepts a method body in the form of
+either a code reference or a L<Class::MOP::Method> instance, followed
+by a hash of options.
 
 The options are:
 
@@ -153,11 +161,13 @@ The options are:
 
 =item * name
 
-The method name (without a package name). This is required.
+The method name (without a package name). This is required if C<$code>
+is a coderef.
 
 =item * package_name
 
-The package name for the method. This is required.
+The package name for the method. This is required if C<$code> is a
+coderef.
 
 =item * associated_metaclass
 

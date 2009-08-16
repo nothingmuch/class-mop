@@ -9,7 +9,7 @@ use Class::MOP::Method::Accessor;
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.89';
+our $VERSION   = '0.92';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -32,7 +32,7 @@ sub new {
 
     my $name = $options{name};
 
-    (defined $name && $name)
+    (defined $name)
         || confess "You must provide a name for the attribute";
 
     $options{init_arg} = $name

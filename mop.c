@@ -93,18 +93,15 @@ mop_get_code_info (SV *coderef, char **pkg, char **name)
        we hit it without the guard, we segfault. The slightly odd return
        value strikes me as an improvement (mst)
     */
-#ifdef isGV_with_GP
+
     if ( isGV_with_GP(CvGV(coderef)) ) {
-#endif
         GV *gv   = CvGV(coderef);
         *pkg     = HvNAME( GvSTASH(gv) ? GvSTASH(gv) : CvSTASH(coderef) );
         *name    = GvNAME( CvGV(coderef) );
-#ifdef isGV_with_GP
     } else {
         *pkg     = "__UNKNOWN__";
         *name    = "__ANON__";
     }
-#endif
 
     return 1;
 }
