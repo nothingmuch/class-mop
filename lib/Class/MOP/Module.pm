@@ -61,8 +61,8 @@ sub _instantiate_module {
     Class::MOP::_is_valid_class_name($package_name)
         || confess "creation of $package_name failed: invalid package name";
 
-    $self->add_package_symbol('$VERSION',   \$version);
-    $self->add_package_symbol('$AUTHORITY', \$authority);
+    ${ $self->get_package_symbol('$VERSION',   create => 1) } = $version;
+    ${ $self->get_package_symbol('$AUTHORITY', create => 1) } = $authority;
 
     return;
 }
