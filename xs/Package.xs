@@ -98,6 +98,8 @@ mop_deconstruct_variable_name(pTHX_ SV* const variable,
 static GV*
 mop_get_gv(pTHX_ SV* const self, svtype const type, const char* const var_name, I32 const var_name_len, I32 const flags){
     SV* package_name;
+    STRLEN len;
+    const char* pv;
 
     if(!(flags & ~GV_NOADD_MASK)){ /* for shortcut fetching */
         SV* const ns = mop_call0(aTHX_ self, mop_namespace);
@@ -117,7 +119,9 @@ mop_get_gv(pTHX_ SV* const self, svtype const type, const char* const var_name, 
         croak("name() did not return a defined value");
     }
 
-    return gv_fetchpv(Perl_form(aTHX_ "%"SVf"::%s", package_name, var_name), flags, type);
+    pv = SvPV_const(package_name, len);
+
+    return gv_fetchpvn_flags(Perl_form(aTHX_ "%s::%s", pv, var_name), (len + var_name_len + 2), flags, type);
 }
 
 static SV*
