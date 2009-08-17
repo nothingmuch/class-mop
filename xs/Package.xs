@@ -382,7 +382,7 @@ PREINIT:
     GV* gv;
     SV* sv;
 CODE:
-    { /* parse options */
+    if(items > 2){ /* parse options */
         I32 i;
         if((items % 2) != 0){
             croak("Odd number of arguments for get_package_symbol()");
