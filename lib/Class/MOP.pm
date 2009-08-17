@@ -1081,7 +1081,7 @@ L<http://citeseer.ist.psu.edu/37617.html>
 
 =over 4
 
-=item L<http://svn.openfoundry.org/pugs/perl5/Perl6-MetaModel>
+=item L<http://svn.openfoundry.org/pugs/misc/Perl-MetaModel/>
 
 =item L<http://svn.openfoundry.org/pugs/perl5/Perl6-ObjectSpace>
 
