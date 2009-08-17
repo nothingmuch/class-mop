@@ -346,6 +346,10 @@ CODE:
                 && isGV(CvGV(subr))
                 && strEQ(GvNAME(CvGV(subr)), "__ANON__")){
 
+                /* NOTE:
+                    A gv "has-a" cv, but a cv refers to a gv as a (pseudo) weak ref.
+                    so we can replace CvGV with no SvREFCNT_inc/dec.
+                */
                 CvGV(subr) = gv;
                 CvANON_off(subr);
             }
