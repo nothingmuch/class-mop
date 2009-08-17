@@ -101,7 +101,7 @@ mop_get_gv(pTHX_ SV* const self, svtype const type, const char* const var_name, 
     STRLEN len;
     const char* pv;
 
-    if(!(flags & ~GV_NOADD_MASK)){ /* for shortcut fetching */
+    if(!flags){
         SV* const ns = mop_call0(aTHX_ self, mop_namespace);
         GV** gvp;
         if(!(SvROK(ns) && SvTYPE(SvRV(ns)) == SVt_PVHV)){
@@ -375,7 +375,16 @@ PREINIT:
 CODE:
     mop_deconstruct_variable_name(aTHX_ variable, &var_name, &var_name_len, &type, &type_name);
     gv = mop_get_gv(aTHX_ self, type, var_name, var_name_len, 0);
-    RETVAL = mop_gv_elem(aTHX_ gv, type, FALSE) ? TRUE : FALSE;
+    if(type == SVt_PV){
+        /* In SCALAR, for backword compatibility,
+           defined(${*gv{SCALAR}}) instead of defined(*gv{SCALAR}) */
+        SV* const sv = mop_gv_elem(aTHX_ gv, type, FALSE);
+        RETVAL = (sv && SvOK(sv)) ? TRUE : FALSE;
+    }
+    else{
+        /* Otherwise, defined(*gv{TYPE}) */
+        RETVAL = mop_gv_elem(aTHX_ gv, type, FALSE) ? TRUE : FALSE;
+    }
 OUTPUT:
     RETVAL
 
