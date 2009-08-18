@@ -81,7 +81,7 @@ can_xs(SV* self)
 PREINIT:
     SV* const can             = newSVpvs_flags("can", SVs_TEMP);
     SV* const default_class   = newSVpvs_flags("Class::MOP::Instance", SVs_TEMP);
-    SV* const create_instance = newSVpvs_flags("create_instance", SVs_TEMP);
+    SV* const create_instance = newSVpvs_flags("get_slot_value", SVs_TEMP);
     SV* m1;
     SV* m2;
 CODE:
