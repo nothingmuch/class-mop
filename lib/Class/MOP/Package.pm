@@ -103,10 +103,10 @@ sub namespace {
     \%{$_[0]->{'package'} . '::'} 
 }
 
-sub method_metaclass         { $_[0]->{'method_metaclass'}            }
-sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
+#sub method_metaclass         { $_[0]->{'method_metaclass'}            }
+#sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 
-sub _method_map              { $_[0]->{'methods'}                     }
+#sub _method_map              { $_[0]->{'methods'}                     }
 
 # utility methods
 
