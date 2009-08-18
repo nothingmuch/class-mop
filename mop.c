@@ -75,6 +75,28 @@ mop_call0 (pTHX_ SV *const self, SV *const method)
     return ret;
 }
 
+SV *
+mop_call1 (pTHX_ SV *const self, SV *const method, SV* const arg1)
+{
+    dSP;
+    SV *ret;
+
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
+    PUSHs(self);
+    PUSHs(arg1);
+    PUTBACK;
+
+    call_sv(method, G_SCALAR | G_METHOD);
+
+    SPAGAIN;
+    ret = POPs;
+    PUTBACK;
+
+    return ret;
+}
+
+
 int
 mop_get_code_info (SV *coderef, char **pkg, char **name)
 {
@@ -109,6 +131,7 @@ mop_get_code_info (SV *coderef, char **pkg, char **name)
 void
 mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb_t cb, void *ud)
 {
+    dTHX;
     HE *he;
 
     (void)hv_iterinit(stash);
@@ -183,6 +206,7 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
 static bool
 collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
 {
+    dTHX;
     HV *hash = (HV *)ud;
 
     if (!hv_store (hash, key, keylen, newRV_inc(val), 0)) {
@@ -195,165 +219,26 @@ collect_all_symbols (const char *key, STRLEN keylen, SV *val, void *ud)
 HV *
 mop_get_all_package_symbols (HV *stash, type_filter_t filter)
 {
+    dTHX;
     HV *ret = newHV ();
     mop_get_package_symbols (stash, filter, collect_all_symbols, ret);
     return ret;
 }
 
-static MGVTBL mop_accessor_vtbl; /* the MAGIC identity */
 
-CV*
-mop_install_simple_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl)){
-    CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
-    SV* const keysv = newSVpvn_share(key, keylen, 0U);
-
-    sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, NULL, 0);
-    SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
-    return xsub;
-}
-
-static MAGIC*
-mop_mg_find_by_vtbl(pTHX_ SV* const sv, const MGVTBL* const vtbl){
+MAGIC*
+mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags){
     MAGIC* mg;
 
     assert(sv != NULL);
     for(mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic){
         if(mg->mg_virtual == vtbl){
-            break;
+            return mg;
         }
     }
-    return mg;
-}
 
-static SV*
-mop_fetch_attr(pTHX_ SV* const self, SV* const key, I32 const create, CV* const cv){
-    HE* he;
-    if (!SvROK(self)) {
-        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
-    }
-    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
-        croak("object is not a hashref");
-    }
-    if((he = hv_fetch_ent((HV*)SvRV(self), key, create, 0U))){
-        return HeVAL(he);
+    if(flags & MOPf_DIE_ON_FAIL){
+        croak("mop_mg_find: no MAGIC found for %"SVf, sv_2mortal(newRV_inc(sv)));
     }
     return NULL;
-}
-static SV*
-mop_delete_attr(pTHX_ SV* const self, SV* const key, CV* const cv){
-    SV* sv;
-    if (!SvROK(self)) {
-        croak("can't call %s as a class method", GvNAME(CvGV(cv)));
-    }
-    if (SvTYPE(SvRV(self)) != SVt_PVHV) {
-        croak("object is not a hashref");
-    }
-    if((sv = hv_delete_ent((HV*)SvRV(self), key, 0, 0U))){
-        return sv;
-    }
-    return NULL;
-}
-
-XS(mop_xs_simple_accessor)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-    if(items == 1){ /* reader */
-        attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
-    }
-    else if (items == 2){ /* writer */
-        attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
-        sv_setsv(attr, ST(1));
-    }
-    else{
-        croak("expected exactly one or two argument");
-    }
-    ST(0) = attr ? attr : &PL_sv_undef;
-    XSRETURN(1);
-}
-
-
-XS(mop_xs_simple_reader)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-
-    if (items != 1) {
-        croak("expected exactly one argument");
-    }
-
-    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
-    ST(0) = attr ? attr : &PL_sv_undef;
-    XSRETURN(1);
-}
-
-XS(mop_xs_simple_writer)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-
-    if (items != 2) {
-        croak("expected exactly two argument");
-    }
-
-    attr = mop_fetch_attr(aTHX_ ST(0), key, TRUE, cv);
-    sv_setsv(attr, ST(1));
-    ST(0) = attr;
-    XSRETURN(1);
-}
-
-XS(mop_xs_simple_clearer)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-
-    if (items != 1) {
-        croak("expected exactly one argument");
-    }
-
-    attr = mop_delete_attr(aTHX_ ST(0), key, cv);
-    ST(0) = attr ? attr : &PL_sv_undef;
-    XSRETURN(1);
-}
-
-
-XS(mop_xs_simple_predicate)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-
-    if (items != 1) {
-        croak("expected exactly one argument");
-    }
-
-    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
-    ST(0) = boolSV(attr); /* exists */
-    XSRETURN(1);
-}
-
-
-XS(mop_xs_simple_predicate_for_metaclass)
-{
-    dVAR; dXSARGS;
-    MAGIC* const mg = mop_mg_find_by_vtbl(aTHX_ (SV*)cv, &mop_accessor_vtbl);
-    SV* const key   = mg->mg_obj;
-    SV* attr;
-
-    if (items != 1) {
-        croak("expected exactly one argument");
-    }
-
-    attr = mop_fetch_attr(aTHX_ ST(0), key, FALSE, cv);
-    ST(0) = boolSV(attr && SvOK(attr)); /* defined */
-    XSRETURN(1);
 }

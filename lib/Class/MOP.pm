@@ -34,9 +34,11 @@ our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-require XSLoader;
-XSLoader::load( __PACKAGE__, $XS_VERSION );
-
+{
+    require DynaLoader;
+    local *dl_load_flags = sub{ 0x01 };
+    DynaLoader::bootstrap_inherit( __PACKAGE__, $XS_VERSION );
+}
 
 {
     # Metaclasses are singletons, so we cache them here.
