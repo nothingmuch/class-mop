@@ -25,7 +25,7 @@ test_requires 'File::Spec';
 test_requires 'Test::More'      => '0.88';
 test_requires 'Test::Exception' => '0.27';
 
-install_headers('mop.h');
+install_headers('mop.h'); # need Module::Install::XSUtil
 
 #extra_tests();
 
