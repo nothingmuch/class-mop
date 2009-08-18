@@ -74,17 +74,6 @@ sub _new {
 #sub accessor_type        { (shift)->{'accessor_type'} }
 
 
-sub can_xs {
-    my($self, $method_name) = @_;
-    # don't use $method_name here, but there may be cases it is required.
-
-    # FIXME: I didn't know how to detect it properly (gfx)
-    return ref($self) eq __PACKAGE__
-           && $self->associated_attribute->associated_class->instance_metaclass eq 'Class::MOP::Instance';
-}
-
-sub attribute_name{ (shift)->associated_attribute->name }
-
 ## factory
 
 sub _initialize_body {
@@ -93,19 +82,95 @@ sub _initialize_body {
     my $method_name = join "_" => (
         '_generate',
         $self->accessor_type,
-        'method'
+        'method',
     );
 
-    if($self->is_inline){
-        $method_name .= $self->can_xs($method_name) ? '_xs' : '_inline';
-    }
-
     $self->{'body'} = $self->$method_name();
+    return;
 }
 
 ## generators
 
 sub _generate_accessor_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_accessor_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_accessor_method_inline();
+    }
+
+    return $self->_generate_accessor_method_basic();
+}
+
+sub _generate_reader_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_reader_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_reader_method_inline();
+    }
+
+    return $self->_generate_reader_method_basic();
+}
+
+sub _generate_writer_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_writer_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_writer_method_inline();
+    }
+
+    return $self->_generate_writer_method_basic();
+}
+
+sub _generate_clearer_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_clearer_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_clearer_method_inline();
+    }
+
+    return $self->_generate_clearer_method_basic();
+}
+
+sub _generate_predicate_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_predicate_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_predicate_method_inline();
+    }
+
+    return $self->_generate_predicate_method_basic();
+}
+
+
+## basic generators
+
+sub generate_accessor_method {
+    Carp::cluck('The generate_accessor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_accessor_method_basic;
+}
+
+sub _generate_accessor_method_basic {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
@@ -113,7 +178,13 @@ sub _generate_accessor_method {
     };
 }
 
-sub _generate_reader_method {
+sub generate_reader_method {
+    Carp::cluck('The generate_reader_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_reader_method_basic;
+}
+
+sub _generate_reader_method_basic {
     my $attr = (shift)->associated_attribute;
     return sub {
         confess "Cannot assign a value to a read-only accessor" if @_ > 1;
@@ -121,22 +192,39 @@ sub _generate_reader_method {
     };
 }
 
+sub generate_writer_method {
+    Carp::cluck('The generate_writer_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_writer_method_basic;
+}
 
-sub _generate_writer_method {
+sub _generate_writer_method_basic {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->set_value($_[0], $_[1]);
     };
 }
 
-sub _generate_predicate_method {
+sub generate_predicate_method {
+    Carp::cluck('The generate_predicate_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_predicate_method_basic;
+}
+
+sub _generate_predicate_method_basic {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->has_value($_[0])
     };
 }
 
-sub _generate_clearer_method {
+sub generate_clearer_method {
+    Carp::cluck('The generate_clearer_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_clearer_method_basic;
+}
+
+sub _generate_clearer_method_basic {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->clear_value($_[0])

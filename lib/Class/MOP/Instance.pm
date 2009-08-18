@@ -393,6 +393,18 @@ into, and returns code to rebless an instance into a class.
 
 =back
 
+=head2 XS Instance Operations
+
+=over 4
+
+=item B<< $metainstance->can_xs() >>
+
+This is an integer that indicates the address of XS virtual table for slot accesses.
+By default it returns a virtual table address to operate hash references, but subclasses
+should override this.
+
+=back
+
 =head2 Introspection
 
 =over 4
