@@ -1,3 +1,7 @@
+#define NEED_newRV_noinc_GLOBAL
+#define NEED_sv_2pv_flags_GLOBAL
+#define NEED_sv_2pv_nolen_GLOBAL
+#define NEED_newSVpvn_flags_GLOBAL
 #include "mop.h"
 
 void
