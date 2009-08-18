@@ -392,6 +392,7 @@ sub _process_accessors {
                 package_name         => $metaclass->name,
                 name                 => $accessor,
                 definition_context   => $method_ctx,
+                is_inline            => $metaclass->instance_metaclass->is_inlinable,
             );
         };
         confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;
