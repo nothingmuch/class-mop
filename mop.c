@@ -125,54 +125,31 @@ mop_get_package_symbols (HV *stash, type_filter_t filter, get_package_symbols_cb
     }
 
     while ( (he = hv_iternext(stash)) ) {
-        SV *const gv = HeVAL(he);
-        SV *sv = NULL;
-        char *key;
+        GV * const gv          = (GV*)HeVAL(he);
         STRLEN keylen;
-        char *package;
-        SV *fq;
+        const char * const key = HePV(he, keylen);
+        SV *sv = NULL;
 
-        switch( SvTYPE(gv) ) {
-#ifndef SVt_RV
-            case SVt_RV:
-#endif
-            case SVt_PV:
-            case SVt_IV:
-                /* expand the gv into a real typeglob if it
-                 * contains stub functions and we were asked to
-                 * return CODE symbols */
-                if (filter == TYPE_FILTER_CODE) {
-                    if (SvROK(gv)) {
-                        /* we don't really care about the length,
-                           but that's the API */
-                        key = HePV(he, keylen);
-                        package = HvNAME(stash);
-                        fq = sv_2mortal(newSVpvf("%s::%s", package, key));
-                        sv = (SV *)get_cv(SvPV_nolen(fq), 0);
-                        break;
-                    }
-
-                    key = HePV(he, keylen);
-                    gv_init((GV *)gv, stash, key, keylen, GV_ADDMULTI);
-                }
-                /* fall through */
-            case SVt_PVGV:
-                switch (filter) {
-                    case TYPE_FILTER_CODE:   sv = (SV *)GvCVu(gv); break;
-                    case TYPE_FILTER_ARRAY:  sv = (SV *)GvAV(gv);  break;
-                    case TYPE_FILTER_IO:     sv = (SV *)GvIO(gv);  break;
-                    case TYPE_FILTER_HASH:   sv = (SV *)GvHV(gv);  break;
-                    case TYPE_FILTER_SCALAR: sv = (SV *)GvSV(gv);  break;
-                    default:
-                        croak("Unknown type");
-                }
-                break;
-            default:
-                continue;
+        if(isGV(gv)){
+            switch (filter) {
+                case TYPE_FILTER_CODE:   sv = (SV *)GvCVu(gv); break;
+                case TYPE_FILTER_ARRAY:  sv = (SV *)GvAV(gv);  break;
+                case TYPE_FILTER_IO:     sv = (SV *)GvIO(gv);  break;
+                case TYPE_FILTER_HASH:   sv = (SV *)GvHV(gv);  break;
+                case TYPE_FILTER_SCALAR: sv = (SV *)GvSV(gv);  break;
+                default:
+                    croak("Unknown type");
+            }
+        }
+        /* expand the gv into a real typeglob if it
+        * contains stub functions or constants and we
+        * were asked to return CODE references */
+        else if (filter == TYPE_FILTER_CODE) {
+            gv_init(gv, stash, key, keylen, GV_ADDMULTI);
+            sv = (SV *)GvCV(gv);
         }
 
         if (sv) {
-            const char *key = HePV(he, keylen);
             if (!cb(key, keylen, sv, ud)) {
                 return;
             }
