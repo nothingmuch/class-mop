@@ -49,7 +49,6 @@ XS(mop_xs_simple_reader);
 extern SV *mop_method_metaclass;
 extern SV *mop_associated_metaclass;
 extern SV *mop_wrap;
-extern SV *mop_namespace;
 
 UV mop_check_package_cache_flag(pTHX_ HV *stash);
 int mop_get_code_info (SV *coderef, char **pkg, char **name);

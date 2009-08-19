@@ -3,7 +3,6 @@
 SV *mop_method_metaclass;
 SV *mop_associated_metaclass;
 SV *mop_wrap;
-SV *mop_namespace;
 
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
@@ -30,7 +29,6 @@ BOOT:
     mop_method_metaclass     = newSVpvs("method_metaclass");
     mop_wrap                 = newSVpvs("wrap");
     mop_associated_metaclass = newSVpvs("associated_metaclass");
-    mop_namespace            = newSVpvs("namespace");
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
