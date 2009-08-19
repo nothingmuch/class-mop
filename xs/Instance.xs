@@ -79,16 +79,14 @@ BOOT:
 void*
 can_xs(SV* self)
 PREINIT:
+    CV* const default_method  = get_cv("Class::MOP::Instance::get_slot_value", FALSE);
     SV* const can             = newSVpvs_flags("can", SVs_TEMP);
-    SV* const default_class   = newSVpvs_flags("Class::MOP::Instance", SVs_TEMP);
-    SV* const create_instance = newSVpvs_flags("get_slot_value", SVs_TEMP);
-    SV* m1;
-    SV* m2;
+    SV* const method          = newSVpvs_flags("get_slot_value", SVs_TEMP);
+    SV* code_ref;
 CODE:
-    /* $self->can("create_instance") == Class::MOP::Instance->can("create_instance") */
-    m1 = mop_call1(aTHX_ self,          can, create_instance);
-    m2 = mop_call1(aTHX_ default_class, can, create_instance);
-    if(SvROK(m1) && SvROK(m2) && SvRV(m1) == SvRV(m2)){
+    /* $self->can("get_slot_value") == \&Class::MOP::Instance::get_slot_value */
+    code_ref = mop_call1(aTHX_ self, can, method);
+    if(SvROK(code_ref) && SvRV(code_ref) == (SV*)default_method){
         RETVAL = (void*)&mop_default_instance;
     }
     else{
