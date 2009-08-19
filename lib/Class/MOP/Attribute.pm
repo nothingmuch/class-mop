@@ -305,7 +305,10 @@ sub set_initial_value {
     );
 }
 
-sub set_value {
+sub set_value { shift->set_raw_value(@_) }
+sub get_value { shift->get_raw_value(@_) }
+
+sub set_raw_value {
     my ($self, $instance, $value) = @_;
 
     Class::MOP::Class->initialize(ref($instance))
@@ -313,7 +316,7 @@ sub set_value {
                      ->set_slot_value($instance, $self->name, $value);
 }
 
-sub get_value {
+sub get_raw_value {
     my ($self, $instance) = @_;
 
     Class::MOP::Class->initialize(ref($instance))
@@ -827,6 +830,12 @@ It's unlikely that you'll need to call this method yourself.
 Sets the value without going through the accessor. Note that this
 works even with read-only attributes.
 
+=item B<< $attr->set_raw_value($instance, $value) >>
+
+Sets the value with no side effects such as a trigger.
+
+This doesn't actually apply to Class::MOP attributes, only to subclasses.
+
 =item B<< $attr->set_initial_value($instance, $value) >>
 
 Sets the value without going through the accessor. This method is only
@@ -836,6 +845,12 @@ called when the instance is first being initialized.
 
 Returns the value without going through the accessor. Note that this
 works even with write-only accessors.
+
+=item B<< $sttr->get_raw_value($instance) >>
+
+Returns the value without any side effects such as lazy attributes.
+
+Doesn't actually apply to Class::MOP attributes, only to subclasses.
 
 =item B<< $attr->has_value($instance) >>
 

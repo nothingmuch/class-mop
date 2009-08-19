@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 69;
+use Test::More tests => 71;
 use Test::Exception;
 
 use Class::MOP;
@@ -41,6 +41,8 @@ use Class::MOP;
         slots
         get_value
         set_value
+        get_raw_value
+        set_raw_value
         set_initial_value
         has_value
         clear_value
