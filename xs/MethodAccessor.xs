@@ -13,15 +13,21 @@ mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32
     CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
     SV* const keysv = newSVpvn_share(key, keylen, 0U);
     AV* const meta  = newAV();
+    MAGIC* mg;
 
     if(!vtbl){
         vtbl = mop_get_default_instance_vtbl(aTHX);
     }
 
-    sv_magicext((SV*)xsub, (SV*)meta, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
+    mg = sv_magicext((SV*)xsub, (SV*)meta, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
     SvREFCNT_dec(meta); /* sv_magicext() increases refcnt in mg_obj */
 
-    av_store(meta, 0, keysv);
+    av_store(meta, MOP_MI_SLOT, keysv);
+
+    /* NOTE:
+     * although we use MAGIC for gc, we also store mg to any slot for efficiency (gfx)
+     */
+    CvXSUBANY(xsub).any_ptr = (void*)mg;
 
     return xsub;
 }
@@ -53,16 +59,27 @@ mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv) {
     return self;
 }
 
+#ifdef DEBUGGING
+SV**
+mop_debug_mi_access(pTHX_ AV* const mi, I32 const attr_ix){
+    assert(mi);
+    assert(SvTYPE(mi) == SVt_PVAV);
+    assert(AvMAX(mi) >= attr_ix);
+    return &AvARRAY(mi)[attr_ix];
+}
+#endif
+
 XS(mop_xs_simple_accessor)
 {
     dVAR; dXSARGS;
     dMOP_METHOD_COMMON; /* self, mg */
     SV* value;
+
     if(items == 1){ /* reader */
-        value = MOP_mg_vtbl(mg)->get_slot(aTHX_ self, MOP_mg_key(mg));
+        value = MOP_mg_get_slot(mg, self);
     }
     else if (items == 2){ /* writer */
-        value = MOP_mg_vtbl(mg)->set_slot(aTHX_ self, MOP_mg_key(mg), ST(1));
+        value = MOP_mg_set_slot(mg, self, ST(1));
     }
     else{
         croak("expected exactly one or two argument");
@@ -83,7 +100,7 @@ XS(mop_xs_simple_reader)
         croak("expected exactly one argument");
     }
 
-    value = MOP_mg_vtbl(mg)->get_slot(aTHX_ self, MOP_mg_key(mg));
+    value = MOP_mg_get_slot(mg, self);
     ST(0) = value ? value : &PL_sv_undef;
     XSRETURN(1);
 }
@@ -97,7 +114,7 @@ XS(mop_xs_simple_writer)
         croak("expected exactly two argument");
     }
 
-    ST(0) = MOP_mg_vtbl(mg)->set_slot(aTHX_ self, MOP_mg_key(mg), ST(1));
+    ST(0) = MOP_mg_set_slot(mg, self, ST(1));
     XSRETURN(1);
 }
 
@@ -111,7 +128,7 @@ XS(mop_xs_simple_clearer)
         croak("expected exactly one argument");
     }
 
-    value = MOP_mg_vtbl(mg)->delete_slot(aTHX_ self, MOP_mg_key(mg));
+    value = MOP_mg_delete_slot(mg, self);
     ST(0) = value ? value : &PL_sv_undef;
     XSRETURN(1);
 }
@@ -126,7 +143,7 @@ XS(mop_xs_simple_predicate)
         croak("expected exactly one argument");
     }
 
-    ST(0) = boolSV( MOP_mg_vtbl(mg)->has_slot(aTHX_ self, MOP_mg_key(mg)) );
+    ST(0) = boolSV( MOP_mg_has_slot(mg, self) );
     XSRETURN(1);
 }
 
@@ -141,7 +158,7 @@ XS(mop_xs_simple_predicate_for_metaclass)
         croak("expected exactly one argument");
     }
 
-    value = MOP_mg_vtbl(mg)->get_slot(aTHX_ self, MOP_mg_key(mg));
+    value = MOP_mg_get_slot(mg, self);
     ST(0) = boolSV( value && SvOK(value ));
     XSRETURN(1);
 }
