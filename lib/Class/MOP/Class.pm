@@ -1551,7 +1551,7 @@ object instances created for this class, not existing instances.
 =item B<< $metaclass->attribute_metaclass >>
 
 Returns the class name of the attribute metaclass for this class. By
-default, this is L<Class::MOP::Attribute>.  for more information on
+default, this is L<Class::MOP::Attribute>.
 
 =back
 
