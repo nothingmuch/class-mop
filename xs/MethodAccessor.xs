@@ -19,6 +19,11 @@ mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32
         vtbl = mop_get_default_instance_vtbl(aTHX);
     }
 
+    if(!fq_name){
+        /* generated_xsub need sv_2mortal */
+        sv_2mortal((SV*)xsub);
+    }
+
     mg = sv_magicext((SV*)xsub, (SV*)meta, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
     SvREFCNT_dec(meta); /* sv_magicext() increases refcnt in mg_obj */
 
