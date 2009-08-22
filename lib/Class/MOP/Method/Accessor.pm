@@ -74,12 +74,6 @@ sub accessor_type        { (shift)->{'accessor_type'} }
 
 ## factory
 
-sub initialize_body {
-    Carp::cluck('The initialize_body method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_initialize_body;
-}
-
 sub _initialize_body {
     my $self = shift;
 
@@ -95,24 +89,12 @@ sub _initialize_body {
 
 ## generators
 
-sub generate_accessor_method {
-    Carp::cluck('The generate_accessor_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_accessor_method;
-}
-
 sub _generate_accessor_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->set_value($_[0], $_[1]) if scalar(@_) == 2;
         $attr->get_value($_[0]);
     };
-}
-
-sub generate_reader_method {
-    Carp::cluck('The generate_reader_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_reader_method;
 }
 
 sub _generate_reader_method {
@@ -123,11 +105,6 @@ sub _generate_reader_method {
     };
 }
 
-sub generate_writer_method {
-    Carp::cluck('The generate_writer_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_writer_method;
-}
 
 sub _generate_writer_method {
     my $attr = (shift)->associated_attribute;
@@ -136,23 +113,11 @@ sub _generate_writer_method {
     };
 }
 
-sub generate_predicate_method {
-    Carp::cluck('The generate_predicate_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_predicate_method;
-}
-
 sub _generate_predicate_method {
     my $attr = (shift)->associated_attribute;
     return sub {
         $attr->has_value($_[0])
     };
-}
-
-sub generate_clearer_method {
-    Carp::cluck('The generate_clearer_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_clearer_method;
 }
 
 sub _generate_clearer_method {
@@ -163,12 +128,6 @@ sub _generate_clearer_method {
 }
 
 ## Inline methods
-
-sub generate_accessor_method_inline {
-    Carp::cluck('The generate_accessor_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_accessor_method_inline;
-}
 
 sub _generate_accessor_method_inline {
     my $self          = shift;
@@ -189,12 +148,6 @@ sub _generate_accessor_method_inline {
     return $code;
 }
 
-sub generate_reader_method_inline {
-    Carp::cluck('The generate_reader_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_reader_method_inline;
-}
-
 sub _generate_reader_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
@@ -211,12 +164,6 @@ sub _generate_reader_method_inline {
     confess "Could not generate inline reader because : $e" if $e;
 
     return $code;
-}
-
-sub generate_writer_method_inline {
-    Carp::cluck('The generate_writer_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_writer_method_inline;
 }
 
 sub _generate_writer_method_inline {
@@ -236,12 +183,6 @@ sub _generate_writer_method_inline {
     return $code;
 }
 
-sub generate_predicate_method_inline {
-    Carp::cluck('The generate_predicate_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_predicate_method_inline;
-}
-
 sub _generate_predicate_method_inline {
     my $self          = shift;
     my $attr          = $self->associated_attribute;
@@ -257,12 +198,6 @@ sub _generate_predicate_method_inline {
     confess "Could not generate inline predicate because : $e" if $e;
 
     return $code;
-}
-
-sub generate_clearer_method_inline {
-    Carp::cluck('The generate_clearer_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_clearer_method_inline;
 }
 
 sub _generate_clearer_method_inline {

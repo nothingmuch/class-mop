@@ -72,22 +72,9 @@ sub associated_metaclass { (shift)->{'associated_metaclass'} }
 
 ## cached values ...
 
-sub meta_instance {
-    Carp::cluck('The meta_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_meta_instance;
-}
-
 sub _meta_instance {
     my $self = shift;
     $self->{'meta_instance'} ||= $self->associated_metaclass->get_meta_instance;
-}
-
-sub attributes {
-    Carp::cluck('The attributes method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-
-    return shift->_attributes;
 }
 
 sub _attributes {
@@ -96,12 +83,6 @@ sub _attributes {
 }
 
 ## method
-
-sub initialize_body {
-    Carp::cluck('The initialize_body method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_initialize_body;
-}
 
 sub _initialize_body {
     my $self        = shift;
@@ -112,20 +93,8 @@ sub _initialize_body {
     $self->{'body'} = $self->$method_name;
 }
 
-sub generate_constructor_method {
-    Carp::cluck('The generate_constructor_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_constructor_method;
-}
-
 sub _generate_constructor_method {
     return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
-}
-
-sub generate_constructor_method_inline {
-    Carp::cluck('The generate_constructor_method_inline method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_constructor_method_inline;
 }
 
 sub _generate_constructor_method_inline {

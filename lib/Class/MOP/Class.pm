@@ -41,12 +41,6 @@ sub initialize {
         || $class->_construct_class_instance(package => $package_name, @_);
 }
 
-sub construct_class_instance {
-    Carp::cluck('The construct_class_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_construct_class_instance(@_);
-}
-
 # NOTE: (meta-circularity)
 # this is a special form of _construct_instance
 # (see below), which is used to construct class
@@ -168,13 +162,6 @@ sub update_package_cache_flag {
     # having to regenerate the method_map.
     # - SL    
     $self->{'_package_cache_flag'} = Class::MOP::check_package_cache_flag($self->name);    
-}
-
-
-sub check_metaclass_compatibility {
-    Carp::cluck('The check_metaclass_compatibility method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_check_metaclass_compatibility(@_);
 }
 
 sub _check_metaclass_compatibility {
@@ -364,12 +351,6 @@ sub new_object {
     return $class->_construct_instance(@_);
 }
 
-sub construct_instance {
-    Carp::cluck('The construct_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_construct_instance(@_);
-}
-
 sub _construct_instance {
     my $class = shift;
     my $params = @_ == 1 ? $_[0] : {@_};
@@ -403,12 +384,6 @@ sub get_meta_instance {
     $self->{'_meta_instance'} ||= $self->_create_meta_instance();
 }
 
-sub create_meta_instance {
-    Carp::cluck('The create_meta_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_create_meta_instance(@_);
-}
-
 sub _create_meta_instance {
     my $self = shift;
     
@@ -435,12 +410,6 @@ sub clone_object {
     # should not be cloned.
     return $instance if $instance->isa('Class::MOP::Class');
     $class->_clone_instance($instance, @_);
-}
-
-sub clone_instance {
-    Carp::cluck('The clone_instance method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_clone_instance(@_);
 }
 
 sub _clone_instance {
@@ -668,12 +637,6 @@ sub class_precedence_list {
     # to, and so don't need the fully qualified name.
 }
 
-sub alias_method {
-    Carp::cluck("The alias_method method is deprecated. Use add_method instead.\n");
-
-    shift->add_method(@_);
-}
-
 sub find_method_by_name {
     my ($self, $method_name) = @_;
     (defined $method_name && $method_name)
@@ -689,19 +652,6 @@ sub get_all_methods {
     my $self = shift;
     my %methods = map { %{ $self->initialize($_)->get_method_map } } reverse $self->linearized_isa;
     return values %methods;
-}
-
-sub compute_all_applicable_methods {
-    Carp::cluck('The compute_all_applicable_methods method is deprecated.'
-        . " Use get_all_methods instead.\n");
-
-    return map {
-        {
-            name  => $_->name,
-            class => $_->package_name,
-            code  => $_, # sigh, overloading
-        },
-    } shift->get_all_methods(@_);
 }
 
 sub get_all_method_names {
@@ -892,13 +842,6 @@ sub get_all_attributes {
     my $self = shift;
     my %attrs = map { %{ $self->initialize($_)->get_attribute_map } } reverse $self->linearized_isa;
     return values %attrs;
-}
-
-sub compute_all_applicable_attributes {
-    Carp::cluck('The compute_all_applicable_attributes method has been deprecated.'
-        . " Use get_all_attributes instead.\n");
-
-    shift->get_all_attributes(@_);
 }
 
 sub find_attribute_by_name {

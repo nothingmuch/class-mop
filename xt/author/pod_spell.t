@@ -64,6 +64,7 @@ Stevan
 Vilain
 wreis
 Yuval
+Goro
 
 ## proper names
 AOP
