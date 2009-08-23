@@ -43,6 +43,7 @@ get_code_info(coderef)
         char *pkg  = NULL;
         char *name = NULL;
     PPCODE:
+        SvGETMAGIC(coderef);
         if (mop_get_code_info(coderef, &pkg, &name)) {
             EXTEND(SP, 2);
             mPUSHs(newSVpv(pkg, 0));
@@ -59,7 +60,8 @@ is_class_loaded(klass=&PL_sv_undef)
         HV *stash;
         bool found_method = FALSE;
     PPCODE:
-        if (!SvPOK(klass) || !SvCUR(klass)) {
+        SvGETMAGIC(klass);
+        if (!(SvPOKp(klass) && SvCUR(klass))) { /* XXX: SvPOK does not work with magical scalars */
             XSRETURN_NO;
         }
 
