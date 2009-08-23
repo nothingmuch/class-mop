@@ -155,39 +155,6 @@ sub _set_initial_slot_value {
     $instance->$initializer($value, $callback, $self);
 }
 
-# NOTE:
-# the next bunch of methods will get bootstrapped
-# away in the Class::MOP bootstrapping section
-
-#sub associated_class   { $_[0]->{'associated_class'}   }
-#sub associated_methods { $_[0]->{'associated_methods'} }
-
-#sub has_accessor    { defined($_[0]->{'accessor'}) }
-#sub has_reader      { defined($_[0]->{'reader'}) }
-#sub has_writer      { defined($_[0]->{'writer'}) }
-#sub has_predicate   { defined($_[0]->{'predicate'}) }
-#sub has_clearer     { defined($_[0]->{'clearer'}) }
-#sub has_builder     { defined($_[0]->{'builder'}) }
-#sub has_init_arg    { defined($_[0]->{'init_arg'}) }
-#sub has_default     { defined($_[0]->{'default'}) }
-#sub has_initializer { defined($_[0]->{'initializer'}) }
-#sub has_insertion_order { defined($_[0]->{'insertion_order'}) }
-
-#sub accessor           { $_[0]->{'accessor'}    }
-#sub reader             { $_[0]->{'reader'}      }
-#sub writer             { $_[0]->{'writer'}      }
-#sub predicate          { $_[0]->{'predicate'}   }
-#sub clearer            { $_[0]->{'clearer'}     }
-#sub builder            { $_[0]->{'builder'}     }
-#sub init_arg           { $_[0]->{'init_arg'}    }
-#sub initializer        { $_[0]->{'initializer'} }
-#sub definition_context { $_[0]->{'definition_context'} }
-#sub insertion_order    { $_[0]->{'insertion_order'} }
-#sub _set_insertion_order { $_[0]->{'insertion_order'} = $_[1] }
-
-# end bootstrapped away method section.
-# (all methods below here are kept intact)
-
 sub has_read_method  { $_[0]->has_reader || $_[0]->has_accessor }
 sub has_write_method { $_[0]->has_writer || $_[0]->has_accessor }
 

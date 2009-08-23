@@ -68,11 +68,6 @@ sub _new {
     } => $class;
 }
 
-## accessors
-
-#sub associated_attribute { (shift)->{'attribute'}     }
-#sub accessor_type        { (shift)->{'accessor_type'} }
-
 
 ## factory
 

@@ -70,8 +70,6 @@ sub _new {
 
 sub _class_name { $_[0]->{_class_name} ||= $_[0]->associated_metaclass->name }
 
-#sub associated_metaclass { $_[0]{'associated_metaclass'} }
-
 sub create_instance {
     my $self = shift;
     bless {}, $self->_class_name;

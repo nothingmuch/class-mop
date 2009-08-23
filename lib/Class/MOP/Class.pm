@@ -335,19 +335,6 @@ sub create {
     return $meta;
 }
 
-## Attribute readers
-
-# NOTE:
-# all these attribute readers will be bootstrapped
-# away in the Class::MOP bootstrap section
-
-#sub get_attribute_map        { $_[0]->{'attributes'}                  }
-#sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
-#sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
-#sub immutable_trait          { $_[0]->{'immutable_trait'}             }
-#sub constructor_class        { $_[0]->{'constructor_class'}           }
-#sub constructor_name         { $_[0]->{'constructor_name'}            }
-#sub destructor_class         { $_[0]->{'destructor_class'}            }
 
 # Instance Construction & Cloning
 
