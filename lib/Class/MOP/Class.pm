@@ -322,8 +322,6 @@ sub create {
     return $meta;
 }
 
-## Attribute readers
-
 # Instance Construction & Cloning
 
 sub new_object {

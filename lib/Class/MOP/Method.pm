@@ -65,10 +65,6 @@ sub _new {
     } => $class;
 }
 
-## accessors
-
-#sub associated_metaclass { shift->{'associated_metaclass'} }
-
 sub attach_to_class {
     my ( $self, $class ) = @_;
     $self->{associated_metaclass} = $class;
@@ -85,9 +81,6 @@ sub fully_qualified_name {
     $self->package_name . '::' . $self->name;
 }
 
-#sub original_method { (shift)->{'original_method'} }
-
-#sub _set_original_method { $_[0]->{'original_method'} = $_[1] }
 
 # It's possible that this could cause a loop if there is a circular
 # reference in here. That shouldn't ever happen in normal

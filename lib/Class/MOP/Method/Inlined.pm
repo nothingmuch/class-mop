@@ -12,8 +12,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use base 'Class::MOP::Method::Generated';
 
-#sub _expected_method_class { $_[0]{_expected_method_class} }
-
 sub _uninlined_body {
     my $self = shift;
 

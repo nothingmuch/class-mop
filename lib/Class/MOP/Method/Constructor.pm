@@ -65,11 +65,6 @@ sub _new {
     }, $class;
 }
 
-## accessors
-
-#sub options              { (shift)->{'options'}              }
-#sub associated_metaclass { (shift)->{'associated_metaclass'} }
-
 ## cached values ...
 
 sub _meta_instance {
