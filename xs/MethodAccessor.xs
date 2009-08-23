@@ -57,6 +57,10 @@ mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv) {
         croak("too few arguments for %s", GvNAME(CvGV(cv)));
     }
 
+    /* NOTE: If self has GETMAGIC, $self->accessor will invoke GETMAGIC
+     *       before calling methods, so SvGETMAGIC(self) is not necessarily needed here.
+     */
+
     self = ST(0);
     if(!(SvROK(self) && SvOBJECT(SvRV(self)))){
         croak("cant call %s as a class method", GvNAME(CvGV(cv)));
