@@ -3,12 +3,13 @@ use warnings;
 
 use Class::MOP;
 use Class::MOP::Class;
-use Test::More qw/no_plan/;
+use Test::More tests => 9;
 use Test::Exception;
 
 my %results;
 
 {
+
     package Base;
     use metaclass;
     sub hey { $results{base}++ }
@@ -16,42 +17,54 @@ my %results;
 
 for my $wrap (qw(before after)) {
     my $meta = Class::MOP::Class->create_anon_class(
-        superclasses => ['Base', 'Class::MOP::Object']
-    );
+        superclasses => [ 'Base', 'Class::MOP::Object' ] );
     my $alter = "add_${wrap}_method_modifier";
-    $meta->$alter('hey' => sub {
-        $results{wrapped}++;
-        $_ = 'barf'; # 'barf' would replace the cached wrapper subref
-    });
+    $meta->$alter(
+        'hey' => sub {
+            $results{wrapped}++;
+            $_ = 'barf';    # 'barf' would replace the cached wrapper subref
+        }
+    );
 
     %results = ();
     my $o = $meta->get_meta_instance->create_instance;
-    isa_ok($o, 'Base');
+    isa_ok( $o, 'Base' );
     lives_ok {
         $o->hey;
-        $o->hey; # this would die with 'Can't use string ("barf") as a subroutine ref while "strict refs" in use'
-    } 'wrapped doesn\'t die when $_ gets changed';
-    is_deeply(\%results, {base=>2,wrapped=>2});
+        $o->hey
+            ; # this would die with 'Can't use string ("barf") as a subroutine ref while "strict refs" in use'
+    }
+    'wrapped doesn\'t die when $_ gets changed';
+    is_deeply(
+        \%results, { base => 2, wrapped => 2 },
+        'saw expected calls to wrappers'
+    );
 }
 
 {
     my $meta = Class::MOP::Class->create_anon_class(
-        superclasses => ['Base', 'Class::MOP::Object']
-    );
+        superclasses => [ 'Base', 'Class::MOP::Object' ] );
     for my $wrap (qw(before after)) {
         my $alter = "add_${wrap}_method_modifier";
-        $meta->$alter('hey' => sub {
-            $results{wrapped}++;
-            $_ = 'barf'; # 'barf' would replace the cached wrapper subref
-        });
+        $meta->$alter(
+            'hey' => sub {
+                $results{wrapped}++;
+                $_ = 'barf';  # 'barf' would replace the cached wrapper subref
+            }
+        );
     }
 
     %results = ();
     my $o = $meta->get_meta_instance->create_instance;
-    isa_ok($o, 'Base');
+    isa_ok( $o, 'Base' );
     lives_ok {
         $o->hey;
-        $o->hey; # this would die with 'Can't use string ("barf") as a subroutine ref while "strict refs" in use'
-    } 'double-wrapped doesn\'t die when $_ gets changed';
-    is_deeply(\%results, {base=>2,wrapped=>4});
+        $o->hey
+            ; # this would die with 'Can't use string ("barf") as a subroutine ref while "strict refs" in use'
+    }
+    'double-wrapped doesn\'t die when $_ gets changed';
+    is_deeply(
+        \%results, { base => 2, wrapped => 4 },
+        'saw expected calls to wrappers'
+    );
 }
