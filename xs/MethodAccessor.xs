@@ -1,7 +1,19 @@
 #include "mop.h"
 
 
-static MGVTBL mop_accessor_vtbl; /* the MAGIC identity */
+static MGVTBL mop_accessor_vtbl = { /* the MAGIC identity */
+    NULL, /* get */
+    NULL, /* set */
+    NULL, /* len */
+    NULL, /* clear */
+    NULL, /* free */
+    NULL, /* copy */
+    NULL, /* dup */
+#ifdef MGf_LOCAL
+    NULL, /* local */
+#endif
+};
+
 
 MAGIC*
 mop_accessor_get_mg(pTHX_ CV* const xsub){

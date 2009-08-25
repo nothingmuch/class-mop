@@ -63,20 +63,19 @@ void mop_get_package_symbols(HV *stash, type_filter_t filter, get_package_symbol
 HV  *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 
 
-/* Class::MOP::Instance stuff */
+/* Class::MOP Magic stuff */
 
-/* MI: Meta Instance object of Class::MOP::Method */
+/* MG: MOP Magic object */
 
 /* All the MOP_mg_* macros require MAGIC* mg for the first argument */
-/* All the MOP_mi_* macros require AV* mi    for the first argument */
 
 typedef struct {
-    SV*  (*create_instance)(pTHX_ MAGIC* const mg);
-    bool (*has_slot)       (pTHX_ MAGIC* const mg, SV* const instance);
-    SV*  (*get_slot)       (pTHX_ MAGIC* const mg, SV* const instance);
-    SV*  (*set_slot)       (pTHX_ MAGIC* const mg, SV* const instance, SV* const value);
-    SV*  (*delete_slot)    (pTHX_ MAGIC* const mg, SV* const instance);
-    void (*weaken_slot)    (pTHX_ MAGIC* const mg, SV* const instance);
+    SV*  (*create_instance)(pTHX_ SV* const mi);
+    bool (*has_slot)       (pTHX_ SV* const mi, SV* const instance);
+    SV*  (*get_slot)       (pTHX_ SV* const mi, SV* const instance);
+    SV*  (*set_slot)       (pTHX_ SV* const mi, SV* const instance, SV* const value);
+    SV*  (*delete_slot)    (pTHX_ SV* const mi, SV* const instance);
+    void (*weaken_slot)    (pTHX_ SV* const mi, SV* const instance);
 } mop_instance_vtbl;
 
 const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
@@ -84,9 +83,11 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 #define MOP_MI_SLOT   0
 #define MOP_MI_last   1
 
-#define MOP_mg_mi(mg)    ((AV*)(mg)->mg_obj)
+#define MOP_mg_mi(mg)    ((mg)->mg_obj)
 #define MOP_mg_vtbl(mg)  ((const mop_instance_vtbl*)(mg)->mg_ptr)
 #define MOP_mg_flags(mg) ((mg)->mg_private)
+
+#define MOP_mg_miav(mg) ((AV*)MOP_mg_mi(mg))
 
 #ifdef DEBUGGING
 #define MOP_mi_access(mi, a)  *mop_debug_mi_access(aTHX_ (mi) , (a))
@@ -96,14 +97,13 @@ SV** mop_debug_mi_access(pTHX_ AV* const mi, I32 const attr_ix);
 #endif
 
 #define MOP_mi_slot(mi)   MOP_mi_access((mi), MOP_MI_SLOT)
-#define MOP_mg_slot(mg)   MOP_mi_slot(MOP_mg_mi(mg))
 
-#define MOP_mg_create_instance(mg) MOP_mg_vtbl(mg)->create_instance (aTHX_ (mg))
-#define MOP_mg_has_slot(mg, o)     MOP_mg_vtbl(mg)->has_slot        (aTHX_ (mg), (o))
-#define MOP_mg_get_slot(mg, o)     MOP_mg_vtbl(mg)->get_slot        (aTHX_ (mg), (o))
-#define MOP_mg_set_slot(mg, o, v)  MOP_mg_vtbl(mg)->set_slot        (aTHX_ (mg), (o), (v))
-#define MOP_mg_delete_slot(mg, o)  MOP_mg_vtbl(mg)->delete_slot     (aTHX_ (mg), (o))
-#define MOP_mg_weaken_slot(mg, o)  MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ (mg), (o))
+#define MOP_mg_create_instance(mg) MOP_mg_vtbl(mg)->create_instance (aTHX_ MOP_mg_mi(mg))
+#define MOP_mg_has_slot(mg, o)     MOP_mg_vtbl(mg)->has_slot        (aTHX_ MOP_mg_mi(mg), (o))
+#define MOP_mg_get_slot(mg, o)     MOP_mg_vtbl(mg)->get_slot        (aTHX_ MOP_mg_mi(mg), (o))
+#define MOP_mg_set_slot(mg, o, v)  MOP_mg_vtbl(mg)->set_slot        (aTHX_ MOP_mg_mi(mg), (o), (v))
+#define MOP_mg_delete_slot(mg, o)  MOP_mg_vtbl(mg)->delete_slot     (aTHX_ MOP_mg_mi(mg), (o))
+#define MOP_mg_weaken_slot(mg, o)  MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ MOP_mg_mi(mg), (o))
 
 
 /* Class::MOP::Method::Accessor stuff */
