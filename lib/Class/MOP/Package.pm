@@ -322,7 +322,6 @@ sub add_method {
         }
 
         $method->attach_to_class($self);
-        $self->_method_map->{$method_name} = $method;
     }
     else {
         # If a raw code reference is supplied, its method object is not created.
@@ -330,6 +329,7 @@ sub add_method {
         $body = $method;
     }
 
+    $self->_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
@@ -362,34 +362,36 @@ sub has_method {
 }
 
 sub get_method {
-    my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+    my ( $self, $method_name ) = @_;
+    ( defined $method_name && $method_name )
         || confess "You must define a method name";
 
-    my $method_map    = $self->_method_map;
-    my $method_object = $method_map->{$method_name};
-    my $code = $self->get_package_symbol({
-        name  => $method_name,
-        sigil => '&',
-        type  => 'CODE',
-    });
+    my $method_map = $self->_method_map;
+    my $map_entry  = $method_map->{$method_name};
+    my $code = $self->get_package_symbol(
+        {
+            name  => $method_name,
+            sigil => '&',
+            type  => 'CODE',
+        }
+    );
 
-    unless ( $method_object && $method_object->body == ( $code || 0 ) ) {
-        if ( $code && $self->_code_is_mine($code) ) {
-            $method_object = $method_map->{$method_name}
-                = $self->wrap_method_body(
-                body                 => $code,
-                name                 => $method_name,
-                associated_metaclass => $self,
-                );
-        }
-        else {
-            delete $method_map->{$method_name};
-            return undef;
-        }
+    return $map_entry if blessed $map_entry && $map_entry->body == $code;
+
+    # we should never have a blessed map entry but no $code in the package
+    die 'WTF' if blessed $map_entry && ! $code;
+
+    unless ($map_entry) {
+        return unless $code && $self->_code_is_mine($code);
     }
 
-    return $method_object;
+    $code ||= $map_entry;
+
+    return $method_map->{$method_name} = $self->wrap_method_body(
+        body                 => $code,
+        name                 => $method_name,
+        associated_metaclass => $self,
+    );
 }
 
 sub remove_method {
@@ -403,7 +405,7 @@ sub remove_method {
         { sigil => '&', type => 'CODE', name => $method_name }
     );
 
-    $removed_method->detach_from_class if $removed_method;
+    $removed_method->detach_from_class if $removed_method && blessed $removed_method;
 
     $self->update_package_cache_flag; # still valid, since we just removed the method from the map
 

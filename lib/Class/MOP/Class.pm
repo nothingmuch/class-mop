@@ -650,7 +650,15 @@ sub find_method_by_name {
 
 sub get_all_methods {
     my $self = shift;
-    my %methods = map { %{ $self->initialize($_)->get_method_map } } reverse $self->linearized_isa;
+
+    my %methods;
+    for my $class ( reverse $self->linearized_isa ) {
+        my $meta = $self->initialize($class);
+
+        $methods{$_} = $meta->get_method($_)
+            for $meta->get_method_list;
+    }
+
     return values %methods;
 }
 
@@ -863,12 +871,9 @@ sub is_pristine {
     return if $self->get_attribute_list;
 
     # or any non-declared methods
-    if ( my @methods = values %{ $self->get_method_map } ) {
-        my $metaclass = $self->method_metaclass;
-        foreach my $method ( @methods ) {
-            return if $method->isa("Class::MOP::Method::Generated");
-            # FIXME do we need to enforce this too? return unless $method->isa($metaclass);
-        }
+    for my $method ( map { $self->get_method($_) } $self->get_method_list ) {
+        return if $method->isa("Class::MOP::Method::Generated");
+        # FIXME do we need to enforce this too? return unless $method->isa( $self->method_metaclass );
     }
 
     return 1;
