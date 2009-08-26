@@ -74,10 +74,10 @@ sub get_meta_instance {
     $self->{__immutable}{get_meta_instance} ||= $self->$orig;
 }
 
-sub get_method_map {
+sub _get_method_map {
     my $orig = shift;
     my $self = shift;
-    $self->{__immutable}{get_method_map} ||= $self->$orig;
+    $self->{__immutable}{_get_method_map} ||= $self->$orig;
 }
 
 sub add_package_symbol {

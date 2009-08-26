@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 99;
+use Test::More tests => 95;
 use Test::Exception;
 
 use Scalar::Util;
@@ -49,7 +49,7 @@ use Class::MOP;
     ok(!$meta->is_mutable,              '... our class is no longer mutable');
     ok($meta->is_immutable,             '... our class is now immutable');
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
-    ok($meta->get_method_map->{new},    '... inlined constructor created');
+    ok($meta->get_method('new'),        '... inlined constructor created');
     ok($meta->has_method('new'),        '... inlined constructor created for sure');    
     is_deeply([ map { $_->name } $meta->_inlined_methods ], [ 'new' ], '... really, i mean it');
 
@@ -57,8 +57,8 @@ use Class::MOP;
     ok($meta->is_mutable,               '... our class is mutable');
     ok(!$meta->is_immutable,            '... our class is not immutable');
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
-    ok(!$meta->get_method_map->{new},   '... inlined constructor removed');
-    ok(!$meta->has_method('new'),        '... inlined constructor removed for sure');    
+    ok(!$meta->get_method('new'),       '... inlined constructor created');
+    ok(!$meta->has_method('new'),       '... inlined constructor removed for sure');    
 
     my %new_keys = map { $_ => 1 } grep { !/^_/ } keys %$meta;
     is_deeply(\%orig_keys, \%new_keys, '... no extraneous hashkeys');
@@ -86,10 +86,10 @@ use Class::MOP;
 
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       get_all_attributes
-             class_precedence_list  get_method_map );
+             class_precedence_list );
 
     lives_ok {$meta->make_immutable; } '... changed Baz to be immutable again';
-    ok($meta->get_method_map->{new},    '... inlined constructor recreated');
+    ok($meta->get_method('new'),    '... inlined constructor recreated');
 }
 
 {
@@ -115,7 +115,7 @@ use Class::MOP;
 
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       get_all_attributes
-             class_precedence_list  get_method_map );
+             class_precedence_list );
 }
 
 {
@@ -175,7 +175,7 @@ use Class::MOP;
 
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       get_all_attributes
-             class_precedence_list  get_method_map );
+             class_precedence_list );
 };
 
 
@@ -208,7 +208,7 @@ use Class::MOP;
 
     ok( $meta->$_  , "... ${_} works")
       for qw(get_meta_instance       get_all_attributes
-             class_precedence_list  get_method_map );
+             class_precedence_list );
 }
 
 {

@@ -39,7 +39,7 @@ my @class_mop_package_methods = qw(
     _method_map
     _code_is_mine
     has_method get_method add_method remove_method wrap_method_body
-    get_method_list get_method_map
+    get_method_list _full_method_map
 
     _deconstruct_variable_name
 );
@@ -162,7 +162,6 @@ foreach my $non_method_name (qw(
 my @class_mop_package_attributes = (
     'package',
     'namespace',
-    'methods',
     'method_metaclass',
     'wrapped_method_metaclass',
 );

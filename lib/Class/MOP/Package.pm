@@ -34,7 +34,6 @@ sub initialize {
             'package'   => $package_name,
             %options,
         });
-
         Class::MOP::store_metaclass_by_name($package_name, $meta);
 
         return $meta;
@@ -106,7 +105,11 @@ sub namespace {
 sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }
 
-sub _method_map              { $_[0]->{'methods'}                     }
+# This doesn't always get initialized in a constructor because there is a
+# weird object construction path for subclasses of Class::MOP::Class. At one
+# point, this always got initialized by calling into the XS code first, but
+# that is no longer guaranteed to happen.
+sub _method_map { $_[0]->{'methods'} ||= {} }
 
 # utility methods
 
@@ -328,7 +331,7 @@ sub add_method {
         # The method object won't be created until required.
         $body = $method;
     }
-
+    Carp::cluck('wtf') unless defined $self->_method_map;
     $self->_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
@@ -399,7 +402,7 @@ sub remove_method {
     (defined $method_name && $method_name)
         || confess "You must define a method name";
 
-    my $removed_method = delete $self->get_method_map->{$method_name};
+    my $removed_method = delete $self->_full_method_map->{$method_name};
     
     $self->remove_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name }
@@ -540,12 +543,6 @@ returns C<undef>
 Returns a boolean indicating whether or not the class defines the
 named method. It does not include methods inherited from parent
 classes.
-
-=item B<< $metapackage->get_method_map >>
-
-Returns a hash reference representing the methods defined in this
-class. The keys are method names and the values are
-L<Class::MOP::Method> objects.
 
 =item B<< $metapackage->get_method_list >>
 

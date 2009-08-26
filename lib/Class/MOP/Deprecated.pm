@@ -15,6 +15,8 @@ my %DeprecatedAt = (
     'Class::MOP::subname'               => 0.93,
     'Class::MOP::in_global_destruction' => 0.93,
 
+    'Class::MOP::Package::get_method_map' => 0.93,
+
     'Class::MOP::Class::construct_class_instance'          => 0.93,
     'Class::MOP::Class::check_metaclass_compatibility'     => 0.93,
     'Class::MOP::Class::create_meta_instance'              => 0.93,

@@ -121,7 +121,7 @@ get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
         PUSHs(sv_2mortal(newRV_noinc((SV *)symbols)));
 
 void
-get_method_map(self)
+_full_method_map(self)
     SV *self
     PREINIT:
         HV *const obj        = (HV *)SvRV(self);
