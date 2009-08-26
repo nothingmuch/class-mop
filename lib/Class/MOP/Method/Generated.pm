@@ -50,7 +50,7 @@ sub _eval_closure {
                 } keys %$__captures
             ),
             $_[2];
-        print STDERR $_[0]->name, ' ', $source, "\n" if _PRINT_SOURCE;
+        print STDERR "\n", $_[0]->name, ":\n", $source, "\n" if _PRINT_SOURCE;
         $code = eval $source;
         $@;
     };
