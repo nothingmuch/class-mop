@@ -15,6 +15,15 @@ Next
       - When throwing an error because of an immutable method, include that
         method's name. Addresses RT #49680. (Shawn M Moore)
 
+    * Class::MOP::Package
+      - Fixed a bug where adding the same sub reference to multiple packages
+        failed to update the method map properly. RT #48985. Reported by Paul
+        Mooney. (Dave Rolsky)
+      - The get_method_map method is now private. The public version is
+        available as a deprecated method, but the values of the hash reference
+        may now be either Class::MOP::Method objects _or_ raw sub
+        references. (Dave Rolsky)
+
 0.92_01 Thu, Sep 10, 2009
     * Class::MOP::Package
       - Backwards compatibility tweaks to XS for 5.8.1. (Goro Fuji)
