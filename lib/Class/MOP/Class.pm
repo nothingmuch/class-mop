@@ -120,6 +120,7 @@ sub _new {
         # should not actually have a value associated
         # with the slot.
         'namespace' => \undef,
+        'methods'   => {},
 
         # inherited from Class::MOP::Module
         'version'   => \undef,
@@ -128,7 +129,6 @@ sub _new {
         # defined in Class::MOP::Class
         'superclasses' => \undef,
 
-        'methods'    => {},
         'attributes' => {},
         'attribute_metaclass' =>
             ( $options->{'attribute_metaclass'} || 'Class::MOP::Attribute' ),
@@ -1515,11 +1515,10 @@ Making a class immutable lets us optimize the class by inlining some
 methods, and also allows us to optimize some methods on the metaclass
 object itself.
 
-After immutabilization, the metaclass object will cache most
-informational methods such as C<get_method_map> and
-C<get_all_attributes>. Methods which would alter the class, such as
-C<add_attribute>, C<add_method>, and so on will throw an error on an
-immutable metaclass object.
+After immutabilization, the metaclass object will cache most informational
+methods that returns information about methods or attributes.. Methods which
+would alter the class, such as C<add_attribute>, C<add_method>, and so on will
+throw an error on an immutable metaclass object.
 
 The immutabilization system in L<Moose> takes much greater advantage
 of the inlining features than Class::MOP itself does.
