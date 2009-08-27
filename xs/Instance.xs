@@ -10,46 +10,46 @@
     } STMT_END
 
 static SV*
-mop_instance_create_instance(pTHX_ SV* const mi PERL_UNUSED_DECL) {
-    return newRV_noinc((SV*)newHV());
+mop_instance_create_instance(pTHX_ HV* const stash) {
+    return sv_bless( newRV_noinc((SV*)newHV()), stash );
 }
 
 static bool
-mop_instance_has_slot(pTHX_ SV* const mi, SV* const instance) {
+mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
     CHECK_INSTANCE(instance);
-    return hv_exists_ent((HV*)SvRV(instance), MOP_mi_slot(mi), 0U);
+    return hv_exists_ent((HV*)SvRV(instance), slot, 0U);
 }
 
 static SV*
-mop_instance_get_slot(pTHX_ SV* const mi, SV* const instance) {
+mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot) {
     HE* he;
     CHECK_INSTANCE(instance);
-    he = hv_fetch_ent((HV*)SvRV(instance), MOP_mi_slot(mi), FALSE, 0U);
+    he = hv_fetch_ent((HV*)SvRV(instance), slot, FALSE, 0U);
     return he ? HeVAL(he) : NULL;
 }
 
 static SV*
-mop_instance_set_slot(pTHX_ SV* const mi, SV* const instance, SV* const value) {
+mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value) {
     HE* he;
     SV* sv;
     CHECK_INSTANCE(instance);
-    he = hv_fetch_ent((HV*)SvRV(instance), MOP_mi_slot(mi), TRUE, 0U);
+    he = hv_fetch_ent((HV*)SvRV(instance), slot, TRUE, 0U);
     sv = HeVAL(he);
     sv_setsv_mg(sv, value);
     return sv;
 }
 
 static SV*
-mop_instance_delete_slot(pTHX_ SV* const mi, SV* const instance) {
+mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot) {
     CHECK_INSTANCE(instance);
-    return hv_delete_ent((HV*)SvRV(instance), MOP_mi_slot(mi), 0, 0U);
+    return hv_delete_ent((HV*)SvRV(instance), slot, 0, 0U);
 }
 
 static void
-mop_instance_weaken_slot(pTHX_ SV* const mi, SV* const instance) {
+mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot) {
     HE* he;
     CHECK_INSTANCE(instance);
-    he = hv_fetch_ent((HV*)SvRV(instance), MOP_mi_slot(mi), FALSE, 0U);
+    he = hv_fetch_ent((HV*)SvRV(instance), slot, FALSE, 0U);
     if(he){
         sv_rvweaken(HeVAL(he));
     }

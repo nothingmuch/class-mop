@@ -24,7 +24,6 @@ CV*
 mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl), const mop_instance_vtbl* vtbl){
     CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
     SV* const keysv = newSVpvn_share(key, keylen, 0U);
-    AV* const meta  = newAV();
     MAGIC* mg;
 
     if(!vtbl){
@@ -36,10 +35,8 @@ mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32
         sv_2mortal((SV*)xsub);
     }
 
-    mg = sv_magicext((SV*)xsub, (SV*)meta, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
-    SvREFCNT_dec(meta); /* sv_magicext() increases refcnt in mg_obj */
-
-    av_store(meta, MOP_MI_SLOT, keysv);
+    mg = sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
+    SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
 
     /* NOTE:
      * although we use MAGIC for gc, we also store mg to any slot for efficiency (gfx)
@@ -79,16 +76,6 @@ mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv) {
     }
     return self;
 }
-
-#ifdef DEBUGGING
-SV**
-mop_debug_mi_access(pTHX_ AV* const mi, I32 const attr_ix){
-    assert(mi);
-    assert(SvTYPE(mi) == SVt_PVAV);
-    assert(AvMAX(mi) >= attr_ix);
-    return &AvARRAY(mi)[attr_ix];
-}
-#endif
 
 XS(mop_xs_simple_accessor)
 {
