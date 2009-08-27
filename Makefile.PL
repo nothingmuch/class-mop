@@ -70,13 +70,16 @@ sub check_conflicts {
         'Moose' => '0.85',
     );
 
+    my $has_module_info = eval{ require Module::Info };
+    my $get_version     = $has_module_info
+        ? sub{ Module::Info->new_from_module($_[0])->version }
+        : sub{ eval qq{ require $_[0] } ? $_[0]->VERSION : undef };
+
     my $found = 0;
     for my $mod ( sort keys %conflicts ) {
-        eval "require $mod";
-        next if $@;
+        my $installed = $get_version->($mod);
 
-        my $installed = $mod->VERSION();
-        if ( $installed le $conflicts{$mod} ) {
+        if ( defined($installed) && $installed le $conflicts{$mod} ) {
 
             print <<"EOF";
 
