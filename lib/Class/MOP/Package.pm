@@ -331,7 +331,7 @@ sub add_method {
         # The method object won't be created until required.
         $body = $method;
     }
-    Carp::cluck('wtf') unless defined $self->_method_map;
+
     $self->_method_map->{$method_name} = $method;
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
