@@ -11,11 +11,14 @@
 
 static SV*
 mop_instance_create_instance(pTHX_ HV* const stash) {
+    assert(stash);
     return sv_bless( newRV_noinc((SV*)newHV()), stash );
 }
 
 static bool
 mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
+    assert(instance);
+    assert(slot);
     CHECK_INSTANCE(instance);
     return hv_exists_ent((HV*)SvRV(instance), slot, 0U);
 }
@@ -23,6 +26,8 @@ mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
 static SV*
 mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot) {
     HE* he;
+    assert(instance);
+    assert(slot);
     CHECK_INSTANCE(instance);
     he = hv_fetch_ent((HV*)SvRV(instance), slot, FALSE, 0U);
     return he ? HeVAL(he) : NULL;
@@ -32,6 +37,9 @@ static SV*
 mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value) {
     HE* he;
     SV* sv;
+    assert(instance);
+    assert(slot);
+    assert(value);
     CHECK_INSTANCE(instance);
     he = hv_fetch_ent((HV*)SvRV(instance), slot, TRUE, 0U);
     sv = HeVAL(he);
@@ -41,6 +49,8 @@ mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value)
 
 static SV*
 mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot) {
+    assert(instance);
+    assert(slot);
     CHECK_INSTANCE(instance);
     return hv_delete_ent((HV*)SvRV(instance), slot, 0, 0U);
 }
@@ -48,6 +58,8 @@ mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot) {
 static void
 mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot) {
     HE* he;
+    assert(instance);
+    assert(slot);
     CHECK_INSTANCE(instance);
     he = hv_fetch_ent((HV*)SvRV(instance), slot, FALSE, 0U);
     if(he){
