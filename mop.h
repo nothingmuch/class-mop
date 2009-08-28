@@ -89,6 +89,7 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 #define MOP_mg_ptr(mg)   ((mg)->mg_ptr)
 #define MOP_mg_vtbl(mg)  ((const mop_instance_vtbl*)MOP_mg_ptr(mg))
 #define MOP_mg_flags(mg) ((mg)->mg_private)
+#define MOP_mg_virtual(mg) ((mg)->mg_virtual)
 
 #define MOP_mg_obj_refcounted_on(mg)    (void)((mg)->mg_flags |= MGf_REFCOUNTED);
 
@@ -115,7 +116,8 @@ MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 SV*    mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv);
 MAGIC* mop_accessor_get_mg(pTHX_ CV* const cv);
 
-CV*    mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl), const mop_instance_vtbl* vtbl);
+CV*    mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSUBADDR_t const accessor_impl, const mop_instance_vtbl* vtbl);
+CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const accessor_impl, mop_instance_vtbl* const vtbl);
 
 #define INSTALL_SIMPLE_READER(klass, name)                  INSTALL_SIMPLE_READER_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_READER_WITH_KEY(klass, name, key)    (void)mop_install_accessor(aTHX_ "Class::MOP::" #klass "::" #name, #key, sizeof(#key)-1, mop_xs_simple_reader, NULL)
