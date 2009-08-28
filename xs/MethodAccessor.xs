@@ -21,7 +21,7 @@ mop_accessor_get_mg(pTHX_ CV* const xsub){
 }
 
 CV*
-mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSPROTO(accessor_impl), const mop_instance_vtbl* vtbl){
+mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSUBADDR_t const accessor_impl, const mop_instance_vtbl* vtbl){
     CV* const xsub  = newXS((char*)fq_name, accessor_impl, __FILE__);
     SV* const keysv = newSVpvn_share(key, keylen, 0U);
     MAGIC* mg;
@@ -47,8 +47,8 @@ mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32
 }
 
 
-static CV*
-mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSPROTO(accessor_impl), mop_instance_vtbl* const vtbl){
+CV*
+mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const accessor_impl, mop_instance_vtbl* const vtbl){
     /* $key = $accessor->associated_attribute->name */
     SV* const attr = mop_call0(aTHX_ accessor, mop_associated_attribute);
     SV* const key  = mop_call0(aTHX_ attr, mop_name);
@@ -61,13 +61,10 @@ mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSPROTO(accessor_impl), mo
     CV* const xsub = newXS(NULL, accessor_impl, __FILE__);
     sv_2mortal((SV*)xsub);
 
-    /* XXX: when attr is destroyed, all the associated xsub must be released */
-    CvXSUBANY(xsub).any_ptr = (void*)mg;
-
     MOP_mg_obj(mg) = newSVpvn_share(kpv, klen, 0U);
     MOP_mg_obj_refcounted_on(mg);
 
-    MOP_mg_ptr(mg) = vtbl; /* FIXME */
+    CvXSUBANY(xsub).any_ptr = sv_magicext((SV*)xsub, MOP_mg_obj(mg), PERL_MAGIC_ext, MOP_mg_virtual(mg), (char*)vtbl, 0);
 
     return xsub;
 }
