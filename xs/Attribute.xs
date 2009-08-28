@@ -1,15 +1,5 @@
 #include "mop.h"
 
-static MGVTBL mop_attr_vtbl;
-
-
-MAGIC*
-mop_attr_get_mg(pTHX_ SV* const attr){
-    if(!SvROK(attr)) croak("Invalid object");
-
-    return mop_mg_find(aTHX_ SvRV(attr), &mop_attr_vtbl, MOPf_DIE_ON_FAIL);
-}
-
 
 MODULE = Class::MOP::Attribute   PACKAGE = Class::MOP::Attribute
 
@@ -41,14 +31,4 @@ BOOT:
     INSTALL_SIMPLE_PREDICATE(Attribute, init_arg);
     INSTALL_SIMPLE_PREDICATE(Attribute, initializer);
     INSTALL_SIMPLE_PREDICATE(Attribute, default);
-
-void
-BUILD(SV* self)
-PREINIT:
-    mop_instance_vtbl* vtbl;
-CODE:
-    if(!( SvROK(self) && SvOBJECT(SvRV(self)) )){
-        croak("Invalid object");
-    }
-    sv_magicext(SvRV(self), NULL, PERL_MAGIC_ext, &mop_attr_vtbl, NULL, 0);
 
