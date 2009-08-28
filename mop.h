@@ -47,6 +47,8 @@ SV *mop_call1(pTHX_ SV *const self, SV *const method, SV *const arg1);
 #define mop_call0_pvs(o, m)    mop_call0(aTHX_ o, newSVpvs_flags(m, SVs_TEMP))
 #define mop_call1_pvs(o, m, a) mop_call1(aTHX_ o, newSVpvs_flags(m, SVs_TEMP), a)
 
+bool mop_is_class_loaded(pTHX_ SV*);
+#define is_class_loaded(klass) mop_is_class_loaded(aTHX_ klass)
 
 typedef enum {
     TYPE_FILTER_NONE,
