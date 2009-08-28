@@ -39,7 +39,7 @@ mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32
     SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
 
     /* NOTE:
-     * although we use MAGIC for gc, we also store mg to any slot for efficiency (gfx)
+     * although we use MAGIC for gc, we also store mg to CvXSUBANY slot for efficiency (gfx)
      */
     CvXSUBANY(xsub).any_ptr = (void*)mg;
 
