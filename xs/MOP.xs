@@ -13,7 +13,30 @@ SV *mop_package_cache_flag;
 
 SV *mop_VERSION;
 SV *mop_ISA;
+SV *mop_isa;
 
+/* equivalent to "blessed($x) && $x->isa($klass)" */
+bool
+mop_is_instance_of(pTHX_ SV* const sv, SV* const klass){
+    assert(sv);
+    assert(klass);
+
+    if(SvROK(sv) && SvOBJECT(SvRV(sv)) && SvOK(klass)){
+        bool ok;
+
+        ENTER;
+        SAVETMPS;
+
+        ok = SvTRUEx(mop_call1(aTHX_ sv, mop_isa, klass));
+
+        FREETMPS;
+        LEAVE;
+
+        return FALSE;
+    }
+
+    return FALSE;
+}
 
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
@@ -95,6 +118,7 @@ BOOT:
     mop_package_cache_flag   = MAKE_KEYSV(_package_cache_flag);
     mop_VERSION              = MAKE_KEYSV(VERSION);
     mop_ISA                  = MAKE_KEYSV(ISA);
+    mop_isa                  = MAKE_KEYSV(isa);
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
     MOP_CALL_BOOT (boot_Class__MOP__Class);
@@ -125,3 +149,11 @@ is_class_loaded(SV* klass = &PL_sv_undef)
 INIT:
     SvGETMAGIC(klass);
 
+
+
+#bool
+#is_instance_of(SV* sv, SV* klass)
+#INIT:
+#    SvGETMAGIC(sv);
+#    SvGETMAGIC(klass);
+#
