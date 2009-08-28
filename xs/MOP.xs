@@ -13,15 +13,61 @@ SV *mop_package_cache_flag;
 SV *mop_VERSION;
 SV *mop_ISA;
 
+
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 {
-    bool *found_method = (bool *)ud;
+    bool * const found_method = (bool *)ud;
     PERL_UNUSED_ARG(key);
     PERL_UNUSED_ARG(keylen);
     PERL_UNUSED_ARG(val);
     *found_method = TRUE;
     return FALSE;
+}
+
+
+bool
+mop_is_class_loaded(pTHX_ SV * const klass){
+    HV *stash;
+
+    if (!(SvPOKp(klass) && SvCUR(klass))) { /* XXX: SvPOK does not work with magical scalars */
+        return FALSE;
+    }
+
+    stash = gv_stashsv(klass, 0);
+    if (!stash) {
+        return FALSE;
+    }
+
+    if (hv_exists_ent (stash, mop_VERSION, 0U)) {
+        HE *version = hv_fetch_ent(stash, mop_VERSION, 0, 0U);
+        SV *version_sv;
+        if (version && HeVAL(version) && (version_sv = GvSV(HeVAL(version)))) {
+            if (SvROK(version_sv)) {
+                SV *version_sv_ref = SvRV(version_sv);
+
+                if (SvOK(version_sv_ref)) {
+                    return TRUE;
+                }
+            }
+            else if (SvOK(version_sv)) {
+                return TRUE;
+            }
+        }
+    }
+
+    if (hv_exists_ent (stash, mop_ISA, 0U)) {
+        HE *isa = hv_fetch_ent(stash, mop_ISA, 0, 0U);
+        if (isa && HeVAL(isa) && GvAV(HeVAL(isa)) && av_len(GvAV(HeVAL(isa))) != -1) {
+            return TRUE;;
+        }
+    }
+
+    {
+        bool found_method = FALSE;
+        mop_get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
+       return found_method;
+    }
 }
 
 EXTERN_C XS(boot_Class__MOP__Package);
@@ -69,53 +115,9 @@ get_code_info(coderef)
             mPUSHs(newSVpv(name, 0));
         }
 
-# This is some pretty grotty logic. It _should_ be parallel to the
-# pure Perl version in lib/Class/MOP.pm, so if you want to understand
-# it we suggest you start there.
-void
-is_class_loaded(klass=&PL_sv_undef)
-    SV *klass
-    PREINIT:
-        HV *stash;
-        bool found_method = FALSE;
-    PPCODE:
-        SvGETMAGIC(klass);
-        if (!(SvPOKp(klass) && SvCUR(klass))) { /* XXX: SvPOK does not work with magical scalars */
-            XSRETURN_NO;
-        }
 
-        stash = gv_stashsv(klass, 0);
-        if (!stash) {
-            XSRETURN_NO;
-        }
+bool
+is_class_loaded(SV* klass = &PL_sv_undef)
+INIT:
+    SvGETMAGIC(klass);
 
-        if (hv_exists_ent (stash, mop_VERSION, 0U)) {
-            HE *version = hv_fetch_ent(stash, mop_VERSION, 0, 0U);
-            SV *version_sv;
-            if (version && HeVAL(version) && (version_sv = GvSV(HeVAL(version)))) {
-                if (SvROK(version_sv)) {
-                    SV *version_sv_ref = SvRV(version_sv);
-
-                    if (SvOK(version_sv_ref)) {
-                        XSRETURN_YES;
-                    }
-                }
-                else if (SvOK(version_sv)) {
-                    XSRETURN_YES;
-                }
-            }
-        }
-
-        if (hv_exists_ent (stash, mop_ISA, 0U)) {
-            HE *isa = hv_fetch_ent(stash, mop_ISA, 0, 0U);
-            if (isa && HeVAL(isa) && GvAV(HeVAL(isa)) && av_len(GvAV(HeVAL(isa))) != -1) {
-                XSRETURN_YES;
-            }
-        }
-
-        mop_get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
-        if (found_method) {
-            XSRETURN_YES;
-        }
-
-        XSRETURN_NO;
