@@ -519,7 +519,9 @@ Class::MOP::Attribute->meta->add_attribute(
 
 Class::MOP::Attribute->meta->add_method('clone' => sub {
     my $self  = shift;
-    $self->meta->clone_object($self, @_);
+    my $cloned = $self->meta->clone_object($self, @_);
+    $cloned->BUILD();
+    return $cloned;
 });
 
 ## --------------------------------------------------------

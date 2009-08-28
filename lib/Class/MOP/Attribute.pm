@@ -52,7 +52,9 @@ sub new {
         confess("A required attribute must have either 'init_arg', 'builder', or 'default'");
     }
 
-    $class->_new(\%options);
+    my $self = $class->_new(\%options);
+    $self->BUILD(); # Initializer in XS
+    return $self;
 }
 
 sub _new {
@@ -98,7 +100,9 @@ sub clone {
     my %options = @_;
     (blessed($self))
         || confess "Can only clone an instance";
-    return bless { %{$self}, %options } => ref($self);
+    my $cloned = bless { %{$self}, %options } => ref($self);
+    $cloned->BUILD();
+    return $cloned;
 }
 
 sub initialize_instance_slot {
