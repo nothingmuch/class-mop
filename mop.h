@@ -86,8 +86,11 @@ typedef struct {
 const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 
 #define MOP_mg_obj(mg)   ((mg)->mg_obj)
-#define MOP_mg_vtbl(mg)  ((const mop_instance_vtbl*)(mg)->mg_ptr)
+#define MOP_mg_ptr(mg)   ((mg)->mg_ptr)
+#define MOP_mg_vtbl(mg)  ((const mop_instance_vtbl*)MOP_mg_ptr(mg))
 #define MOP_mg_flags(mg) ((mg)->mg_private)
+
+#define MOP_mg_obj_refcounted_on(mg)    (void)((mg)->mg_flags |= MGf_REFCOUNTED);
 
 #define MOP_mg_slot(mg)   MOP_mg_obj(mg)
 
@@ -98,6 +101,9 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 #define MOP_mg_delete_slot(mg, o)         MOP_mg_vtbl(mg)->delete_slot     (aTHX_ (o), MOP_mg_slot(mg))
 #define MOP_mg_weaken_slot(mg, o)         MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ (o), MOP_mg_slot(mg))
 
+/* Class::MOP::Attribute stuff */
+
+MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 
 /* Class::MOP::Method::Accessor stuff */
 

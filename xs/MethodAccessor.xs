@@ -52,10 +52,24 @@ mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSPROTO(accessor_impl), mo
     /* $key = $accessor->associated_attribute->name */
     SV* const attr = mop_call0(aTHX_ accessor, mop_associated_attribute);
     SV* const key  = mop_call0(aTHX_ attr, mop_name);
+
     STRLEN klen;
     const char* const kpv = SvPV_const(key, klen);
 
-    return mop_install_accessor(aTHX_ NULL /* anonymous */, kpv, klen, accessor_impl, vtbl);
+    MAGIC* mg       = mop_attr_get_mg(aTHX_ attr);
+
+    CV* const xsub = newXS(NULL, accessor_impl, __FILE__);
+    sv_2mortal((SV*)xsub);
+
+    /* XXX: when attr is destroyed, all the associated xsub must be released */
+    CvXSUBANY(xsub).any_ptr = (void*)mg;
+
+    MOP_mg_obj(mg) = newSVpvn_share(kpv, klen, 0U);
+    MOP_mg_obj_refcounted_on(mg);
+
+    MOP_mg_ptr(mg) = vtbl; /* FIXME */
+
+    return xsub;
 }
 
 SV*
