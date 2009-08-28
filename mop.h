@@ -49,6 +49,10 @@ SV *mop_call1(pTHX_ SV *const self, SV *const method, SV *const arg1);
 bool mop_is_class_loaded(pTHX_ SV*);
 #define is_class_loaded(klass) mop_is_class_loaded(aTHX_ klass)
 
+bool mop_is_instance_of(pTHX_ SV*, SV*);
+#define is_instance_of(sv, klass)     mop_is_instance_of(aTHX_ sv, klass)
+#define is_instance_of_pvs(sv, klass) mop_is_instance_of(aTHX_ sv, newSVpvs_flags(klass, SVs_TEMP))
+
 typedef enum {
     TYPE_FILTER_NONE,
     TYPE_FILTER_CODE,
