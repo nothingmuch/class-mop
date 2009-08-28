@@ -55,16 +55,20 @@ mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const accessor_
 
     STRLEN klen;
     const char* const kpv = SvPV_const(key, klen);
+    SV* const keysv       = newSVpvn_share(kpv, klen, 0U);
 
-    MAGIC* mg       = mop_attr_get_mg(aTHX_ attr);
+    MAGIC* mg;
 
     CV* const xsub = newXS(NULL, accessor_impl, __FILE__);
     sv_2mortal((SV*)xsub);
 
-    MOP_mg_obj(mg) = newSVpvn_share(kpv, klen, 0U);
-    MOP_mg_obj_refcounted_on(mg);
+    mg =  sv_magicext((SV*)xsub, keysv, PERL_MAGIC_ext, &mop_accessor_vtbl, (char*)vtbl, 0);
+    SvREFCNT_dec(keysv); /* sv_magicext() increases refcnt in mg_obj */
 
-    CvXSUBANY(xsub).any_ptr = sv_magicext((SV*)xsub, MOP_mg_obj(mg), PERL_MAGIC_ext, MOP_mg_virtual(mg), (char*)vtbl, 0);
+    /* NOTE:
+     * although we use MAGIC for gc, we also store mg to CvXSUBANY slot for efficiency (gfx)
+     */
+    CvXSUBANY(xsub).any_ptr = mg;
 
     return xsub;
 }

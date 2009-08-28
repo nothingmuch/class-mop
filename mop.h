@@ -83,6 +83,13 @@ typedef struct {
     void (*weaken_slot)    (pTHX_ SV* const mi, SV* const instance);
 } mop_instance_vtbl;
 
+SV*  mop_instance_create_instance(pTHX_ HV* const stash);
+bool mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot);
+SV*  mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot);
+SV*  mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value);
+SV*  mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot);
+void mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot);
+
 const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 
 #define MOP_mg_obj(mg)   ((mg)->mg_obj)
@@ -114,7 +121,7 @@ MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 
 
 SV*    mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv);
-MAGIC* mop_accessor_get_mg(pTHX_ CV* const cv);
+MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 
 CV*    mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSUBADDR_t const accessor_impl, const mop_instance_vtbl* vtbl);
 CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const accessor_impl, mop_instance_vtbl* const vtbl);

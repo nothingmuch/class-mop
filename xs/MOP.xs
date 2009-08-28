@@ -31,7 +31,7 @@ mop_is_instance_of(pTHX_ SV* const sv, SV* const klass){
         FREETMPS;
         LEAVE;
 
-        return FALSE;
+        return ok;
     }
 
     return FALSE;
