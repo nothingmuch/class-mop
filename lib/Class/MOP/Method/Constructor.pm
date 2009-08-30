@@ -81,14 +81,32 @@ sub _attributes {
 
 sub _initialize_body {
     my $self        = shift;
-    my $method_name = '_generate_constructor_method';
 
-    $method_name .= '_inline' if $self->is_inline;
+    $self->{'body'} = $self->_generate_constructor_method();
+}
 
-    $self->{'body'} = $self->$method_name;
+
+sub generate_constructor_method {
+    Carp::cluck('The generate_constructor_method method has been made private.'
+        . " The public version is deprecated and will be removed in a future release.\n");
+    shift->_generate_constructor_method;
 }
 
 sub _generate_constructor_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_constructor_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_constructor_method_inline();
+    }
+
+    return $self->_generate_constructor_method_basic();
+}
+
+sub _generate_constructor_method_basic {
     return sub { Class::MOP::Class->initialize(shift)->new_object(@_) }
 }
 

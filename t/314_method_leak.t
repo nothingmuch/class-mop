@@ -15,6 +15,7 @@ use Class::MOP;
 {
     package Foo;
     use metaclass;
+
 }
 
 leaks_cmp_ok {

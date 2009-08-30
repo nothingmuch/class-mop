@@ -9,10 +9,12 @@ SV *mop_body;
 SV *mop_package;
 SV *mop_package_name;
 SV *mop_package_cache_flag;
-
+SV *mop_initialize;
+SV *mop_isa;
+SV *mop_can;
+SV *mop_Class;
 SV *mop_VERSION;
 SV *mop_ISA;
-SV *mop_isa;
 
 /* equivalent to "blessed($x) && $x->isa($klass)" */
 bool
@@ -98,6 +100,7 @@ EXTERN_C XS(boot_Class__MOP__Attribute);
 EXTERN_C XS(boot_Class__MOP__Method);
 EXTERN_C XS(boot_Class__MOP__Instance);
 EXTERN_C XS(boot_Class__MOP__Method__Accessor);
+EXTERN_C XS(boot_Class__MOP__Method__Constructor);
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
@@ -113,15 +116,19 @@ BOOT:
     mop_package              = MAKE_KEYSV(package);
     mop_package_name         = MAKE_KEYSV(package_name);
     mop_package_cache_flag   = MAKE_KEYSV(_package_cache_flag);
+    mop_initialize           = MAKE_KEYSV(initialize);
+    mop_Class                = MAKE_KEYSV(Class::MOP::Class);
     mop_VERSION              = MAKE_KEYSV(VERSION);
     mop_ISA                  = MAKE_KEYSV(ISA);
     mop_isa                  = MAKE_KEYSV(isa);
+    mop_can                  = MAKE_KEYSV(can);
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
-    MOP_CALL_BOOT (boot_Class__MOP__Method);
     MOP_CALL_BOOT (boot_Class__MOP__Instance);
+    MOP_CALL_BOOT (boot_Class__MOP__Method);
     MOP_CALL_BOOT (boot_Class__MOP__Method__Accessor);
+    MOP_CALL_BOOT (boot_Class__MOP__Method__Constructor);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
 void

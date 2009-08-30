@@ -10,7 +10,7 @@ use Class::MOP::Method::Accessor;
 use Class::MOP::Method::Constructor;
 
 use Carp         'confess';
-use Scalar::Util 'blessed', 'reftype', 'weaken';
+use Scalar::Util 'blessed', 'reftype';
 use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 

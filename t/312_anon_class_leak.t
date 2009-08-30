@@ -9,7 +9,7 @@ BEGIN {
     plan skip_all => "Test::LeakTrace is required for this test" if $@;
 }
 
-plan tests => 2;
+plan tests => 4;
 
 # 5.10.0 has a bug on weaken($hash_ref) which leaks an AV.
 my $expected = ( $] == 5.010_000 ? 1 : 0 );
@@ -24,3 +24,13 @@ leaks_cmp_ok {
 }
 '<=', $expected, 'create_anon_class(superclass => [...])';
 
+leaks_cmp_ok {
+    Class::MOP::Class->create_anon_class()->new_object();
+}
+'<=', $expected, 'create_anon_class->new_object';
+
+leaks_cmp_ok {
+    my $meta = Class::MOP::Class->create_anon_class();
+    $meta->make_immutable();
+}
+'<=', $expected, 'create_anon_class->make_immutable';

@@ -70,10 +70,10 @@ sub _new {
 
 sub _class_name { $_[0]->{_class_name} ||= $_[0]->associated_metaclass->name }
 
-sub create_instance {
-    my $self = shift;
-    bless {}, $self->_class_name;
-}
+#sub create_instance {
+#    my $self = shift;
+#    bless {}, $self->_class_name;
+#}
 
 sub clone_instance {
     my ($self, $instance) = @_;
@@ -99,25 +99,25 @@ sub is_valid_slot {
 
 # operations on created instances
 
-sub get_slot_value {
-    my ($self, $instance, $slot_name) = @_;
-    $instance->{$slot_name};
-}
-
-sub set_slot_value {
-    my ($self, $instance, $slot_name, $value) = @_;
-    $instance->{$slot_name} = $value;
-}
+#sub get_slot_value {
+#    my ($self, $instance, $slot_name) = @_;
+#    $instance->{$slot_name};
+#}
+#
+#sub set_slot_value {
+#    my ($self, $instance, $slot_name, $value) = @_;
+#    $instance->{$slot_name} = $value;
+#}
 
 sub initialize_slot {
     my ($self, $instance, $slot_name) = @_;
     return;
 }
 
-sub deinitialize_slot {
-    my ( $self, $instance, $slot_name ) = @_;
-    delete $instance->{$slot_name};
-}
+#sub deinitialize_slot {
+#    my ( $self, $instance, $slot_name ) = @_;
+#    delete $instance->{$slot_name};
+#}
 
 sub initialize_all_slots {
     my ($self, $instance) = @_;
@@ -133,15 +133,15 @@ sub deinitialize_all_slots {
     }
 }
 
-sub is_slot_initialized {
-    my ($self, $instance, $slot_name, $value) = @_;
-    exists $instance->{$slot_name};
-}
+#sub is_slot_initialized {
+#    my ($self, $instance, $slot_name, $value) = @_;
+#    exists $instance->{$slot_name};
+#}
 
-sub weaken_slot_value {
-    my ($self, $instance, $slot_name) = @_;
-    weaken $instance->{$slot_name};
-}
+#sub weaken_slot_value {
+#    my ($self, $instance, $slot_name) = @_;
+#    weaken $instance->{$slot_name};
+#}
 
 sub strengthen_slot_value {
     my ($self, $instance, $slot_name) = @_;

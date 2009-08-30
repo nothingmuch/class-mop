@@ -223,3 +223,55 @@ mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags){
     }
     return NULL;
 }
+
+#ifdef DEBUGGING
+SV**
+mop_av_at_safe(pTHX_ AV* const av, I32 const ix){
+    assert(av);
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(AvMAX(av) >= ix);
+    return &AvARRAY(av)[ix];
+}
+#endif
+
+
+/*
+    XXX: 5.8.1 does have shared hash key mechanism, but does not have the APIs,
+         so the following APIs, which are stolen from 5.8.9, are safe to use.
+*/
+#ifndef SvIsCOW_shared_hash
+#define SvIsCOW(sv)		((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
+				    (SVf_FAKE | SVf_READONLY))
+#define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
+#define SvSHARED_HASH(sv) (0 + SvUVX(sv))
+#endif
+
+SV*
+mop_newSVsv_share(pTHX_ SV* const sv){
+    STRLEN len;
+    const char* const pv = SvPV_const(sv, len);
+    U32 const hash       = SvIsCOW_shared_hash(sv) ? SvSHARED_HASH(sv) : 0U;
+
+    return newSVpvn_share(pv, SvUTF8(sv) ? -len : len, hash);
+}
+
+SV*
+mop_class_of(pTHX_ SV* const sv){
+    SV* class_name;
+
+    if(IsObject(sv)){
+        HV* const stash = SvSTASH(SvRV(sv));
+        assert(stash);
+#ifdef HvNAME_HEK /* 5.10.0 */
+        assert(HvNAME_HEK(stash));
+        class_name = sv_2mortal(newSVhek(HvNAME_HEK(stash)));
+#else
+        assert(HvNAME_get(stash));
+        class_name = sv_2mortal(newSVpv(HvNAME_get(stash), 0));
+#endif
+   }
+   else{
+        class_name = sv;
+   }
+   return mop_call1(aTHX_ mop_Class, mop_initialize, class_name);
+}
