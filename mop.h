@@ -36,6 +36,9 @@ extern SV *mop_body;
 extern SV *mop_package;
 extern SV *mop_package_name;
 extern SV *mop_package_cache_flag;
+extern SV *mop_initialize;
+extern SV *mop_can;
+extern SV *mop_Class;
 extern SV *mop_VERSION;
 extern SV *mop_ISA;
 
@@ -76,7 +79,7 @@ HV  *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 /* All the MOP_mg_* macros require MAGIC* mg for the first argument */
 
 typedef struct {
-    SV*  (*create_instance)(pTHX_ SV* const mi);
+    SV*  (*create_instance)(pTHX_ HV* const stash);
     bool (*has_slot)       (pTHX_ SV* const mi, SV* const instance);
     SV*  (*get_slot)       (pTHX_ SV* const mi, SV* const instance);
     SV*  (*set_slot)       (pTHX_ SV* const mi, SV* const instance, SV* const value);
@@ -84,10 +87,11 @@ typedef struct {
     void (*weaken_slot)    (pTHX_ SV* const mi, SV* const instance);
 } mop_instance_vtbl;
 
-SV*  mop_instance_create_instance(pTHX_ HV* const stash);
-bool mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot);
-SV*  mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot);
-SV*  mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value);
+SV*  mop_instance_create     (pTHX_ HV* const stash);
+SV*  mop_instance_slot       (pTHX_ SV* const meta_instance, SV* const attr);
+bool mop_instance_has_slot   (pTHX_ SV* const instance, SV* const slot);
+SV*  mop_instance_get_slot   (pTHX_ SV* const instance, SV* const slot);
+SV*  mop_instance_set_slot   (pTHX_ SV* const instance, SV* const slot, SV* const value);
 SV*  mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot);
 void mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot);
 
@@ -101,14 +105,12 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 
 #define MOP_mg_obj_refcounted_on(mg)    (void)((mg)->mg_flags |= MGf_REFCOUNTED);
 
-#define MOP_mg_slot(mg)   MOP_mg_obj(mg)
-
 #define MOP_mg_create_instance(mg, stash) MOP_mg_vtbl(mg)->create_instance (aTHX_ (stash))
-#define MOP_mg_has_slot(mg, o)            MOP_mg_vtbl(mg)->has_slot        (aTHX_ (o), MOP_mg_slot(mg))
-#define MOP_mg_get_slot(mg, o)            MOP_mg_vtbl(mg)->get_slot        (aTHX_ (o), MOP_mg_slot(mg))
-#define MOP_mg_set_slot(mg, o, v)         MOP_mg_vtbl(mg)->set_slot        (aTHX_ (o), MOP_mg_slot(mg), (v))
-#define MOP_mg_delete_slot(mg, o)         MOP_mg_vtbl(mg)->delete_slot     (aTHX_ (o), MOP_mg_slot(mg))
-#define MOP_mg_weaken_slot(mg, o)         MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ (o), MOP_mg_slot(mg))
+#define MOP_mg_has_slot(mg, o, slot)      MOP_mg_vtbl(mg)->has_slot        (aTHX_ (o), (slot))
+#define MOP_mg_get_slot(mg, o, slot)      MOP_mg_vtbl(mg)->get_slot        (aTHX_ (o), (slot))
+#define MOP_mg_set_slot(mg, o, slot, v)   MOP_mg_vtbl(mg)->set_slot        (aTHX_ (o), (slot), (v))
+#define MOP_mg_delete_slot(mg, o, slot)   MOP_mg_vtbl(mg)->delete_slot     (aTHX_ (o), (slot))
+#define MOP_mg_weaken_slot(mg, o, slot)   MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ (o), (slot))
 
 /* Class::MOP::Attribute stuff */
 
@@ -138,5 +140,20 @@ CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const ac
 
 #define MOPf_DIE_ON_FAIL 0x01
 MAGIC* mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags);
+
+
+#ifdef DEBUGGING
+#define MOP_av_at(av, ix)  *mop_av_at_safe(aTHX_ (av) , (ix))
+SV** mop_av_at_safe(pTHX_ AV* const mi, I32 const ix);
+#else
+#define MOP_av_at(av, ix)  AvARRAY(av)[ix]
+#endif
+
+#define IsObject(sv) (SvROK(sv) && SvOBJECT(SvRV(sv)))
+
+#define newSVsv_share(sv) mop_newSVsv_share(aTHX_ sv)
+SV* mop_newSVsv_share(pTHX_ SV*);
+
+SV* mop_class_of(pTHX_ SV* const sv);
 
 #endif

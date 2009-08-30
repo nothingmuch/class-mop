@@ -13,12 +13,6 @@ BOOT:
 
     INSTALL_SIMPLE_WRITER_WITH_KEY(Method, _set_original_method, original_method);
 
-MODULE = Class::MOP::Method   PACKAGE = Class::MOP::Method::Constructor
-
-BOOT:
-    INSTALL_SIMPLE_READER(Method::Constructor, options);
-    INSTALL_SIMPLE_READER(Method::Constructor, associated_metaclass);
-
 MODULE = Class::MOP::Method   PACKAGE = Class::MOP::Method::Generated
 
 BOOT:
