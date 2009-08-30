@@ -15,7 +15,7 @@ my $extra = shift || 'KiokuDB';
 
 print "Profiling $branch (require $extra) ...\n";
 
-my @cmd = ($^X, '-Iblib/lib', '-Iblib/arch', '-e', "require Moose; require $extra");
+my @cmd = ($^X, '-Iblib/lib', '-Iblib/arch', '-d:NYTProf', '-e', "require Moose; require $extra");
 print "> @cmd\n";
 system(@cmd) == 0 or die "Cannot profile";
 system(@cmd) == 0 or die "Cannot profile";
