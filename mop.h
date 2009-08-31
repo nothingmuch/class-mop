@@ -10,12 +10,7 @@
 
 #define MOP_CALL_BOOT(name)  mop_call_xs(aTHX_ name, cv, mark);
 
-#ifndef XSPROTO
-#define XSPROTO(name) XS(name)
-#endif
-
 void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
-
 
 #define MAKE_KEYSV(name) newSVpvn_share(#name, sizeof(#name)-1, 0U)
 
@@ -91,6 +86,9 @@ SV* mop_newSVsv_share(pTHX_ SV*);
 
 SV* mop_class_of(pTHX_ SV* const sv);
 
+/* Class::MOP::Class */
+
+AV* mop_class_get_all_attributes(pTHX_ SV* const metaclass);
 
 /* Class::MOP Magic stuff */
 
@@ -134,7 +132,34 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 
 /* Class::MOP::Attribute stuff */
 
-MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
+
+#define MOP_attr_slot(meta)          MOP_av_at(meta, MOP_ATTR_SLOT)
+#define MOP_attr_init_arg(meta)      MOP_av_at(meta, MOP_ATTR_INIT_ARG)
+#define MOP_attr_default(meta)       MOP_av_at(meta, MOP_ATTR_DEFAULT)
+#define MOP_attr_builder(meta)       MOP_av_at(meta, MOP_ATTR_BUILDER)
+
+enum mop_attr_ix_t{
+    MOP_ATTR_SLOT,
+
+    MOP_ATTR_INIT_ARG,
+    MOP_ATTR_DEFAULT,
+    MOP_ATTR_BUILDER,
+
+    MOP_ATTR_last,
+};
+
+enum mop_attr_flags_t{ /* keep 16 bits */
+    MOP_ATTRf_HAS_INIT_ARG         = 0x0001,
+    MOP_ATTRf_HAS_DEFAULT          = 0x0002,
+    MOP_ATTRf_IS_DEFAULT_A_CODEREF = 0x0004,
+    MOP_ATTRf_HAS_BUILDER          = 0x0008,
+    MOP_ATTRf_HAS_INITIALIZER      = 0x0010,
+
+    MOP_ATTRf_DEBUG                = 0x8000
+};
+
+MAGIC* mop_attr_mg(pTHX_ SV* const attr, SV* const instance);
+void   mop_attr_initialize_instance_slot(pTHX_ SV* const attr, const mop_instance_vtbl* const vtbl, SV* const instance, HV* const args);
 
 /* Class::MOP::Method::Accessor stuff */
 
@@ -144,7 +169,6 @@ MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 
 
 SV*    mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv);
-MAGIC* mop_attr_get_mg(pTHX_ SV* const attr);
 
 CV*    mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSUBADDR_t const accessor_impl, const mop_instance_vtbl* vtbl);
 CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const accessor_impl, mop_instance_vtbl* const vtbl);
