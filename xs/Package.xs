@@ -83,6 +83,12 @@ PROTOTYPES: DISABLE
 
 VERSIONCHECK: DISABLE
 
+BOOT:
+    INSTALL_SIMPLE_READER_WITH_KEY(Package, name, package);
+    INSTALL_SIMPLE_READER_WITH_KEY(Package, _method_map, methods);
+    INSTALL_SIMPLE_READER(Package, method_metaclass);
+    INSTALL_SIMPLE_READER(Package, wrapped_method_metaclass);
+
 void
 get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
     SV *self
@@ -147,9 +153,3 @@ get_method_map(self)
         }
 
         XPUSHs(map_ref);
-
-BOOT:
-    INSTALL_SIMPLE_READER_WITH_KEY(Package, name, package);
-    INSTALL_SIMPLE_READER_WITH_KEY(Package, _method_map, methods);
-    INSTALL_SIMPLE_READER(Package, method_metaclass);
-    INSTALL_SIMPLE_READER(Package, wrapped_method_metaclass);
