@@ -5,6 +5,8 @@ MODULE = Class::MOP::Attribute   PACKAGE = Class::MOP::Attribute
 
 PROTOTYPES: DISABLE
 
+VERSIONCHECK: DISABLE
+
 BOOT:
     INSTALL_SIMPLE_READER(Attribute, name);
     INSTALL_SIMPLE_READER(Attribute, associated_class);

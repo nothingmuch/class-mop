@@ -305,6 +305,8 @@ MODULE = Class::MOP::Method::Constructor   PACKAGE = Class::MOP::Method::Constru
 
 PROTOTYPES: DISABLE
 
+VERSIONCHECK: DISABLE
+
 BOOT:
     INSTALL_SIMPLE_READER(Method::Constructor, options);
     INSTALL_SIMPLE_READER(Method::Constructor, associated_metaclass);

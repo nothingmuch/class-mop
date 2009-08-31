@@ -184,6 +184,8 @@ MODULE = Class::MOP::Method::Accessor   PACKAGE = Class::MOP::Method::Accessor
 
 PROTOTYPES: DISABLE
 
+VERSIONCHECK: DISABLE
+
 BOOT:
     INSTALL_SIMPLE_READER_WITH_KEY(Method::Accessor, associated_attribute, attribute);
     INSTALL_SIMPLE_READER(Method::Accessor, accessor_type);

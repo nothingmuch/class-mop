@@ -81,6 +81,8 @@ MODULE = Class::MOP::Package   PACKAGE = Class::MOP::Package
 
 PROTOTYPES: DISABLE
 
+VERSIONCHECK: DISABLE
+
 void
 get_all_package_symbols(self, filter=TYPE_FILTER_NONE)
     SV *self
