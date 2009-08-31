@@ -42,6 +42,8 @@ extern SV *mop_Class;
 extern SV *mop_VERSION;
 extern SV *mop_ISA;
 
+/* MOP utilities */
+
 UV mop_check_package_cache_flag(pTHX_ HV *stash);
 int mop_get_code_info (SV *coderef, char **pkg, char **name);
 SV *mop_call0(pTHX_ SV *const self, SV *const method);
@@ -72,9 +74,25 @@ void mop_get_package_symbols(HV *stash, type_filter_t filter, get_package_symbol
 HV  *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 
 
-/* Class::MOP Magic stuff */
+#define MOPf_DIE_ON_FAIL 0x01
+MAGIC* mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags);
 
-/* MG: MOP Magic object */
+#ifdef DEBUGGING
+#define MOP_av_at(av, ix)  *mop_av_at_safe(aTHX_ (av) , (ix))
+SV** mop_av_at_safe(pTHX_ AV* const mi, I32 const ix);
+#else
+#define MOP_av_at(av, ix)  AvARRAY(av)[ix]
+#endif
+
+#define IsObject(sv) (SvROK(sv) && SvOBJECT(SvRV(sv)))
+
+#define newSVsv_share(sv) mop_newSVsv_share(aTHX_ sv)
+SV* mop_newSVsv_share(pTHX_ SV*);
+
+SV* mop_class_of(pTHX_ SV* const sv);
+
+
+/* Class::MOP Magic stuff */
 
 /* All the MOP_mg_* macros require MAGIC* mg for the first argument */
 
@@ -86,6 +104,8 @@ typedef struct {
     SV*  (*delete_slot)    (pTHX_ SV* const mi, SV* const instance);
     void (*weaken_slot)    (pTHX_ SV* const mi, SV* const instance);
 } mop_instance_vtbl;
+
+/* Class::MOP::Instance stuff */
 
 SV*  mop_instance_create     (pTHX_ HV* const stash);
 SV*  mop_instance_slot       (pTHX_ SV* const meta_instance, SV* const attr);
@@ -137,23 +157,5 @@ CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const ac
 
 #define INSTALL_SIMPLE_PREDICATE(klass, name)                INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) (void)mop_install_accessor(aTHX_ "Class::MOP::" #klass "::has_" #name, #key, sizeof(#key)-1, mop_xs_simple_predicate_for_metaclass, NULL)
-
-#define MOPf_DIE_ON_FAIL 0x01
-MAGIC* mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags);
-
-
-#ifdef DEBUGGING
-#define MOP_av_at(av, ix)  *mop_av_at_safe(aTHX_ (av) , (ix))
-SV** mop_av_at_safe(pTHX_ AV* const mi, I32 const ix);
-#else
-#define MOP_av_at(av, ix)  AvARRAY(av)[ix]
-#endif
-
-#define IsObject(sv) (SvROK(sv) && SvOBJECT(SvRV(sv)))
-
-#define newSVsv_share(sv) mop_newSVsv_share(aTHX_ sv)
-SV* mop_newSVsv_share(pTHX_ SV*);
-
-SV* mop_class_of(pTHX_ SV* const sv);
 
 #endif

@@ -249,10 +249,9 @@ XS(mop_xs_constructor)
         croak("The constructor must be called as a class method");
     }
 
-    stash = gv_stashsv(klass, TRUE);
-
     args = mop_build_args(aTHX_ cv, ax+1, items-1);
 
+    stash = gv_stashsv(klass, TRUE);
     if( stash != GvSTASH(CvGV(cv)) ){
         SV* const metaclass = mop_class_of(aTHX_ klass);
         dSP;
