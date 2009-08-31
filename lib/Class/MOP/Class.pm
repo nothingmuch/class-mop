@@ -322,6 +322,7 @@ sub create {
     return $meta;
 }
 
+
 # Instance Construction & Cloning
 
 sub new_object {
@@ -1014,16 +1015,6 @@ sub _rebless_as_mutable {
     bless $self, $self->get_mutable_metaclass_name;
 
     return $self;
-}
-
-sub _inline_accessors {
-    Carp::cluck("The _inline_accessors method is deprecated and will be removed in a future release.\n");
-
-    my $self = shift;
-
-    foreach my $attr_name ( $self->get_attribute_list ) {
-        $self->get_attribute($attr_name)->install_accessors(1);
-    }
 }
 
 sub _inline_constructor {

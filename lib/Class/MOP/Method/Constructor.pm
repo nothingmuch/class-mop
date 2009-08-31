@@ -85,6 +85,7 @@ sub _initialize_body {
     $self->{'body'} = $self->_generate_constructor_method();
 }
 
+
 sub _generate_constructor_method {
     my ($self) = @_;
 

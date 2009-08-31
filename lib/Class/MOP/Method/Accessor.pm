@@ -156,7 +156,6 @@ sub _generate_predicate_method {
     return $self->_generate_predicate_method_basic();
 }
 
-
 ## basic generators
 
 sub _generate_accessor_method_basic {

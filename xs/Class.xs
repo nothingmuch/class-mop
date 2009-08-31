@@ -1,7 +1,8 @@
 #include "mop.h"
 
-
 MODULE = Class::MOP::Class    PACKAGE = Class::MOP::Class
+
+PROTOTYPES: DISABLE
 
 VERSIONCHECK: DISABLE
 

@@ -22,6 +22,7 @@ my %DeprecatedAt = (
     'Class::MOP::Class::alias_method'                      => 0.93,
     'Class::MOP::Class::compute_all_applicable_methods'    => 0.93,
     'Class::MOP::Class::compute_all_applicable_attributes' => 0.93,
+    'Class::MOP::Class::_inline_accessors'                 => 0.93,
 
     'Class::MOP::Instance::bless_instance_structure' => 0.93,
 
@@ -185,6 +186,17 @@ sub compute_all_applicable_attributes {
 
     shift->get_all_attributes(@_);
 }
+
+sub _inline_accessors {
+    Carp::cluck("The _inline_accessors method is deprecated and will be removed in a future release.\n");
+
+    my $self = shift;
+
+    foreach my $attr_name ( $self->get_attribute_list ) {
+        $self->get_attribute($attr_name)->install_accessors(1);
+    }
+}
+
 
 package
     Class::MOP::Instance;
