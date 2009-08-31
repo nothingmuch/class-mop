@@ -2,6 +2,7 @@
 
 SV *mop_method_metaclass;
 SV *mop_associated_metaclass;
+SV *mop_associated_attribute;
 SV *mop_wrap;
 SV *mop_methods;
 SV *mop_name;
@@ -96,9 +97,10 @@ mop_is_class_loaded(pTHX_ SV * const klass){
 }
 
 EXTERN_C XS(boot_Class__MOP__Package);
+EXTERN_C XS(boot_Class__MOP__Class);
 EXTERN_C XS(boot_Class__MOP__Attribute);
-EXTERN_C XS(boot_Class__MOP__Method);
 EXTERN_C XS(boot_Class__MOP__Instance);
+EXTERN_C XS(boot_Class__MOP__Method);
 EXTERN_C XS(boot_Class__MOP__Method__Accessor);
 EXTERN_C XS(boot_Class__MOP__Method__Constructor);
 
@@ -108,8 +110,9 @@ PROTOTYPES: DISABLE
 
 BOOT:
     mop_method_metaclass     = MAKE_KEYSV(method_metaclass);
-    mop_wrap                 = MAKE_KEYSV(wrap);
     mop_associated_metaclass = MAKE_KEYSV(associated_metaclass);
+    mop_associated_attribute = MAKE_KEYSV(associated_attribute);
+    mop_wrap                 = MAKE_KEYSV(wrap);
     mop_methods              = MAKE_KEYSV(methods);
     mop_name                 = MAKE_KEYSV(name);
     mop_body                 = MAKE_KEYSV(body);
@@ -124,6 +127,7 @@ BOOT:
     mop_can                  = MAKE_KEYSV(can);
 
     MOP_CALL_BOOT (boot_Class__MOP__Package);
+    MOP_CALL_BOOT (boot_Class__MOP__Class);
     MOP_CALL_BOOT (boot_Class__MOP__Attribute);
     MOP_CALL_BOOT (boot_Class__MOP__Instance);
     MOP_CALL_BOOT (boot_Class__MOP__Method);

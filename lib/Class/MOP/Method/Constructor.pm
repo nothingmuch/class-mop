@@ -85,13 +85,6 @@ sub _initialize_body {
     $self->{'body'} = $self->_generate_constructor_method();
 }
 
-
-sub generate_constructor_method {
-    Carp::cluck('The generate_constructor_method method has been made private.'
-        . " The public version is deprecated and will be removed in a future release.\n");
-    shift->_generate_constructor_method;
-}
-
 sub _generate_constructor_method {
     my ($self) = @_;
 

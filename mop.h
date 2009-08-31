@@ -28,6 +28,7 @@ XS(mop_xs_simple_clearer);
 
 extern SV *mop_method_metaclass;
 extern SV *mop_associated_metaclass;
+extern SV *mop_associated_attribute;
 extern SV *mop_wrap;
 extern SV *mop_methods;
 extern SV *mop_name;
