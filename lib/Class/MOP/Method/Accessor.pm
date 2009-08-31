@@ -98,6 +98,69 @@ sub _generate_accessor_method {
     }
 
     return $self->_generate_accessor_method_basic();
+<<<<<<< HEAD:lib/Class/MOP/Method/Accessor.pm
+}
+
+sub _generate_reader_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_reader_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_reader_method_inline();
+    }
+
+    return $self->_generate_reader_method_basic();
+}
+
+sub _generate_writer_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_writer_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_writer_method_inline();
+    }
+
+    return $self->_generate_writer_method_basic();
+}
+
+sub _generate_clearer_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_clearer_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_clearer_method_inline();
+    }
+
+    return $self->_generate_clearer_method_basic();
+}
+
+sub _generate_predicate_method {
+    my ($self) = @_;
+
+    if(my $xs = $self->associated_metaclass->instance_metaclass->can_xs()){
+        return $self->_generate_predicate_method_xs($xs);
+    }
+
+    if($self->is_inline){
+        return $self->_generate_predicate_method_inline();
+    }
+
+    return $self->_generate_predicate_method_basic();
+}
+
+
+## basic generators
+
+=======
 }
 
 sub _generate_reader_method {
