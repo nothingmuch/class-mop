@@ -3,6 +3,8 @@
 
 MODULE = Class::MOP::Class    PACKAGE = Class::MOP::Class
 
+VERSIONCHECK: DISABLE
+
 BOOT:
     INSTALL_SIMPLE_READER_WITH_KEY(Class, get_attribute_map, attributes);
     /* INSTALL_SIMPLE_READER_WITH_KEY(Class, _method_map, methods); */

@@ -3,6 +3,8 @@
 MODULE = Class::MOP::Method   PACKAGE = Class::MOP::Method
 
 PROTOTYPES: DISABLE
+VERSIONCHECK: DISABLE
+
 
 BOOT:
     INSTALL_SIMPLE_READER(Method, name);
