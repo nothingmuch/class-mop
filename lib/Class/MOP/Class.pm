@@ -389,7 +389,6 @@ sub _create_meta_instance {
     
     my $instance = $self->instance_metaclass->new(
         associated_metaclass => $self,
-        attributes => [ $self->get_all_attributes() ],
     );
 
     $self->add_meta_instance_dependencies()

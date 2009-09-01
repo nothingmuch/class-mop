@@ -4,7 +4,7 @@ package Class::MOP::Instance;
 use strict;
 use warnings;
 
-use Scalar::Util 'weaken', 'blessed';
+use Scalar::Util 'weaken';
 
 our $VERSION   = '0.93';
 $VERSION = eval $VERSION;
@@ -13,30 +13,18 @@ our $AUTHORITY = 'cpan:STEVAN';
 use base 'Class::MOP::Object';
 
 sub BUILDARGS {
-    my ($class, @args) = @_;
+    my $class = shift;
 
-    if ( @args == 1 ) {
-        unshift @args, "associated_metaclass";
-    } elsif ( @args >= 2 && blessed($args[0]) && $args[0]->isa("Class::MOP::Class") ) {
-        # compat mode
-        my ( $meta, @attrs ) = @args;
-        @args = ( associated_metaclass => $meta, attributes => \@attrs );
-    }
+    unshift @_, 'associated_metaclass' if @_ % 2;
 
-    my %options = @args;
-    # FIXME lazy_build
-    $options{slots} ||= [ map { $_->slots } @{ $options{attributes} || [] } ];
-    $options{slot_hash} = { map { $_ => undef } @{ $options{slots} } }; # FIXME lazy_build
-
-    return \%options;
+    return { @_ };
 }
 
 sub new {
-    my $class = shift;
-    my $options = $class->BUILDARGS(@_);
+    my $class  = shift;
+    my $params = $class->BUILDARGS(@_);
 
-    # FIXME replace with a proper constructor
-    my $instance = $class->_new(%$options);
+    my $instance = $class->_new($params);
 
     # FIXME weak_ref => 1,
     weaken($instance->{'associated_metaclass'});
@@ -84,19 +72,23 @@ sub clone_instance {
 
 # operations on meta instance
 
-sub get_all_slots {
-    my $self = shift;
-    return @{$self->{'slots'}};
-}
-
 sub get_all_attributes {
     my $self = shift;
-    return @{$self->{attributes}};
+    # lazy build
+    return @{ $self->{attributes} ||= [ $self->associated_metaclass->get_all_attributes ] };
+}
+
+sub get_all_slots {
+    my $self = shift;
+    # lazy build
+    return @{ $self->{slots} ||= [ map{ $_->slots } $self->get_all_attributes ] };
 }
 
 sub is_valid_slot {
     my ($self, $slot_name) = @_;
-    exists $self->{'slot_hash'}->{$slot_name};
+    # lazy build
+    $self->{slot_hash} ||= { map{ $_ => undef } $self->get_all_slots };
+    return exists $self->{slot_hash}->{$slot_name};
 }
 
 # operations on created instances
