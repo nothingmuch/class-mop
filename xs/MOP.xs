@@ -96,14 +96,6 @@ mop_is_class_loaded(pTHX_ SV * const klass){
     }
 }
 
-EXTERN_C XS(boot_Class__MOP__Package);
-EXTERN_C XS(boot_Class__MOP__Class);
-EXTERN_C XS(boot_Class__MOP__Attribute);
-EXTERN_C XS(boot_Class__MOP__Instance);
-EXTERN_C XS(boot_Class__MOP__Method);
-EXTERN_C XS(boot_Class__MOP__Method__Accessor);
-EXTERN_C XS(boot_Class__MOP__Method__Constructor);
-
 MODULE = Class::MOP   PACKAGE = Class::MOP
 
 PROTOTYPES: DISABLE
@@ -126,13 +118,13 @@ BOOT:
     mop_isa                  = MAKE_KEYSV(isa);
     mop_can                  = MAKE_KEYSV(can);
 
-    MOP_CALL_BOOT (boot_Class__MOP__Package);
-    MOP_CALL_BOOT (boot_Class__MOP__Class);
-    MOP_CALL_BOOT (boot_Class__MOP__Attribute);
-    MOP_CALL_BOOT (boot_Class__MOP__Instance);
-    MOP_CALL_BOOT (boot_Class__MOP__Method);
-    MOP_CALL_BOOT (boot_Class__MOP__Method__Accessor);
-    MOP_CALL_BOOT (boot_Class__MOP__Method__Constructor);
+    MOP_CALL_BOOT( Class__MOP__Package );
+    MOP_CALL_BOOT( Class__MOP__Class );
+    MOP_CALL_BOOT( Class__MOP__Attribute );
+    MOP_CALL_BOOT( Class__MOP__Instance );
+    MOP_CALL_BOOT( Class__MOP__Method );
+    MOP_CALL_BOOT( Class__MOP__Method__Accessor );
+    MOP_CALL_BOOT( Class__MOP__Method__Constructor );
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
 void

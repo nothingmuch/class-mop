@@ -4,15 +4,6 @@
 #define NEED_newSVpvn_flags_GLOBAL
 #include "mop.h"
 
-void
-mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark)
-{
-    dSP;
-    PUSHMARK(mark);
-    (*subaddr)(aTHX_ cv);
-    PUTBACK;
-}
-
 #if PERL_BCDVERSION >= 0x5010000
 UV
 mop_check_package_cache_flag (pTHX_ HV *stash)

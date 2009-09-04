@@ -8,9 +8,12 @@
 
 #include "ppport.h"
 
-#define MOP_CALL_BOOT(name)  mop_call_xs(aTHX_ name, cv, mark);
+#define MOP_CALL_BOOT(name) STMT_START {        \
+        EXTERN_C XS(CAT2(boot_, name));         \
+        PUSHMARK(SP);                           \
+        CALL_FPTR(CAT2(boot_, name))(aTHX_ cv); \
+    } STMT_END
 
-void mop_call_xs (pTHX_ XSPROTO(subaddr), CV *cv, SV **mark);
 
 #define MAKE_KEYSV(name) newSVpvn_share(#name, sizeof(#name)-1, 0U)
 
