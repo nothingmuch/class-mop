@@ -33,12 +33,12 @@ sub _new {
 
 sub version {  
     my $self = shift;
-    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'VERSION' })};
+    ${$self->get_package_symbol('$VERSION', create => 1)};
 }
 
 sub authority {  
     my $self = shift;
-    ${$self->get_package_symbol({ sigil => '$', type => 'SCALAR', name => 'AUTHORITY' })};
+    ${$self->get_package_symbol('$AUTHORITY', create => 1)};
 }
 
 sub identifier {
@@ -61,10 +61,8 @@ sub _instantiate_module {
     Class::MOP::_is_valid_class_name($package_name)
         || confess "creation of $package_name failed: invalid package name";
 
-    no strict 'refs';
-    scalar %{ $package_name . '::' };    # touch the stash
-    ${ $package_name . '::VERSION' }   = $version   if defined $version;
-    ${ $package_name . '::AUTHORITY' } = $authority if defined $authority;
+    ${ $self->get_package_symbol('$VERSION',   create => 1) } = $version;
+    ${ $self->get_package_symbol('$AUTHORITY', create => 1) } = $authority;
 
     return;
 }

@@ -39,6 +39,7 @@ sub remove_method         { _immutable_cannot_call() }
 sub add_attribute         { _immutable_cannot_call() }
 sub remove_attribute      { _immutable_cannot_call() }
 sub remove_package_symbol { _immutable_cannot_call() }
+sub add_package_symbol    { _immutable_cannot_call() }
 
 sub class_precedence_list {
     my $orig = shift;
@@ -81,15 +82,6 @@ sub get_method_map {
     my $orig = shift;
     my $self = shift;
     $self->{__immutable}{get_method_map} ||= $self->$orig;
-}
-
-sub add_package_symbol {
-    my $orig = shift;
-    my $self = shift;
-    confess "Cannot add package symbols to an immutable metaclass"
-        unless ( caller(3) )[3] eq 'Class::MOP::Package::get_package_symbol';
-
-    $self->$orig(@_);
 }
 
 1;

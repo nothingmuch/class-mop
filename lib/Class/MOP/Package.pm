@@ -100,6 +100,7 @@ sub namespace {
     # we could just store a ref and it would
     # Just Work, but oh well :\    
     no strict 'refs';    
+    no warnings 'uninitialized';
     \%{$_[0]->{'package'} . '::'} 
 }
 
@@ -140,84 +141,9 @@ sub _method_map              { $_[0]->{'methods'}                     }
 
 # ... these functions have to touch the symbol table itself,.. yuk
 
-sub add_package_symbol {
-    my ($self, $variable, $initial_value) = @_;
-
-    my ($name, $sigil, $type) = ref $variable eq 'HASH'
-        ? @{$variable}{qw[name sigil type]}
-        : $self->_deconstruct_variable_name($variable);
-
-    my $pkg = $self->{'package'};
-
-    no strict 'refs';
-    no warnings 'redefine', 'misc', 'prototype';
-    *{$pkg . '::' . $name} = ref $initial_value ? $initial_value : \$initial_value;
-}
-
 sub remove_package_glob {
     my ($self, $name) = @_;
-    no strict 'refs';        
-    delete ${$self->name . '::'}{$name};     
-}
-
-# ... these functions deal with stuff on the namespace level
-
-sub has_package_symbol {
-    my ( $self, $variable ) = @_;
-
-    my ( $name, $sigil, $type )
-        = ref $variable eq 'HASH'
-        ? @{$variable}{qw[name sigil type]}
-        : $self->_deconstruct_variable_name($variable);
-
-    my $namespace = $self->namespace;
-
-    return 0 unless exists $namespace->{$name};
-
-    my $entry_ref = \$namespace->{$name};
-    if ( reftype($entry_ref) eq 'GLOB' ) {
-        if ( $type eq 'SCALAR' ) {
-            return defined( ${ *{$entry_ref}{SCALAR} } );
-        }
-        else {
-            return defined( *{$entry_ref}{$type} );
-        }
-    }
-    else {
-
-        # a symbol table entry can be -1 (stub), string (stub with prototype),
-        # or reference (constant)
-        return $type eq 'CODE';
-    }
-}
-
-sub get_package_symbol {
-    my ($self, $variable) = @_;    
-
-    my ($name, $sigil, $type) = ref $variable eq 'HASH'
-        ? @{$variable}{qw[name sigil type]}
-        : $self->_deconstruct_variable_name($variable);
-
-    my $namespace = $self->namespace;
-
-    # FIXME
-    $self->add_package_symbol($variable)
-        unless exists $namespace->{$name};
-
-    my $entry_ref = \$namespace->{$name};
-
-    if ( ref($entry_ref) eq 'GLOB' ) {
-        return *{$entry_ref}{$type};
-    }
-    else {
-        if ( $type eq 'CODE' ) {
-            no strict 'refs';
-            return \&{ $self->name . '::' . $name };
-        }
-        else {
-            return undef;
-        }
-    }
+    delete $self->namespace->{$name};
 }
 
 sub remove_package_symbol {
