@@ -1,5 +1,14 @@
 Revision history for Perl extension Class-MOP.
 
+
+    * XS
+      - Implement all the MOP accessors in XS (gfx)
+      - Implement accessor and constructor generators in XS (gfx)
+    * Class::MOP::Class
+      - Accessor methods are now created once, so make_immutable() can
+        generate constructors and destructores (gfx)
+        It is already true in Moose, but was not in Class::MOP
+
 0.92 Thu Aug 13, 2009
     * Class::MOP::Class
     * Class::MOP::Package
