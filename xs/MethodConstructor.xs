@@ -54,6 +54,9 @@ XS(mop_xs_constructor)
         croak("Not enough arguments for %s()", GvNAME(CvGV(cv)));
     }
 
+    SP -= items;
+    PUTBACK;
+
     klass = ST(0);
 
     if(SvROK(klass)){
