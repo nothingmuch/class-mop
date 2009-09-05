@@ -55,6 +55,7 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 bool
 mop_is_class_loaded(pTHX_ SV * const klass){
     HV *stash;
+    HE* he;
 
     if (!(SvPOKp(klass) && SvCUR(klass))) { /* XXX: SvPOK does not work with magical scalars */
         return FALSE;
@@ -65,34 +66,24 @@ mop_is_class_loaded(pTHX_ SV * const klass){
         return FALSE;
     }
 
-    if (hv_exists_ent (stash, mop_VERSION, 0U)) {
-        HE *version = hv_fetch_ent(stash, mop_VERSION, 0, 0U);
-        SV *version_sv;
-        if (version && HeVAL(version) && (version_sv = GvSV(HeVAL(version)))) {
-            if (SvROK(version_sv)) {
-                SV *version_sv_ref = SvRV(version_sv);
-
-                if (SvOK(version_sv_ref)) {
-                    return TRUE;
-                }
-            }
-            else if (SvOK(version_sv)) {
-                return TRUE;
-            }
+    if (( he = hv_fetch_ent (stash, mop_VERSION, FALSE, 0U) )) {
+        GV* const version_gv = (GV*)HeVAL(he);
+        if(isGV(version_gv) && GvSV(version_gv) && SvOK(GvSV(version_gv))){
+            return TRUE;
         }
     }
 
-    if (hv_exists_ent (stash, mop_ISA, 0U)) {
-        HE *isa = hv_fetch_ent(stash, mop_ISA, 0, 0U);
-        if (isa && HeVAL(isa) && GvAV(HeVAL(isa)) && av_len(GvAV(HeVAL(isa))) != -1) {
-            return TRUE;;
+    if (( he = hv_fetch_ent (stash, mop_ISA, FALSE, 0U) )) {
+        GV* const isa_gv = (GV*)HeVAL(he);
+        if(isGV(isa_gv) && GvAV(isa_gv) && av_len(GvAV(isa_gv)) != -1){
+            return TRUE;
         }
     }
 
     {
         bool found_method = FALSE;
         mop_get_package_symbols(stash, TYPE_FILTER_CODE, find_method, &found_method);
-       return found_method;
+        return found_method;
     }
 }
 
