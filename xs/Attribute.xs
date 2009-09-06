@@ -135,7 +135,7 @@ mop_attr_initialize_instance_slot(pTHX_ SV* const attr, const mop_instance_vtbl*
             call_method("set_initial_value", G_VOID | G_DISCARD);
         }
         else{
-            vtbl->set_slot(aTHX_ instance, MOP_attr_slot(meta), value);
+            vtbl->set_slot(aTHX_ NULL, instance, MOP_attr_slot(meta), value);
         }
     }
 }

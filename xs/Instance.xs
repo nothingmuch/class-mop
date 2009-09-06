@@ -7,13 +7,13 @@
     } STMT_END
 
 SV*
-mop_instance_create(pTHX_ HV* const stash) {
+mop_instance_create(pTHX_ SV* const mi PERL_UNUSED_DECL, HV* const stash) {
     assert(stash);
     return sv_bless( newRV_noinc((SV*)newHV()), stash );
 }
 
 SV*
-mop_instance_clone(pTHX_ SV* const instance) {
+mop_instance_clone(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance) {
     HV* proto;
     assert(instance);
 
@@ -25,7 +25,7 @@ mop_instance_clone(pTHX_ SV* const instance) {
 
 
 bool
-mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
+mop_instance_has_slot(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance, SV* const slot) {
     assert(instance);
     assert(slot);
     CHECK_INSTANCE(instance);
@@ -33,7 +33,7 @@ mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
 }
 
 SV*
-mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot) {
+mop_instance_get_slot(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance, SV* const slot) {
     HE* he;
     assert(instance);
     assert(slot);
@@ -43,7 +43,7 @@ mop_instance_get_slot(pTHX_ SV* const instance, SV* const slot) {
 }
 
 SV*
-mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value) {
+mop_instance_set_slot(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance, SV* const slot, SV* const value) {
     HE* he;
     SV* sv;
     assert(instance);
@@ -57,7 +57,7 @@ mop_instance_set_slot(pTHX_ SV* const instance, SV* const slot, SV* const value)
 }
 
 SV*
-mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot) {
+mop_instance_delete_slot(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance, SV* const slot) {
     assert(instance);
     assert(slot);
     CHECK_INSTANCE(instance);
@@ -65,7 +65,7 @@ mop_instance_delete_slot(pTHX_ SV* const instance, SV* const slot) {
 }
 
 void
-mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot) {
+mop_instance_weaken_slot(pTHX_ SV* const mi PERL_UNUSED_DECL, SV* const instance, SV* const slot) {
     HE* he;
     assert(instance);
     assert(slot);
@@ -76,7 +76,7 @@ mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot) {
     }
 }
 
-static const mop_instance_vtbl mop_default_instance = {
+static const mop_instance_vtbl mop_default_instance_vtbl = {
     mop_instance_create,
     mop_instance_clone,
     mop_instance_has_slot,
@@ -89,7 +89,7 @@ static const mop_instance_vtbl mop_default_instance = {
 
 const mop_instance_vtbl*
 mop_get_default_instance_vtbl(pTHX){
-    return &mop_default_instance;
+    return &mop_default_instance_vtbl;
 }
 
 MODULE = Class::MOP::Instance  PACKAGE = Class::MOP::Instance
@@ -111,7 +111,7 @@ CODE:
     /* $self->can("get_slot_value") == \&Class::MOP::Instance::get_slot_value */
     code_ref = mop_call1(aTHX_ self, mop_can, method);
     if(SvROK(code_ref) && SvRV(code_ref) == (SV*)default_method){
-        RETVAL = (void*)&mop_default_instance;
+        RETVAL = (void*)&mop_default_instance_vtbl;
     }
     else{
         RETVAL = NULL;
@@ -125,7 +125,7 @@ PREINIT:
     SV* class_name;
 CODE:
     class_name = mop_call0_pvs(self, "_class_name");
-    RETVAL = mop_instance_create(aTHX_ gv_stashsv(class_name, TRUE));
+    RETVAL = mop_instance_create(aTHX_ NULL, gv_stashsv(class_name, TRUE));
 OUTPUT:
     RETVAL
 
@@ -133,7 +133,7 @@ SV*
 clone_instance(SV* self, SV* instance)
 CODE:
     PERL_UNUSED_VAR(self);
-    RETVAL = mop_instance_clone(aTHX_ instance);
+    RETVAL = mop_instance_clone(aTHX_ NULL, instance);
 OUTPUT:
     RETVAL
 
@@ -141,7 +141,7 @@ bool
 is_slot_initialized(SV* self, SV* instance, SV* slot)
 CODE:
     PERL_UNUSED_VAR(self);
-    RETVAL = mop_instance_has_slot(aTHX_ instance, slot);
+    RETVAL = mop_instance_has_slot(aTHX_ NULL, instance, slot);
 OUTPUT:
     RETVAL
 
@@ -149,7 +149,7 @@ SV*
 get_slot_value(SV* self, SV* instance, SV* slot)
 CODE:
     PERL_UNUSED_VAR(self);
-    RETVAL = mop_instance_get_slot(aTHX_ instance, slot);
+    RETVAL = mop_instance_get_slot(aTHX_ NULL, instance, slot);
     RETVAL = RETVAL ? newSVsv(RETVAL) : &PL_sv_undef;
 OUTPUT:
     RETVAL
@@ -158,7 +158,7 @@ SV*
 set_slot_value(SV* self, SV* instance, SV* slot, SV* value)
 CODE:
     PERL_UNUSED_VAR(self);
-    RETVAL = mop_instance_set_slot(aTHX_ instance, slot, value);
+    RETVAL = mop_instance_set_slot(aTHX_ NULL, instance, slot, value);
     SvREFCNT_inc_simple_void_NN(RETVAL);
 OUTPUT:
     RETVAL
@@ -167,7 +167,7 @@ SV*
 deinitialize_slot(SV* self, SV* instance, SV* slot)
 CODE:
     PERL_UNUSED_VAR(self);
-    RETVAL = mop_instance_delete_slot(aTHX_ instance, slot);
+    RETVAL = mop_instance_delete_slot(aTHX_ NULL, instance, slot);
     if(RETVAL){
         SvREFCNT_inc_simple_void_NN(RETVAL);
     }
@@ -181,4 +181,4 @@ void
 weaken_slot_value(SV* self, SV* instance, SV* slot)
 CODE:
     PERL_UNUSED_VAR(self);
-    mop_instance_weaken_slot(aTHX_ instance, slot);
+    mop_instance_weaken_slot(aTHX_ NULL, instance, slot);
