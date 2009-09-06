@@ -23,7 +23,7 @@ mop_is_instance_of(pTHX_ SV* const sv, SV* const klass){
     assert(sv);
     assert(klass);
 
-    if(SvROK(sv) && SvOBJECT(SvRV(sv)) && SvOK(klass)){
+    if(IsObject(sv) && SvOK(klass)){
         bool ok;
 
         ENTER;
