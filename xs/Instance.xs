@@ -12,6 +12,18 @@ mop_instance_create(pTHX_ HV* const stash) {
     return sv_bless( newRV_noinc((SV*)newHV()), stash );
 }
 
+SV*
+mop_instance_clone(pTHX_ SV* const instance) {
+    HV* proto;
+    assert(instance);
+
+    CHECK_INSTANCE(instance);
+    proto = newHVhv((HV*)SvRV(instance));
+    return sv_bless( newRV_noinc((SV*)proto), SvSTASH(SvRV(instance)) );
+}
+
+
+
 bool
 mop_instance_has_slot(pTHX_ SV* const instance, SV* const slot) {
     assert(instance);
@@ -66,6 +78,7 @@ mop_instance_weaken_slot(pTHX_ SV* const instance, SV* const slot) {
 
 static const mop_instance_vtbl mop_default_instance = {
     mop_instance_create,
+    mop_instance_clone,
     mop_instance_has_slot,
     mop_instance_get_slot,
     mop_instance_set_slot,
@@ -113,6 +126,14 @@ PREINIT:
 CODE:
     class_name = mop_call0_pvs(self, "_class_name");
     RETVAL = mop_instance_create(aTHX_ gv_stashsv(class_name, TRUE));
+OUTPUT:
+    RETVAL
+
+SV*
+clone_instance(SV* self, SV* instance)
+CODE:
+    PERL_UNUSED_VAR(self);
+    RETVAL = mop_instance_clone(aTHX_ instance);
 OUTPUT:
     RETVAL
 

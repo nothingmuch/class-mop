@@ -75,10 +75,10 @@ sub _class_name { $_[0]->{_class_name} ||= $_[0]->associated_metaclass->name }
 #    bless {}, $self->_class_name;
 #}
 
-sub clone_instance {
-    my ($self, $instance) = @_;
-    bless { %$instance }, $self->_class_name;
-}
+#sub clone_instance {
+#    my ($self, $instance) = @_;
+#    bless { %$instance }, $self->_class_name;
+#}
 
 # operations on meta instance
 

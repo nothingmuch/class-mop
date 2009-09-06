@@ -99,6 +99,7 @@ AV* mop_class_get_all_attributes(pTHX_ SV* const metaclass);
 
 typedef struct {
     SV*  (*create_instance)(pTHX_ HV* const stash);
+    SV*  (*clone_instance) (pTHX_ SV* const instance);
     bool (*has_slot)       (pTHX_ SV* const mi, SV* const instance);
     SV*  (*get_slot)       (pTHX_ SV* const mi, SV* const instance);
     SV*  (*set_slot)       (pTHX_ SV* const mi, SV* const instance, SV* const value);
@@ -109,7 +110,7 @@ typedef struct {
 /* Class::MOP::Instance stuff */
 
 SV*  mop_instance_create     (pTHX_ HV* const stash);
-SV*  mop_instance_slot       (pTHX_ SV* const meta_instance, SV* const attr);
+SV*  mop_instance_clone      (pTHX_ SV* const instance);
 bool mop_instance_has_slot   (pTHX_ SV* const instance, SV* const slot);
 SV*  mop_instance_get_slot   (pTHX_ SV* const instance, SV* const slot);
 SV*  mop_instance_set_slot   (pTHX_ SV* const instance, SV* const slot, SV* const value);
@@ -127,6 +128,7 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 #define MOP_mg_obj_refcounted_on(mg)    (void)((mg)->mg_flags |= MGf_REFCOUNTED);
 
 #define MOP_mg_create_instance(mg, stash) MOP_mg_vtbl(mg)->create_instance (aTHX_ (stash))
+#define MOP_mg_clone_instance(mg, o)      MOP_mg_vtbl(mg)->clone_instance  (aTHX_ (o))
 #define MOP_mg_has_slot(mg, o, slot)      MOP_mg_vtbl(mg)->has_slot        (aTHX_ (o), (slot))
 #define MOP_mg_get_slot(mg, o, slot)      MOP_mg_vtbl(mg)->get_slot        (aTHX_ (o), (slot))
 #define MOP_mg_set_slot(mg, o, slot, v)   MOP_mg_vtbl(mg)->set_slot        (aTHX_ (o), (slot), (v))
