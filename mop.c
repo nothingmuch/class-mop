@@ -1,3 +1,7 @@
+/*
+    we need ppport functions for all the source files,
+    so we define them as global. (gfx)
+*/
 #define NEED_newRV_noinc_GLOBAL
 #define NEED_sv_2pv_flags_GLOBAL
 #define NEED_sv_2pv_nolen_GLOBAL

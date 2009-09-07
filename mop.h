@@ -75,6 +75,7 @@ HV  *mop_get_all_package_symbols (HV *stash, type_filter_t filter);
 #define MOPf_DIE_ON_FAIL 0x01
 MAGIC* mop_mg_find(pTHX_ SV* const sv, const MGVTBL* const vtbl, I32 const flags);
 
+/* MOP_av_at(av, ix) is the safer version of AvARRAY(av)[ix] if perl is compiled with -DDEBUGGING */
 #ifdef DEBUGGING
 #define MOP_av_at(av, ix)  *mop_av_at_safe(aTHX_ (av) , (ix))
 SV** mop_av_at_safe(pTHX_ AV* const mi, I32 const ix);
@@ -93,12 +94,11 @@ SV* mop_class_of(pTHX_ SV* const sv);
 
 AV* mop_class_get_all_attributes(pTHX_ SV* const metaclass);
 
-/* Class::MOP Magic stuff */
-
-/* All the MOP_mg_* macros require MAGIC* mg for the first argument */
-
-
 /* Class::MOP::Instance stuff */
+
+/*
+   mop_instance_vtbl is usualy stored in MOP_mg_ptr(MAGIC* mg)
+*/
 
 /* SV* mi (meta instance) may not be used */
 typedef struct {
@@ -121,6 +121,13 @@ void mop_instance_weaken_slot(pTHX_ SV* const mi, SV* const instance, SV* const 
 
 const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 
+/*
+    mg_obj:     slot of attributes(simple accessors), or meta instance of attributes
+    mg_ptr:     mop_instance_vtbl (static data)
+    mg_flags:   attribute flags (MOP_ATTRf_*)
+    mg_virtual: identity of MAGICs
+*/
+
 #define MOP_mg_obj(mg)   ((mg)->mg_obj)
 #define MOP_mg_ptr(mg)   ((mg)->mg_ptr)
 #define MOP_mg_vtbl(mg)  ((const mop_instance_vtbl*)MOP_mg_ptr(mg))
@@ -138,7 +145,6 @@ const mop_instance_vtbl* mop_get_default_instance_vtbl(pTHX);
 #define MOP_mg_weaken_slot(mg, o, slot)   MOP_mg_vtbl(mg)->weaken_slot     (aTHX_ NULL, (o), (slot))
 
 /* Class::MOP::Attribute stuff */
-
 
 #define MOP_attr_slot(meta)          MOP_av_at(meta, MOP_ATTR_SLOT)
 #define MOP_attr_init_arg(meta)      MOP_av_at(meta, MOP_ATTR_INIT_ARG)
@@ -174,7 +180,6 @@ void   mop_attr_initialize_instance_slot(pTHX_ SV* const attr, const mop_instanc
 #define dMOP_mg(xsub)  MAGIC* mg      = (MAGIC*)CvXSUBANY(xsub).any_ptr
 #define dMOP_METHOD_COMMON  dMOP_self; dMOP_mg(cv)
 
-
 SV*    mop_accessor_get_self(pTHX_ I32 const ax, I32 const items, CV* const cv);
 
 CV*    mop_install_accessor(pTHX_ const char* const fq_name, const char* const key, I32 const keylen, XSUBADDR_t const accessor_impl, const mop_instance_vtbl* vtbl);
@@ -189,4 +194,4 @@ CV*    mop_instantiate_xs_accessor(pTHX_ SV* const accessor, XSUBADDR_t const ac
 #define INSTALL_SIMPLE_PREDICATE(klass, name)                INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, name)
 #define INSTALL_SIMPLE_PREDICATE_WITH_KEY(klass, name, key) (void)mop_install_accessor(aTHX_ "Class::MOP::" #klass "::has_" #name, #key, sizeof(#key)-1, mop_xs_simple_predicate_for_metaclass, NULL)
 
-#endif
+#endif /* !__MOP_H__ */
