@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+next release
+    * Class::MOP::Class
+      - Restore the previous behavior (prior to the last immutable refactor) of
+        saving options passed into make_immutable and using them as defaults
+        when a class is made mutable and then immutable again. (doy)
+
 0.92 Thu Aug 13, 2009
     * Class::MOP::Class
     * Class::MOP::Package
