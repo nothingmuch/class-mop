@@ -879,6 +879,8 @@ sub is_pristine {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
+sub immutable_options { %{ $_[0]{__immutable}{options} || {} } }
+
 sub _immutable_options {
     my ( $self, @args ) = @_;
 

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 73;
+use Test::More tests => 75;
 use Test::Exception;
 
 use Class::MOP;
@@ -40,6 +40,11 @@ use Class::MOP;
     my $meta = Foo->meta;
     my $original_metaclass_name = ref $meta;
 
+    is_deeply(
+        { $meta->immutable_options }, {},
+        'immutable_options is empty before a class is made_immutable'
+    );
+
     $meta->make_immutable;
 
     my $immutable_metaclass = $meta->_immutable_metaclass->meta;
@@ -50,6 +55,21 @@ use Class::MOP;
     ok( $immutable_class_name->is_immutable, '... immutable_metaclass is immutable' );
     is( $immutable_class_name->meta, $immutable_metaclass,
         '... immutable_metaclass meta hack works' );
+
+    is_deeply(
+        { $meta->immutable_options },
+        {
+            inline_accessors   => 1,
+            inline_constructor => 1,
+            inline_destructor  => 0,
+            debug              => 0,
+            immutable_trait    => 'Class::MOP::Class::Immutable::Trait',
+            constructor_name   => 'new',
+            constructor_class  => 'Class::MOP::Method::Constructor',
+            destructor_class   => undef,
+        },
+        'immutable_options is empty before a class is made_immutable'
+    );
 
     isa_ok( $meta, "Class::MOP::Class" );
 }

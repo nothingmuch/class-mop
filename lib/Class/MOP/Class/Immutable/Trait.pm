@@ -15,8 +15,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 # the original class of the metaclass instance
 sub _get_mutable_metaclass_name { $_[0]{__immutable}{original_class} }
 
-sub immutable_options { %{ $_[0]{__immutable}{options} } }
-
 sub is_mutable   { 0 }
 sub is_immutable { 1 }
 
