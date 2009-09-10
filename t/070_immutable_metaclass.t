@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 75;
+use Test::More tests => 76;
 use Test::Exception;
 
 use Class::MOP;
@@ -283,5 +283,32 @@ use Class::MOP;
             Bar->meta->get_attribute('baz')
         ],
         '... got the right list of attributes'
+    );
+}
+
+# This test probably needs to go last since it will muck up the Foo class
+{
+    my $meta = Foo->meta;
+
+    $meta->make_mutable;
+    $meta->make_immutable(
+        inline_accessors   => 0,
+        inline_constructor => 0,
+        constructor_name   => 'newer',
+    );
+
+    is_deeply(
+        { $meta->immutable_options },
+        {
+            inline_accessors   => 0,
+            inline_constructor => 0,
+            inline_destructor  => 0,
+            debug              => 0,
+            immutable_trait    => 'Class::MOP::Class::Immutable::Trait',
+            constructor_name   => 'newer',
+            constructor_class  => 'Class::MOP::Method::Constructor',
+            destructor_class   => undef,
+        },
+        'custom immutable_options are returned by immutable_options accessor'
     );
 }
