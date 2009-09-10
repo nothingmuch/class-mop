@@ -936,10 +936,10 @@ sub is_pristine {
 sub is_mutable   { 1 }
 sub is_immutable { 0 }
 
-sub _immutable_options {
-    my ( $self, @args ) = @_;
+sub _default_immutable_options {
+    my ( $self ) = @_;
 
-    $self->{_immutable_options} ||= {
+    return (
         inline_accessors   => 1,
         inline_constructor => 1,
         inline_destructor  => 0,
@@ -948,20 +948,22 @@ sub _immutable_options {
         constructor_name   => $self->constructor_name,
         constructor_class  => $self->constructor_class,
         destructor_class   => $self->destructor_class,
-    };
-    $self->{_immutable_options} = {
-        %{ $self->{_immutable_options} },
-        @args,
-    };
+    );
+}
+sub _immutable_options {
+    my ( $self, @args ) = @_;
 
-    return %{ $self->{_immutable_options} };
+    return @args;
 }
 
 sub make_immutable {
     my ( $self, @args ) = @_;
 
     if ( $self->is_mutable ) {
-        $self->_immutable_options(@args);
+        $self->{_immutable_options} ||= { $self->_default_immutable_options };
+        $self->{_immutable_options} = {
+            $self->_immutable_options( %{ $self->{_immutable_options} }, @args )
+        };
         $self->_initialize_immutable;
         $self->_rebless_as_immutable;
         return $self;
