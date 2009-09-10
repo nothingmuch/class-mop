@@ -1579,6 +1579,13 @@ replaced when inlining a destructor. This defaults to false.
 
 =back
 
+=item B<< $metaclass->immutable_options >>
+
+Returns a hash of the options used when making the class immutable, including
+both defaults and anything supplied by the user in the call to C<<
+$metaclass->make_immutable >>. This is useful if you need to temporarily make
+a class mutable and then restore immutability as it was before.
+
 =item B<< $metaclass->make_mutable >>
 
 Calling this method reverse the immutabilization transformation.
