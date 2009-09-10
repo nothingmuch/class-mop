@@ -13,7 +13,7 @@ $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
 # the original class of the metaclass instance
-sub get_mutable_metaclass_name { $_[0]{__immutable}{original_class} }
+sub _get_mutable_metaclass_name { $_[0]{__immutable}{original_class} }
 
 sub immutable_options { %{ $_[0]{__immutable}{options} } }
 

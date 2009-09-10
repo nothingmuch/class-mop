@@ -69,7 +69,7 @@ sub _construct_class_instance {
     # get the name of the class appropriately
     $class = (ref($class)
                     ? ($class->is_immutable
-                        ? $class->get_mutable_metaclass_name()
+                        ? $class->_get_mutable_metaclass_name()
                         : ref($class))
                     : $class);
 
@@ -183,7 +183,7 @@ sub _check_metaclass_compatibility {
         # get the name of the class appropriately
         my $super_meta_type
             = $super_meta->is_immutable
-            ? $super_meta->get_mutable_metaclass_name()
+            ? $super_meta->_get_mutable_metaclass_name()
             : ref($super_meta);
 
         ($self->isa($super_meta_type))
@@ -965,7 +965,7 @@ sub _immutable_metaclass {
     # example of where this matters).
     my $meta_name
         = $meta->is_immutable
-        ? $meta->get_mutable_metaclass_name
+        ? $meta->_get_mutable_metaclass_name
         : ref $meta;
 
     my $immutable_meta = $meta_name->create(
@@ -1028,7 +1028,7 @@ sub _install_inlined_code {
 sub _rebless_as_mutable {
     my $self = shift;
 
-    bless $self, $self->get_mutable_metaclass_name;
+    bless $self, $self->_get_mutable_metaclass_name;
 
     return $self;
 }
