@@ -15,9 +15,7 @@ ok(!$meta->has_method('new'),
 
 $meta->make_mutable;
 $meta->make_immutable;
-{ local $TODO = "make_immutable doesn't save options yet";
 ok($meta->has_method('foo'),
    "constructor is generated with correct name by default after roundtrip");
 ok(!$meta->has_method('new'),
    "constructor is not generated with incorrect name by default after roundtrip");
-}

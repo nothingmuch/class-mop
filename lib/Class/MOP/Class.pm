@@ -939,7 +939,7 @@ sub is_immutable { 0 }
 sub _immutable_options {
     my ( $self, @args ) = @_;
 
-    return (
+    $self->{_immutable_options} ||= {
         inline_accessors   => 1,
         inline_constructor => 1,
         inline_destructor  => 0,
@@ -948,16 +948,22 @@ sub _immutable_options {
         constructor_name   => $self->constructor_name,
         constructor_class  => $self->constructor_class,
         destructor_class   => $self->destructor_class,
+    };
+    $self->{_immutable_options} = {
+        %{ $self->{_immutable_options} },
         @args,
-    );
+    };
+
+    return %{ $self->{_immutable_options} };
 }
 
 sub make_immutable {
     my ( $self, @args ) = @_;
 
     if ( $self->is_mutable ) {
-        $self->_initialize_immutable( $self->_immutable_options(@args) );
-        $self->_rebless_as_immutable(@args);
+        $self->_immutable_options(@args);
+        $self->_initialize_immutable;
+        $self->_rebless_as_immutable;
         return $self;
     }
     else {
@@ -981,11 +987,13 @@ sub make_mutable {
 }
 
 sub _rebless_as_immutable {
-    my ( $self, @args ) = @_;
+    my ( $self ) = @_;
 
     $self->{__immutable}{original_class} = ref $self;
 
-    bless $self => $self->_immutable_metaclass(@args);
+    bless $self => $self->_immutable_metaclass(
+        %{ $self->{_immutable_options} }
+    );
 }
 
 sub _immutable_metaclass {
@@ -1067,10 +1075,10 @@ sub _add_inlined_method {
 }
 
 sub _initialize_immutable {
-    my ( $self, %args ) = @_;
+    my ( $self ) = @_;
 
-    $self->{__immutable}{options} = \%args;
-    $self->_install_inlined_code(%args);
+    $self->{__immutable}{options} = $self->{_immutable_options};
+    $self->_install_inlined_code(%{ $self->{_immutable_options} });
 }
 
 sub _install_inlined_code {
