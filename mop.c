@@ -78,6 +78,8 @@ mop_call0 (pTHX_ SV *const self, SV *const method)
 int
 mop_get_code_info (SV *coderef, char **pkg, char **name)
 {
+    GV *gv;
+
     if (!SvOK(coderef) || !SvROK(coderef) || SvTYPE(SvRV(coderef)) != SVt_PVCV) {
         return 0;
     }
@@ -95,12 +97,12 @@ mop_get_code_info (SV *coderef, char **pkg, char **name)
     */
 
     if ( isGV_with_GP(CvGV(coderef)) ) {
-        GV *gv   = CvGV(coderef);
-        *pkg     = HvNAME( GvSTASH(gv) ? GvSTASH(gv) : CvSTASH(coderef) );
-        *name    = GvNAME( CvGV(coderef) );
+        gv   = CvGV(coderef);
+        *pkg  = HvNAME( GvSTASH(gv) ? GvSTASH(gv) : CvSTASH(coderef) );
+        *name = GvNAME( CvGV(coderef) );
     } else {
-        *pkg     = "__UNKNOWN__";
-        *name    = "__ANON__";
+        *pkg  = "__UNKNOWN__";
+        *name = "__ANON__";
     }
 
     return 1;

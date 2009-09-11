@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+Next
+    * mop.c
+      - Applied an MS VC++ compilation fix from Taro Nishino. RT #48072
+
 0.92_01 Thu, Sep 10, 2009
     * Class::MOP::Package
       - Backwards compatibility tweaks to XS for 5.8.1. (Goro Fuji)
