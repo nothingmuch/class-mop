@@ -8,7 +8,7 @@ use Scalar::Util 'blessed', 'reftype';
 use Carp         'confess';
 use Sub::Name    'subname';
 
-our $VERSION   = '0.92';
+our $VERSION   = '0.92_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 

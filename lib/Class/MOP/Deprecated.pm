@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Carp qw(cluck);
 
-our $VERSION = '0.92';
+our $VERSION = '0.92_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
