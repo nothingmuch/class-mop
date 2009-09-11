@@ -207,6 +207,18 @@ Class::MOP::Package->meta->add_attribute(
 );
 
 Class::MOP::Package->meta->add_attribute(
+    Class::MOP::Attribute->new('_methods' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            '_full_method_map' => \&Class::MOP::Package::_full_method_map
+        },
+        default => sub { {} }
+    ))
+);
+
+Class::MOP::Package->meta->add_attribute(
     Class::MOP::Attribute->new('method_metaclass' => (
         reader   => {
             # NOTE:

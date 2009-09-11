@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 300;
+use Test::More tests => 302;
 use Test::Exception;
 
 use Class::MOP;
@@ -164,6 +164,7 @@ my @class_mop_package_attributes = (
     'namespace',
     'method_metaclass',
     'wrapped_method_metaclass',
+    '_methods',
 );
 
 my @class_mop_module_attributes = (
