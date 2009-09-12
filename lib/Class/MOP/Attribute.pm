@@ -591,7 +591,7 @@ twice the given value.
   Class::MOP::Attribute->new(
       'doubled' => (
           initializer => sub {
-              my ( $instance, $value, $set ) = @_;
+              my ( $self, $value, $set, $attr ) = @_;
               $set->( $value * 2 );
           },
       )
