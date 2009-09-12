@@ -35,7 +35,7 @@ do {
 {
     local $@;
     eval { Class::MOP::load_class('Class') };
-    ok( ! $@, 'load_class never dies' );
+    ok( ! $@, 'load_class does not die if the package is already defined' );
 }
 
 ok( !Class::MOP::does_metaclass_exist("Class"), "no metaclass for non MOP class" );
