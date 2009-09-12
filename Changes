@@ -4,6 +4,12 @@ Next
     * mop.c
       - Applied an MS VC++ compilation fix from Taro Nishino. RT #48072
 
+    * Class::MOP
+      - The load_class function no longer returns a value, since it's return
+        value was confusing (either a metaclass object or a class name). It
+        either loads a class or dies trying. Addresses RT #45883. (Dave
+        Rolsky)
+
 0.92_01 Thu, Sep 10, 2009
     * Class::MOP::Package
       - Backwards compatibility tweaks to XS for 5.8.1. (Goro Fuji)

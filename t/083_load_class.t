@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 36;
+use Test::More tests => 32;
 use Test::Exception;
 
 require Class::MOP;
@@ -23,9 +23,7 @@ throws_ok {
     Class::MOP::load_class('__PACKAGE__')
 } qr/__PACKAGE__\.pm.*\@INC/, 'errors sanely on __PACKAGE__.pm';
 
-my $meta = Class::MOP::load_class('BinaryTree');
-ok($meta, "successfully loaded the class BinaryTree");
-is($meta->name, "BinaryTree", "load_class returns the metaclass");
+Class::MOP::load_class('BinaryTree');
 can_ok('BinaryTree' => 'traverse');
 
 do {
@@ -34,9 +32,11 @@ do {
 };
 
 
-my $ret = Class::MOP::load_class('Class');
-ok($ret, "this should not die!");
-is( $ret, "Class", "class name returned" );
+{
+    local $@;
+    eval { Class::MOP::load_class('Class') };
+    ok( ! $@, 'load_class never dies' );
+}
 
 ok( !Class::MOP::does_metaclass_exist("Class"), "no metaclass for non MOP class" );
 
@@ -79,8 +79,6 @@ lives_ok {
     package Lala;
     use metaclass;
 }
-
-isa_ok( Class::MOP::load_class("Lala"), "Class::MOP::Class", "when an object has a metaclass it is returned" );
 
 lives_ok {
     is(Class::MOP::load_first_existing_class("Lala", "Does::Not::Exist"), "Lala", 'load_first_existing_class 1/2 params ok, class name returned');

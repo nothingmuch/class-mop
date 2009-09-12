@@ -132,8 +132,9 @@ sub _try_load_one_class {
 }
 
 sub load_class {
-    my $class = load_first_existing_class($_[0]);
-    return get_metaclass_by_name($class) || $class;
+    load_first_existing_class($_[0]);
+
+    return;
 }
 
 sub _is_valid_class_name {
@@ -911,8 +912,7 @@ Note that these are all called as B<functions, not methods>.
 This will load the specified C<$class_name>, if it is not already
 loaded (as reported by C<is_class_loaded>). This function can be used
 in place of tricks like C<eval "use $module"> or using C<require>
-unconditionally. This will return the metaclass of C<$class_name> if
-one exists, otherwise it will return C<$class_name>.
+unconditionally.
 
 =item B<Class::MOP::is_class_loaded($class_name)>
 
