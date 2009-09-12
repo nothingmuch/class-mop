@@ -134,7 +134,10 @@ sub _try_load_one_class {
 sub load_class {
     load_first_existing_class($_[0]);
 
-    return;
+    # This is done to avoid breaking code which checked the return value. Said
+    # code is dumb. The return value was _always_ true, since it dies on
+    # failure!
+    return 1;
 }
 
 sub _is_valid_class_name {
@@ -913,6 +916,10 @@ This will load the specified C<$class_name>, if it is not already
 loaded (as reported by C<is_class_loaded>). This function can be used
 in place of tricks like C<eval "use $module"> or using C<require>
 unconditionally.
+
+If the module cannot be loaded, an exception is thrown.
+
+For historical reasons, this function returns explicitly returns a true value.
 
 =item B<Class::MOP::is_class_loaded($class_name)>
 
