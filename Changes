@@ -8,7 +8,8 @@ Next
       - The load_class function just returns true, since it's return value was
         confusing (either a metaclass object or a class name). It either loads
         a class or dies trying. In the future, this may change to not return
-        anything. Addresses RT #45883. (Dave Rolsky)
+        anything, since there's no point in checking its return
+        value. Addresses RT #45883. (Dave Rolsky)
 
 0.92_01 Thu, Sep 10, 2009
     * Class::MOP::Package
