@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 302;
+use Test::More tests => 304;
 use Test::Exception;
 
 use Class::MOP;
@@ -42,6 +42,8 @@ my @class_mop_package_methods = qw(
     get_method_list _full_method_map
 
     _deconstruct_variable_name
+
+    get_method_map
 );
 
 my @class_mop_module_methods = qw(

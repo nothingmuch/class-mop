@@ -46,7 +46,9 @@ my %trustme = (
     ],
     'Class::MOP::Class::Immutable::Trait'             => ['.+'],
     'Class::MOP::Class::Immutable::Class::MOP::Class' => ['.+'],
-    'Class::MOP::Instance'                            => [
+    'Class::MOP::Deprecated'                          => ['.+'],
+
+    'Class::MOP::Instance' => [
         qw( BUILDARGS
             bless_instance_structure
             is_dependent_on_superclasses ),
@@ -86,8 +88,8 @@ my %trustme = (
             initialize_body
             )
     ],
-    'Class::MOP::Module' => ['create'],
-    'Class::MOP::Package' => ['wrap_method_body'],
+    'Class::MOP::Module'  => ['create'],
+    'Class::MOP::Package' => [ 'get_method_map', 'wrap_method_body' ],
 );
 
 for my $module ( sort @modules ) {
