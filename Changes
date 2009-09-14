@@ -1,6 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
-Next
+0.93
     * mop.c
       - Applied an MS VC++ compilation fix from Taro Nishino. RT #48072
 
