@@ -379,12 +379,11 @@ sub get_method {
         }
     );
 
-    # we should never have a blessed map entry but no $code in the package
-    if ( blessed( $map_entry ) && !$code ) {
-        my $method = sprintf '%s::%s', $self->name, $method_name;
-        confess "Found a meta method object in the method map but no"
-            . " corresponding code entry in the symbol table for $method";
-    }
+    # This seems to happen in some weird cases where methods modifiers are
+    # added via roles or some other such bizareness. Honestly, I don't totally
+    # understand this, but returning the entry works, and keeps various MX
+    # modules from blowing up. - DR
+    return $map_entry if blessed $map_entry && !$code;
 
     return $map_entry if blessed $map_entry && $map_entry->body == $code;
 
