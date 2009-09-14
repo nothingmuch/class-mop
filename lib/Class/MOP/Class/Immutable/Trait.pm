@@ -28,15 +28,14 @@ sub superclasses {
 }
 
 sub _immutable_cannot_call {
-    Carp::confess "This method cannot be called on an immutable instance";
+    my $name = shift;
+    Carp::confess "The '$name' method cannot be called on an immutable instance";
 }
 
-sub add_method            { _immutable_cannot_call() }
-sub alias_method          { _immutable_cannot_call() }
-sub remove_method         { _immutable_cannot_call() }
-sub add_attribute         { _immutable_cannot_call() }
-sub remove_attribute      { _immutable_cannot_call() }
-sub remove_package_symbol { _immutable_cannot_call() }
+for my $name (qw/add_method alias_method remove_method add_attribute remove_attribute remove_package_symbol/) {
+    no strict 'refs';
+    *{__PACKAGE__."::$name"} = sub { _immutable_cannot_call($name) };
+}
 
 sub class_precedence_list {
     my $orig = shift;
