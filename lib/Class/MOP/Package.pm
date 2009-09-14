@@ -379,10 +379,14 @@ sub get_method {
         }
     );
 
-    return $map_entry if blessed $map_entry && $map_entry->body == $code;
-
     # we should never have a blessed map entry but no $code in the package
-    die 'WTF' if blessed $map_entry && ! $code;
+    if ( blessed( $map_entry ) && !$code ) {
+        my $method = sprintf '%s::%s', $self->name, $method_name;
+        confess "Found a meta method object in the method map but no"
+            . " corresponding code entry in the symbol table for $method";
+    }
+
+    return $map_entry if blessed $map_entry && $map_entry->body == $code;
 
     unless ($map_entry) {
         return unless $code && $self->_code_is_mine($code);
