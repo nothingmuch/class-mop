@@ -16,9 +16,9 @@ Next
         method's name. Addresses RT #49680. (Shawn M Moore)
 
     * Class::MOP::Package
-      - Fixed a bug where adding the same sub reference to multiple packages
-        failed to update the method map properly. RT #48985. Reported by Paul
-        Mooney. (Dave Rolsky)
+      - Adding the same sub reference to multiple packages failed to update
+        the method map properly. RT #48985. Reported by Paul Mooney. (Dave
+        Rolsky)
       - The get_method_map method is now private (and called as
         _full_method_map or _method_map). The public version is available as a
         deprecated method. (Dave Rolsky)
