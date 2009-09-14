@@ -11,6 +11,10 @@ Next
         anything, since there's no point in checking its return
         value. Addresses RT #45883. (Dave Rolsky)
 
+    * Class::MOP::Class::Trait::Immutable
+      - When throwing an error because of an immutable method, include that
+        method's name. Addresses RT #49680. (Shawn M Moore)
+
 0.92_01 Thu, Sep 10, 2009
     * Class::MOP::Package
       - Backwards compatibility tweaks to XS for 5.8.1. (Goro Fuji)
