@@ -9,6 +9,15 @@ our $VERSION = '0.05';
 
 use base 'Class::MOP::Attribute';
 
+sub method_metaclasses {
+    return { 
+        %{ shift->SUPER::method_metaclasses }, 
+        history_accessor => 'AttributesWithHistory::Method::AccessorWithHistory',
+        accessor => 'AttributesWithHistory::Method::Accessor',
+        writer => 'AttributesWithHistory::Method::Writer',
+    };
+}
+
 # this is for an extra attribute constructor 
 # option, which is to be able to create a 
 # way for the class to access the history
@@ -36,7 +45,7 @@ AttributesWithHistory->meta->add_after_method_modifier('install_accessors' => su
 });
 
 package # hide the package from PAUSE
-    AttributesWithHistory::Method::Accessor;
+    AttributesWithHistory::Method::AccessorWithHistory;
 
 use strict;
 use warnings;
@@ -47,7 +56,7 @@ use base 'Class::MOP::Method::Accessor';
 
 # generate the methods
 
-sub _generate_history_accessor_method {
+sub _generate_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
@@ -57,7 +66,17 @@ sub _generate_history_accessor_method {
     }};    
 }
 
-sub _generate_accessor_method {
+package # hide the package from PAUSE
+    AttributesWithHistory::Method::Accessor;
+
+use strict;
+use warnings;
+
+our $VERSION = 0.01;
+
+use base 'Class::MOP::Method::Accessor';
+
+sub _generate_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         if (scalar(\@_) == 2) {
@@ -71,7 +90,17 @@ sub _generate_accessor_method {
     }};
 }
 
-sub _generate_writer_method {
+package # hide the package from PAUSE
+    AttributesWithHistory::Method::Writer;
+
+use strict;
+use warnings;
+
+our $VERSION = 0.01;
+
+use base 'Class::MOP::Method::Writer';
+
+sub _generate_method {
     my $attr_name = (shift)->associated_attribute->name;
     eval qq{sub {
         unless (ref \$_[0]->meta->get_attribute('$attr_name')->_history()->\{\$_[0]\}) \{
