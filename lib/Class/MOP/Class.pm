@@ -1163,7 +1163,7 @@ Class::MOP::Class - Class Meta Object
 The Class Protocol is the largest and most complex part of the
 Class::MOP meta-object protocol. It controls the introspection and
 manipulation of Perl 5 classes, and it can create them as well. The
-best way to understand what this module can do, is to read the
+best way to understand what this module can do is to read the
 documentation for each of its methods.
 
 =head1 INHERITANCE
@@ -1175,7 +1175,7 @@ C<Class::MOP::Class> is a subclass of L<Class::MOP::Module>.
 =head2 Class construction
 
 These methods all create new C<Class::MOP::Class> objects. These
-objects can represent existing classes, or they can be used to create
+objects can represent existing classes or they can be used to create
 new classes from scratch.
 
 The metaclass object for a given class is a singleton. If you attempt
@@ -1187,7 +1187,7 @@ existing object.
 =item B<< Class::MOP::Class->create($package_name, %options) >>
 
 This method creates a new C<Class::MOP::Class> object with the given
-package name. It accepts a number of options.
+package name. It accepts a number of options:
 
 =over 8
 
@@ -1206,7 +1206,7 @@ An optional array reference of superclass names.
 =item * methods
 
 An optional hash reference of methods for the class. The keys of the
-hash reference are method names, and values are subroutine references.
+hash reference are method names and values are subroutine references.
 
 =item * attributes
 
@@ -1231,7 +1231,7 @@ All instances of an anonymous class keep a special reference to the
 metaclass object, which prevents the metaclass from going out of scope
 while any instances exist.
 
-This only works if the instance if based on a hash reference, however.
+This only works if the instance is based on a hash reference, however.
 
 =item B<< Class::MOP::Class->initialize($package_name, %options) >>
 
@@ -1301,12 +1301,11 @@ class. Any parameters you provide are used to initialize the
 instance's attributes. A special C<__INSTANCE__> key can be passed to
 provide an already generated instance, rather than having Class::MOP
 generate it for you. This is mostly useful for using Class::MOP with
-foreign classes, which generally generate instances using their own
-constructor.
+foreign classes which generate instances using their own constructors.
 
 =item B<< $metaclass->instance_metaclass >>
 
-Returns the class name of the instance metaclass, see
+Returns the class name of the instance metaclass. See
 L<Class::MOP::Instance> for more information on the instance
 metaclass.
 
@@ -1468,7 +1467,7 @@ the L<Class::MOP::Attribute> objects for this class and its parents.
 
 This will return a L<Class::MOP::Attribute> for the specified
 C<$attribute_name>. If the class does not have the specified
-attribute, it returns C<undef>
+attribute, it returns C<undef>.
 
 Unlike C<get_attribute>, this attribute I<will> look for the named
 attribute in superclasses.
@@ -1476,7 +1475,7 @@ attribute in superclasses.
 =item B<< $metaclass->add_attribute(...) >>
 
 This method accepts either an existing L<Class::MOP::Attribute>
-object, or parameters suitable for passing to that class's C<new>
+object or parameters suitable for passing to that class's C<new>
 method.
 
 The attribute provided will be added to the class.
@@ -1516,8 +1515,8 @@ methods, and also allows us to optimize some methods on the metaclass
 object itself.
 
 After immutabilization, the metaclass object will cache most informational
-methods that returns information about methods or attributes.. Methods which
-would alter the class, such as C<add_attribute>, C<add_method>, and so on will
+methods that returns information about methods or attributes. Methods which
+would alter the class, such as C<add_attribute> and C<add_method>, will
 throw an error on an immutable metaclass object.
 
 The immutabilization system in L<Moose> takes much greater advantage
@@ -1527,7 +1526,7 @@ of the inlining features than Class::MOP itself does.
 
 =item B<< $metaclass->make_immutable(%options) >>
 
-This method will create an immutable transformer and uses it to make
+This method will create an immutable transformer and use it to make
 the class and its metaclass object immutable.
 
 This method accepts the following options:
@@ -1600,7 +1599,7 @@ Calling this method reverse the immutabilization transformation.
 
 Method modifiers are hooks which allow a method to be wrapped with
 I<before>, I<after> and I<around> method modifiers. Every time a
-method is called, it's modifiers are also called.
+method is called, its modifiers are also called.
 
 A class can modify its own methods, as well as methods defined in
 parent classes.
@@ -1644,9 +1643,9 @@ order. So the call tree might looks something like this:
 
 Of course there is a performance cost associated with method
 modifiers, but we have made every effort to make that cost directly
-proportional to the number of modifier features you utilize.
+proportional to the number of modifier features you use.
 
-The wrapping method does it's best to B<only> do as much work as it
+The wrapping method does its best to B<only> do as much work as it
 absolutely needs to. In order to do this we have moved some of the
 performance costs to set-up time, where they are easier to amortize.
 
