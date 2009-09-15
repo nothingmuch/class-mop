@@ -1,9 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
 0.93
-    * mop.c
-      - Applied an MS VC++ compilation fix from Taro Nishino. RT #48072
-
     * Class::MOP
       - The load_class function just returns true, since it's return value was
         confusing (either a metaclass object or a class name). It either loads
