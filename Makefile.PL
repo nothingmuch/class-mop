@@ -12,7 +12,10 @@ license 'perl';
 
 require Config;
 my $ccflags = ( $Config::Config{ccflags} || '' ) . ' -I.';
-$ccflags .= ' -Wall' if -d '.svn' || -d '.git' || $ENV{MAINTAINER_MODE};
+
+if ( -d '.git' || $ENV{MAINTAINER_MODE} ) {
+    $ccflags .= ' -Wall -Wdeclaration-after-statement';
+}
 
 requires 'Carp';
 requires 'Devel::GlobalDestruction';
