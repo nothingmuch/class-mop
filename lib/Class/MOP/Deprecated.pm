@@ -6,6 +6,12 @@ use warnings;
 use Carp qw( cluck );
 use Scalar::Util qw( blessed );
 
+use namespace::clean;
+
+# force loading of everything to prevent namespace::clean in the patched
+# packages from deleting our symbols
+use Class::MOP;
+
 our $VERSION = '0.93';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
@@ -125,7 +131,7 @@ sub get_method_map {
     my $map = $self->_full_method_map;
 
     $map->{$_} = $self->get_method($_)
-        for grep { !blessed( $map->{$_} ) } keys %{$map};
+        for grep { !Scalar::Util::blessed( $map->{$_} ) } keys %{$map};
 
     return $map;
 }

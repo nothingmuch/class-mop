@@ -190,6 +190,8 @@ is($BAZ_ATTR->name, '$baz', '... got the attributes name correctly');
     use metaclass;
     use Scalar::Util qw/blessed/;
 
+    use namespace::clean -except => "meta";
+
     my $meta = Buzz->meta;
     ::lives_ok {
         $meta->add_attribute($FOO_ATTR_2);

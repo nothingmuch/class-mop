@@ -6,6 +6,8 @@ use warnings;
 
 use Carp 'confess';
 
+use namespace::clean;
+
 our $VERSION   = '0.93';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';

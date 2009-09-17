@@ -19,9 +19,10 @@ if ( -d '.git' || $ENV{MAINTAINER_MODE} ) {
 
 requires 'Carp';
 requires 'Devel::GlobalDestruction';
-requires 'MRO::Compat'  => '0.05';
-requires 'Scalar::Util' => '1.18';
-requires 'Sub::Name'    => '0.04';
+requires 'MRO::Compat'      => '0.05';
+requires 'Scalar::Util'     => '1.18';
+requires 'Sub::Name'        => '0.04';
+requires 'namespace::clean' => '0.11';
 requires 'Task::Weaken';
 
 test_requires 'File::Spec';
