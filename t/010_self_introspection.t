@@ -67,6 +67,13 @@ my @class_mop_class_methods = qw(
     clone_instance _clone_instance
     rebless_instance rebless_instance_back rebless_instance_away
     check_metaclass_compatibility _check_metaclass_compatibility
+    _check_class_metaclass_compatibility _check_single_metaclass_compatibility
+    _fix_metaclass_incompatibility _fix_class_metaclass_incompatibility
+    _fix_single_metaclass_incompatibility _base_metaclasses
+    _can_fix_class_metaclass_incompatibility_by_subclassing
+    _can_fix_single_metaclass_incompatibility_by_subclassing
+    _can_fix_metaclass_incompatibility_by_subclassing
+    _can_fix_metaclass_incompatibility
 
     add_meta_instance_dependencies remove_meta_instance_dependencies update_meta_instance_dependencies
     add_dependent_meta_instance remove_dependent_meta_instance

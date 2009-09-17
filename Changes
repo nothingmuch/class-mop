@@ -5,6 +5,13 @@ Revision history for Perl extension Class-MOP.
   * Packages and modules no longer have methods - this functionality was
     moved back up into Class::MOP::Class (doy).
 
+  [ENHANCEMENTS]
+
+  * Metaclass incompatibility checking now checks all metaclass types. (doy)
+  * Class::MOP can now do simple metaclass incompatibility fixing: if your
+    class's metaclass is a subclass of your parent class's metaclass, it will
+    just use the parent class's metaclass directly. (doy)
+
 1.01 Thu, May 26, 2010
 
   [NEW FEATURES]
