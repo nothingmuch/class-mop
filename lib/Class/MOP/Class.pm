@@ -902,6 +902,30 @@ sub _immutable_options {
     );
 }
 
+sub list_non_method_package_symbols {
+    my $self = shift;
+
+    my %method_names = map { $_ => 1 } $self->get_all_method_names;
+
+    # this is injected for classes that use overloading
+    $method_names{'()'} = 1;
+
+    my @all_symbols = $self->list_all_package_symbols("CODE");
+
+    return grep { not exists $method_names{$_} } @all_symbols;
+}
+
+sub warn_on_symbol_pollution {
+    my $self = shift;
+
+    if ( my @pollution = $self->list_non_method_package_symbols ) {
+        Carp::carp( "Polluting symbols found in "
+              . $self->name . ": "
+              . join( ", ", @pollution )
+              . ". Consider unimporting or using namespace::autoclean" );
+    }
+}
+
 sub make_immutable {
     my ( $self, @args ) = @_;
 
@@ -1523,6 +1547,15 @@ The immutabilization system in L<Moose> takes much greater advantage
 of the inlining features than Class::MOP itself does.
 
 =over 4
+
+=item B<< $metaclass->list_non_method_package_symbols >>
+
+Compares the list of all C<CODE> symbols to the output of
+C<get_all_method_names> and returns the non method ones.
+
+=item B<< $metaclass->warn_on_symbol_pollution >>
+
+Issues a warning if C<list_non_method_package_symbols> returns anything.
 
 =item B<< $metaclass->make_immutable(%options) >>
 

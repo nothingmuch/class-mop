@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 304;
+use Test::More tests => 308;
 use Test::Exception;
 
 use Class::MOP;
@@ -101,6 +101,8 @@ my @class_mop_class_methods = qw(
     _immutable_metaclass
     immutable_trait immutable_options
     constructor_name constructor_class destructor_class
+
+    list_non_method_package_symbols warn_on_symbol_pollution
 
     DESTROY
 );
