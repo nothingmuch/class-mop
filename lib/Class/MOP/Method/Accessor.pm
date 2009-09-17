@@ -157,7 +157,7 @@ sub _generate_reader_method_inline {
      my ( $code, $e ) = $self->_eval_closure(
          {},
         'sub {'
-        . 'confess "Cannot assign a value to a read-only accessor" if @_ > 1;'
+        . 'Carp::confess("Cannot assign a value to a read-only accessor") if @_ > 1;'
         . $meta_instance->inline_get_slot_value('$_[0]', $attr_name)
         . '}'
     );
