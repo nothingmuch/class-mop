@@ -932,8 +932,14 @@ sub make_immutable {
     my ( $self, @args ) = @_;
 
     if ( $self->is_mutable ) {
-        $self->_initialize_immutable( $self->_immutable_options(@args) );
+        my %options = $self->_immutable_options(@args);
+
+        $self->_initialize_immutable(%options);
         $self->_rebless_as_immutable(@args);
+
+        $self->warn_on_symbol_pollution
+            unless $options{no_pollution_check};
+
         return $self;
     }
     else {
@@ -1614,6 +1620,10 @@ generate the inlined destructor. This defaults to
 
 This is a boolean indicating whether an existing destructor should be
 replaced when inlining a destructor. This defaults to false.
+
+=item * no_pollution_check
+
+Suppresses the call to C<warn_on_symbol_pollution>
 
 =back
 
