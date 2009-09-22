@@ -1,9 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+0.94 Tue, Sep 22, 2009
     * Class::MOP::Attribute
         - Introduce set_raw_value and get_raw_value, side effect free variants
-          of {get,set}_value. These are meaningless in Class::MOP but diverge
-          in behavior in Moose.
+          of {get,set}_value. These don't do anything useful in Class::MOP but
+          have different behavior that set_value and get_value for Moose
+          attributes. (nothingmuch)
 
 0.93 Tue, Sep 15, 2009
     * Class::MOP
