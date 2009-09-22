@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Attribute
+        - Introduce set_raw_value and get_raw_value, side effect free variants
+          of {get,set}_value. These are meaningless in Class::MOP but diverge
+          in behavior in Moose.
+
 0.93 Tue, Sep 15, 2009
     * Class::MOP
       - The load_class function just returns true, since it's return value was
