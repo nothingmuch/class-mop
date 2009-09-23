@@ -22,6 +22,7 @@ requires 'Devel::GlobalDestruction';
 requires 'MRO::Compat'  => '0.05';
 requires 'Scalar::Util' => '1.18';
 requires 'Sub::Name'    => '0.04';
+requires 'Try::Tiny'    => '0.02';
 requires 'Task::Weaken';
 
 test_requires 'File::Spec';

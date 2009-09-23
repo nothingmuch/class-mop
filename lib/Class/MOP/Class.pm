@@ -13,6 +13,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
+use Try::Tiny;
 
 our $VERSION   = '0.94';
 $VERSION = eval $VERSION;
@@ -735,16 +736,14 @@ sub add_attribute {
     $self->get_attribute_map->{$attr_name} = $attribute;
 
     # invalidate package flag here
-    my $e = do {
-        local $@;
+    try {
         local $SIG{__DIE__};
-        eval { $attribute->install_accessors() };
-        $@;
-    };
-    if ( $e ) {
-        $self->remove_attribute($attr_name);
-        die $e;
+        $attribute->install_accessors();
     }
+    catch {
+        $self->remove_attribute($attr_name);
+        die $_;
+    };
 
     return $attribute;
 }

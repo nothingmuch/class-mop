@@ -8,6 +8,7 @@ use Class::MOP::Method::Accessor;
 
 use Carp         'confess';
 use Scalar::Util 'blessed', 'weaken';
+use Try::Tiny;
 
 our $VERSION   = '0.94';
 $VERSION = eval $VERSION;
@@ -369,7 +370,7 @@ sub _process_accessors {
     else {
         my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
         my $method;
-        eval {
+        try {
             if ( $method_ctx ) {
                 my $desc = "accessor $accessor";
                 if ( $accessor ne $self->name ) {
@@ -387,8 +388,10 @@ sub _process_accessors {
                 name          => $accessor,
                 definition_context => $method_ctx,
             );
+        }
+        catch {
+            confess "Could not create the '$type' method for " . $self->name . " because : $_";
         };
-        confess "Could not create the '$type' method for " . $self->name . " because : $@" if $@;
         $self->associate_method($method);
         return ($accessor, $method);
     }

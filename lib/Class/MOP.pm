@@ -10,6 +10,7 @@ use MRO::Compat;
 
 use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
+use Try::Tiny;
 
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -87,9 +88,9 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
     for my $class (@classes) {
-        my $e = _try_load_one_class($class);
+        my ($fail, $e) = _try_load_one_class($class);
 
-        if ($e) {
+        if ($fail) {
             my $pmfile = _class_to_pmfile($class);
             $exceptions{$class} = $e;
             last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
@@ -123,12 +124,17 @@ sub _try_load_one_class {
 
     my $file = _class_to_pmfile($class);
 
-    return do {
-        local $@;
+    my ($failed, $error);
+    try {
         local $SIG{__DIE__};
-        eval { require($file) };
-        $@;
+        require($file);
+    }
+    catch {
+        $failed = 1;
+        $error = $_;
     };
+
+    return $failed, $error;
 }
 
 sub load_class {
