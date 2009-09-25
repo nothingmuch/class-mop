@@ -76,7 +76,7 @@ sub _class_to_pmfile {
 
 sub load_first_existing_class {
     my @classes = @_
-        or return;
+      or return;
 
     foreach my $class (@classes) {
         unless ( _is_valid_class_name($class) ) {
@@ -87,54 +87,31 @@ sub load_first_existing_class {
 
     my $found;
     my %exceptions;
+
     for my $class (@classes) {
-        my ($fail, $e) = _try_load_one_class($class);
+        my $file = _class_to_pmfile($class);
 
-        if ($fail) {
-            my $pmfile = _class_to_pmfile($class);
-            $exceptions{$class} = $e;
-            last if $e !~ /^Can't locate \Q$pmfile\E in \@INC/;
+        return $class if is_class_loaded($class);;
+
+        return $class if try {
+            local $SIG{__DIE__};
+            require $file;
+            return 1;
         }
-        else {
-            $found = $class;
-            last;
-        }
-    }
-
-    return $found if $found;
-
-    confess join(
-        "\n",
-        map {
-            sprintf(
-                "Could not load class (%s) because : %s", $_,
-                $exceptions{$_}
-                )
+        catch {
+            unless (/^Can't locate \Q$file\E in \@INC/) {
+                confess "Couldn't load class ($class) because: $_";
             }
-        grep {
-            exists $exceptions{$_}
-            } @classes
-    );
-}
 
-sub _try_load_one_class {
-    my $class = shift;
-
-    return if is_class_loaded($class);
-
-    my $file = _class_to_pmfile($class);
-
-    my ($failed, $error);
-    try {
-        local $SIG{__DIE__};
-        require($file);
+            return;
+        };
     }
-    catch {
-        $failed = 1;
-        $error = $_;
-    };
 
-    return $failed, $error;
+    if ( @classes > 1 ) {
+        confess "Can't locate any of @classes in \@INC (\@INC contains: @INC).";
+    } else {
+        confess "Can't locate " . _class_to_pmfile($classes[0]) . " in \@INC (\@INC contains: @INC).";
+    }
 }
 
 sub load_class {

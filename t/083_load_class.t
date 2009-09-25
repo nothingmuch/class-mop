@@ -62,8 +62,8 @@ qr/Missing right curly/,
 throws_ok {
     Class::MOP::load_class('This::Does::Not::Exist');
 }
-qr/Could not load class \(This::Does::Not::Exist\) because :/,
-    'Many Moose tests rely on the exact formatting of this error';
+qr{Can't locate This/Does/Not/Exist\.pm in \@INC},
+    'load_first_existing_class throws a familiar error for a single module';
 
 {
     package Other;
@@ -87,7 +87,7 @@ lives_ok {
 
 throws_ok {
     Class::MOP::load_first_existing_class("Does::Not::Exist", "Also::Does::Not::Exist")
-} qr/Could not load class \(Does::Not::Exist.*Could not load class \(Also::Does::Not::Exist/s, 'Multiple non-existant classes cause exception';
+} qr/Does::Not::Exist.*Also::Does::Not::Exist/s, 'Multiple non-existant classes cause exception';
 
 {
     sub whatever {
