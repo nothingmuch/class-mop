@@ -358,7 +358,8 @@ sub _code_is_mine {
 
 sub has_method {
     my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+
+    defined($method_name)
         || confess "You must define a method name";
 
     return defined($self->get_method($method_name));
@@ -366,7 +367,8 @@ sub has_method {
 
 sub get_method {
     my ( $self, $method_name ) = @_;
-    ( defined $method_name && $method_name )
+
+    defined($method_name)
         || confess "You must define a method name";
 
     my $method_map = $self->_method_map;
