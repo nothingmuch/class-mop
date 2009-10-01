@@ -282,7 +282,7 @@ Class::MOP::Class->meta->add_attribute(
             #
             # we just alias the original method
             # rather than re-produce it here
-            'get_attribute_map' => \&Class::MOP::Class::get_attribute_map
+            '_attribute_map' => \&Class::MOP::Class::_attribute_map
         },
         default  => sub { {} }
     ))

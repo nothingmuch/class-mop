@@ -329,7 +329,7 @@ sub create {
 # all these attribute readers will be bootstrapped
 # away in the Class::MOP bootstrap section
 
-sub get_attribute_map        { $_[0]->{'attributes'}                  }
+sub _attribute_map           { $_[0]->{'attributes'}                  }
 sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
 sub immutable_trait          { $_[0]->{'immutable_trait'}             }
@@ -729,11 +729,11 @@ sub add_attribute {
     
     # get our count of previously inserted attributes and
     # increment by one so this attribute knows its order
-    my $order = (scalar keys %{$self->get_attribute_map});
+    my $order = (scalar keys %{$self->_attribute_map});
     $attribute->_set_insertion_order($order);
 
     # then onto installing the new accessors
-    $self->get_attribute_map->{$attr_name} = $attribute;
+    $self->_attribute_map->{$attr_name} = $attribute;
 
     # invalidate package flag here
     try {
@@ -813,14 +813,14 @@ sub has_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name)
         || confess "You must define an attribute name";
-    exists $self->get_attribute_map->{$attribute_name};
+    exists $self->_attribute_map->{$attribute_name};
 }
 
 sub get_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name)
         || confess "You must define an attribute name";
-    return $self->get_attribute_map->{$attribute_name}
+    return $self->_attribute_map->{$attribute_name}
     # NOTE:
     # this will return undef anyway, so no need ...
     #    if $self->has_attribute($attribute_name);
@@ -831,9 +831,9 @@ sub remove_attribute {
     my ($self, $attribute_name) = @_;
     (defined $attribute_name)
         || confess "You must define an attribute name";
-    my $removed_attribute = $self->get_attribute_map->{$attribute_name};
+    my $removed_attribute = $self->_attribute_map->{$attribute_name};
     return unless defined $removed_attribute;
-    delete $self->get_attribute_map->{$attribute_name};
+    delete $self->_attribute_map->{$attribute_name};
     $self->invalidate_meta_instances();
     $removed_attribute->remove_accessors();
     $removed_attribute->detach_from_class();
@@ -842,12 +842,12 @@ sub remove_attribute {
 
 sub get_attribute_list {
     my $self = shift;
-    keys %{$self->get_attribute_map};
+    keys %{$self->_attribute_map};
 }
 
 sub get_all_attributes {
     my $self = shift;
-    my %attrs = map { %{ $self->initialize($_)->get_attribute_map } } reverse $self->linearized_isa;
+    my %attrs = map { %{ $self->initialize($_)->_attribute_map } } reverse $self->linearized_isa;
     return values %attrs;
 }
 
@@ -1445,12 +1445,6 @@ need to use C<find_attribute_by_name>.
 Returns a boolean indicating whether or not the class defines the
 named attribute. It does not include attributes inherited from parent
 classes.
-
-=item B<< $metaclass->get_attribute_map >>
-
-Returns a hash reference representing the attributes defined in this
-class. The keys are attribute names and the values are
-L<Class::MOP::Attribute> objects.
 
 =item B<< $metaclass->get_attribute_list >>
 

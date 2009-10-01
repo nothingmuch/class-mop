@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Test::Exception;
 
 use Carp;
@@ -45,6 +45,16 @@ $SIG{__WARN__} = \&croak;
     ::lives_ok{
         Class::MOP::in_global_destruction();
         } 'safe in an inner class';
+}
+
+{
+    package Foo2;
+
+    use metaclass;
+
+    ::throws_ok{ Foo2->meta->get_attribute_map }
+        qr/\Qget_attribute_map method has been deprecated/,
+        'get_attribute_map is deprecated';
 }
 
 {

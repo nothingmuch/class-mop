@@ -6,6 +6,10 @@ Revision history for Perl extension Class-MOP.
         which are false (like "0"), but the name must be defined and not be an
         emptry string.
 
+    * Class::MOP::Class
+      - Deprecated get_attribute_map as a public method. You can use a
+        combination of get_attribute_list and get_attribute instead. (Dave
+        Rolsky)
 
 0.94 Tue, Sep 22, 2009
     * Class::MOP::Attribute

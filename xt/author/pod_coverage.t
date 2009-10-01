@@ -43,6 +43,9 @@ my %trustme = (
 
         # doc'd with rebless_instance
         'rebless_instance_away',
+
+        # deprecated
+        'get_attribute_map',
     ],
     'Class::MOP::Class::Immutable::Trait'             => ['.+'],
     'Class::MOP::Class::Immutable::Class::MOP::Class' => ['.+'],

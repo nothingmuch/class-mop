@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 304;
+use Test::More tests => 306;
 use Test::Exception;
 
 use Class::MOP;
@@ -90,7 +90,9 @@ my @class_mop_class_methods = qw(
         add_before_method_modifier add_after_method_modifier add_around_method_modifier
 
     has_attribute get_attribute add_attribute remove_attribute
-    get_attribute_list get_attribute_map get_all_attributes compute_all_applicable_attributes find_attribute_by_name
+    get_attribute_list _attribute_map get_all_attributes compute_all_applicable_attributes find_attribute_by_name
+
+    get_attribute_map
 
     is_mutable is_immutable make_mutable make_immutable
     _initialize_immutable _install_inlined_code _inlined_methods
@@ -194,7 +196,7 @@ is_deeply(
 );
 
 is_deeply(
-    [ sort keys %{$class_mop_class_meta->get_attribute_map} ],
+    [ sort keys %{$class_mop_class_meta->_attribute_map} ],
     [ sort @class_mop_class_attributes ],
     '... got the right list of attributes');
 
@@ -211,7 +213,7 @@ is_deeply(
     '... got the right list of attributes');
 
 is_deeply(
-    [ sort keys %{$class_mop_package_meta->get_attribute_map} ],
+    [ sort keys %{$class_mop_package_meta->_attribute_map} ],
     [ sort @class_mop_package_attributes ],
     '... got the right list of attributes');
 
@@ -228,7 +230,7 @@ is_deeply(
     '... got the right list of attributes');
 
 is_deeply(
-    [ sort keys %{$class_mop_module_meta->get_attribute_map} ],
+    [ sort keys %{$class_mop_module_meta->_attribute_map} ],
     [ sort @class_mop_module_attributes ],
     '... got the right list of attributes');
 
@@ -282,8 +284,8 @@ is($class_mop_package_meta->get_attribute('method_metaclass')->default,
 
 ok($class_mop_class_meta->get_attribute('attributes')->has_reader, '... Class::MOP::Class attributes has a reader');
 is_deeply($class_mop_class_meta->get_attribute('attributes')->reader,
-   { 'get_attribute_map' => \&Class::MOP::Class::get_attribute_map },
-   '... Class::MOP::Class attributes\'s a reader is &get_attribute_map');
+   { '_attribute_map' => \&Class::MOP::Class::_attribute_map },
+   '... Class::MOP::Class attributes\'s a reader is &_attribute_map');
 
 ok($class_mop_class_meta->get_attribute('attributes')->has_init_arg, '... Class::MOP::Class attributes has a init_arg');
 is($class_mop_class_meta->get_attribute('attributes')->init_arg,

@@ -26,6 +26,7 @@ my %DeprecatedAt = (
     'Class::MOP::Class::alias_method'                      => 0.93,
     'Class::MOP::Class::compute_all_applicable_methods'    => 0.93,
     'Class::MOP::Class::compute_all_applicable_attributes' => 0.93,
+    'Class::MOP::Class::get_attribute_map' => 0.95,
 
     'Class::MOP::Instance::bless_instance_structure' => 0.93,
 
@@ -203,6 +204,13 @@ sub compute_all_applicable_attributes {
             . " Use get_all_attributes instead.\n" );
 
     shift->get_all_attributes(@_);
+}
+
+sub get_attribute_map {
+    Class::MOP::Deprecated::warn(
+        "The get_attribute_map method has been deprecated.\n");
+
+    shift->_attribute_map(@_);
 }
 
 package
