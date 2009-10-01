@@ -10,47 +10,41 @@ $SIG{__WARN__} = \&croak;
 
 {
     package Foo;
-    use Test::More;
-    use Test::Exception;
 
-    throws_ok {
+    ::throws_ok{
         Class::MOP::in_global_destruction();
-    } qr/\b deprecated \b/xmsi, 'complained';
+        } qr/\b deprecated \b/xmsi,
+        'Class::MOP::in_global_destruction is deprecated';
 }
 
 {
     package Bar;
-    use Test::More;
-    use Test::Exception;
 
     use Class::MOP::Deprecated -compatible => 0.93;
 
-    throws_ok {
+    ::throws_ok{
         Class::MOP::in_global_destruction();
-    } qr/\b deprecated \b/xmsi, 'complained';
+        } qr/\b deprecated \b/xmsi,
+        'Class::MOP::in_global_destruction is deprecated with 0.93 compatibility';
 }
 
 {
     package Baz;
-    use Test::More;
-    use Test::Exception;
 
     use Class::MOP::Deprecated -compatible => 0.92;
 
-    lives_ok {
+    ::lives_ok{
         Class::MOP::in_global_destruction();
-    } 'safe';
+        }
+        'Class::MOP::in_global_destruction is not deprecated with 0.92 compatibility';
 }
-
 
 {
     package Baz::Inner;
-    use Test::More;
-    use Test::Exception;
 
-    lives_ok {
+    ::lives_ok{
         Class::MOP::in_global_destruction();
-    } 'safe in an inner class';
+        } 'safe in an inner class';
 }
 
 {
@@ -68,9 +62,13 @@ $SIG{__WARN__} = \&croak;
     my $map = Quux->meta->get_method_map;
     my @method_objects = grep { blessed($_) } values %{$map};
 
-    ::is( scalar @method_objects, 3,
-          'get_method_map still returns all values as method object' );
-    ::is_deeply( [ sort keys %{$map} ],
-                 [ qw( bar foo meta ) ],
-                 'get_method_map returns expected methods' );
+    ::is(
+        scalar @method_objects, 3,
+        'get_method_map still returns all values as method object'
+    );
+    ::is_deeply(
+        [ sort keys %{$map} ],
+        [qw( bar foo meta )],
+        'get_method_map returns expected methods'
+    );
 }
