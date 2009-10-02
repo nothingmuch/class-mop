@@ -311,7 +311,7 @@ sub wrap_method_body {
 
 sub add_method {
     my ($self, $method_name, $method) = @_;
-    (defined $method_name && $method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name";
 
     my $body;
@@ -359,7 +359,7 @@ sub _code_is_mine {
 sub has_method {
     my ($self, $method_name) = @_;
 
-    defined($method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name";
 
     return defined($self->get_method($method_name));
@@ -368,7 +368,7 @@ sub has_method {
 sub get_method {
     my ( $self, $method_name ) = @_;
 
-    defined($method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name";
 
     my $method_map = $self->_method_map;
@@ -404,7 +404,7 @@ sub get_method {
 
 sub remove_method {
     my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name";
 
     my $removed_method = delete $self->_full_method_map->{$method_name};

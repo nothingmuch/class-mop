@@ -1,5 +1,12 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP::Class
+    * Class::MOP::Package
+      - Any method which takes a method name as an argument now allows names
+        which are false (like "0"), but the name must be defined and not be an
+        emptry string.
+
+
 0.94 Tue, Sep 22, 2009
     * Class::MOP::Attribute
         - Introduce set_raw_value and get_raw_value, side effect free variants

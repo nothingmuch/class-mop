@@ -596,7 +596,7 @@ sub class_precedence_list {
 
     sub add_before_method_modifier {
         my ($self, $method_name, $method_modifier) = @_;
-        (defined $method_name && $method_name)
+        (defined $method_name && length $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_before_modifier(
@@ -606,7 +606,7 @@ sub class_precedence_list {
 
     sub add_after_method_modifier {
         my ($self, $method_name, $method_modifier) = @_;
-        (defined $method_name && $method_name)
+        (defined $method_name && length $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_after_modifier(
@@ -616,7 +616,7 @@ sub class_precedence_list {
 
     sub add_around_method_modifier {
         my ($self, $method_name, $method_modifier) = @_;
-        (defined $method_name && $method_name)
+        (defined $method_name && length $method_name)
             || confess "You must pass in a method name";
         my $method = $fetch_and_prepare_method->($self, $method_name);
         $method->add_around_modifier(
@@ -640,7 +640,7 @@ sub class_precedence_list {
 
 sub find_method_by_name {
     my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name to find";
     foreach my $class ($self->linearized_isa) {
         my $method = $self->initialize($class)->get_method($method_name);
@@ -671,7 +671,7 @@ sub get_all_method_names {
 
 sub find_all_methods_by_name {
     my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name to find";
     my @methods;
     foreach my $class ($self->linearized_isa) {
@@ -688,7 +688,7 @@ sub find_all_methods_by_name {
 
 sub find_next_method_by_name {
     my ($self, $method_name) = @_;
-    (defined $method_name && $method_name)
+    (defined $method_name && length $method_name)
         || confess "You must define a method name to find";
     my @cpl = $self->linearized_isa;
     shift @cpl; # discard ourselves
