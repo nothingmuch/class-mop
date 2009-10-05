@@ -248,7 +248,7 @@ Revision history for Perl extension Class-MOP.
 
     * Many methods have been renamed with a leading underscore, and a
       few have been deprecated entirely. The methods with a leading
-      underscore are consider "internals only". People writing
+      underscore are considered "internals only". People writing
       subclasses or extensions to Class::MOP should feel free to
       override them, but they are not for "public" use.
 
