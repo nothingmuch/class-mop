@@ -902,7 +902,7 @@ unconditionally.
 
 If the module cannot be loaded, an exception is thrown.
 
-For historical reasons, this function returns explicitly returns a true value.
+For historical reasons, this function explicitly returns a true value.
 
 =item B<Class::MOP::is_class_loaded($class_name)>
 
