@@ -4,7 +4,7 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP::Package
       - Any method which takes a method name as an argument now allows names
         which are false (like "0"), but the name must be defined and not be an
-        emptry string.
+        empty string. (Dave Rolsky)
 
     * Class::MOP::Class
       - Deprecated get_attribute_map as a public method. You can use a
