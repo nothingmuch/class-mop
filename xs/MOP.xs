@@ -51,7 +51,7 @@ get_code_info(coderef)
         }
 
 void
-is_class_loaded(klass=&PL_sv_undef)
+is_class_loaded(klass)
     SV *klass
     PREINIT:
         HV *stash;

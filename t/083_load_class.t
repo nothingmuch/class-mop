@@ -6,7 +6,10 @@ use Test::Exception;
 require Class::MOP;
 use lib 't/lib';
 
-ok(!Class::MOP::is_class_loaded(), "is_class_loaded with no argument returns false");
+dies_ok {
+    Class::MOP::is_class_loaded()
+} "is_class_loaded with no argument dies";
+
 ok(!Class::MOP::is_class_loaded(''), "can't load the empty class");
 ok(!Class::MOP::is_class_loaded(\"foo"), "can't load a class name reference??");
 

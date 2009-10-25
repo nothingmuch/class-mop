@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+    * Class::MOP
+      - Make is_class_loaded without any arguments fail loudly
+        (Florian Ragwitz).
+
     * Class::MOP::Class
     * Class::MOP::Package
       - Any method which takes a method name as an argument now allows names
