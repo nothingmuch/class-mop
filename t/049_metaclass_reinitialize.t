@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 14;
 use Test::Exception;
 
 {
@@ -39,5 +39,3 @@ throws_ok {
 throws_ok {
     $meta->reinitialize($meta->new_object);
 } qr/You must pass a package name or an existing Class::MOP::Package instance/;
-
-done_testing;
