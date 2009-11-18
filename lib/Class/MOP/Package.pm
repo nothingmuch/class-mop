@@ -320,7 +320,7 @@ sub add_method {
         if ($method->package_name ne $self->name) {
             $method = $method->clone(
                 package_name => $self->name,
-                name         => $method_name            
+                name         => $method_name,
             ) if $method->can('clone');
         }
 
@@ -336,7 +336,7 @@ sub add_method {
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
-    if ( !defined $current_name || $current_name eq '__ANON__' ) {
+    if ( !defined $current_name || $current_name =~ /^__ANON__/ ) {
         my $full_method_name = ($self->name . '::' . $method_name);
         subname($full_method_name => $body);
     }
