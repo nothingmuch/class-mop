@@ -3,6 +3,8 @@ Revision history for Perl extension Class-MOP.
     * Class::MOP
       - Make is_class_loaded without any arguments fail loudly
         (Florian Ragwitz).
+      - Make load_class throw more standard error messages when loading single
+        modules (nothingmuch).
 
     * Class::MOP::Package
       - Stop add_method from behaving differently under the debugger
