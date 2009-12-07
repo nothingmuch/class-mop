@@ -36,7 +36,13 @@ code_name_is( \&Class::MOP::Method::name, "Class::MOP::Method", "name" );
     sub MODIFY_CODE_ATTRIBUTES {
         my ($class, $code) = @_;
         my @info = Class::MOP::get_code_info($code);
-        ::is_deeply(\@info, [], "no name for a coderef that's still compiling");
+
+        if ( $] >= 5.011 ) {
+            ::is_deeply(\@info, ['Foo', 'foo'], "got a name for a code ref in an attr handler");
+        }
+        else {
+            ::is_deeply(\@info, [], "no name for a coderef that's still compiling");
+        }
         return ();
     }
 

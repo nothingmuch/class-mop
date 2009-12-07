@@ -1,5 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
+0.96
+    * tests
+      - Fixed t/082_get_code_info.t so it passes with bleadperl.
+
 0.95 Wed, Nov 19, 2009
     * Class::MOP
       - Make is_class_loaded without any arguments fail loudly
