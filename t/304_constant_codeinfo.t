@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More;
 
 use Class::MOP;
 
@@ -18,3 +18,5 @@ undef $syms;
 
 $syms = $meta->get_all_package_symbols('CODE');
 is(ref $syms->{FOO}, 'CODE', 'constant symbol still there, although we dropped our reference');
+
+done_testing;

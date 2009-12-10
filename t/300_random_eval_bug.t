@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 1;
+use Test::More;
 
 use Class::MOP;
 
@@ -46,3 +46,5 @@ eval {
     $c->employees();
 };
 ok( $@, '... we die correctly with bad args' );
+
+done_testing;

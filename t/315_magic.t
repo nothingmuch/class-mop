@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -15,14 +15,14 @@ use Tie::Scalar;
     package Foo;
     use metaclass;
 
-    Foo->meta->add_attribute('bar' => 
+    Foo->meta->add_attribute('bar' =>
         reader => 'get_bar',
         writer => 'set_bar',
-    );  
+    );
 
-    Foo->meta->add_attribute('baz' => 
+    Foo->meta->add_attribute('baz' =>
         accessor => 'baz',
-    );  
+    );
 
     Foo->meta->make_immutable();
 }
@@ -71,3 +71,5 @@ use Tie::Scalar;
         is_deeply [Class::MOP::get_code_info($value)], [qw(Class::MOP get_code_info)], 'get_code_info(tied scalar)';
     }
 }
+
+done_testing;

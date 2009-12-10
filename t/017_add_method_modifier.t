@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -136,3 +136,4 @@ is( $checking_account->balance, 0,
 is( $savings_account->balance, 200,
     '... got the right savings balance after overdraft withdrawal' );
 
+done_testing;

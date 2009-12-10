@@ -2,8 +2,7 @@ use strict;
 use warnings;
 
 use Class::MOP;
-
-use Test::More tests => 3;
+use Test::More;
 
 {
     package Foo;
@@ -20,3 +19,5 @@ ok( $meta->is_pristine, 'Foo is still pristine after add_method' );
 
 $meta->add_attribute( name => 'attr', reader => 'get_attr' );
 ok( ! $meta->is_pristine, 'Foo is not pristine after add_attribute' );
+
+done_testing;

@@ -1,19 +1,18 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More;
 
-BEGIN {use metaclass;    
-}
+use metaclass;
 
 # meta classes
 {
     package Foo::Meta;
     use base 'Class::MOP::Class';
-    
+
     package Bar::Meta;
     use base 'Class::MOP::Class';
-    
+
     package FooBar::Meta;
     use base 'Foo::Meta', 'Bar::Meta';
 }
@@ -64,4 +63,4 @@ eval {
 };
 ok(!$@, '... FooBar2.meta => FooBar::Meta is compatible') || diag $@;
 
-
+done_testing;

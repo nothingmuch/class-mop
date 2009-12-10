@@ -4,7 +4,7 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 69;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -329,3 +329,4 @@ sub inOrderTraverse {
         '... this should be the reverse of the original');
 }
 
+done_testing;

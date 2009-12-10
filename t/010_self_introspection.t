@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 306;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -60,7 +60,7 @@ my @class_mop_class_methods = qw(
     is_pristine
 
     initialize create
-    
+
     update_package_cache_flag
     reset_package_cache_flag
 
@@ -341,3 +341,4 @@ is($class_mop_class_meta->attribute_metaclass, 'Class::MOP::Attribute', '... got
 is($class_mop_class_meta->method_metaclass, 'Class::MOP::Method', '... got the right value for method_metaclass');
 is($class_mop_class_meta->instance_metaclass, 'Class::MOP::Instance', '... got the right value for instance_metaclass');
 
+done_testing;

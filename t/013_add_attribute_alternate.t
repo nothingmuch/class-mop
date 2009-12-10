@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -28,12 +28,12 @@ use Class::MOP;
     sub clear {
         my $self = shift;
         $self->{'x'} = 0;
-        $self->{'y'} = 0;            
+        $self->{'y'} = 0;
     }
 
     package Point3D;
     our @ISA = ('Point');
-    
+
     Point3D->meta->add_attribute('z' => (
         default => 123
     ));
@@ -99,9 +99,11 @@ is($point3d->{'z'}, 3, '... the z attribute was initialized correctly through th
 {
     my $point3d = Point3D->new();
     isa_ok($point3d, 'Point3D');
-    
+
     is($point3d->x, undef, '... the x attribute was not initialized');
     is($point3d->y, undef, '... the y attribute was not initialized');
-    is($point3d->{'z'}, 123, '... the z attribute was initialized correctly through the metaobject');    
-        
+    is($point3d->{'z'}, 123, '... the z attribute was initialized correctly through the metaobject');
+
 }
+
+done_testing;

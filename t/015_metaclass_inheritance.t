@@ -1,14 +1,14 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
 
 =pod
 
-Test that a default set up will cause metaclasses to inherit 
+Test that a default set up will cause metaclasses to inherit
 the same metaclass type, but produce different metaclasses.
 
 =cut
@@ -16,10 +16,10 @@ the same metaclass type, but produce different metaclasses.
 {
     package Foo;
     use metaclass;
-    
+
     package Bar;
     use base 'Foo';
-    
+
     package Baz;
     use base 'Bar';
 }
@@ -42,3 +42,4 @@ is($baz_meta->name, 'Baz', '... baz_meta->name == Baz');
 isnt($baz_meta, $bar_meta, '... Baz->meta != Bar->meta');
 isnt($baz_meta, $foo_meta, '... Baz->meta != Foo->meta');
 
+done_testing;

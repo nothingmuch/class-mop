@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More;
 use Sub::Name 'subname';
 
 BEGIN {
@@ -48,3 +48,5 @@ code_name_is( \&Class::MOP::Method::name, "Class::MOP::Method", "name" );
 
     sub foo : Bar {}
 }
+
+done_testing;

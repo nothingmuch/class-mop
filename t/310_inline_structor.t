@@ -6,7 +6,6 @@ use Test::More;
 BEGIN {
     eval "use Test::Output;";
     plan skip_all => "Test::Output is required for this test" if $@;
-    plan tests => 15;
 }
 
 use Class::MOP;
@@ -293,3 +292,5 @@ use Class::MOP;
         'got a warning when trying to inline a destructor in a class that inherits an unexpected DESTROY'
     );
 }
+
+done_testing;

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 32;
+use Test::More;
 use Test::Exception;
 
 require Class::MOP;
@@ -145,3 +145,4 @@ throws_ok {
         'an @ISA with members does mean a class is loaded' );
 }
 
+done_testing;

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -50,3 +50,5 @@ is_deeply([$instance->meta->class_precedence_list],
           [$anon_class_name, 'Foo'],
           '... Anonymous instance has class precedence list',
          );
+
+done_testing;

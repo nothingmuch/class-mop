@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 50;
+use Test::More;
 
 BEGIN {
     use_ok('Class::MOP');
@@ -130,3 +130,5 @@ is(
 );
 
 isa_ok(Class::MOP::Class->meta, 'Class::MOP::Class');
+
+done_testing;

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More;
 use Class::MOP;
 
 my @calls;
@@ -42,3 +42,4 @@ is($calls[0][3], 'foo');
 is($calls[0][4], 1);
 splice @calls;
 
+done_testing;

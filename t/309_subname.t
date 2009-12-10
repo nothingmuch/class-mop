@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More;
 
 use Class::MOP;
 
@@ -38,3 +38,5 @@ is_deeply(
 is( Foo->bar, "Origin::bar", "caller aggrees" );
 
 is( Origin->bar, "Origin::bar", "unrelated class untouched" );
+
+done_testing;

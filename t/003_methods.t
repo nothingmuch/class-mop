@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 69;
+use Test::More;
 use Test::Exception;
 
 use Scalar::Util qw/reftype/;
@@ -351,3 +351,5 @@ is( $new_method->original_method, $method,
         ok( $method, 'Got the foo method back' );
     }
 }
+
+done_testing;

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More;
 use Test::Exception;
 
 use Carp;
@@ -82,3 +82,5 @@ $SIG{__WARN__} = \&croak;
         'get_method_map returns expected methods'
     );
 }
+
+done_testing;

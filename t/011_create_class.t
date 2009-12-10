@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -16,7 +16,7 @@ my $Point = Class::MOP::Class->create('Point' => (
         Class::MOP::Attribute->new('y' => (
             accessor => 'y',
             init_arg => 'y'
-        )),        
+        )),
     ],
     methods => {
         'new' => sub {
@@ -27,13 +27,13 @@ my $Point = Class::MOP::Class->create('Point' => (
         'clear' => sub {
             my $self = shift;
             $self->{'x'} = 0;
-            $self->{'y'} = 0;            
+            $self->{'y'} = 0;
         }
     }
 ));
 
 my $Point3D = Class::MOP::Class->create('Point3D' => (
-    version      => '0.01',    
+    version      => '0.01',
     superclasses => [ 'Point' ],
     attributes => [
         Class::MOP::Attribute->new('z' => (
@@ -103,11 +103,11 @@ is($point3d->{'z'}, 3, '... the z attribute was initialized correctly through th
 {
     my $point3d = Point3D->new();
     isa_ok($point3d, 'Point3D');
-    
+
     is($point3d->x, undef, '... the x attribute was not initialized');
     is($point3d->y, undef, '... the y attribute was not initialized');
-    is($point3d->{'z'}, 123, '... the z attribute was initialized correctly through the metaobject');    
-        
+    is($point3d->{'z'}, 123, '... the z attribute was initialized correctly through the metaobject');
+
 }
 
-
+done_testing;

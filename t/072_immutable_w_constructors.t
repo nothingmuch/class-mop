@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 91;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -297,3 +297,5 @@ use Class::MOP;
   ::is($buzz2->bah, undef, '...bah is undef');
 
 }
+
+done_testing;

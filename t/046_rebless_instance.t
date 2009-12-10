@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More;
 use Test::Exception;
 use Scalar::Util 'blessed';
 
@@ -73,3 +73,4 @@ ok($bar->meta->has_method('child'), 'metaclass has "child" method');
 
 is(blessed($bar->meta->new_object), 'Child', 'new_object gives a Child');
 
+done_testing;

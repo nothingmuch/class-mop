@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 71;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -106,3 +106,5 @@ use Class::MOP;
     # wont worry about it for now. Maybe if I get
     # bored I will do it.
 }
+
+done_testing;

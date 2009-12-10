@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 45;
+use Test::More;
 use Test::Exception;
 
 use Scalar::Util qw/isweak reftype/;
@@ -9,12 +9,12 @@ use Scalar::Util qw/isweak reftype/;
 use Class::MOP::Instance;
 
 can_ok( "Class::MOP::Instance", $_ ) for qw/
-    new
+        new
 
         create_instance
         bless_instance_structure
 
-    get_all_slots
+        get_all_slots
 
         initialize_all_slots
         deinitialize_all_slots
@@ -136,3 +136,4 @@ ok(!$mi_foo->is_slot_initialized( $i_foo, "moosen" ), "slot deinitialized");
 
 ok(!defined($mi_foo->get_slot_value( $i_foo, "moosen" )), "... no value for slot");
 
+done_testing;

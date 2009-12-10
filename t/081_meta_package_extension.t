@@ -1,39 +1,38 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More;
 use Test::Exception;
 
-BEGIN {use Class::MOP;        
-}
+use Class::MOP;
 
 {
     package My::Meta::Package;
-    
+
     use strict;
     use warnings;
-    
+
     use Carp 'confess';
     use Symbol 'gensym';
-    
+
     use base 'Class::MOP::Package';
-    
+
     __PACKAGE__->meta->add_attribute(
         'namespace' => (
             reader  => 'namespace',
             default => sub { {} }
         )
-    );    
-    
+    );
+
     sub add_package_symbol {
         my ($self, $variable, $initial_value) = @_;
-        
-        my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable);   
-    
+
+        my ($name, $sigil, $type) = $self->_deconstruct_variable_name($variable);
+
         my $glob = gensym();
         *{$glob} = $initial_value if defined $initial_value;
-        $self->namespace->{$name} = *{$glob};    
-    }       
+        $self->namespace->{$name} = *{$glob};
+    }
 }
 
 # No actually package Foo exists :)
@@ -75,3 +74,4 @@ lives_ok {
 
 ok(!defined($Foo::{baz}), '... the %baz slot has still not been created');
 
+done_testing;

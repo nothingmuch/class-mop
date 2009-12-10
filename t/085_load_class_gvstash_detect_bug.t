@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -18,4 +18,6 @@ lives_ok {
 
 lives_ok {
     TestClassLoaded->a_method;
-}
+};
+
+done_testing;

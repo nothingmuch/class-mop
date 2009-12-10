@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -98,3 +98,4 @@ TODO: {
     );
 }
 
+done_testing;

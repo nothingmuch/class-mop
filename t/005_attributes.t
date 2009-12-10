@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 90;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -258,3 +258,5 @@ for(1 .. 2){
 
   Buzz->meta->make_immutable();
 }
+
+done_testing;

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 95;
+use Test::More;
 use Test::Exception;
 
 use Scalar::Util;
@@ -50,7 +50,7 @@ use Class::MOP;
     ok($meta->is_immutable,             '... our class is now immutable');
     ok(!$meta->make_immutable,          '... make immutable now returns nothing');
     ok($meta->get_method('new'),        '... inlined constructor created');
-    ok($meta->has_method('new'),        '... inlined constructor created for sure');    
+    ok($meta->has_method('new'),        '... inlined constructor created for sure');
     is_deeply([ map { $_->name } $meta->_inlined_methods ], [ 'new' ], '... really, i mean it');
 
     lives_ok { $meta->make_mutable; }  '... changed Baz to be mutable';
@@ -58,7 +58,7 @@ use Class::MOP;
     ok(!$meta->is_immutable,            '... our class is not immutable');
     ok(!$meta->make_mutable,            '... make mutable now returns nothing');
     ok(!$meta->get_method('new'),       '... inlined constructor created');
-    ok(!$meta->has_method('new'),       '... inlined constructor removed for sure');    
+    ok(!$meta->has_method('new'),       '... inlined constructor removed for sure');
 
     my %new_keys = map { $_ => 1 } grep { !/^_/ } keys %$meta;
     is_deeply(\%orig_keys, \%new_keys, '... no extraneous hashkeys');
@@ -216,3 +216,5 @@ use Class::MOP;
     Bar->meta->make_immutable;
     Bar->meta->make_mutable;
 }
+
+done_testing;

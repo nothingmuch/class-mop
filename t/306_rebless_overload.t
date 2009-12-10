@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More;
 use Class::MOP;
 
 do {
@@ -24,3 +24,4 @@ my $meta = Class::MOP::Class->initialize('With::Overloading');
 $meta->rebless_instance($without);
 is("$without", "overloaded", "overloading after reblessing works");
 
+done_testing;

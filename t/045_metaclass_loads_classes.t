@@ -4,7 +4,7 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 8;
+use Test::More;
 
 use Class::MOP;
 
@@ -37,3 +37,5 @@ ok(Class::MOP::is_class_loaded('MyMetaClass::Instance'), '... instance metaclass
 
 is($meta->method_metaclass,    'MyMetaClass::Method',  '... Correct method metaclass');
 ok(Class::MOP::is_class_loaded('MyMetaClass::Method'), '... method metaclass loaded');
+
+done_testing;

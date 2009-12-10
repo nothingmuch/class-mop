@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -74,3 +74,5 @@ use Class::MOP;
         'Bar->meta->superclasses returns expected value after immutabilization'
     );
 }
+
+done_testing;

@@ -1,34 +1,36 @@
 use strict;
 use warnings;
 
-use Test::More tests => 11;
+use Test::More;
 use File::Spec;
 
-BEGIN {use Class::MOP;    
+use Class::MOP;
+
+BEGIN {
     require_ok(File::Spec->catfile('examples', 'InstanceCountingClass.pod'));
 }
 
 =pod
 
-This is a trivial and contrived example of how to 
+This is a trivial and contrived example of how to
 make a metaclass which will count all the instances
-created. It is not meant to be anything more than 
+created. It is not meant to be anything more than
 a simple demonstration of how to make a metaclass.
 
 =cut
 
 {
     package Foo;
-    
+
     use metaclass 'InstanceCountingClass';
-    
+
     sub new  {
         my $class = shift;
         $class->meta->new_object(@_);
     }
-    
+
     package Bar;
-    
+
     our @ISA = ('Foo');
 }
 
@@ -51,6 +53,7 @@ for (2 .. 10) {
     Foo->new();
 }
 
-is(Foo->meta->get_count(), 10, '... our Foo count is now 10');    
+is(Foo->meta->get_count(), 10, '... our Foo count is now 10');
 is(Bar->meta->get_count(), 1, '... our Bar count is still 1');
 
+done_testing;

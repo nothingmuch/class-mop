@@ -1,32 +1,34 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More;
 use File::Spec;
 
-BEGIN {use Class::MOP;    
+use Class::MOP;
+
+BEGIN {
     require_ok(File::Spec->catfile('examples', 'AttributesWithHistory.pod'));
 }
 
 {
     package Foo;
     use metaclass;
-    
+
     Foo->meta->add_attribute(AttributesWithHistory->new('foo' => (
         accessor         => 'foo',
         history_accessor => 'get_foo_history',
-    )));    
-    
+    )));
+
     Foo->meta->add_attribute(AttributesWithHistory->new('bar' => (
         reader           => 'get_bar',
         writer           => 'set_bar',
         history_accessor => 'get_bar_history',
-    )));    
-    
+    )));
+
     sub new  {
         my $class = shift;
         $class->meta->new_object(@_);
-    }   
+    }
 }
 
 my $foo = Foo->new();
@@ -46,12 +48,12 @@ is_deeply(
     [ $foo->get_foo_history() ],
     [ ],
     '... got correct empty history for foo');
-    
+
 is($foo2->foo, undef, '... foo2 is not yet defined');
 is_deeply(
     [ $foo2->get_foo_history() ],
     [ ],
-    '... got correct empty history for foo2');    
+    '... got correct empty history for foo2');
 
 $foo->foo(42);
 is($foo->foo, 42, '... foo == 42');
@@ -65,7 +67,7 @@ is_deeply(
     [ $foo2->get_foo_history() ],
     [ ],
     '... still got correct empty history for foo2');
-        
+
 $foo2->foo(100);
 is($foo->foo, 42, '... foo is still == 42');
 is_deeply(
@@ -87,7 +89,7 @@ $foo->foo(46);
 is_deeply(
     [ $foo->get_foo_history() ],
     [ 42, 43, 44, 45, 46 ],
-    '... got correct history for foo');    
+    '... got correct history for foo');
 
 is($foo->get_bar, undef, '... bar is not yet defined');
 is_deeply(
@@ -115,3 +117,5 @@ is_deeply(
     [ $foo->get_foo_history() ],
     [ 42, 43, 44, 45, 46 ],
     '... still have the correct history for foo');
+
+done_testing;

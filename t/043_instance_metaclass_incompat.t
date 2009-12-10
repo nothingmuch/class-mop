@@ -1,19 +1,18 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More;
 
-BEGIN {use metaclass;    
-}
+use metaclass;
 
 # meta classes
-{   
+{
     package Foo::Meta::Instance;
-    use base 'Class::MOP::Instance';    
-    
+    use base 'Class::MOP::Instance';
+
     package Bar::Meta::Instance;
-    use base 'Class::MOP::Instance';    
-    
+    use base 'Class::MOP::Instance';
+
     package FooBar::Meta::Instance;
     use base 'Foo::Meta::Instance', 'Bar::Meta::Instance';
 }
@@ -44,7 +43,7 @@ $@ = undef;
 eval {
     package Bar::Bar;
     use base 'Bar';
-    metaclass->import('instance_metaclass' => 'Foo::Meta::Instance');    
+    metaclass->import('instance_metaclass' => 'Foo::Meta::Instance');
 };
 ok($@, '... Bar::Bar.meta => Foo::Meta is not compatible') || diag $@;
 
@@ -52,7 +51,7 @@ $@ = undef;
 eval {
     package FooBar;
     use base 'Foo';
-    metaclass->import('instance_metaclass' => 'FooBar::Meta::Instance');    
+    metaclass->import('instance_metaclass' => 'FooBar::Meta::Instance');
 };
 ok(!$@, '... FooBar.meta => FooBar::Meta is compatible') || diag $@;
 
@@ -60,8 +59,8 @@ $@ = undef;
 eval {
     package FooBar2;
     use base 'Bar';
-    metaclass->import('instance_metaclass' => 'FooBar::Meta::Instance');    
+    metaclass->import('instance_metaclass' => 'FooBar::Meta::Instance');
 };
 ok(!$@, '... FooBar2.meta => FooBar::Meta is compatible') || diag $@;
 
-
+done_testing;

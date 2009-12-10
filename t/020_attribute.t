@@ -3,7 +3,7 @@ use warnings;
 
 use Scalar::Util 'reftype', 'blessed';
 
-use Test::More tests => 104;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -30,13 +30,13 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
 
     {
         my $reader = $attr->get_read_method_ref;
-        my $writer = $attr->get_write_method_ref;        
-        
+        my $writer = $attr->get_write_method_ref;
+
         ok(!blessed($reader), '... it is a plain old sub');
-        ok(!blessed($writer), '... it is a plain old sub');        
-        
+        ok(!blessed($writer), '... it is a plain old sub');
+
         is(reftype($reader), 'CODE', '... it is a plain old sub');
-        is(reftype($writer), 'CODE', '... it is a plain old sub');                
+        is(reftype($writer), 'CODE', '... it is a plain old sub');
     }
 
     my $class = Class::MOP::Class->initialize('Foo');
@@ -47,19 +47,19 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
     } '... attached a class successfully';
 
     is($attr->associated_class, $class, '... the class was associated correctly');
-    
+
     ok(!$attr->get_read_method, '... $attr does not have an read method');
-    ok(!$attr->get_write_method, '... $attr does not have an write method');    
-    
+    ok(!$attr->get_write_method, '... $attr does not have an write method');
+
     {
         my $reader = $attr->get_read_method_ref;
-        my $writer = $attr->get_write_method_ref;        
-        
+        my $writer = $attr->get_write_method_ref;
+
         ok(blessed($reader), '... it is a plain old sub');
-        ok(blessed($writer), '... it is a plain old sub');        
-        
+        ok(blessed($writer), '... it is a plain old sub');
+
         isa_ok($reader, 'Class::MOP::Method');
-        isa_ok($writer, 'Class::MOP::Method');        
+        isa_ok($writer, 'Class::MOP::Method');
     }
 
     my $attr_clone = $attr->clone();
@@ -91,20 +91,20 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
     ok(!$attr->has_accessor, '... $attr does not have an accessor');
     ok(!$attr->has_reader, '... $attr does not have an reader');
     ok(!$attr->has_writer, '... $attr does not have an writer');
-    
+
     ok(!$attr->get_read_method, '... $attr does not have an read method');
-    ok(!$attr->get_write_method, '... $attr does not have an write method');    
-    
+    ok(!$attr->get_write_method, '... $attr does not have an write method');
+
     {
         my $reader = $attr->get_read_method_ref;
-        my $writer = $attr->get_write_method_ref;        
-        
+        my $writer = $attr->get_write_method_ref;
+
         ok(!blessed($reader), '... it is a plain old sub');
-        ok(!blessed($writer), '... it is a plain old sub');        
-        
+        ok(!blessed($writer), '... it is a plain old sub');
+
         is(reftype($reader), 'CODE', '... it is a plain old sub');
-        is(reftype($writer), 'CODE', '... it is a plain old sub');                
-    }    
+        is(reftype($writer), 'CODE', '... it is a plain old sub');
+    }
 
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
@@ -137,20 +137,20 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
 
     ok(!$attr->has_reader, '... $attr does not have an reader');
     ok(!$attr->has_writer, '... $attr does not have an writer');
-    
+
     is($attr->get_read_method,  'foo', '... $attr does not have an read method');
-    is($attr->get_write_method, 'foo', '... $attr does not have an write method');    
-    
+    is($attr->get_write_method, 'foo', '... $attr does not have an write method');
+
     {
         my $reader = $attr->get_read_method_ref;
-        my $writer = $attr->get_write_method_ref;        
-        
+        my $writer = $attr->get_write_method_ref;
+
         ok(!blessed($reader), '... it is not a plain old sub');
-        ok(!blessed($writer), '... it is not a plain old sub');         
-        
+        ok(!blessed($writer), '... it is not a plain old sub');
+
         is(reftype($reader), 'CODE', '... it is a plain old sub');
-        is(reftype($writer), 'CODE', '... it is a plain old sub');                
-    }    
+        is(reftype($writer), 'CODE', '... it is a plain old sub');
+    }
 
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
@@ -181,20 +181,20 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
     is($attr->writer, 'set_foo', '... $attr->writer == set_foo');
 
     ok(!$attr->has_accessor, '... $attr does not have an accessor');
-    
+
     is($attr->get_read_method,  'get_foo', '... $attr does not have an read method');
-    is($attr->get_write_method, 'set_foo', '... $attr does not have an write method');    
-    
+    is($attr->get_write_method, 'set_foo', '... $attr does not have an write method');
+
     {
         my $reader = $attr->get_read_method_ref;
-        my $writer = $attr->get_write_method_ref;        
-        
+        my $writer = $attr->get_write_method_ref;
+
         ok(!blessed($reader), '... it is not a plain old sub');
-        ok(!blessed($writer), '... it is not a plain old sub');           
-        
+        ok(!blessed($writer), '... it is not a plain old sub');
+
         is(reftype($reader), 'CODE', '... it is a plain old sub');
-        is(reftype($writer), 'CODE', '... it is a plain old sub');                
-    }    
+        is(reftype($writer), 'CODE', '... it is a plain old sub');
+    }
 
     my $attr_clone = $attr->clone();
     isa_ok($attr_clone, 'Class::MOP::Attribute');
@@ -244,3 +244,5 @@ dies_ok { Class::MOP::Attribute->name } q{... can't call name() as a class metho
 
     is($attr->default(42), 42, 'passthrough for default on attribute');
 }
+
+done_testing;

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -10,13 +10,13 @@ use Class::MOP;
     package Foo;
     use metaclass;
     Foo->meta->add_attribute('bar' => (reader => 'bar'));
-    
+
     sub new { (shift)->meta->new_object(@_) }
-    
+
     package Bar;
     use metaclass;
     use base 'Foo';
-    Bar->meta->add_attribute('baz' => (reader => 'baz', default => 'BAZ'));    
+    Bar->meta->add_attribute('baz' => (reader => 'baz', default => 'BAZ'));
 }
 
 # normal ...
@@ -70,4 +70,4 @@ use Class::MOP;
     is($foo->baz, 'FOO-BAZ', '... got the expect value');
 }
 
-
+done_testing;

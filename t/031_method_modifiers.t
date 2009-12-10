@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 28;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -206,3 +206,4 @@ use Class::MOP::Method;
                'check around_modifiers' );
 }
 
+done_testing;

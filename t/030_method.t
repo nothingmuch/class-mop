@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 53;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -159,3 +159,5 @@ is($wrapped->name, '__ANON__', 'method name copied properly');
 
 my $wrapped2 = Method::Subclass->wrap($method, foo => 'baz', name => 'FOO');
 is($wrapped2->name, 'FOO', 'got a new method name');
+
+done_testing;

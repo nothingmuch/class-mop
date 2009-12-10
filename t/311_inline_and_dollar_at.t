@@ -1,10 +1,6 @@
 use strict;
 use warnings;
-
 use Test::More;
-
-plan tests => 1;
-
 use Class::MOP;
 
 
@@ -19,3 +15,5 @@ use Class::MOP;
 
     ::is( $@, 'dollar at', '$@ is untouched after immutablization' );
 }
+
+done_testing;

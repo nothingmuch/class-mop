@@ -1,11 +1,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More;
 use Test::Exception;
 
-BEGIN {use Class::MOP;use Class::MOP::Attribute;
-}
+use Class::MOP;
+use Class::MOP::Attribute;
 
 # most values are static
 
@@ -201,3 +201,5 @@ BEGIN {use Class::MOP;use Class::MOP::Attribute;
         ));
     } '... can create accessors with reader/writers';
 }
+
+done_testing;

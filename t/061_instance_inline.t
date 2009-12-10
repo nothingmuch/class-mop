@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP::Instance;
@@ -45,4 +45,4 @@ my $C = 'Class::MOP::Instance';
       '... got the right code for rebless_instance_structure');
 }
 
-
+done_testing;

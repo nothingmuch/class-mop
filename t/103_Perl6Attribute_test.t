@@ -1,26 +1,28 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More;
 use File::Spec;
 
-BEGIN {use Class::MOP;    
+use Class::MOP;
+
+BEGIN {
     require_ok(File::Spec->catfile('examples', 'Perl6Attribute.pod'));
 }
 
 {
     package Foo;
-    
+
     use metaclass;
-    
+
     Foo->meta->add_attribute(Perl6Attribute->new('$.foo'));
-    Foo->meta->add_attribute(Perl6Attribute->new('@.bar'));    
-    Foo->meta->add_attribute(Perl6Attribute->new('%.baz'));    
-    
+    Foo->meta->add_attribute(Perl6Attribute->new('@.bar'));
+    Foo->meta->add_attribute(Perl6Attribute->new('%.baz'));
+
     sub new  {
         my $class = shift;
         $class->meta->new_object(@_);
-    }      
+    }
 }
 
 my $foo = Foo->new();
@@ -37,3 +39,5 @@ is($foo->foo, 42, '... Foo.foo == 42');
 
 is_deeply($foo->bar, [], '... Foo.bar == []');
 is_deeply($foo->baz, {}, '... Foo.baz == {}');
+
+done_testing;

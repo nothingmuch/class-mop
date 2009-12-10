@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 20;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -47,3 +47,5 @@ while (my ($name, $meta_method) = each %methods) {
     is $meta_method->fully_qualified_name, "Derived::${name}";
     lives_ok { $meta_method->execute };
 }
+
+done_testing;

@@ -4,7 +4,7 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 14;
+use Test::More;
 use Test::Exception;
 use Scalar::Util;
 
@@ -71,3 +71,5 @@ use lib catdir( $FindBin::Bin, 'lib' );
     lives_ok { $meta->make_mutable } "Baz is now mutable";
     ok( $meta->is_mutable, '... Baz is mutable again' );
 }
+
+done_testing;

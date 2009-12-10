@@ -4,7 +4,7 @@ use warnings;
 use FindBin;
 use File::Spec::Functions;
 
-use Test::More tests => 35;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -124,3 +124,4 @@ is($attr->associated_class,
    $attr_clone->associated_class,
    '... we successfully did not clone our associated metaclass');
 
+done_testing;

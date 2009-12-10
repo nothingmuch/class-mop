@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -33,3 +33,4 @@ throws_ok {
     Bar->meta->superclasses('Foo');
 } qr/^Recursive inheritance detected/, "error occurs when Bar extends Foo, when Foo is a Bar";
 
+done_testing;

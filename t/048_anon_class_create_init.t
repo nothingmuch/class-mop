@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More;
 
 use Class::MOP;
 
@@ -21,3 +21,4 @@ use Class::MOP;
 my $anon = MyMeta->create_anon_class( foo => 'this' );
 isa_ok( $anon, 'MyMeta' );
 
+done_testing;

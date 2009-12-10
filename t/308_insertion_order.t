@@ -1,7 +1,7 @@
+use strict;
+use warnings;
+use Test::More;
 use Class::MOP;
-
-use Test::More('tests', 2);
-
 
 my $Point = Class::MOP::Class->create('Point' => (
     version    => '0.01',
@@ -13,7 +13,7 @@ my $Point = Class::MOP::Class->create('Point' => (
         Class::MOP::Attribute->new('y' => (
             accessor => 'y',
             init_arg => 'y'
-        )),        
+        )),
     ],
     methods => {
         'new' => sub {
@@ -24,7 +24,7 @@ my $Point = Class::MOP::Class->create('Point' => (
         'clear' => sub {
             my $self = shift;
             $self->{'x'} = 0;
-            $self->{'y'} = 0;            
+            $self->{'y'} = 0;
         }
     }
 ));
@@ -32,4 +32,4 @@ my $Point = Class::MOP::Class->create('Point' => (
 is($Point->get_attribute('x')->insertion_order, 0, 'Insertion order of Attribute "x"');
 is($Point->get_attribute('y')->insertion_order, 1, 'Insertion order of Attribute "y"');
 
-1;
+done_testing;

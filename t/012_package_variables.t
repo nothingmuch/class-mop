@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 86;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -13,7 +13,7 @@ use Class::MOP;
 
 =pod
 
-This is the same test as 080_meta_package.t just here 
+This is the same test as 080_meta_package.t just here
 we call all the methods through Class::MOP::Class.
 
 =cut
@@ -28,7 +28,7 @@ lives_ok {
     Foo->meta->add_package_symbol('%foo' => { one => 1 });
 } '... created %Foo::foo successfully';
 
-# ... scalar should NOT be created here 
+# ... scalar should NOT be created here
 
 ok(!Foo->meta->has_package_symbol('$foo'), '... SCALAR shouldnt have been created too');
 ok(!Foo->meta->has_package_symbol('@foo'), '... ARRAY shouldnt have been created too');
@@ -55,9 +55,9 @@ $foo->{two} = 2;
 {
     no strict 'refs';
     is(\%{'Foo::foo'}, Foo->meta->get_package_symbol('%foo'), '... our %foo is the same as the metas');
-    
+
     ok(exists ${'Foo::foo'}{two}, '... our %foo was updated correctly');
-    is(${'Foo::foo'}{two}, 2, '... our %foo was updated correctly');    
+    is(${'Foo::foo'}{two}, 2, '... our %foo was updated correctly');
 }
 
 # ----------------------------------------------------------------------
@@ -72,7 +72,7 @@ lives_ok {
 ok(defined($Foo::{bar}), '... the @bar slot was created successfully');
 ok(Foo->meta->has_package_symbol('@bar'), '... the meta agrees');
 
-# ... why does this not work ... 
+# ... why does this not work ...
 
 ok(!Foo->meta->has_package_symbol('$bar'), '... SCALAR shouldnt have been created too');
 ok(!Foo->meta->has_package_symbol('%bar'), '... HASH shouldnt have been created too');
@@ -102,14 +102,14 @@ ok(!Foo->meta->has_package_symbol('@baz'), '... ARRAY shouldnt have been created
 ok(!Foo->meta->has_package_symbol('%baz'), '... HASH shouldnt have been created too');
 ok(!Foo->meta->has_package_symbol('&baz'), '... CODE shouldnt have been created too');
 
-is(${Foo->meta->get_package_symbol('$baz')}, 10, '... got the right value back');   
+is(${Foo->meta->get_package_symbol('$baz')}, 10, '... got the right value back');
 
 {
     no strict 'refs';
     ${'Foo::baz'} = 1;
 
     is(${'Foo::baz'}, 1, '... our $baz was assigned to correctly');
-    is(${Foo->meta->get_package_symbol('$baz')}, 1, '... the meta agrees');    
+    is(${Foo->meta->get_package_symbol('$baz')}, 1, '... the meta agrees');
 }
 
 # ----------------------------------------------------------------------
@@ -184,9 +184,9 @@ is(Foo->meta->get_package_symbol('$foo'), $SCALAR, '... got the right value for 
 {
     no strict 'refs';
     ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');
-    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');   
-    ok(defined(*{"Foo::foo"}{CODE}), '... the &foo slot has NOT been removed');   
-    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');            
+    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');
+    ok(defined(*{"Foo::foo"}{CODE}), '... the &foo slot has NOT been removed');
+    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');
 }
 
 lives_ok {
@@ -203,10 +203,10 @@ is(Foo->meta->get_package_symbol('$foo'), $SCALAR, '... got the right value for 
 
 {
     no strict 'refs';
-    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');    
-    ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');       
-    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');   
-    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');            
+    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');
+    ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');
+    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');
+    ok(defined(${"Foo::foo"}), '... the $foo slot has NOT been removed');
 }
 
 lives_ok {
@@ -221,10 +221,10 @@ is(Foo->meta->get_package_symbol('@foo'), $ARRAY, '... got the right values for 
 
 {
     no strict 'refs';
-    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');    
-    ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');   
-    ok(!defined(${"Foo::foo"}), '... the $foo slot has now been removed');                           
-    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');    
+    ok(!defined(*{"Foo::foo"}{HASH}), '... the %foo slot has been removed successfully');
+    ok(!defined(*{"Foo::foo"}{CODE}), '... the &foo slot has now been removed');
+    ok(!defined(${"Foo::foo"}), '... the $foo slot has now been removed');
+    ok(defined(*{"Foo::foo"}{ARRAY}), '... the @foo slot has NOT been removed');
 }
 
 
@@ -245,3 +245,5 @@ dies_ok {
 dies_ok {
     Foo->meta->has_package_symbol('bar');
 } '... no sigil for bar';
+
+done_testing;

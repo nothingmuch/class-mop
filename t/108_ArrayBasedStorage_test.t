@@ -1,11 +1,12 @@
 use strict;
 use warnings;
 
-use Test::More tests => 72;
+use Test::More;
 use File::Spec;
 use Scalar::Util 'reftype';
+use Class::MOP;
 
-BEGIN {use Class::MOP;
+BEGIN {
     require_ok(File::Spec->catfile('examples', 'ArrayBasedStorage.pod'));
 }
 
@@ -200,3 +201,4 @@ my $new_baz = Bar::Baz->new;
 
 cmp_ok( scalar(@$new_baz), ">", scalar(@$baz), "additional slot due to refreshed meta instance" );
 
+done_testing;

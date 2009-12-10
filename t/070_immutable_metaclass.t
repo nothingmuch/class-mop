@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 76;
+use Test::More;
 use Test::Exception;
 
 use Class::MOP;
@@ -312,3 +312,5 @@ use Class::MOP;
         'custom immutable_options are returned by immutable_options accessor'
     );
 }
+
+done_testing;

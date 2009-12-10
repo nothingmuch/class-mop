@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 12;
+use Test::More;
 use Class::MOP;
 
 do {
@@ -42,3 +42,4 @@ is_deeply([sort Son->meta->direct_subclasses],         []);
 is_deeply([sort Daughter->meta->direct_subclasses],    []);
 is_deeply([sort Cousin->meta->direct_subclasses],      []);
 
+done_testing;

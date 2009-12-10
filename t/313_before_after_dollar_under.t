@@ -3,7 +3,7 @@ use warnings;
 
 use Class::MOP;
 use Class::MOP::Class;
-use Test::More tests => 9;
+use Test::More;
 use Test::Exception;
 
 my %results;
@@ -68,3 +68,5 @@ for my $wrap (qw(before after)) {
         'saw expected calls to wrappers'
     );
 }
+
+done_testing;
