@@ -1051,6 +1051,8 @@ sub _inline_constructor {
     my ( $self, %args ) = @_;
 
     my $name = $args{constructor_name};
+    # A class may not even have a constructor, and that's okay.
+    return unless defined $name;
 
     if ( $self->has_method($name) && !$args{replace_constructor} ) {
         my $class = $self->name;

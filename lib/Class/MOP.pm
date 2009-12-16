@@ -12,6 +12,7 @@ use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Try::Tiny;
 
+use Class::MOP::HasMethods;
 use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
@@ -160,6 +161,45 @@ sub _is_valid_class_name {
 # inherit them using _construct_instance
 
 ## --------------------------------------------------------
+## Class::MOP::HasMethods
+
+Class::MOP::HasMethods->meta->add_attribute(
+    Class::MOP::Attribute->new('_methods' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            '_full_method_map' => \&Class::MOP::HasMethods::_full_method_map
+        },
+        default => sub { {} }
+    ))
+);
+
+Class::MOP::HasMethods->meta->add_attribute(
+    Class::MOP::Attribute->new('method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'method_metaclass' => \&Class::MOP::HasMethods::method_metaclass
+        },
+        default  => 'Class::MOP::Method',
+    ))
+);
+
+Class::MOP::HasMethods->meta->add_attribute(
+    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'wrapped_method_metaclass' => \&Class::MOP::HasMethods::wrapped_method_metaclass
+        },
+        default  => 'Class::MOP::Method::Wrapped',
+    ))
+);
+
+## --------------------------------------------------------
 ## Class::MOP::Package
 
 Class::MOP::Package->meta->add_attribute(
@@ -186,42 +226,6 @@ Class::MOP::Package->meta->add_attribute(
         },
         init_arg => undef,
         default  => sub { \undef }
-    ))
-);
-
-Class::MOP::Package->meta->add_attribute(
-    Class::MOP::Attribute->new('_methods' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            '_full_method_map' => \&Class::MOP::Package::_full_method_map
-        },
-        default => sub { {} }
-    ))
-);
-
-Class::MOP::Package->meta->add_attribute(
-    Class::MOP::Attribute->new('method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'method_metaclass' => \&Class::MOP::Package::method_metaclass
-        },
-        default  => 'Class::MOP::Method',
-    ))
-);
-
-Class::MOP::Package->meta->add_attribute(
-    Class::MOP::Attribute->new('wrapped_method_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'wrapped_method_metaclass' => \&Class::MOP::Package::wrapped_method_metaclass
-        },
-        default  => 'Class::MOP::Method::Wrapped',
     ))
 );
 
@@ -682,6 +686,14 @@ $_->meta->make_immutable(
     Class::MOP::Method::Accessor
     Class::MOP::Method::Constructor
     Class::MOP::Method::Wrapped
+/;
+
+$_->meta->make_immutable(
+    inline_constructor  => 0,
+    constructor_name    => undef,
+    inline_accessors => 0,
+) for qw/
+    Class::MOP::HasMethods
 /;
 
 1;

@@ -5,11 +5,12 @@ use Test::More;
 
 BEGIN {
     use_ok('Class::MOP');
+    use_ok('Class::MOP::HasMethods');
     use_ok('Class::MOP::Package');
     use_ok('Class::MOP::Module');
     use_ok('Class::MOP::Class');
     use_ok('Class::MOP::Class::Immutable::Trait');
-    use_ok('Class::MOP::Attribute');
+    use_ok('Class::MOP::Method');
     use_ok('Class::MOP::Method');
     use_ok('Class::MOP::Method::Wrapped');
     use_ok('Class::MOP::Method::Inlined');
@@ -29,6 +30,7 @@ my %METAS = (
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
+    'Class::MOP::HasMethods'      => Class::MOP::HasMethods->meta,
     'Class::MOP::Package'         => Class::MOP::Package->meta,
     'Class::MOP::Module'          => Class::MOP::Module->meta,
     'Class::MOP::Class'           => Class::MOP::Class->meta,
@@ -70,6 +72,7 @@ is_deeply(
         Class::MOP::Class->meta,
         Class::MOP::Class::Immutable::Class::MOP::Class->meta,
         Class::MOP::class_of('Class::MOP::Class::Immutable::Trait'),
+        Class::MOP::HasMethods->meta,
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
         Class::MOP::Method::Accessor->meta,
@@ -92,6 +95,7 @@ is_deeply(
             Class::MOP::Class
             Class::MOP::Class::Immutable::Class::MOP::Class
             Class::MOP::Class::Immutable::Trait
+            Class::MOP::HasMethods
             Class::MOP::Instance
             Class::MOP::Method
             Class::MOP::Method::Accessor
