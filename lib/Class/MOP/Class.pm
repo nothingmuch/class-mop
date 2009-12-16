@@ -980,16 +980,7 @@ sub _immutable_metaclass {
     );
 
     Class::MOP::load_class($trait);
-    for my $meth ( Class::MOP::Class->initialize($trait)->get_all_methods ) {
-        my $meth_name = $meth->name;
-
-        if ( $immutable_meta->find_method_by_name( $meth_name ) ) {
-            $immutable_meta->add_around_method_modifier( $meth_name, $meth->body );
-        }
-        else {
-            $immutable_meta->add_method( $meth_name, $meth->clone );
-        }
-    }
+    $trait->apply($immutable_meta);
 
     $immutable_meta->make_immutable(
         inline_constructor => 0,

@@ -16,6 +16,7 @@ BEGIN {
     use_ok('Class::MOP::Method::Generated');
     use_ok('Class::MOP::Method::Accessor');
     use_ok('Class::MOP::Method::Constructor');
+    use_ok('Class::MOP::MiniTrait');
     use_ok('Class::MOP::Instance');
     use_ok('Class::MOP::Object');
 }
@@ -36,6 +37,7 @@ my %METAS = (
     'Class::MOP::Method::Wrapped' => Class::MOP::Method::Wrapped->meta,
     'Class::MOP::Instance'        => Class::MOP::Instance->meta,
     'Class::MOP::Object'          => Class::MOP::Object->meta,
+    'Class::MOP::MiniTrait'       => Class::MOP::MiniTrait->meta,
     'Class::MOP::Class::Immutable::Trait' => Class::MOP::class_of('Class::MOP::Class::Immutable::Trait'),
     'Class::MOP::Class::Immutable::Class::MOP::Class' => Class::MOP::Class::Immutable::Class::MOP::Class->meta,
 );
@@ -43,11 +45,13 @@ my %METAS = (
 ok( Class::MOP::is_class_loaded($_), '... ' . $_ . ' is loaded' )
     for keys %METAS;
 
+my %expect_mutable = map { $_ => 1 }
+    qw( Class::MOP::Class::Immutable::Trait Class::MOP::MiniTrait );
 for my $meta (values %METAS) {
     # the trait shouldn't be made immutable, it doesn't actually do anything,
     # and it doesn't even matter because it's not a class that will be
     # instantiated
-    if ($meta->name eq 'Class::MOP::Class::Immutable::Trait') {
+    if ( $expect_mutable{ $meta->name} ) {
         ok( $meta->is_mutable(), '... ' . $meta->name . ' is mutable' );
     }
     else {
@@ -77,6 +81,7 @@ is_deeply(
         Class::MOP::Method::Generated->meta,
         Class::MOP::Method::Inlined->meta,
         Class::MOP::Method::Wrapped->meta,
+        Class::MOP::MiniTrait->meta,
         Class::MOP::Module->meta,
         Class::MOP::Object->meta,
         Class::MOP::Package->meta,
@@ -99,6 +104,7 @@ is_deeply(
             Class::MOP::Method::Generated
             Class::MOP::Method::Inlined
             Class::MOP::Method::Wrapped
+            Class::MOP::MiniTrait
             Class::MOP::Module
             Class::MOP::Object
             Class::MOP::Package
