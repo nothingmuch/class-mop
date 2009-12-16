@@ -5,6 +5,7 @@ use Test::More;
 
 BEGIN {
     use_ok('Class::MOP');
+    use_ok('Class::MOP::HasAttributes');
     use_ok('Class::MOP::HasMethods');
     use_ok('Class::MOP::Package');
     use_ok('Class::MOP::Module');
@@ -30,6 +31,7 @@ my %METAS = (
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
+    'Class::MOP::HasAttributes'   => Class::MOP::HasAttributes->meta,
     'Class::MOP::HasMethods'      => Class::MOP::HasMethods->meta,
     'Class::MOP::Package'         => Class::MOP::Package->meta,
     'Class::MOP::Module'          => Class::MOP::Module->meta,
@@ -72,6 +74,7 @@ is_deeply(
         Class::MOP::Class->meta,
         Class::MOP::Class::Immutable::Class::MOP::Class->meta,
         Class::MOP::class_of('Class::MOP::Class::Immutable::Trait'),
+        Class::MOP::HasAttributes->meta,
         Class::MOP::HasMethods->meta,
         Class::MOP::Instance->meta,
         Class::MOP::Method->meta,
@@ -95,6 +98,7 @@ is_deeply(
             Class::MOP::Class
             Class::MOP::Class::Immutable::Class::MOP::Class
             Class::MOP::Class::Immutable::Trait
+            Class::MOP::HasAttributes
             Class::MOP::HasMethods
             Class::MOP::Instance
             Class::MOP::Method

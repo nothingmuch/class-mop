@@ -12,6 +12,7 @@ use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Try::Tiny;
 
+use Class::MOP::HasAttributes;
 use Class::MOP::HasMethods;
 use Class::MOP::Class;
 use Class::MOP::Attribute;
@@ -200,6 +201,36 @@ Class::MOP::HasMethods->meta->add_attribute(
 );
 
 ## --------------------------------------------------------
+## Class::MOP::HasMethods
+
+Class::MOP::HasAttributes->meta->add_attribute(
+    Class::MOP::Attribute->new('attributes' => (
+        reader   => {
+            # NOTE: we need to do this in order
+            # for the instance meta-object to
+            # not fall into meta-circular death
+            #
+            # we just alias the original method
+            # rather than re-produce it here
+            '_attribute_map' => \&Class::MOP::HasAttributes::_attribute_map
+        },
+        default  => sub { {} }
+    ))
+);
+
+Class::MOP::HasAttributes->meta->add_attribute(
+    Class::MOP::Attribute->new('attribute_metaclass' => (
+        reader   => {
+            # NOTE:
+            # we just alias the original method
+            # rather than re-produce it here
+            'attribute_metaclass' => \&Class::MOP::HasAttributes::attribute_metaclass
+        },
+        default  => 'Class::MOP::Attribute',
+    ))
+);
+
+## --------------------------------------------------------
 ## Class::MOP::Package
 
 Class::MOP::Package->meta->add_attribute(
@@ -278,21 +309,6 @@ Class::MOP::Module->meta->add_attribute(
 ## Class::MOP::Class
 
 Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('attributes' => (
-        reader   => {
-            # NOTE: we need to do this in order
-            # for the instance meta-object to
-            # not fall into meta-circular death
-            #
-            # we just alias the original method
-            # rather than re-produce it here
-            '_attribute_map' => \&Class::MOP::Class::_attribute_map
-        },
-        default  => sub { {} }
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
     Class::MOP::Attribute->new('superclasses' => (
         accessor => {
             # NOTE:
@@ -302,18 +318,6 @@ Class::MOP::Class->meta->add_attribute(
         },
         init_arg => undef,
         default  => sub { \undef }
-    ))
-);
-
-Class::MOP::Class->meta->add_attribute(
-    Class::MOP::Attribute->new('attribute_metaclass' => (
-        reader   => {
-            # NOTE:
-            # we just alias the original method
-            # rather than re-produce it here
-            'attribute_metaclass' => \&Class::MOP::Class::attribute_metaclass
-        },
-        default  => 'Class::MOP::Attribute',
     ))
 );
 
@@ -693,6 +697,7 @@ $_->meta->make_immutable(
     constructor_name    => undef,
     inline_accessors => 0,
 ) for qw/
+    Class::MOP::HasAttributes
     Class::MOP::HasMethods
 /;
 
