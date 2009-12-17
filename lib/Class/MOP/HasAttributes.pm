@@ -40,7 +40,8 @@ sub add_attribute {
         $self->remove_attribute($attr_name);
     }
     else {
-        $self->invalidate_meta_instances();
+        $self->invalidate_meta_instances()
+            if $self->can('invalidate_meta_instances');
     }
 
     # get our count of previously inserted attributes and
@@ -92,7 +93,8 @@ sub remove_attribute {
     return unless defined $removed_attribute;
 
     delete $self->_attribute_map->{$attribute_name};
-    $self->invalidate_meta_instances();
+    $self->invalidate_meta_instances()
+        if $self->can('invalidate_meta_instances');
     $removed_attribute->remove_accessors();
     $removed_attribute->detach_from_class();
 
@@ -102,13 +104,6 @@ sub remove_attribute {
 sub get_attribute_list {
     my $self = shift;
     keys %{ $self->_attribute_map };
-}
-
-sub get_all_attributes {
-    my $self = shift;
-    my %attrs = map { %{ $self->initialize($_)->_attribute_map } }
-        reverse $self->linearized_isa;
-    return values %attrs;
 }
 
 sub find_attribute_by_name {

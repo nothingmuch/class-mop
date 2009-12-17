@@ -243,6 +243,7 @@ sub _check_metaclass_compatibility {
         no warnings 'uninitialized';
         my $name = $self->name;
         return unless $name =~ /^$ANON_CLASS_PREFIX/o;
+
         # Moose does a weird thing where it replaces the metaclass for
         # class when fixing metaclass incompatibility. In that case,
         # we don't want to clean out the namespace now. We can detect
@@ -465,6 +466,13 @@ sub rebless_instance {
 
 sub rebless_instance_away {
     # this intentionally does nothing, it is just a hook
+}
+
+sub get_all_attributes {
+    my $self = shift;
+    my %attrs = map { %{ $self->initialize($_)->_attribute_map } }
+        reverse $self->linearized_isa;
+    return values %attrs;
 }
 
 # Inheritance
