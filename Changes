@@ -1,6 +1,9 @@
 Revision history for Perl extension Class-MOP.
 
-0.96
+0.97 Fri, Dec 18, 2009
+    * No code changes, just packaging fixes to make this distro installable.
+
+0.96 Fri, Dec 18, 2009
     * tests
       - Fixed t/082_get_code_info.t so it passes with bleadperl. (Dave Rolsky)
       - Add XS & C files to no tabs check (Dave Rolsky)
