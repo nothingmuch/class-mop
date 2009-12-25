@@ -13,6 +13,7 @@ use Carp         'confess';
 use Scalar::Util 'blessed', 'reftype', 'weaken';
 use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
+use Try::Tiny;
 
 our $VERSION   = '0.95';
 $VERSION = eval $VERSION;
@@ -466,6 +467,54 @@ sub rebless_instance {
 
 sub rebless_instance_away {
     # this intentionally does nothing, it is just a hook
+}
+
+sub _attach_attribute {
+    my ($self, $attribute) = @_;
+    $attribute->attach_to_class($self);
+}
+
+sub _post_add_attribute {
+    my ( $self, $attribute ) = @_;
+
+    $self->invalidate_meta_instances;
+
+    # invalidate package flag here
+    try {
+        local $SIG{__DIE__};
+        $attribute->install_accessors;
+    }
+    catch {
+        $self->remove_attribute( $attribute->name );
+        die $_;
+    };
+}
+
+sub remove_attribute {
+    my $self = shift;
+
+    my $removed_attribute = $self->SUPER::remove_attribute(@_)
+        or return;
+
+    $self->invalidate_meta_instances;
+
+    $removed_attribute->remove_accessors;
+    $removed_attribute->detach_from_class;
+
+    return$removed_attribute;
+}
+
+sub find_attribute_by_name {
+    my ( $self, $attr_name ) = @_;
+
+    foreach my $class ( $self->linearized_isa ) {
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        return $meta->get_attribute($attr_name)
+            if $meta->has_attribute($attr_name);
+    }
+
+    return;
 }
 
 sub get_all_attributes {

@@ -5,7 +5,6 @@ use warnings;
 
 use Carp         'confess';
 use Scalar::Util 'blessed';
-use Try::Tiny;
 
 use base 'Class::MOP::Object';
 
@@ -15,52 +14,32 @@ sub attribute_metaclass { $_[0]->{'attribute_metaclass'} }
 sub add_attribute {
     my $self = shift;
 
-    # either we have an attribute object already
-    # or we need to create one from the args provided
     my $attribute
         = blessed( $_[0] ) ? $_[0] : $self->attribute_metaclass->new(@_);
 
-    # make sure it is derived from the correct type though
     ( $attribute->isa('Class::MOP::Attribute') )
         || confess
         "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
 
-    # first we attach our new attribute
-    # because it might need certain information
-    # about the class which it is attached to
-    $attribute->attach_to_class($self);
+    $self->_attach_attribute($attribute);
 
     my $attr_name = $attribute->name;
 
-    # then we remove attributes of a conflicting
-    # name here so that we can properly detach
-    # the old attr object, and remove any
-    # accessors it would have generated
-    if ( $self->has_attribute($attr_name) ) {
-        $self->remove_attribute($attr_name);
-    }
-    else {
-        $self->invalidate_meta_instances()
-            if $self->can('invalidate_meta_instances');
-    }
+    $self->remove_attribute($attr_name)
+        if $self->has_attribute($attr_name);
 
-    # get our count of previously inserted attributes and
-    # increment by one so this attribute knows its order
     my $order = ( scalar keys %{ $self->_attribute_map } );
     $attribute->_set_insertion_order($order);
 
-    # then onto installing the new accessors
     $self->_attribute_map->{$attr_name} = $attribute;
 
-    # invalidate package flag here
-    try {
-        local $SIG{__DIE__};
-        $attribute->install_accessors();
-    }
-    catch {
-        $self->remove_attribute($attr_name);
-        die $_;
-    };
+    # This method is called to allow for installing accessors. Ideally, we'd
+    # use method overriding, but then the subclass would be responsible for
+    # making the attribute, which would end up with lots of code
+    # duplication. Even more ideally, we'd use augment/inner, but this is
+    # Class::MOP!
+    $self->_post_add_attribute($attribute)
+        if $self->can('_post_add_attribute');
 
     return $attribute;
 }
@@ -93,10 +72,6 @@ sub remove_attribute {
     return unless defined $removed_attribute;
 
     delete $self->_attribute_map->{$attribute_name};
-    $self->invalidate_meta_instances()
-        if $self->can('invalidate_meta_instances');
-    $removed_attribute->remove_accessors();
-    $removed_attribute->detach_from_class();
 
     return $removed_attribute;
 }
@@ -104,19 +79,6 @@ sub remove_attribute {
 sub get_attribute_list {
     my $self = shift;
     keys %{ $self->_attribute_map };
-}
-
-sub find_attribute_by_name {
-    my ( $self, $attr_name ) = @_;
-
-    foreach my $class ( $self->linearized_isa ) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_attribute($attr_name)
-            if $meta->has_attribute($attr_name);
-    }
-
-    return;
 }
 
 1;

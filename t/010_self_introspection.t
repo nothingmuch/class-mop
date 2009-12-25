@@ -80,6 +80,12 @@ my @class_mop_class_methods = qw(
 
         add_before_method_modifier add_after_method_modifier add_around_method_modifier
 
+    _attach_attribute
+    _post_add_attribute
+    remove_attribute
+    find_attribute_by_name
+    get_all_attributes
+
     compute_all_applicable_attributes
     get_attribute_map
 
