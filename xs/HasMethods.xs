@@ -89,7 +89,7 @@ mop_update_method_map(pTHX_ SV *const self, SV *const class_name, HV *const stas
     }
 }
 
-MODULE = Class::MOP::HasMethods   PACKAGE = Class::MOP::HasMethods
+MODULE = Class::MOP::Mixin::HasMethods   PACKAGE = Class::MOP::Mixin::HasMethods
 
 PROTOTYPES: DISABLE
 

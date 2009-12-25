@@ -242,7 +242,7 @@ is($class_mop_package_meta->get_attribute('package')->init_arg, 'package', '... 
 # ... package, but inherited from HasMethods
 ok($class_mop_package_meta->find_attribute_by_name('method_metaclass')->has_reader, '... Class::MOP::Package method_metaclass has a reader');
 is_deeply($class_mop_package_meta->find_attribute_by_name('method_metaclass')->reader,
-   { 'method_metaclass' => \&Class::MOP::HasMethods::method_metaclass },
+   { 'method_metaclass' => \&Class::MOP::Mixin::HasMethods::method_metaclass },
    '... Class::MOP::Package method_metaclass\'s a reader is &method_metaclass');
 
 ok($class_mop_package_meta->find_attribute_by_name('method_metaclass')->has_init_arg, '... Class::MOP::Package method_metaclass has a init_arg');
@@ -257,7 +257,7 @@ is($class_mop_package_meta->find_attribute_by_name('method_metaclass')->default,
 
 ok($class_mop_package_meta->find_attribute_by_name('wrapped_method_metaclass')->has_reader, '... Class::MOP::Package wrapped_method_metaclass has a reader');
 is_deeply($class_mop_package_meta->find_attribute_by_name('wrapped_method_metaclass')->reader,
-   { 'wrapped_method_metaclass' => \&Class::MOP::HasMethods::wrapped_method_metaclass },
+   { 'wrapped_method_metaclass' => \&Class::MOP::Mixin::HasMethods::wrapped_method_metaclass },
    '... Class::MOP::Package wrapped_method_metaclass\'s a reader is &wrapped_method_metaclass');
 
 ok($class_mop_package_meta->find_attribute_by_name('wrapped_method_metaclass')->has_init_arg, '... Class::MOP::Package wrapped_method_metaclass has a init_arg');
@@ -275,7 +275,7 @@ is($class_mop_package_meta->find_attribute_by_name('method_metaclass')->default,
 
 ok($class_mop_class_meta->find_attribute_by_name('attributes')->has_reader, '... Class::MOP::Class attributes has a reader');
 is_deeply($class_mop_class_meta->find_attribute_by_name('attributes')->reader,
-   { '_attribute_map' => \&Class::MOP::HasAttributes::_attribute_map },
+   { '_attribute_map' => \&Class::MOP::Mixin::HasAttributes::_attribute_map },
    '... Class::MOP::Class attributes\'s a reader is &_attribute_map');
 
 ok($class_mop_class_meta->find_attribute_by_name('attributes')->has_init_arg, '... Class::MOP::Class attributes has a init_arg');
@@ -290,7 +290,7 @@ is_deeply($class_mop_class_meta->find_attribute_by_name('attributes')->default('
 
 ok($class_mop_class_meta->find_attribute_by_name('attribute_metaclass')->has_reader, '... Class::MOP::Class attribute_metaclass has a reader');
 is_deeply($class_mop_class_meta->find_attribute_by_name('attribute_metaclass')->reader,
-   { 'attribute_metaclass' => \&Class::MOP::HasAttributes::attribute_metaclass },
+   { 'attribute_metaclass' => \&Class::MOP::Mixin::HasAttributes::attribute_metaclass },
   '... Class::MOP::Class attribute_metaclass\'s a reader is &attribute_metaclass');
 
 ok($class_mop_class_meta->find_attribute_by_name('attribute_metaclass')->has_init_arg, '... Class::MOP::Class attribute_metaclass has a init_arg');
@@ -315,7 +315,7 @@ is(${$class_mop_class_meta->get_package_symbol('$VERSION')},
 
 is_deeply(
     [ $class_mop_class_meta->superclasses ],
-    [ qw/Class::MOP::Module Class::MOP::HasAttributes/ ],
+    [ qw/Class::MOP::Module Class::MOP::Mixin::HasAttributes/ ],
     '... Class::MOP::Class->superclasses == [ Class::MOP::Module ]');
 
 is_deeply(
@@ -324,9 +324,9 @@ is_deeply(
         Class::MOP::Class
         Class::MOP::Module
         Class::MOP::Package
-        Class::MOP::HasMethods
+        Class::MOP::Mixin::HasMethods
         Class::MOP::Object
-        Class::MOP::HasAttributes
+        Class::MOP::Mixin::HasAttributes
         Class::MOP::Object
     / ],
     '... Class::MOP::Class->class_precedence_list == [ Class::MOP::Class Class::MOP::Module Class::MOP::Package ]');

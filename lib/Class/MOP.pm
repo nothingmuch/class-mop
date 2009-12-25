@@ -12,8 +12,8 @@ use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Try::Tiny;
 
-use Class::MOP::HasAttributes;
-use Class::MOP::HasMethods;
+use Class::MOP::Mixin::HasAttributes;
+use Class::MOP::Mixin::HasMethods;
 use Class::MOP::Class;
 use Class::MOP::Attribute;
 use Class::MOP::Method;
@@ -162,48 +162,48 @@ sub _is_valid_class_name {
 # inherit them using _construct_instance
 
 ## --------------------------------------------------------
-## Class::MOP::HasMethods
+## Class::MOP::Mixin::HasMethods
 
-Class::MOP::HasMethods->meta->add_attribute(
+Class::MOP::Mixin::HasMethods->meta->add_attribute(
     Class::MOP::Attribute->new('_methods' => (
         reader   => {
             # NOTE:
             # we just alias the original method
             # rather than re-produce it here
-            '_full_method_map' => \&Class::MOP::HasMethods::_full_method_map
+            '_full_method_map' => \&Class::MOP::Mixin::HasMethods::_full_method_map
         },
         default => sub { {} }
     ))
 );
 
-Class::MOP::HasMethods->meta->add_attribute(
+Class::MOP::Mixin::HasMethods->meta->add_attribute(
     Class::MOP::Attribute->new('method_metaclass' => (
         reader   => {
             # NOTE:
             # we just alias the original method
             # rather than re-produce it here
-            'method_metaclass' => \&Class::MOP::HasMethods::method_metaclass
+            'method_metaclass' => \&Class::MOP::Mixin::HasMethods::method_metaclass
         },
         default  => 'Class::MOP::Method',
     ))
 );
 
-Class::MOP::HasMethods->meta->add_attribute(
+Class::MOP::Mixin::HasMethods->meta->add_attribute(
     Class::MOP::Attribute->new('wrapped_method_metaclass' => (
         reader   => {
             # NOTE:
             # we just alias the original method
             # rather than re-produce it here
-            'wrapped_method_metaclass' => \&Class::MOP::HasMethods::wrapped_method_metaclass
+            'wrapped_method_metaclass' => \&Class::MOP::Mixin::HasMethods::wrapped_method_metaclass
         },
         default  => 'Class::MOP::Method::Wrapped',
     ))
 );
 
 ## --------------------------------------------------------
-## Class::MOP::HasMethods
+## Class::MOP::Mixin::HasMethods
 
-Class::MOP::HasAttributes->meta->add_attribute(
+Class::MOP::Mixin::HasAttributes->meta->add_attribute(
     Class::MOP::Attribute->new('attributes' => (
         reader   => {
             # NOTE: we need to do this in order
@@ -212,19 +212,19 @@ Class::MOP::HasAttributes->meta->add_attribute(
             #
             # we just alias the original method
             # rather than re-produce it here
-            '_attribute_map' => \&Class::MOP::HasAttributes::_attribute_map
+            '_attribute_map' => \&Class::MOP::Mixin::HasAttributes::_attribute_map
         },
         default  => sub { {} }
     ))
 );
 
-Class::MOP::HasAttributes->meta->add_attribute(
+Class::MOP::Mixin::HasAttributes->meta->add_attribute(
     Class::MOP::Attribute->new('attribute_metaclass' => (
         reader   => {
             # NOTE:
             # we just alias the original method
             # rather than re-produce it here
-            'attribute_metaclass' => \&Class::MOP::HasAttributes::attribute_metaclass
+            'attribute_metaclass' => \&Class::MOP::Mixin::HasAttributes::attribute_metaclass
         },
         default  => 'Class::MOP::Attribute',
     ))
@@ -697,8 +697,8 @@ $_->meta->make_immutable(
     constructor_name    => undef,
     inline_accessors => 0,
 ) for qw/
-    Class::MOP::HasAttributes
-    Class::MOP::HasMethods
+    Class::MOP::Mixin::HasAttributes
+    Class::MOP::Mixin::HasMethods
 /;
 
 1;

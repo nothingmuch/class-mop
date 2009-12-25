@@ -1,4 +1,4 @@
-package Class::MOP::HasMethods;
+package Class::MOP::Mixin::HasMethods;
 
 use strict;
 use warnings;

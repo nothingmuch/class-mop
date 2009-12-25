@@ -1,4 +1,4 @@
-package Class::MOP::HasAttributes;
+package Class::MOP::Mixin::HasAttributes;
 
 use strict;
 use warnings;

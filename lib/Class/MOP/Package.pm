@@ -11,7 +11,7 @@ our $VERSION   = '0.97';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::HasMethods';
+use base 'Class::MOP::Mixin::HasMethods';
 
 # creation ...
 

@@ -19,7 +19,7 @@ our $VERSION   = '0.97';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Module', 'Class::MOP::HasAttributes';
+use base 'Class::MOP::Module', 'Class::MOP::Mixin::HasAttributes';
 
 # Creation
 
