@@ -12,6 +12,7 @@ use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Try::Tiny;
 
+use Class::MOP::Mixin::AttributeBase;
 use Class::MOP::Mixin::HasAttributes;
 use Class::MOP::Mixin::HasMethods;
 use Class::MOP::Class;
@@ -379,9 +380,8 @@ Class::MOP::Class->meta->add_attribute(
 # _construct_class_instance method.
 
 ## --------------------------------------------------------
-## Class::MOP::Attribute
-
-Class::MOP::Attribute->meta->add_attribute(
+## Class::MOP::Mixin::AttributeBase
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
     Class::MOP::Attribute->new('name' => (
         reader   => {
             # NOTE: we need to do this in order
@@ -390,11 +390,90 @@ Class::MOP::Attribute->meta->add_attribute(
             #
             # we just alias the original method
             # rather than re-produce it here
-            'name' => \&Class::MOP::Attribute::name
+            'name' => \&Class::MOP::Mixin::AttributeBase::name
         }
     ))
 );
 
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('accessor' => (
+        reader    => { 'accessor'     => \&Class::MOP::Mixin::AttributeBase::accessor     },
+        predicate => { 'has_accessor' => \&Class::MOP::Mixin::AttributeBase::has_accessor },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('reader' => (
+        reader    => { 'reader'     => \&Class::MOP::Mixin::AttributeBase::reader     },
+        predicate => { 'has_reader' => \&Class::MOP::Mixin::AttributeBase::has_reader },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('initializer' => (
+        reader    => { 'initializer'     => \&Class::MOP::Mixin::AttributeBase::initializer     },
+        predicate => { 'has_initializer' => \&Class::MOP::Mixin::AttributeBase::has_initializer },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('definition_context' => (
+        reader    => { 'definition_context'     => \&Class::MOP::Mixin::AttributeBase::definition_context     },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('writer' => (
+        reader    => { 'writer'     => \&Class::MOP::Mixin::AttributeBase::writer     },
+        predicate => { 'has_writer' => \&Class::MOP::Mixin::AttributeBase::has_writer },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('predicate' => (
+        reader    => { 'predicate'     => \&Class::MOP::Mixin::AttributeBase::predicate     },
+        predicate => { 'has_predicate' => \&Class::MOP::Mixin::AttributeBase::has_predicate },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('clearer' => (
+        reader    => { 'clearer'     => \&Class::MOP::Mixin::AttributeBase::clearer     },
+        predicate => { 'has_clearer' => \&Class::MOP::Mixin::AttributeBase::has_clearer },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('builder' => (
+        reader    => { 'builder'     => \&Class::MOP::Mixin::AttributeBase::builder     },
+        predicate => { 'has_builder' => \&Class::MOP::Mixin::AttributeBase::has_builder },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('init_arg' => (
+        reader    => { 'init_arg'     => \&Class::MOP::Mixin::AttributeBase::init_arg     },
+        predicate => { 'has_init_arg' => \&Class::MOP::Mixin::AttributeBase::has_init_arg },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('default' => (
+        # default has a custom 'reader' method ...
+        predicate => { 'has_default' => \&Class::MOP::Mixin::AttributeBase::has_default },
+    ))
+);
+
+Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+    Class::MOP::Attribute->new('insertion_order' => (
+        reader      => { 'insertion_order' => \&Class::MOP::Mixin::AttributeBase::insertion_order },
+        writer      => { '_set_insertion_order' => \&Class::MOP::Mixin::AttributeBase::_set_insertion_order },
+        predicate   => { 'has_insertion_order' => \&Class::MOP::Mixin::AttributeBase::has_insertion_order },
+    ))
+);
+
+## --------------------------------------------------------
+## Class::MOP::Attribute
 Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('associated_class' => (
         reader   => {
@@ -410,86 +489,9 @@ Class::MOP::Attribute->meta->add_attribute(
 );
 
 Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('accessor' => (
-        reader    => { 'accessor'     => \&Class::MOP::Attribute::accessor     },
-        predicate => { 'has_accessor' => \&Class::MOP::Attribute::has_accessor },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('reader' => (
-        reader    => { 'reader'     => \&Class::MOP::Attribute::reader     },
-        predicate => { 'has_reader' => \&Class::MOP::Attribute::has_reader },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('initializer' => (
-        reader    => { 'initializer'     => \&Class::MOP::Attribute::initializer     },
-        predicate => { 'has_initializer' => \&Class::MOP::Attribute::has_initializer },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('definition_context' => (
-        reader    => { 'definition_context'     => \&Class::MOP::Attribute::definition_context     },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('writer' => (
-        reader    => { 'writer'     => \&Class::MOP::Attribute::writer     },
-        predicate => { 'has_writer' => \&Class::MOP::Attribute::has_writer },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('predicate' => (
-        reader    => { 'predicate'     => \&Class::MOP::Attribute::predicate     },
-        predicate => { 'has_predicate' => \&Class::MOP::Attribute::has_predicate },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('clearer' => (
-        reader    => { 'clearer'     => \&Class::MOP::Attribute::clearer     },
-        predicate => { 'has_clearer' => \&Class::MOP::Attribute::has_clearer },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('builder' => (
-        reader    => { 'builder'     => \&Class::MOP::Attribute::builder     },
-        predicate => { 'has_builder' => \&Class::MOP::Attribute::has_builder },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('init_arg' => (
-        reader    => { 'init_arg'     => \&Class::MOP::Attribute::init_arg     },
-        predicate => { 'has_init_arg' => \&Class::MOP::Attribute::has_init_arg },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('default' => (
-        # default has a custom 'reader' method ...
-        predicate => { 'has_default' => \&Class::MOP::Attribute::has_default },
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
     Class::MOP::Attribute->new('associated_methods' => (
         reader   => { 'associated_methods' => \&Class::MOP::Attribute::associated_methods },
         default  => sub { [] }
-    ))
-);
-
-Class::MOP::Attribute->meta->add_attribute(
-    Class::MOP::Attribute->new('insertion_order' => (
-        reader      => { 'insertion_order' => \&Class::MOP::Attribute::insertion_order },
-        writer      => { '_set_insertion_order' => \&Class::MOP::Attribute::_set_insertion_order },
-        predicate   => { 'has_insertion_order' => \&Class::MOP::Attribute::has_insertion_order },
     ))
 );
 
@@ -697,6 +699,7 @@ $_->meta->make_immutable(
     constructor_name    => undef,
     inline_accessors => 0,
 ) for qw/
+    Class::MOP::Mixin::AttributeBase
     Class::MOP::Mixin::HasAttributes
     Class::MOP::Mixin::HasMethods
 /;
