@@ -17,9 +17,9 @@ sub add_attribute {
     my $attribute
         = blessed( $_[0] ) ? $_[0] : $self->attribute_metaclass->new(@_);
 
-    ( $attribute->isa('Class::MOP::Attribute') )
+    ( $attribute->isa('Class::MOP::Mixin::AttributeBase') )
         || confess
-        "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
+        "Your attribute must be an instance of Class::MOP::Mixin::AttributeBase (or a subclass)";
 
     $self->_attach_attribute($attribute);
 
