@@ -7,7 +7,7 @@ use Scalar::Util 'blessed';
 use Carp         'confess';
 use Sub::Name    'subname';
 
-use base 'Class::MOP::Object';
+use base 'Class::MOP::Mixin';
 
 sub method_metaclass         { $_[0]->{'method_metaclass'}            }
 sub wrapped_method_metaclass { $_[0]->{'wrapped_method_metaclass'}    }

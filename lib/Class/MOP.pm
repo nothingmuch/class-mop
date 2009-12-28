@@ -699,6 +699,7 @@ $_->meta->make_immutable(
     constructor_name    => undef,
     inline_accessors => 0,
 ) for qw/
+    Class::MOP::Mixin
     Class::MOP::Mixin::AttributeCore
     Class::MOP::Mixin::HasAttributes
     Class::MOP::Mixin::HasMethods

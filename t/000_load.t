@@ -5,6 +5,7 @@ use Test::More;
 
 BEGIN {
     use_ok('Class::MOP');
+    use_ok('Class::MOP::Mixin');
     use_ok('Class::MOP::Mixin::AttributeCore');
     use_ok('Class::MOP::Mixin::HasAttributes');
     use_ok('Class::MOP::Mixin::HasMethods');
@@ -32,6 +33,7 @@ my %METAS = (
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
+    'Class::MOP::Mixin'   => Class::MOP::Mixin->meta,
     'Class::MOP::Mixin::AttributeCore'   => Class::MOP::Mixin::AttributeCore->meta,
     'Class::MOP::Mixin::HasAttributes'   => Class::MOP::Mixin::HasAttributes->meta,
     'Class::MOP::Mixin::HasMethods'      => Class::MOP::Mixin::HasMethods->meta,
@@ -83,6 +85,7 @@ is_deeply(
         Class::MOP::Method::Generated->meta,
         Class::MOP::Method::Inlined->meta,
         Class::MOP::Method::Wrapped->meta,
+        Class::MOP::Mixin->meta,
         Class::MOP::Mixin::AttributeCore->meta,
         Class::MOP::Mixin::HasAttributes->meta,
         Class::MOP::Mixin::HasMethods->meta,
@@ -101,6 +104,7 @@ is_deeply(
             Class::MOP::Class
             Class::MOP::Class::Immutable::Class::MOP::Class
             Class::MOP::Class::Immutable::Trait
+            Class::MOP::Mixin
             Class::MOP::Mixin::AttributeCore
             Class::MOP::Mixin::HasAttributes
             Class::MOP::Mixin::HasMethods

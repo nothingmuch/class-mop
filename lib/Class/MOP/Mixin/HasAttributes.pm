@@ -6,7 +6,7 @@ use warnings;
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
-use base 'Class::MOP::Object';
+use base 'Class::MOP::Mixin';
 
 sub _attribute_map      { $_[0]->{'attributes'} }
 sub attribute_metaclass { $_[0]->{'attribute_metaclass'} }

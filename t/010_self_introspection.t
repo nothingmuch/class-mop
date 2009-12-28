@@ -324,10 +324,11 @@ is_deeply(
         Class::MOP::Class
         Class::MOP::Module
         Class::MOP::Package
+        Class::MOP::Object
         Class::MOP::Mixin::HasMethods
-        Class::MOP::Object
+        Class::MOP::Mixin
         Class::MOP::Mixin::HasAttributes
-        Class::MOP::Object
+        Class::MOP::Mixin
     / ],
     '... Class::MOP::Class->class_precedence_list == [ Class::MOP::Class Class::MOP::Module Class::MOP::Package ]');
 

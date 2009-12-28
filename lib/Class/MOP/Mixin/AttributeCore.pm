@@ -9,7 +9,7 @@ our $VERSION = '0.97';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Object';
+use base 'Class::MOP::Mixin';
 
 sub has_accessor        { defined $_[0]->{'accessor'} }
 sub has_reader          { defined $_[0]->{'reader'} }
