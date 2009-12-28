@@ -14,7 +14,7 @@ our $VERSION   = '0.97';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Object', 'Class::MOP::Mixin::AttributeBase';
+use base 'Class::MOP::Object', 'Class::MOP::Mixin::AttributeCore';
 
 # NOTE: (meta-circularity)
 # This method will be replaced in the

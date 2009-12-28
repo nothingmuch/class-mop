@@ -67,7 +67,7 @@ use Class::MOP;
 
     is_deeply(
         [
-            sort Class::MOP::Mixin::AttributeBase->meta->get_method_list,
+            sort Class::MOP::Mixin::AttributeCore->meta->get_method_list,
             $meta->get_method_list
         ],
         [ sort @methods ],
@@ -98,7 +98,7 @@ use Class::MOP;
 
     is_deeply(
         [
-            sort Class::MOP::Mixin::AttributeBase->meta->get_attribute_list,
+            sort Class::MOP::Mixin::AttributeCore->meta->get_attribute_list,
             $meta->get_attribute_list
         ],
         [ sort @attributes ],

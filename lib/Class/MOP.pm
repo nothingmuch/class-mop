@@ -12,7 +12,7 @@ use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
 use Try::Tiny;
 
-use Class::MOP::Mixin::AttributeBase;
+use Class::MOP::Mixin::AttributeCore;
 use Class::MOP::Mixin::HasAttributes;
 use Class::MOP::Mixin::HasMethods;
 use Class::MOP::Class;
@@ -380,8 +380,8 @@ Class::MOP::Class->meta->add_attribute(
 # _construct_class_instance method.
 
 ## --------------------------------------------------------
-## Class::MOP::Mixin::AttributeBase
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+## Class::MOP::Mixin::AttributeCore
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('name' => (
         reader   => {
             # NOTE: we need to do this in order
@@ -390,85 +390,85 @@ Class::MOP::Mixin::AttributeBase->meta->add_attribute(
             #
             # we just alias the original method
             # rather than re-produce it here
-            'name' => \&Class::MOP::Mixin::AttributeBase::name
+            'name' => \&Class::MOP::Mixin::AttributeCore::name
         }
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('accessor' => (
-        reader    => { 'accessor'     => \&Class::MOP::Mixin::AttributeBase::accessor     },
-        predicate => { 'has_accessor' => \&Class::MOP::Mixin::AttributeBase::has_accessor },
+        reader    => { 'accessor'     => \&Class::MOP::Mixin::AttributeCore::accessor     },
+        predicate => { 'has_accessor' => \&Class::MOP::Mixin::AttributeCore::has_accessor },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('reader' => (
-        reader    => { 'reader'     => \&Class::MOP::Mixin::AttributeBase::reader     },
-        predicate => { 'has_reader' => \&Class::MOP::Mixin::AttributeBase::has_reader },
+        reader    => { 'reader'     => \&Class::MOP::Mixin::AttributeCore::reader     },
+        predicate => { 'has_reader' => \&Class::MOP::Mixin::AttributeCore::has_reader },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('initializer' => (
-        reader    => { 'initializer'     => \&Class::MOP::Mixin::AttributeBase::initializer     },
-        predicate => { 'has_initializer' => \&Class::MOP::Mixin::AttributeBase::has_initializer },
+        reader    => { 'initializer'     => \&Class::MOP::Mixin::AttributeCore::initializer     },
+        predicate => { 'has_initializer' => \&Class::MOP::Mixin::AttributeCore::has_initializer },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('definition_context' => (
-        reader    => { 'definition_context'     => \&Class::MOP::Mixin::AttributeBase::definition_context     },
+        reader    => { 'definition_context'     => \&Class::MOP::Mixin::AttributeCore::definition_context     },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('writer' => (
-        reader    => { 'writer'     => \&Class::MOP::Mixin::AttributeBase::writer     },
-        predicate => { 'has_writer' => \&Class::MOP::Mixin::AttributeBase::has_writer },
+        reader    => { 'writer'     => \&Class::MOP::Mixin::AttributeCore::writer     },
+        predicate => { 'has_writer' => \&Class::MOP::Mixin::AttributeCore::has_writer },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('predicate' => (
-        reader    => { 'predicate'     => \&Class::MOP::Mixin::AttributeBase::predicate     },
-        predicate => { 'has_predicate' => \&Class::MOP::Mixin::AttributeBase::has_predicate },
+        reader    => { 'predicate'     => \&Class::MOP::Mixin::AttributeCore::predicate     },
+        predicate => { 'has_predicate' => \&Class::MOP::Mixin::AttributeCore::has_predicate },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('clearer' => (
-        reader    => { 'clearer'     => \&Class::MOP::Mixin::AttributeBase::clearer     },
-        predicate => { 'has_clearer' => \&Class::MOP::Mixin::AttributeBase::has_clearer },
+        reader    => { 'clearer'     => \&Class::MOP::Mixin::AttributeCore::clearer     },
+        predicate => { 'has_clearer' => \&Class::MOP::Mixin::AttributeCore::has_clearer },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('builder' => (
-        reader    => { 'builder'     => \&Class::MOP::Mixin::AttributeBase::builder     },
-        predicate => { 'has_builder' => \&Class::MOP::Mixin::AttributeBase::has_builder },
+        reader    => { 'builder'     => \&Class::MOP::Mixin::AttributeCore::builder     },
+        predicate => { 'has_builder' => \&Class::MOP::Mixin::AttributeCore::has_builder },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('init_arg' => (
-        reader    => { 'init_arg'     => \&Class::MOP::Mixin::AttributeBase::init_arg     },
-        predicate => { 'has_init_arg' => \&Class::MOP::Mixin::AttributeBase::has_init_arg },
+        reader    => { 'init_arg'     => \&Class::MOP::Mixin::AttributeCore::init_arg     },
+        predicate => { 'has_init_arg' => \&Class::MOP::Mixin::AttributeCore::has_init_arg },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('default' => (
         # default has a custom 'reader' method ...
-        predicate => { 'has_default' => \&Class::MOP::Mixin::AttributeBase::has_default },
+        predicate => { 'has_default' => \&Class::MOP::Mixin::AttributeCore::has_default },
     ))
 );
 
-Class::MOP::Mixin::AttributeBase->meta->add_attribute(
+Class::MOP::Mixin::AttributeCore->meta->add_attribute(
     Class::MOP::Attribute->new('insertion_order' => (
-        reader      => { 'insertion_order' => \&Class::MOP::Mixin::AttributeBase::insertion_order },
-        writer      => { '_set_insertion_order' => \&Class::MOP::Mixin::AttributeBase::_set_insertion_order },
-        predicate   => { 'has_insertion_order' => \&Class::MOP::Mixin::AttributeBase::has_insertion_order },
+        reader      => { 'insertion_order' => \&Class::MOP::Mixin::AttributeCore::insertion_order },
+        writer      => { '_set_insertion_order' => \&Class::MOP::Mixin::AttributeCore::_set_insertion_order },
+        predicate   => { 'has_insertion_order' => \&Class::MOP::Mixin::AttributeCore::has_insertion_order },
     ))
 );
 
@@ -699,7 +699,7 @@ $_->meta->make_immutable(
     constructor_name    => undef,
     inline_accessors => 0,
 ) for qw/
-    Class::MOP::Mixin::AttributeBase
+    Class::MOP::Mixin::AttributeCore
     Class::MOP::Mixin::HasAttributes
     Class::MOP::Mixin::HasMethods
 /;

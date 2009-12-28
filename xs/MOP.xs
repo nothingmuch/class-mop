@@ -13,7 +13,7 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 
 EXTERN_C XS(boot_Class__MOP__Mixin__HasMethods);
 EXTERN_C XS(boot_Class__MOP__Package);
-EXTERN_C XS(boot_Class__MOP__Mixin__AttributeBase);
+EXTERN_C XS(boot_Class__MOP__Mixin__AttributeCore);
 EXTERN_C XS(boot_Class__MOP__Method);
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
@@ -25,7 +25,7 @@ BOOT:
 
     MOP_CALL_BOOT (boot_Class__MOP__Mixin__HasMethods);
     MOP_CALL_BOOT (boot_Class__MOP__Package);
-    MOP_CALL_BOOT (boot_Class__MOP__Mixin__AttributeBase);
+    MOP_CALL_BOOT (boot_Class__MOP__Mixin__AttributeCore);
     MOP_CALL_BOOT (boot_Class__MOP__Method);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify

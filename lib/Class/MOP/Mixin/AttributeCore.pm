@@ -1,4 +1,4 @@
-package Class::MOP::Mixin::AttributeBase;
+package Class::MOP::Mixin::AttributeCore;
 
 use strict;
 use warnings;
