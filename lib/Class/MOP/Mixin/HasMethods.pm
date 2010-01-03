@@ -3,6 +3,10 @@ package Class::MOP::Mixin::HasMethods;
 use strict;
 use warnings;
 
+our $VERSION   = '0.97';
+$VERSION = eval $VERSION;
+our $AUTHORITY = 'cpan:STEVAN';
+
 use Scalar::Util 'blessed';
 use Carp         'confess';
 use Sub::Name    'subname';
@@ -148,3 +152,32 @@ sub get_method_list {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Class::MOP::Mixin::HasMethods - Methods for metaclasses which have methods
+
+=head1 DESCRIPTION
+
+This class implements methods for metaclasses which have methods
+(L<Class::MOP::Package> and L<Moose::Meta::Role>). See L<Class::MOP::Package>
+for API details.
+
+=head1 AUTHORS
+
+Dave Rolsky E<lt>autarch@urth.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006-2009 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

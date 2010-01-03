@@ -3,6 +3,10 @@ package Class::MOP::Mixin::HasAttributes;
 use strict;
 use warnings;
 
+our $VERSION   = '0.97';
+$VERSION = eval $VERSION;
+our $AUTHORITY = 'cpan:STEVAN';
+
 use Carp         'confess';
 use Scalar::Util 'blessed';
 
@@ -82,3 +86,32 @@ sub get_attribute_list {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Class::MOP::Mixin::HasMethods - Methods for metaclasses which have attributes
+
+=head1 DESCRIPTION
+
+This class implements methods for metaclasses which have attributes
+(L<Class::MOP::Class> and L<Moose::Meta::Role>). See L<Class::MOP::Class> for
+API details.
+
+=head1 AUTHORS
+
+Dave Rolsky E<lt>autarch@urth.orgE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2006-2009 by Infinity Interactive, Inc.
+
+L<http://www.iinteractive.com>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

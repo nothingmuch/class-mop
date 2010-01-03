@@ -113,6 +113,8 @@ IRC
 isa
 login
 metadata
+mixin
+mixins
 munge
 namespace
 namespaced
