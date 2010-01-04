@@ -8,7 +8,7 @@ use MRO::Compat;
 use Carp 'confess';
 use Scalar::Util 'blessed', 'weaken';
 
-our $VERSION   = '0.97';
+our $VERSION   = '0.97_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 

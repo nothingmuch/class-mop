@@ -6,7 +6,7 @@ use warnings;
 use Carp qw( cluck );
 use Scalar::Util qw( blessed );
 
-our $VERSION = '0.97';
+our $VERSION = '0.97_01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
@@ -400,7 +400,7 @@ Goro Fuji E<lt>gfuji@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006-2009 by Infinity Interactive, Inc.
+Copyright 2006-2010 by Infinity Interactive, Inc.
 
 L<http://www.iinteractive.com>
 

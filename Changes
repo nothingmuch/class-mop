@@ -1,5 +1,6 @@
 Revision history for Perl extension Class-MOP.
 
+0.97_01 Mon, Jan 4, 2010
     * Various
       - Internal refactorings to move shared behavior into new "mixin"
         classes. This made adding some new features to Moose much
