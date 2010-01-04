@@ -465,6 +465,35 @@ sub rebless_instance {
     $instance;
 }
 
+sub rebless_instance_back {
+    my ( $self, $instance ) = @_;
+
+    my $old_metaclass = Class::MOP::class_of($instance);
+
+    my $old_class
+        = $old_metaclass ? $old_metaclass->name : blessed($instance);
+    $old_class->isa( $self->name )
+        || confess
+        "You may rebless only into a superclass of ($old_class), of which ("
+        . $self->name
+        . ") isn't.";
+
+    $old_metaclass->rebless_instance_away( $instance, $self )
+        if $old_metaclass;
+
+    my $meta_instance = $self->get_meta_instance;
+
+    # we use $_[1] here because of t/306_rebless_overload.t regressions on 5.8.8
+    $meta_instance->rebless_instance_structure( $_[1], $self );
+
+    for my $attr ( $old_metaclass->get_all_attributes ) {
+        next if $self->has_attribute( $attr->name );
+        $meta_instance->deinitialize_slot( $instance, $_ ) for $attr->slots;
+    }
+
+    return $instance;
+}
+
 sub rebless_instance_away {
     # this intentionally does nothing, it is just a hook
 }
@@ -1249,6 +1278,15 @@ C<rebless_instance_away> on the instance's current metaclass. This method
 will be passed the instance, the new metaclass, and any parameters
 specified to C<rebless_instance>. By default, C<rebless_instance_away>
 does nothing; it is merely a hook.
+
+=item B<< $metaclass->rebless_instance_back($instance) >>
+
+Does the same thing as C<rebless_instance>, except that you can only
+rebless an instance into one of its superclasses. Any attributes that
+do not exist in the superclass will be deinitialized.
+
+This is a much more dangerous operation than C<rebless_instance>,
+especially when multiple inheritance is involved, so use this carefully!
 
 =item B<< $metaclass->new_object(%params) >>
 

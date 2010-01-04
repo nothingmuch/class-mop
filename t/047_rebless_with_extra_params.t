@@ -34,6 +34,12 @@ use Class::MOP;
     is($foo->bar, 'BAR', '... got the expect value');
     ok($foo->can('baz'), '... we have baz method now');
     is($foo->baz, 'BAZ', '... got the expect value');
+
+    lives_ok {
+        Foo->meta->rebless_instance_back($foo)
+    } '... this works';
+    is($foo->bar, 'BAR', '... got the expect value');
+    ok(!$foo->can('baz'), '... no baz method though');
 }
 
 # with extra params ...
@@ -51,6 +57,14 @@ use Class::MOP;
     is($foo->bar, 'BAR', '... got the expect value');
     ok($foo->can('baz'), '... we have baz method now');
     is($foo->baz, 'FOO-BAZ', '... got the expect value');
+
+    lives_ok {
+        Foo->meta->rebless_instance_back($foo)
+    } '... this works';
+
+    is($foo->bar, 'BAR', '... got the expect value');
+    ok(!$foo->can('baz'), '... no baz method though');
+    ok(!exists($foo->{baz}), '... and the baz attribute was deinitialized');
 }
 
 # with extra params ...
@@ -68,6 +82,14 @@ use Class::MOP;
     is($foo->bar, 'FOO-BAR', '... got the expect value');
     ok($foo->can('baz'), '... we have baz method now');
     is($foo->baz, 'FOO-BAZ', '... got the expect value');
+
+    lives_ok {
+        Foo->meta->rebless_instance_back($foo)
+    } '... this works';
+
+    is($foo->bar, 'FOO-BAR', '... got the expect value');
+    ok(!$foo->can('baz'), '... no baz method though');
+    ok(!exists($foo->{baz}), '... and the baz attribute was deinitialized');
 }
 
 done_testing;

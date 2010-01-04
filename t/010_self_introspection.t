@@ -65,7 +65,7 @@ my @class_mop_class_methods = qw(
     construct_instance _construct_instance
     construct_class_instance _construct_class_instance
     clone_instance _clone_instance
-    rebless_instance rebless_instance_away
+    rebless_instance rebless_instance_back rebless_instance_away
     check_metaclass_compatibility _check_metaclass_compatibility
 
     add_meta_instance_dependencies remove_meta_instance_dependencies update_meta_instance_dependencies

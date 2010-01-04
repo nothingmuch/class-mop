@@ -6,6 +6,10 @@ Revision history for Perl extension Class-MOP.
         classes. This made adding some new features to Moose much
         easier. (Dave Rolsky)
 
+    * Class::MOP::Class
+      - Added rebless_instance_back, which does the inverse of
+        rebless_instance (doy, rafl).
+
 0.97 Fri, Dec 18, 2009
     * No code changes, just packaging fixes to make this distro installable.
 
