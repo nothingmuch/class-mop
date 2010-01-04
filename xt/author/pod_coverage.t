@@ -17,7 +17,6 @@ my %trustme = (
     'Class::MOP' => [ 'HAVE_ISAREV', 'subname', 'in_global_destruction' ],
     'Class::MOP::Attribute' => ['process_accessors'],
     'Class::MOP::Class'     => [
-
         # deprecated
         'alias_method',
         'compute_all_applicable_attributes',
@@ -50,8 +49,7 @@ my %trustme = (
     'Class::MOP::Class::Immutable::Trait'             => ['.+'],
     'Class::MOP::Class::Immutable::Class::MOP::Class' => ['.+'],
     'Class::MOP::Deprecated'                          => ['.+'],
-
-    'Class::MOP::Instance' => [
+    'Class::MOP::Instance'                            => [
         qw( BUILDARGS
             bless_instance_structure
             is_dependent_on_superclasses ),
@@ -91,7 +89,10 @@ my %trustme = (
             initialize_body
             )
     ],
-    'Class::MOP::Module'  => ['create'],
+    'Class::MOP::Mixin::AttributeCore' => ['.+'],
+    'Class::MOP::Mixin::HasAttributes' => ['.+'],
+    'Class::MOP::Mixin::HasMethods'    => ['.+'],
+    'Class::MOP::Module'               => ['create'],
     'Class::MOP::Package' => [ 'get_method_map', 'wrap_method_body' ],
 );
 

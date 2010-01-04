@@ -5,11 +5,15 @@ use Test::More;
 
 BEGIN {
     use_ok('Class::MOP');
+    use_ok('Class::MOP::Mixin');
+    use_ok('Class::MOP::Mixin::AttributeCore');
+    use_ok('Class::MOP::Mixin::HasAttributes');
+    use_ok('Class::MOP::Mixin::HasMethods');
     use_ok('Class::MOP::Package');
     use_ok('Class::MOP::Module');
     use_ok('Class::MOP::Class');
     use_ok('Class::MOP::Class::Immutable::Trait');
-    use_ok('Class::MOP::Attribute');
+    use_ok('Class::MOP::Method');
     use_ok('Class::MOP::Method');
     use_ok('Class::MOP::Method::Wrapped');
     use_ok('Class::MOP::Method::Inlined');
@@ -29,6 +33,10 @@ my %METAS = (
     'Class::MOP::Method::Accessor'  => Class::MOP::Method::Accessor->meta,
     'Class::MOP::Method::Constructor' =>
         Class::MOP::Method::Constructor->meta,
+    'Class::MOP::Mixin'   => Class::MOP::Mixin->meta,
+    'Class::MOP::Mixin::AttributeCore'   => Class::MOP::Mixin::AttributeCore->meta,
+    'Class::MOP::Mixin::HasAttributes'   => Class::MOP::Mixin::HasAttributes->meta,
+    'Class::MOP::Mixin::HasMethods'      => Class::MOP::Mixin::HasMethods->meta,
     'Class::MOP::Package'         => Class::MOP::Package->meta,
     'Class::MOP::Module'          => Class::MOP::Module->meta,
     'Class::MOP::Class'           => Class::MOP::Class->meta,
@@ -77,6 +85,10 @@ is_deeply(
         Class::MOP::Method::Generated->meta,
         Class::MOP::Method::Inlined->meta,
         Class::MOP::Method::Wrapped->meta,
+        Class::MOP::Mixin->meta,
+        Class::MOP::Mixin::AttributeCore->meta,
+        Class::MOP::Mixin::HasAttributes->meta,
+        Class::MOP::Mixin::HasMethods->meta,
         Class::MOP::Module->meta,
         Class::MOP::Object->meta,
         Class::MOP::Package->meta,
@@ -92,6 +104,10 @@ is_deeply(
             Class::MOP::Class
             Class::MOP::Class::Immutable::Class::MOP::Class
             Class::MOP::Class::Immutable::Trait
+            Class::MOP::Mixin
+            Class::MOP::Mixin::AttributeCore
+            Class::MOP::Mixin::HasAttributes
+            Class::MOP::Mixin::HasMethods
             Class::MOP::Instance
             Class::MOP::Method
             Class::MOP::Method::Accessor

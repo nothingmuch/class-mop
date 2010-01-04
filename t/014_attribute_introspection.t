@@ -8,12 +8,13 @@ use Class::MOP;
 
 {
     my $attr = Class::MOP::Attribute->new('$test');
-    is($attr->meta, Class::MOP::Attribute->meta, '... instance and class both lead to the same meta');
+    is( $attr->meta, Class::MOP::Attribute->meta,
+        '... instance and class both lead to the same meta' );
 }
 
 {
     my $meta = Class::MOP::Attribute->meta();
-    isa_ok($meta, 'Class::MOP::Class');
+    isa_ok( $meta, 'Class::MOP::Class' );
 
     my @methods = qw(
         new
@@ -62,15 +63,20 @@ use Class::MOP;
         remove_accessors
 
         _new
-        );
+    );
 
     is_deeply(
-        [ sort $meta->get_method_list ],
+        [
+            sort Class::MOP::Mixin::AttributeCore->meta->get_method_list,
+            $meta->get_method_list
+        ],
         [ sort @methods ],
-        '... our method list matches');
+        '... our method list matches'
+    );
 
     foreach my $method_name (@methods) {
-        ok($meta->has_method($method_name), '... Class::MOP::Attribute->has_method(' . $method_name . ')');
+        ok( $meta->find_method_by_name($method_name),
+            '... Class::MOP::Attribute->find_method_by_name(' . $method_name . ')' );
     }
 
     my @attributes = (
@@ -91,12 +97,19 @@ use Class::MOP;
     );
 
     is_deeply(
-        [ sort $meta->get_attribute_list ],
+        [
+            sort Class::MOP::Mixin::AttributeCore->meta->get_attribute_list,
+            $meta->get_attribute_list
+        ],
         [ sort @attributes ],
-        '... our attribute list matches');
+        '... our attribute list matches'
+    );
 
     foreach my $attribute_name (@attributes) {
-        ok($meta->has_attribute($attribute_name), '... Class::MOP::Attribute->has_attribute(' . $attribute_name . ')');
+        ok( $meta->find_attribute_by_name($attribute_name),
+                  '... Class::MOP::Attribute->find_attribute_by_name('
+                . $attribute_name
+                . ')' );
     }
 
     # We could add some tests here to make sure that

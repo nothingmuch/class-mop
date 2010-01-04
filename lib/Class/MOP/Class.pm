@@ -19,7 +19,7 @@ our $VERSION   = '0.97';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Module';
+use base 'Class::MOP::Module', 'Class::MOP::Mixin::HasAttributes';
 
 # Creation
 
@@ -244,6 +244,7 @@ sub _check_metaclass_compatibility {
         no warnings 'uninitialized';
         my $name = $self->name;
         return unless $name =~ /^$ANON_CLASS_PREFIX/o;
+
         # Moose does a weird thing where it replaces the metaclass for
         # class when fixing metaclass incompatibility. In that case,
         # we don't want to clean out the namespace now. We can detect
@@ -329,8 +330,6 @@ sub create {
 # all these attribute readers will be bootstrapped
 # away in the Class::MOP bootstrap section
 
-sub _attribute_map           { $_[0]->{'attributes'}                  }
-sub attribute_metaclass      { $_[0]->{'attribute_metaclass'}         }
 sub instance_metaclass       { $_[0]->{'instance_metaclass'}          }
 sub immutable_trait          { $_[0]->{'immutable_trait'}             }
 sub constructor_class        { $_[0]->{'constructor_class'}           }
@@ -468,6 +467,61 @@ sub rebless_instance {
 
 sub rebless_instance_away {
     # this intentionally does nothing, it is just a hook
+}
+
+sub _attach_attribute {
+    my ($self, $attribute) = @_;
+    $attribute->attach_to_class($self);
+}
+
+sub _post_add_attribute {
+    my ( $self, $attribute ) = @_;
+
+    $self->invalidate_meta_instances;
+
+    # invalidate package flag here
+    try {
+        local $SIG{__DIE__};
+        $attribute->install_accessors;
+    }
+    catch {
+        $self->remove_attribute( $attribute->name );
+        die $_;
+    };
+}
+
+sub remove_attribute {
+    my $self = shift;
+
+    my $removed_attribute = $self->SUPER::remove_attribute(@_)
+        or return;
+
+    $self->invalidate_meta_instances;
+
+    $removed_attribute->remove_accessors;
+    $removed_attribute->detach_from_class;
+
+    return$removed_attribute;
+}
+
+sub find_attribute_by_name {
+    my ( $self, $attr_name ) = @_;
+
+    foreach my $class ( $self->linearized_isa ) {
+        # fetch the meta-class ...
+        my $meta = $self->initialize($class);
+        return $meta->get_attribute($attr_name)
+            if $meta->has_attribute($attr_name);
+    }
+
+    return;
+}
+
+sub get_all_attributes {
+    my $self = shift;
+    my %attrs = map { %{ $self->initialize($_)->_attribute_map } }
+        reverse $self->linearized_isa;
+    return values %attrs;
 }
 
 # Inheritance
@@ -699,55 +753,6 @@ sub find_next_method_by_name {
     return;
 }
 
-## Attributes
-
-sub add_attribute {
-    my $self      = shift;
-    # either we have an attribute object already
-    # or we need to create one from the args provided
-    my $attribute = blessed($_[0]) ? $_[0] : $self->attribute_metaclass->new(@_);
-    # make sure it is derived from the correct type though
-    ($attribute->isa('Class::MOP::Attribute'))
-        || confess "Your attribute must be an instance of Class::MOP::Attribute (or a subclass)";
-
-    # first we attach our new attribute
-    # because it might need certain information
-    # about the class which it is attached to
-    $attribute->attach_to_class($self);
-
-    my $attr_name = $attribute->name;
-
-    # then we remove attributes of a conflicting
-    # name here so that we can properly detach
-    # the old attr object, and remove any
-    # accessors it would have generated
-    if ( $self->has_attribute($attr_name) ) {
-        $self->remove_attribute($attr_name);
-    } else {
-        $self->invalidate_meta_instances();
-    }
-    
-    # get our count of previously inserted attributes and
-    # increment by one so this attribute knows its order
-    my $order = (scalar keys %{$self->_attribute_map});
-    $attribute->_set_insertion_order($order);
-
-    # then onto installing the new accessors
-    $self->_attribute_map->{$attr_name} = $attribute;
-
-    # invalidate package flag here
-    try {
-        local $SIG{__DIE__};
-        $attribute->install_accessors();
-    }
-    catch {
-        $self->remove_attribute($attr_name);
-        die $_;
-    };
-
-    return $attribute;
-}
-
 sub update_meta_instance_dependencies {
     my $self = shift;
 
@@ -764,9 +769,10 @@ sub add_meta_instance_dependencies {
     my @attrs = $self->get_all_attributes();
 
     my %seen;
-    my @classes = grep { not $seen{$_->name}++ } map { $_->associated_class } @attrs;
+    my @classes = grep { not $seen{ $_->name }++ }
+        map { $_->associated_class } @attrs;
 
-    foreach my $class ( @classes ) { 
+    foreach my $class (@classes) {
         $class->add_dependent_meta_instance($self);
     }
 
@@ -777,7 +783,7 @@ sub remove_meta_instance_dependencies {
     my $self = shift;
 
     if ( my $classes = delete $self->{meta_instance_dependencies} ) {
-        foreach my $class ( @$classes ) {
+        foreach my $class (@$classes) {
             $class->remove_dependent_meta_instance($self);
         }
 
@@ -796,70 +802,19 @@ sub add_dependent_meta_instance {
 sub remove_dependent_meta_instance {
     my ( $self, $metaclass ) = @_;
     my $name = $metaclass->name;
-    @$_ = grep { $_->name ne $name } @$_ for $self->{dependent_meta_instances};
+    @$_ = grep { $_->name ne $name } @$_
+        for $self->{dependent_meta_instances};
 }
 
 sub invalidate_meta_instances {
     my $self = shift;
-    $_->invalidate_meta_instance() for $self, @{ $self->{dependent_meta_instances} };
+    $_->invalidate_meta_instance()
+        for $self, @{ $self->{dependent_meta_instances} };
 }
 
 sub invalidate_meta_instance {
     my $self = shift;
     undef $self->{_meta_instance};
-}
-
-sub has_attribute {
-    my ($self, $attribute_name) = @_;
-    (defined $attribute_name)
-        || confess "You must define an attribute name";
-    exists $self->_attribute_map->{$attribute_name};
-}
-
-sub get_attribute {
-    my ($self, $attribute_name) = @_;
-    (defined $attribute_name)
-        || confess "You must define an attribute name";
-    return $self->_attribute_map->{$attribute_name}
-    # NOTE:
-    # this will return undef anyway, so no need ...
-    #    if $self->has_attribute($attribute_name);
-    #return;
-}
-
-sub remove_attribute {
-    my ($self, $attribute_name) = @_;
-    (defined $attribute_name)
-        || confess "You must define an attribute name";
-    my $removed_attribute = $self->_attribute_map->{$attribute_name};
-    return unless defined $removed_attribute;
-    delete $self->_attribute_map->{$attribute_name};
-    $self->invalidate_meta_instances();
-    $removed_attribute->remove_accessors();
-    $removed_attribute->detach_from_class();
-    return $removed_attribute;
-}
-
-sub get_attribute_list {
-    my $self = shift;
-    keys %{$self->_attribute_map};
-}
-
-sub get_all_attributes {
-    my $self = shift;
-    my %attrs = map { %{ $self->initialize($_)->_attribute_map } } reverse $self->linearized_isa;
-    return values %attrs;
-}
-
-sub find_attribute_by_name {
-    my ($self, $attr_name) = @_;
-    foreach my $class ($self->linearized_isa) {
-        # fetch the meta-class ...
-        my $meta = $self->initialize($class);
-        return $meta->get_attribute($attr_name)
-            if $meta->has_attribute($attr_name);
-    }
-    return;
 }
 
 # check if we can reinitialize
@@ -1051,6 +1006,8 @@ sub _inline_constructor {
     my ( $self, %args ) = @_;
 
     my $name = $args{constructor_name};
+    # A class may not even have a constructor, and that's okay.
+    return unless defined $name;
 
     if ( $self->has_method($name) && !$args{replace_constructor} ) {
         my $class = $self->name;

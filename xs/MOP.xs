@@ -1,9 +1,5 @@
 #include "mop.h"
 
-SV *mop_method_metaclass;
-SV *mop_associated_metaclass;
-SV *mop_wrap;
-
 static bool
 find_method (const char *key, STRLEN keylen, SV *val, void *ud)
 {
@@ -15,8 +11,9 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
     return FALSE;
 }
 
+EXTERN_C XS(boot_Class__MOP__Mixin__HasMethods);
 EXTERN_C XS(boot_Class__MOP__Package);
-EXTERN_C XS(boot_Class__MOP__Attribute);
+EXTERN_C XS(boot_Class__MOP__Mixin__AttributeCore);
 EXTERN_C XS(boot_Class__MOP__Method);
 
 MODULE = Class::MOP   PACKAGE = Class::MOP
@@ -26,12 +23,9 @@ PROTOTYPES: DISABLE
 BOOT:
     mop_prehash_keys();
 
-    mop_method_metaclass     = newSVpvs("method_metaclass");
-    mop_wrap                 = newSVpvs("wrap");
-    mop_associated_metaclass = newSVpvs("associated_metaclass");
-
+    MOP_CALL_BOOT (boot_Class__MOP__Mixin__HasMethods);
     MOP_CALL_BOOT (boot_Class__MOP__Package);
-    MOP_CALL_BOOT (boot_Class__MOP__Attribute);
+    MOP_CALL_BOOT (boot_Class__MOP__Mixin__AttributeCore);
     MOP_CALL_BOOT (boot_Class__MOP__Method);
 
 # use prototype here to be compatible with get_code_info from Sub::Identify
