@@ -59,7 +59,11 @@ use Class::MOP;
 
         process_accessors
         _process_accessors
+        compute_all_accessors
+        _compute_accessors
         install_accessors
+        _create_accessors
+        _install_accessor
         remove_accessors
 
         _new

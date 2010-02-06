@@ -294,7 +294,7 @@ sub clear_value {
 
 sub accessor_metaclass { 'Class::MOP::Method::Accessor' }
 
-sub _process_accessors {
+sub _compute_accessors {
     my ($self, $type, $accessor, $generate_as_inline_methods) = @_;
 
     my $method_ctx;
@@ -307,69 +307,97 @@ sub _process_accessors {
         (ref($accessor) eq 'HASH')
             || confess "bad accessor/reader/writer/predicate/clearer format, must be a HASH ref";
         my ($name, $method) = %{$accessor};
-        $method = $self->accessor_metaclass->wrap(
+        return ($name, [
+            $self->accessor_metaclass,
             $method,
-            package_name => $self->associated_class->name,
-            name         => $name,
+            name => $name,
             definition_context => $method_ctx,
-        );
-        $self->associate_method($method);
-        return ($name, $method);
+        ]);
     }
-    else {
-        my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
-        my $method;
-        try {
-            if ( $method_ctx ) {
-                my $desc = "accessor $accessor";
-                if ( $accessor ne $self->name ) {
-                    $desc .= " of attribute " . $self->name;
-                }
 
-                $method_ctx->{description} = $desc;
-            }
+    my $inline_me = ($generate_as_inline_methods && $self->associated_class->instance_metaclass->is_inlinable);
 
-            $method = $self->accessor_metaclass->new(
-                attribute     => $self,
-                is_inline     => $inline_me,
-                accessor_type => $type,
-                package_name  => $self->associated_class->name,
-                name          => $accessor,
-                definition_context => $method_ctx,
-            );
+    if ( $method_ctx ) {
+        my $desc = "accessor $accessor";
+        if ( $accessor ne $self->name ) {
+            $desc .= " of attribute " . $self->name;
         }
-        catch {
-            confess "Could not create the '$type' method for " . $self->name . " because : $_";
-        };
-        $self->associate_method($method);
-        return ($accessor, $method);
+
+        $method_ctx->{description} = $desc;
     }
+
+    return ($accessor, [
+        $self->accessor_metaclass,
+        attribute     => $self,
+        is_inline     => $inline_me,
+        accessor_type => $type,
+        name          => $accessor,
+        definition_context => $method_ctx,
+    ]);
+}
+
+sub _create_accessors {
+    my ($self, $type, $args) = @_;
+
+    my $accessor_metaclass = shift @{ $args };
+    my $create = (ref $args->[0] && ref $args->[0] eq 'CODE') ? 'wrap' : 'new';
+
+    my $method;
+    try {
+        $method = $accessor_metaclass->$create(
+            @{ $args }, package_name => $self->associated_class->name,
+        );
+    }
+    catch {
+        confess "Could not create the '$type' method for " . $self->name . " because : $_";
+    };
+
+    $self->associate_method($method);
+
+    return $method;
+}
+
+# for extension compatibility
+sub _process_accessors {
+    my $self = shift;
+    my ($type, $accessor, $generate_as_inline_methods) = @_;
+
+    my ($name, $args) = $self->_compute_accessors(@_);
+    my $method = $self->_create_accessors($type, $args);
+
+    return ($name, $method);
+}
+
+sub compute_all_accessors {
+    my ($self, $inline) = @_;
+
+    my @ret = map {
+        $self->${\"has_$_"}
+            ? ($_ => [$self->_compute_accessors($_ => $self->$_, $inline)])
+            : ()
+    } qw(accessor reader writer predicate clearer);
+
+    return @ret;
 }
 
 sub install_accessors {
     my $self   = shift;
     my $inline = shift;
+
+    my %accessors = $self->compute_all_accessors($inline);
+    while (my ($type, $desc) = each %accessors) {
+        my ($name, $args) = @{ $desc };
+        $self->_install_accessor($name => $self->_create_accessors($type => $args));
+    }
+
+    return;
+}
+
+sub _install_accessor {
+    my ($self, $name, $method) = @_;
     my $class  = $self->associated_class;
 
-    $class->add_method(
-        $self->_process_accessors('accessor' => $self->accessor(), $inline)
-    ) if $self->has_accessor();
-
-    $class->add_method(
-        $self->_process_accessors('reader' => $self->reader(), $inline)
-    ) if $self->has_reader();
-
-    $class->add_method(
-        $self->_process_accessors('writer' => $self->writer(), $inline)
-    ) if $self->has_writer();
-
-    $class->add_method(
-        $self->_process_accessors('predicate' => $self->predicate(), $inline)
-    ) if $self->has_predicate();
-
-    $class->add_method(
-        $self->_process_accessors('clearer' => $self->clearer(), $inline)
-    ) if $self->has_clearer();
+    $class->add_method($name => $method);
 
     return;
 }
