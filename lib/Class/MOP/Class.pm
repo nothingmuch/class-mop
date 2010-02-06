@@ -726,7 +726,7 @@ sub find_method_by_name {
     (defined $method_name && length $method_name)
         || confess "You must define a method name to find";
     foreach my $class ($self->linearized_isa) {
-        my $method = $self->initialize($class)->get_method($method_name);
+        my $method = Class::MOP::Class->initialize($class)->get_method($method_name);
         return $method if defined $method;
     }
     return;
