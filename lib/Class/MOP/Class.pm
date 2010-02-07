@@ -95,7 +95,8 @@ sub _construct_class_instance {
     # NOTE:
     # we need to weaken any anon classes
     # so that they can call DESTROY properly
-    Class::MOP::weaken_metaclass($package_name) if $meta->is_anon_class;
+    Class::MOP::weaken_metaclass($package_name)
+        if $meta->is_anon_class || $options->{no_cache};
 
     $meta;
 }
@@ -538,7 +539,7 @@ sub find_attribute_by_name {
 
     foreach my $class ( $self->linearized_isa ) {
         # fetch the meta-class ...
-        my $meta = $self->initialize($class);
+        my $meta = $self->initialize($class, no_cache => 1);
         return $meta->get_attribute($attr_name)
             if $meta->has_attribute($attr_name);
     }
@@ -548,7 +549,7 @@ sub find_attribute_by_name {
 
 sub get_all_attributes {
     my $self = shift;
-    my %attrs = map { %{ $self->initialize($_)->_attribute_map } }
+    my %attrs = map { %{ $self->initialize($_, no_cache => 1)->_attribute_map } }
         reverse $self->linearized_isa;
     return values %attrs;
 }
@@ -637,7 +638,7 @@ sub class_precedence_list {
         return (
             $name,
             map {
-                $self->initialize($_)->class_precedence_list()
+                $self->initialize($_, no_cache => 1)->class_precedence_list()
             } $self->superclasses()
         );
     }
@@ -726,7 +727,7 @@ sub find_method_by_name {
     (defined $method_name && length $method_name)
         || confess "You must define a method name to find";
     foreach my $class ($self->linearized_isa) {
-        my $method = Class::MOP::Class->initialize($class)->get_method($method_name);
+        my $method = $self->initialize($class, no_cache => 1)->get_method($method_name);
         return $method if defined $method;
     }
     return;
@@ -737,7 +738,7 @@ sub get_all_methods {
 
     my %methods;
     for my $class ( reverse $self->linearized_isa ) {
-        my $meta = $self->initialize($class);
+        my $meta = $self->initialize($class, no_cache => 1);
 
         $methods{$_} = $meta->get_method($_)
             for $meta->get_method_list;
@@ -749,7 +750,7 @@ sub get_all_methods {
 sub get_all_method_names {
     my $self = shift;
     my %uniq;
-    return grep { !$uniq{$_}++ } map { $self->initialize($_)->get_method_list } $self->linearized_isa;
+    return grep { !$uniq{$_}++ } map { $self->initialize($_, no_cache => 1)->get_method_list } $self->linearized_isa;
 }
 
 sub find_all_methods_by_name {
@@ -759,7 +760,7 @@ sub find_all_methods_by_name {
     my @methods;
     foreach my $class ($self->linearized_isa) {
         # fetch the meta-class ...
-        my $meta = $self->initialize($class);
+        my $meta = $self->initialize($class, no_cache => 1);
         push @methods => {
             name  => $method_name,
             class => $class,
@@ -776,7 +777,7 @@ sub find_next_method_by_name {
     my @cpl = $self->linearized_isa;
     shift @cpl; # discard ourselves
     foreach my $class (@cpl) {
-        my $method = $self->initialize($class)->get_method($method_name);
+        my $method = $self->initialize($class, no_cache => 1)->get_method($method_name);
         return $method if defined $method;
     }
     return;
