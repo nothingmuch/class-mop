@@ -656,6 +656,10 @@ Class::MOP::Instance->meta->add_attribute(
     ),
 );
 
+# cache the metaclasses for ::Object and ::Mixin, since they don't get this
+# done above (because they have no attributes to add)
+$_->meta for qw(Class::MOP::Object Class::MOP::Mixin);
+
 require Class::MOP::Deprecated unless our $no_deprecated;
 
 # we need the meta instance of the meta instance to be created now, in order
