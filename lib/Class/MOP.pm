@@ -1,4 +1,3 @@
-
 package Class::MOP;
 
 use strict;
@@ -88,31 +87,36 @@ sub load_first_existing_class {
         }
     }
 
-    my $found;
-    my %exceptions;
-
+    my $file_loaded;
     for my $class (@classes) {
-        my $file = _class_to_pmfile($class);
 
         return $class if is_class_loaded($class);;
 
-        return $class if try {
-            local $SIG{__DIE__};
-            require $file;
-            return 1;
-        }
-        catch {
-            unless (/^Can't locate \Q$file\E in \@INC/) {
-                confess "Couldn't load class ($class) because: $_";
-            }
+        my $file = _class_to_pmfile($class);
 
-            return;
-        };
+	$file_loaded =
+	    try {
+		local $SIG{__DIE__};
+		require $file;
+		return [$class, $file];
+	    }
+	    catch {
+		unless (/^Can't locate \Q$file\E in \@INC/) {
+		    confess "Couldn't load class ($class) because: $_";
+		}
+		return;
+	    };
+
+        return $class if $file_loaded && is_class_loaded($class);
     }
 
-    if ( @classes > 1 ) {
+    if( $file_loaded ) {
+	confess "$file_loaded->[0] is empty or missing in file $file_loaded->[1]";
+    }
+    elsif ( @classes > 1 ) {
         confess "Can't locate any of @classes in \@INC (\@INC contains: @INC).";
-    } else {
+    }
+    else {
         confess "Can't locate " . _class_to_pmfile($classes[0]) . " in \@INC (\@INC contains: @INC).";
     }
 }
