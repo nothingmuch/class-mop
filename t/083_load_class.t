@@ -145,4 +145,13 @@ throws_ok {
         'an @ISA with members does mean a class is loaded' );
 }
 
+{
+
+    throws_ok {
+	Class::MOP::load_class("MistypedPackageName")
+    } qr/empty/, 'throws for nonexistent package name with something in a sub-namespace';
+
+}
+
+
 done_testing;
