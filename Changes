@@ -1,8 +1,15 @@
 Revision history for Perl extension Class-MOP.
 
+1.00 Thu, Mar 25, 2010
+
+  [GRRR< FUCKIGN STEVAN@]
+
+  * Re-release 0.99 as 1.00.
+
 0.99 Thu, Mar 25, 2010
 
   [DOCUMENTATION]
+
   * Fix typo in Class::MOP::Attribute (Franck Cuny).
 
 0.98 Mon, Jan 18, 2010
