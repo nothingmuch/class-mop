@@ -302,12 +302,12 @@ mop_attr_destroy (mop_attr_t *attr)
 
 mop_attr_t *_attr_build_c_instance(SV *perl_attr) {
     mop_attr_t *attr = mop_attr_new_from_perl_attr(perl_attr);
-    mop_stash_in_mg(SvRV(perl_attr), NULL, (void *)attr, mop_attr_destroy);
+    mop_stash_in_mg(aTHX_ SvRV(perl_attr), NULL, (void *)attr, mop_attr_destroy);
     return attr;
 }
 
 mop_attr_t *mop_attr_get_c_instance (SV *perl_attr) {
-    mop_attr_t *attr = mop_get_stashed_ptr_in_mg(SvRV(perl_attr));
+    mop_attr_t *attr = mop_get_stashed_ptr_in_mg(aTHX_ SvRV(perl_attr));
 
     if ( attr )
         return attr;

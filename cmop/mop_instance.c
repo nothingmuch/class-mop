@@ -100,12 +100,12 @@ mop_instance_destroy (mop_instance_t *instance)
 
 mop_instance_t *_instance_build_c_instance(SV *perl_instance) {
     mop_instance_t *instance = mop_instance_new_from_perl_instance(perl_instance);
-    mop_stash_in_mg(SvRV(perl_instance), NULL, (void *)instance, mop_instance_destroy);
+    mop_stash_in_mg(aTHX_ SvRV(perl_instance), NULL, (void *)instance, mop_instance_destroy);
     return instance;
 }
 
 mop_instance_t *mop_instance_get_c_instance (SV *perl_instance) {
-    mop_instance_t *instance = mop_get_stashed_ptr_in_mg(SvRV(perl_instance));
+    mop_instance_t *instance = mop_get_stashed_ptr_in_mg(aTHX_ SvRV(perl_instance));
 
     if ( instance )
         return instance;
