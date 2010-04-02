@@ -130,6 +130,20 @@ ok(!Foo::NoMeta->can('meta'), "non-cmop superclass doesn't get methods installed
 isa_ok(Class::MOP::class_of('Foo::NoMeta2'), 'Class::MOP::Class');
 isa_ok(Foo::NoMeta2::Sub->meta, 'Foo::Meta::Class');
 
+Foo::Meta::Class->create('Foo::WithMeta');
+{
+    package Foo::WithMeta::Sub;
+    use base 'Foo::WithMeta';
+}
+Class::MOP::Class->create(
+    'Foo::WithMeta::Sub::Sub',
+    superclasses => ['Foo::WithMeta::Sub']
+);
+
+isa_ok(Class::MOP::class_of('Foo::WithMeta'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::WithMeta::Sub'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::WithMeta::Sub::Sub'), 'Foo::Meta::Class');
+
 # unsafe fixing...
 
 {
