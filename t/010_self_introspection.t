@@ -68,6 +68,7 @@ my @class_mop_class_methods = qw(
     rebless_instance rebless_instance_back rebless_instance_away
     check_metaclass_compatibility _check_metaclass_compatibility
     _check_class_metaclass_compatibility _check_single_metaclass_compatibility
+    _class_metaclass_is_compatible _single_metaclass_is_compatible
     _fix_metaclass_incompatibility _fix_class_metaclass_incompatibility
     _fix_single_metaclass_incompatibility _base_metaclasses
     _can_fix_class_metaclass_incompatibility_by_subclassing
