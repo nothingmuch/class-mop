@@ -144,6 +144,39 @@ isa_ok(Class::MOP::class_of('Foo::WithMeta'), 'Foo::Meta::Class');
 isa_ok(Class::MOP::class_of('Foo::WithMeta::Sub'), 'Foo::Meta::Class');
 isa_ok(Class::MOP::class_of('Foo::WithMeta::Sub::Sub'), 'Foo::Meta::Class');
 
+Foo::Meta::Class->create('Foo::WithMeta2');
+{
+    package Foo::WithMeta2::Sub;
+    use base 'Foo::WithMeta2';
+}
+{
+    package Foo::WithMeta2::Sub::Sub;
+    use base 'Foo::WithMeta2::Sub';
+}
+Class::MOP::Class->create(
+    'Foo::WithMeta2::Sub::Sub::Sub',
+    superclasses => ['Foo::WithMeta2::Sub::Sub']
+);
+
+isa_ok(Class::MOP::class_of('Foo::WithMeta2'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::WithMeta2::Sub'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::WithMeta2::Sub::Sub'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::WithMeta2::Sub::Sub::Sub'), 'Foo::Meta::Class');
+
+Class::MOP::Class->create(
+    'Foo::Reverse::Sub::Sub',
+    superclasses => ['Foo::Reverse::Sub'],
+);
+eval "package Foo::Reverse::Sub; use base 'Foo::Reverse';";
+Foo::Meta::Class->create(
+    'Foo::Reverse',
+);
+isa_ok(Class::MOP::class_of('Foo::Reverse'), 'Foo::Meta::Class');
+{ local $TODO = "no idea how to handle this";
+isa_ok(Class::MOP::class_of('Foo::Reverse::Sub'), 'Foo::Meta::Class');
+isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
+}
+
 # unsafe fixing...
 
 {
