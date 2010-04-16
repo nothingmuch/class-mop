@@ -384,7 +384,10 @@ sub _fix_class_metaclass_incompatibility {
     my ( $super_meta ) = @_;
 
     if ($self->_can_fix_class_metaclass_incompatibility_by_subclassing($super_meta)) {
-        $super_meta->meta->rebless_instance($self);
+        my $super_meta_name = $super_meta->is_immutable
+                                  ? $super_meta->_get_mutable_metaclass_name
+                                  : blessed($super_meta);
+        $super_meta_name->meta->rebless_instance($self);
     }
 }
 

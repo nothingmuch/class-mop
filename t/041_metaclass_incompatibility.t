@@ -193,4 +193,25 @@ isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
               "can't switch out the attribute metaclass of a class that already has attributes";
 }
 
+# immutability...
+
+{
+    my $foometa = Foo::Meta::Class->create(
+        'Foo::Immutable',
+    );
+    $foometa->make_immutable;
+    my $barmeta = Class::MOP::Class->create(
+        'Bar::Mutable',
+    );
+    my $bazmeta = Class::MOP::Class->create(
+        'Baz::Mutable',
+    );
+    $bazmeta->superclasses($foometa->name);
+    lives_ok { $bazmeta->superclasses($barmeta->name) }
+             "can still set superclasses";
+    ok(!$bazmeta->is_immutable,
+       "immutable superclass doesn't make this class immutable");
+    lives_ok { $bazmeta->make_immutable } "can still make immutable";
+}
+
 done_testing;
