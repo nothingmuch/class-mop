@@ -355,11 +355,6 @@ sub _fix_metaclass_incompatibility {
     }
     return unless $necessary;
 
-    ($self->is_pristine)
-        || confess "Can't fix metaclass incompatibility for "
-                 . $self->name
-                 . " because it is not pristine.";
-
     for my $super (map { Class::MOP::Class->initialize($_) } @supers) {
         if (!$self->_class_metaclass_is_compatible($super->name)) {
             $self->_fix_class_metaclass_incompatibility($super);
@@ -384,6 +379,11 @@ sub _fix_class_metaclass_incompatibility {
     my ( $super_meta ) = @_;
 
     if ($self->_can_fix_class_metaclass_incompatibility_by_subclassing($super_meta)) {
+        ($self->is_pristine)
+            || confess "Can't fix metaclass incompatibility for "
+                     . $self->name
+                     . " because it is not pristine.";
+
         my $super_meta_name = $super_meta->is_immutable
                                   ? $super_meta->_get_mutable_metaclass_name
                                   : blessed($super_meta);
@@ -396,6 +396,11 @@ sub _fix_single_metaclass_incompatibility {
     my ( $metaclass_type, $super_meta ) = @_;
 
     if ($self->_can_fix_single_metaclass_incompatibility_by_subclassing($metaclass_type, $super_meta)) {
+        ($self->is_pristine)
+            || confess "Can't fix metaclass incompatibility for "
+                     . $self->name
+                     . " because it is not pristine.";
+
         $self->{$metaclass_type} = $super_meta->$metaclass_type;
     }
 }
