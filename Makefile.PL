@@ -30,6 +30,8 @@ test_requires 'File::Spec';
 test_requires 'Test::More'      => '0.88';
 test_requires 'Test::Exception' => '0.27';
 
+repository 'git://git.moose.perl.org/Class-MOP.git';
+
 extra_tests();
 
 makemaker_args( CCFLAGS => $ccflags );
