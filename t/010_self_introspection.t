@@ -100,8 +100,8 @@ my @class_mop_class_methods = qw(
     is_mutable is_immutable make_mutable make_immutable
     _initialize_immutable _install_inlined_code _inlined_methods
     _add_inlined_method _inline_accessors _inline_constructor
-    _inline_destructor _immutable_options _rebless_as_immutable
-    _rebless_as_mutable _remove_inlined_code
+    _inline_destructor _immutable_options _real_ref_name
+    _rebless_as_immutable _rebless_as_mutable _remove_inlined_code
 
     _immutable_metaclass
     immutable_trait immutable_options

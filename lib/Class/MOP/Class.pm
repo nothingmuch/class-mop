@@ -67,15 +67,10 @@ sub _construct_class_instance {
         return $meta;
     }
 
-    # NOTE:
-    # we need to deal with the possibility
-    # of class immutability here, and then
-    # get the name of the class appropriately
-    $class = (ref($class)
-                    ? ($class->is_immutable
-                        ? $class->_get_mutable_metaclass_name()
-                        : ref($class))
-                    : $class);
+    $class
+        = ref $class
+        ? $class->_real_ref_name
+        : $class;
 
     # now create the metaclass
     my $meta;
@@ -101,6 +96,16 @@ sub _construct_class_instance {
     Class::MOP::weaken_metaclass($package_name) if $meta->is_anon_class;
 
     $meta;
+}
+
+sub _real_ref_name {
+    my $self = shift;
+
+    # NOTE: we need to deal with the possibility of class immutability here,
+    # and then get the name of the class appropriately
+    return $self->is_immutable
+        ? $self->_get_mutable_metaclass_name()
+        : ref $self;
 }
 
 sub _new {
@@ -219,14 +224,7 @@ sub _class_metaclass_is_compatible {
     my $super_meta = Class::MOP::get_metaclass_by_name($superclass_name)
         || return 1;
 
-    # NOTE:
-    # we need to deal with the possibility
-    # of class immutability here, and then
-    # get the name of the class appropriately
-    my $super_meta_type
-        = $super_meta->is_immutable
-        ? $super_meta->_get_mutable_metaclass_name()
-        : ref($super_meta);
+    my $super_meta_type = $super_meta->_real_ref_name;
 
     return $self->isa($super_meta_type);
 }
@@ -238,14 +236,7 @@ sub _check_class_metaclass_compatibility {
     if (!$self->_class_metaclass_is_compatible($superclass_name)) {
         my $super_meta = Class::MOP::get_metaclass_by_name($superclass_name);
 
-        # NOTE:
-        # we need to deal with the possibility
-        # of class immutability here, and then
-        # get the name of the class appropriately
-        my $super_meta_type
-            = $super_meta->is_immutable
-            ? $super_meta->_get_mutable_metaclass_name()
-            : ref($super_meta);
+        my $super_meta_type = $super_meta->_real_ref_name;
 
         confess "The metaclass of " . $self->name . " ("
               . (ref($self)) . ")" .  " is not compatible with "
@@ -294,14 +285,7 @@ sub _can_fix_class_metaclass_incompatibility_by_subclassing {
     my $self = shift;
     my ($super_meta) = @_;
 
-    # NOTE:
-    # we need to deal with the possibility
-    # of class immutability here, and then
-    # get the name of the class appropriately
-    my $super_meta_type
-        = $super_meta->is_immutable
-        ? $super_meta->_get_mutable_metaclass_name()
-        : ref($super_meta);
+    my $super_meta_type = $super_meta->_real_ref_name;
 
     return $super_meta_type ne blessed($self)
         && $super_meta->isa(blessed($self));
