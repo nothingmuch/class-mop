@@ -172,7 +172,7 @@ Foo::Meta::Class->create(
     'Foo::Reverse',
 );
 isa_ok(Class::MOP::class_of('Foo::Reverse'), 'Foo::Meta::Class');
-{ local $TODO = "no idea how to handle this";
+{ local $TODO = 'No idea how to handle case where parent class is created before children';
 isa_ok(Class::MOP::class_of('Foo::Reverse::Sub'), 'Foo::Meta::Class');
 isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
 }
