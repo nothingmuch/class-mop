@@ -368,9 +368,8 @@ sub _fix_class_metaclass_incompatibility {
                      . $self->name
                      . " because it is not pristine.";
 
-        my $super_meta_name = $super_meta->is_immutable
-                                  ? $super_meta->_get_mutable_metaclass_name
-                                  : blessed($super_meta);
+        my $super_meta_name = $super_meta->_real_ref_name;
+
         $super_meta_name->meta->rebless_instance($self);
     }
 }
