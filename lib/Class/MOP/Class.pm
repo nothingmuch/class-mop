@@ -1153,10 +1153,7 @@ sub _immutable_metaclass {
     # metaclass roles applied (via Moose), then we want to make sure
     # that we preserve that anonymous class (see Fey::ORM for an
     # example of where this matters).
-    my $meta_name
-        = $meta->is_immutable
-        ? $meta->_get_mutable_metaclass_name
-        : ref $meta;
+    my $meta_name = $meta->_real_ref_name;
 
     my $immutable_meta = $meta_name->create(
         $class_name,
