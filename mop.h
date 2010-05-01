@@ -27,6 +27,7 @@ typedef enum {
     KEY_methods,
     KEY_VERSION,
     KEY_ISA,
+    KEY__version,
     key_last,
 } mop_prehashed_key_t;
 

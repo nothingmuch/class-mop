@@ -18,6 +18,7 @@ if ( -d '.git' || $ENV{MAINTAINER_MODE} ) {
 }
 
 requires 'Carp';
+requires 'Data::OptList';
 requires 'Devel::GlobalDestruction';
 requires 'MRO::Compat'  => '0.05';
 requires 'Scalar::Util' => '1.18';

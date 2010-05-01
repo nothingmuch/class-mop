@@ -11,6 +11,35 @@ find_method (const char *key, STRLEN keylen, SV *val, void *ud)
     return FALSE;
 }
 
+static bool
+check_version (SV *klass, SV *required_version)
+{
+    bool ret = 0;
+
+    dSP;
+    ENTER;
+    SAVETMPS;
+    PUSHMARK(SP);
+    EXTEND(SP, 2);
+    PUSHs(klass);
+    PUSHs(required_version);
+    PUTBACK;
+
+    call_method("VERSION", G_DISCARD|G_VOID|G_EVAL);
+
+    SPAGAIN;
+
+    if (!SvTRUE(ERRSV)) {
+        ret = 1;
+    }
+
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+
+    return ret;
+}
+
 EXTERN_C XS(boot_Class__MOP__Mixin__HasMethods);
 EXTERN_C XS(boot_Class__MOP__Package);
 EXTERN_C XS(boot_Class__MOP__Mixin__AttributeCore);
@@ -45,8 +74,9 @@ get_code_info(coderef)
         }
 
 void
-is_class_loaded(klass)
+is_class_loaded(klass, options=NULL)
     SV *klass
+    HV *options
     PREINIT:
         HV *stash;
         bool found_method = FALSE;
@@ -58,6 +88,15 @@ is_class_loaded(klass)
 
         stash = gv_stashsv(klass, 0);
         if (!stash) {
+            XSRETURN_NO;
+        }
+
+        if (options && hv_exists_ent(options, KEY_FOR(_version), HASH_FOR(_version))) {
+            HE *required_version = hv_fetch_ent(options, KEY_FOR(_version), 0, HASH_FOR(_version));
+            if (check_version (klass, HeVAL(required_version))) {
+                XSRETURN_YES;
+            }
+
             XSRETURN_NO;
         }
 

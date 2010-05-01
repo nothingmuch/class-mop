@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+  [NEW FEATURES]
+
+  * is_class_loaded, load_class and load_first_existing_class now allow
+    specifying a minimum required version (Florian Ragwitz).
+
   [BUG FIXES]
 
   * The __INSTANCE__ parameter to Class::MOP::Class::new_object now enforces

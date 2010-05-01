@@ -145,4 +145,36 @@ throws_ok {
         'an @ISA with members does mean a class is loaded' );
 }
 
+{
+    {
+        package Class::WithVersion;
+        our $VERSION = 23;
+    };
+
+    ok( Class::MOP::is_class_loaded('Class::WithVersion', { -version => 13 }),
+        'version 23 satisfies version requirement 13' );
+
+    ok( !Class::MOP::is_class_loaded('Class::WithVersion', { -version => 42 }),
+        'version 23 does not satisfy version requirement 42' );
+
+    throws_ok {
+        Class::MOP::load_first_existing_class('Affe', 'Tiger', 'Class::WithVersion' => { -version => 42 });
+    } qr/Class::WithVersion version 42 required--this is only version 23/,
+    'load_first_existing_class gives correct exception on old version';
+
+    lives_ok {
+        Class::MOP::load_first_existing_class('Affe', 'Tiger', 'Class::WithVersion' => { -version => 13 });
+    } 'loading class with required version with load_first_existing_class';
+
+    throws_ok {
+        Class::MOP::load_class('Class::WithVersion' => { -version => 42 });
+    } qr/Class::WithVersion version 42 required--this is only version 23/,
+    'load_class gives correct exception on old version';
+
+    lives_ok {
+        Class::MOP::load_class('Class::WithVersion' => { -version => 13 });
+    } 'loading class with required version with load_class';
+
+}
+
 done_testing;

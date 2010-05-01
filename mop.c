@@ -194,7 +194,8 @@ static struct {
     DECLARE_KEY_WITH_VALUE(package_cache_flag, "_package_cache_flag"),
     DECLARE_KEY(methods),
     DECLARE_KEY(VERSION),
-    DECLARE_KEY(ISA)
+    DECLARE_KEY(ISA),
+    DECLARE_KEY_WITH_VALUE(_version, "-version")
 };
 
 SV *

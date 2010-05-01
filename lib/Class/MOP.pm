@@ -10,6 +10,7 @@ use MRO::Compat;
 
 use Carp          'confess';
 use Scalar::Util  'weaken', 'reftype', 'blessed';
+use Data::OptList;
 use Try::Tiny;
 
 use Class::MOP::Mixin::AttributeCore;
@@ -78,12 +79,13 @@ sub _class_to_pmfile {
 }
 
 sub load_first_existing_class {
-    my @classes = @_
+    my $classes = Data::OptList::mkopt(\@_)
       or return;
 
-    foreach my $class (@classes) {
-        unless ( _is_valid_class_name($class) ) {
-            my $display = defined($class) ? $class : 'undef';
+    foreach my $class (@{ $classes }) {
+        my $name = $class->[0];
+        unless ( _is_valid_class_name($name) ) {
+            my $display = defined($name) ? $name : 'undef';
             confess "Invalid class name ($display)";
         }
     }
@@ -91,34 +93,48 @@ sub load_first_existing_class {
     my $found;
     my %exceptions;
 
-    for my $class (@classes) {
-        my $file = _class_to_pmfile($class);
+    for my $class (@{ $classes }) {
+        my ($name, $options) = @{ $class };
 
-        return $class if is_class_loaded($class);;
+        if ($options) {
+            return $name if is_class_loaded($name, $options);
+            if (is_class_loaded($name)) {
+                # we already know it's loaded and too old, but we call
+                # ->VERSION anyway to generate the exception for us
+                $name->VERSION($options->{-version});
+            }
+        }
+        else {
+            return $name if is_class_loaded($name);
+        }
 
-        return $class if try {
+        my $file = _class_to_pmfile($name);
+        return $name if try {
             local $SIG{__DIE__};
             require $file;
+            $name->VERSION($options->{-version})
+                if defined $options->{-version};
             return 1;
         }
         catch {
             unless (/^Can't locate \Q$file\E in \@INC/) {
-                confess "Couldn't load class ($class) because: $_";
+                confess "Couldn't load class ($name) because: $_";
             }
 
             return;
         };
     }
 
-    if ( @classes > 1 ) {
-        confess "Can't locate any of @classes in \@INC (\@INC contains: @INC).";
+    if ( @{ $classes } > 1 ) {
+        my @list = map { $_->[0] } @{ $classes };
+        confess "Can't locate any of @list in \@INC (\@INC contains: @INC).";
     } else {
-        confess "Can't locate " . _class_to_pmfile($classes[0]) . " in \@INC (\@INC contains: @INC).";
+        confess "Can't locate " . _class_to_pmfile($classes->[0]->[0]) . " in \@INC (\@INC contains: @INC).";
     }
 }
 
 sub load_class {
-    load_first_existing_class($_[0]);
+    load_first_existing_class($_[0], ref $_[1] ? $_[1] : ());
 
     # This is done to avoid breaking code which checked the return value. Said
     # code is dumb. The return value was _always_ true, since it dies on
@@ -914,7 +930,7 @@ Note that these are all called as B<functions, not methods>.
 
 =over 4
 
-=item B<Class::MOP::load_class($class_name)>
+=item B<Class::MOP::load_class($class_name, \%options?)>
 
 This will load the specified C<$class_name>, if it is not already
 loaded (as reported by C<is_class_loaded>). This function can be used
@@ -923,9 +939,15 @@ unconditionally.
 
 If the module cannot be loaded, an exception is thrown.
 
+You can pass a hash reference with options as second argument. The
+only option currently recognised is C<-version>, which will ensure
+that the loaded class has at least the required version.
+
+See also L</Class Loading Options>.
+
 For historical reasons, this function explicitly returns a true value.
 
-=item B<Class::MOP::is_class_loaded($class_name)>
+=item B<Class::MOP::is_class_loaded($class_name, \%options?)>
 
 Returns a boolean indicating whether or not C<$class_name> has been
 loaded.
@@ -936,6 +958,12 @@ about 99% of the time, but it can be fooled into reporting false
 positives. In particular, loading any of the core L<IO> modules will
 cause most of the rest of the core L<IO> modules to falsely report
 having been loaded, due to the way the base L<IO> module works.
+
+You can pass a hash reference with options as second argument. The
+only option currently recognised is C<-version>, which will ensure
+that the loaded class has at least the required version.
+
+See also L</Class Loading Options>.
 
 =item B<Class::MOP::get_code_info($code)>
 
@@ -963,6 +991,8 @@ variable which is not package specific.
 
 =item B<Class::MOP::load_first_existing_class(@class_names)>
 
+=item B<Class::MOP::load_first_existing_class($classA, \%optionsA?, $classB, ...)>
+
 B<NOTE: DO NOT USE THIS FUNCTION, IT IS FOR INTERNAL USE ONLY!>
 
 Given a list of class names, this function will attempt to load each
@@ -970,6 +1000,13 @@ one in turn.
 
 If it finds a class it can load, it will return that class' name.  If
 none of the classes can be loaded, it will throw an exception.
+
+Additionally, you can pass a hash reference with options after each
+class name. Currently, only C<-version> is recognised and will ensure
+that the loaded class has at least the required version. If the class
+version is not sufficient, an exception will be raised.
+
+See also L</Class Loading Options>.
 
 =back
 
@@ -1021,6 +1058,17 @@ C<$name> key, and return false otherwise.
 =item B<Class::MOP::remove_metaclass_by_name($name)>
 
 This will remove the metaclass stored in the C<$name> key.
+
+=back
+
+=head2 Class Loading Options
+
+=over 4
+
+=item -version
+
+Can be used to pass a minimum required version that will be checked
+against the class version after it was loaded.
 
 =back
 
