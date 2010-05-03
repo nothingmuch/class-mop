@@ -1,5 +1,11 @@
 Revision history for Perl extension Class-MOP.
 
+  [BUG FIXES]
+
+  * The __INSTANCE__ parameter to Class::MOP::Class::new_object now enforces
+    that the passed in reference is blessed into the correct class (by dying if
+    it's not) (doy, jhallock).
+
 1.00 Thu, Mar 25, 2010
 
   [GRRR< FUCKING STEVAN@]

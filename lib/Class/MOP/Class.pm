@@ -359,7 +359,21 @@ sub _construct_instance {
     # the code below is almost certainly incorrect
     # but this is foreign inheritance, so we might
     # have to kludge it in the end.
-    my $instance = $params->{__INSTANCE__} || $meta_instance->create_instance();
+    my $instance;
+    if (my $instance_class = blessed($params->{__INSTANCE__})) {
+        ($instance_class eq $class->name)
+            || confess "Objects passed as the __INSTANCE__ parameter must "
+                     . "already be blessed into the correct class, but "
+                     . "$params->{__INSTANCE__} is not a " . $class->name;
+        $instance = $params->{__INSTANCE__};
+    }
+    elsif (exists $params->{__INSTANCE__}) {
+        confess "The __INSTANCE__ parameter must be a blessed reference, not "
+              . $params->{__INSTANCE__};
+    }
+    else {
+        $instance = $meta_instance->create_instance();
+    }
     foreach my $attr ($class->get_all_attributes()) {
         $attr->initialize_instance_slot($meta_instance, $instance, $params);
     }
