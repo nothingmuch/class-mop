@@ -1,5 +1,7 @@
 Revision history for Perl extension Class-MOP.
 
+1.01 Thu, May 26, 2010
+
   [NEW FEATURES]
 
   * is_class_loaded, load_class and load_first_existing_class now allow

@@ -15,7 +15,7 @@ use Sub::Name    'subname';
 use Devel::GlobalDestruction 'in_global_destruction';
 use Try::Tiny;
 
-our $VERSION   = '1.00';
+our $VERSION   = '1.01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
