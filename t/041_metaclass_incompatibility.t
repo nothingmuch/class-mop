@@ -214,4 +214,43 @@ isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
     lives_ok { $bazmeta->make_immutable } "can still make immutable";
 }
 
+# nonexistent metaclasses
+
+Class::MOP::Class->create('Weird::Meta::Method::Destructor');
+
+lives_ok {
+    Class::MOP::Class->create(
+        'Weird::Class',
+        destructor_class => 'Weird::Meta::Method::Destructor',
+    );
+} "defined metaclass in child with defined metaclass in parent is fine";
+
+is(Weird::Class->meta->destructor_class, 'Weird::Meta::Method::Destructor',
+   "got the right destructor class");
+
+lives_ok {
+    Class::MOP::Class->create(
+        'Weird::Class::Sub',
+        superclasses     => ['Weird::Class'],
+        destructor_class => undef,
+    );
+} "undef metaclass in child with defined metaclass in parent can be fixed";
+
+is(Weird::Class::Sub->meta->destructor_class, 'Weird::Meta::Method::Destructor',
+   "got the right destructor class");
+
+lives_ok {
+    Class::MOP::Class->create(
+        'Weird::Class::Sub2',
+        destructor_class => undef,
+    );
+} "undef metaclass in child with defined metaclass in parent can be fixed";
+
+lives_ok {
+    Weird::Class::Sub2->meta->superclasses('Weird::Class');
+} "undef metaclass in child with defined metaclass in parent can be fixed";
+
+is(Weird::Class::Sub->meta->destructor_class, 'Weird::Meta::Method::Destructor',
+   "got the right destructor class");
+
 done_testing;

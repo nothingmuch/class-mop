@@ -257,8 +257,10 @@ sub _single_metaclass_is_compatible {
     return 1 unless $super_meta->can($metaclass_type);
     # for instance, Moose::Meta::Class has a destructor_class, but
     # Class::MOP::Class doesn't - this shouldn't be an error
-    return 1 if defined $self->$metaclass_type
-             && !defined $super_meta->$metaclass_type;
+    return 1 unless defined $super_meta->$metaclass_type;
+    # if metaclass is defined in superclass but not here, it's not compatible
+    # this is a really odd case
+    return 0 unless defined $self->$metaclass_type;
 
     return $self->$metaclass_type->isa($super_meta->$metaclass_type);
 }
@@ -301,8 +303,11 @@ sub _can_fix_single_metaclass_incompatibility_by_subclassing {
 
     # for instance, Moose::Meta::Class has a destructor_class, but
     # Class::MOP::Class doesn't - this shouldn't be an error
-    return if defined $specific_meta
-           && !defined $super_specific_meta;
+    return unless defined $super_specific_meta;
+
+    # if metaclass is defined in superclass but not here, it's fixable
+    # this is a really odd case
+    return 1 unless defined $specific_meta;
 
     return $specific_meta ne $super_specific_meta
         && $super_specific_meta->isa($specific_meta);
@@ -316,7 +321,6 @@ sub _can_fix_metaclass_incompatibility_by_subclassing {
 
     my %base_metaclass = $self->_base_metaclasses;
     for my $metaclass_type (keys %base_metaclass) {
-        next unless defined $self->$metaclass_type;
         return 1 if $self->_can_fix_single_metaclass_incompatibility_by_subclassing($metaclass_type, $super_meta);
     }
 
@@ -347,7 +351,6 @@ sub _fix_metaclass_incompatibility {
 
     my %base_metaclass = $self->_base_metaclasses;
     for my $metaclass_type (keys %base_metaclass) {
-        next unless defined $self->$metaclass_type;
         for my $super (@supers) {
             if (!$self->_single_metaclass_is_compatible($metaclass_type, $super->name)) {
                 $self->_fix_single_metaclass_incompatibility(
