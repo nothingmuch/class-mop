@@ -330,16 +330,16 @@ sub _can_fix_metaclass_incompatibility {
 
 sub _fix_metaclass_incompatibility {
     my $self = shift;
-    my @supers = @_;
+    my @supers = map { Class::MOP::Class->initialize($_) } @_;
 
     my $necessary = 0;
-    for my $super (map { Class::MOP::Class->initialize($_) } @supers) {
+    for my $super (@supers) {
         $necessary = 1
             if $self->_can_fix_metaclass_incompatibility($super);
     }
     return unless $necessary;
 
-    for my $super (map { Class::MOP::Class->initialize($_) } @supers) {
+    for my $super (@supers) {
         if (!$self->_class_metaclass_is_compatible($super->name)) {
             $self->_fix_class_metaclass_incompatibility($super);
         }
@@ -348,7 +348,7 @@ sub _fix_metaclass_incompatibility {
     my %base_metaclass = $self->_base_metaclasses;
     for my $metaclass_type (keys %base_metaclass) {
         next unless defined $self->$metaclass_type;
-        for my $super (map { Class::MOP::Class->initialize($_) } @supers) {
+        for my $super (@supers) {
             if (!$self->_single_metaclass_is_compatible($metaclass_type, $super->name)) {
                 $self->_fix_single_metaclass_incompatibility(
                     $metaclass_type, $super
