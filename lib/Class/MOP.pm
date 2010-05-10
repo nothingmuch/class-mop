@@ -848,6 +848,18 @@ metaclass compatibility both upwards and downwards.
     |    A    |<----|    B    |
     +---------+     +---------+
 
+In actuality, I<all> of a class's metaclasses must be compatible,
+not just the class metaclass. That includes the instance, attribute,
+and method metaclasses, as well as the constructor and destructor
+classes.
+
+C<Class::MOP> will attempt to fix some simple types of
+incompatibilities. If all the metaclasses for the parent class are
+I<subclasses> of the child's metaclasses then we can simply replace
+the child's metaclasses with the parent's. In addition, if the child
+is missing a metaclass that the parent has, we can also just make the
+child use the parent's metaclass.
+
 As I said this is a highly esoteric topic and one you will only run
 into if you do a lot of subclassing of L<Class::MOP::Class>. If you
 are interested in why this is an issue see the paper I<Uniform and
