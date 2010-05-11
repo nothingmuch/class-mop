@@ -34,7 +34,7 @@ my @class_mop_package_methods = qw(
     add_package_symbol get_package_symbol has_package_symbol remove_package_symbol
     list_all_package_symbols get_all_package_symbols remove_package_glob
 
-    _deconstruct_variable_name
+    _package_stash
 
     get_method_map
 );

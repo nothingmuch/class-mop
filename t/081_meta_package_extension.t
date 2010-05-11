@@ -7,15 +7,15 @@ use Test::Exception;
 use Class::MOP;
 
 {
-    package My::Meta::Package;
-
+    package My::Package::Stash;
     use strict;
     use warnings;
 
-    use Carp 'confess';
-    use Symbol 'gensym';
+    use base 'Package::Stash';
 
-    use base 'Class::MOP::Package';
+    use metaclass;
+
+    use Symbol 'gensym';
 
     __PACKAGE__->meta->add_attribute(
         'namespace' => (
@@ -23,6 +23,11 @@ use Class::MOP;
             default => sub { {} }
         )
     );
+
+    sub new {
+        my $class = shift;
+        $class->meta->new_object(__INSTANCE__ => $class->SUPER::new(@_));
+    }
 
     sub add_package_symbol {
         my ($self, $variable, $initial_value) = @_;
@@ -32,6 +37,19 @@ use Class::MOP;
         my $glob = gensym();
         *{$glob} = $initial_value if defined $initial_value;
         $self->namespace->{$name} = *{$glob};
+    }
+}
+
+{
+    package My::Meta::Package;
+
+    use strict;
+    use warnings;
+
+    use base 'Class::MOP::Package';
+
+    sub _package_stash {
+        $_[0]->{_package_stash} ||= My::Package::Stash->new($_[0]->name);
     }
 }
 
