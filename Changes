@@ -1,5 +1,10 @@
 Revision history for Perl extension Class-MOP.
 
+  [API CHANGES]
+
+  * Packages and modules no longer have methods - this functionality was
+    moved back up into Class::MOP::Class (doy).
+
 1.01 Thu, May 26, 2010
 
   [NEW FEATURES]

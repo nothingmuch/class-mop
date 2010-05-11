@@ -19,7 +19,9 @@ our $VERSION   = '1.01';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
-use base 'Class::MOP::Module', 'Class::MOP::Mixin::HasAttributes';
+use base 'Class::MOP::Module',
+         'Class::MOP::Mixin::HasAttributes',
+         'Class::MOP::Mixin::HasMethods';
 
 # Creation
 
@@ -1384,13 +1386,75 @@ include indirect subclasses.
 
 =back
 
-=head2 Method introspection
+=head2 Method introspection and creation
 
-See L<Class::MOP::Package/Method introspection and creation> for
-methods that operate only on the current class.  Class::MOP::Class adds
-introspection capabilities that take inheritance into account.
+These methods allow you to introspect a class's methods, as well as
+add, remove, or change methods.
+
+Determining what is truly a method in a Perl 5 class requires some
+heuristics (aka guessing).
+
+Methods defined outside the package with a fully qualified name (C<sub
+Package::name { ... }>) will be included. Similarly, methods named
+with a fully qualified name using L<Sub::Name> are also included.
+
+However, we attempt to ignore imported functions.
+
+Ultimately, we are using heuristics to determine what truly is a
+method in a class, and these heuristics may get the wrong answer in
+some edge cases. However, for most "normal" cases the heuristics work
+correctly.
 
 =over 4
+
+=item B<< $metaclass->get_method($method_name) >>
+
+This will return a L<Class::MOP::Method> for the specified
+C<$method_name>. If the class does not have the specified method, it
+returns C<undef>
+
+=item B<< $metaclass->has_method($method_name) >>
+
+Returns a boolean indicating whether or not the class defines the
+named method. It does not include methods inherited from parent
+classes.
+
+=item B<< $metaclass->get_method_list >>
+
+This will return a list of method I<names> for all methods defined in
+this class.
+
+=item B<< $metaclass->add_method($method_name, $method) >>
+
+This method takes a method name and a subroutine reference, and adds
+the method to the class.
+
+The subroutine reference can be a L<Class::MOP::Method>, and you are
+strongly encouraged to pass a meta method object instead of a code
+reference. If you do so, that object gets stored as part of the
+class's method map directly. If not, the meta information will have to
+be recreated later, and may be incorrect.
+
+If you provide a method object, this method will clone that object if
+the object's package name does not match the class name. This lets us
+track the original source of any methods added from other classes
+(notably Moose roles).
+
+=item B<< $metaclass->remove_method($method_name) >>
+
+Remove the named method from the class. This method returns the
+L<Class::MOP::Method> object for the method.
+
+=item B<< $metaclass->method_metaclass >>
+
+Returns the class name of the method metaclass, see
+L<Class::MOP::Method> for more information on the method metaclass.
+
+=item B<< $metaclass->wrapped_method_metaclass >>
+
+Returns the class name of the wrapped method metaclass, see
+L<Class::MOP::Method::Wrapped> for more information on the wrapped
+method metaclass.
 
 =item B<< $metaclass->get_all_methods >>
 
