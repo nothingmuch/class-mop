@@ -13,7 +13,7 @@ Revision history for Perl extension Class-MOP.
     class's metaclass is a subclass of your parent class's metaclass, it will
     just use the parent class's metaclass directly. (doy)
 
-1.01 Thu, May 26, 2010
+1.01 Thu, May 6, 2010
 
   [NEW FEATURES]
 
