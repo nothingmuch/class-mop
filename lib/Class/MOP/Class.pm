@@ -16,7 +16,7 @@ use Devel::GlobalDestruction 'in_global_destruction';
 use Try::Tiny;
 use List::MoreUtils 'all';
 
-our $VERSION   = '1.01';
+our $VERSION   = '1.02';
 $VERSION = eval $VERSION;
 our $AUTHORITY = 'cpan:STEVAN';
 
