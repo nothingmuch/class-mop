@@ -9,7 +9,6 @@ our $AUTHORITY = 'cpan:STEVAN';
 
 use Scalar::Util 'blessed';
 use Carp         'confess';
-use Sub::Name    'subname';
 
 use base 'Class::MOP::Mixin';
 
@@ -61,14 +60,12 @@ sub add_method {
 
     my ( $current_package, $current_name ) = Class::MOP::get_code_info($body);
 
-    if ( !defined $current_name || $current_name =~ /^__ANON__/ ) {
-        my $full_method_name = ( $self->name . '::' . $method_name );
-        subname( $full_method_name => $body );
-    }
-
     $self->add_package_symbol(
         { sigil => '&', type => 'CODE', name => $method_name },
         $body,
+        (!defined($current_name) || $current_name =~ /^__ANON__/)
+            ? (subname => $method_name)
+            : (),
     );
 }
 
