@@ -1,5 +1,7 @@
 Revision history for Perl extension Class-MOP.
 
+1.03 Sat, Jun 5, 2010
+
   [ENHANCEMENTS]
 
   * Make CMOP::Package a thin wrapper around Package::Stash (doy).
