@@ -33,6 +33,7 @@ test_requires 'Test::More'      => '0.88';
 test_requires 'Test::Exception' => '0.27';
 
 repository 'git://git.moose.perl.org/Class-MOP.git';
+add_metadata(x_authority => 'cpan:STEVAN');
 
 extra_tests();
 
