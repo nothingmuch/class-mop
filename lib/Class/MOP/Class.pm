@@ -176,8 +176,6 @@ sub update_package_cache_flag {
 ## Metaclass compatibility
 {
     my %base_metaclass = (
-        attribute_metaclass      => 'Class::MOP::Attribute',
-        method_metaclass         => 'Class::MOP::Method',
         wrapped_method_metaclass => 'Class::MOP::Method::Wrapped',
         instance_metaclass       => 'Class::MOP::Instance',
         constructor_class        => 'Class::MOP::Method::Constructor',

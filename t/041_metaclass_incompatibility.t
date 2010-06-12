@@ -6,12 +6,18 @@ use Test::Exception;
 
 use metaclass;
 
-my %metaclass_attrs = (
+my %checked_metaclass_attrs = (
     'Instance'            => 'instance_metaclass',
-    'Attribute'           => 'attribute_metaclass',
-    'Method'              => 'method_metaclass',
     'Method::Wrapped'     => 'wrapped_method_metaclass',
     'Method::Constructor' => 'constructor_class',
+);
+my %unchecked_metaclass_attrs = (
+    'Attribute'           => 'attribute_metaclass',
+    'Method'              => 'method_metaclass',
+);
+my %metaclass_attrs = (
+    %checked_metaclass_attrs,
+    %unchecked_metaclass_attrs,
 );
 
 # meta classes
@@ -65,7 +71,7 @@ throws_ok {
         map { $metaclass_attrs{$_} => "Foo::Meta::$_" } keys %metaclass_attrs,
     )
 } qr/compatible/, 'incompatible Class metaclass';
-for my $suffix (keys %metaclass_attrs) {
+for my $suffix (keys %checked_metaclass_attrs) {
     throws_ok {
         Foo::Meta::Class->create(
             "Foo::All::Sub::$suffix",
@@ -74,6 +80,16 @@ for my $suffix (keys %metaclass_attrs) {
             $metaclass_attrs{$suffix} => "Bar::Meta::$suffix",
         )
     } qr/compatible/, "incompatible $suffix metaclass";
+}
+for my $suffix (keys %unchecked_metaclass_attrs) {
+    lives_ok {
+        Foo::Meta::Class->create(
+            "Foo::All::Sub::$suffix",
+            superclasses => ['Foo::All'],
+            (map { $metaclass_attrs{$_} => "Foo::Meta::$_" } keys %metaclass_attrs),
+            $metaclass_attrs{$suffix} => "Bar::Meta::$suffix",
+        )
+    } "compatible $suffix metaclass";
 }
 
 # fixing...
@@ -105,9 +121,13 @@ for my $suffix (keys %metaclass_attrs) {
             $metaclass_attrs{$suffix} => "Class::MOP::$suffix",
         )
     } "$metaclass_attrs{$suffix} fixing works with other non-default metaclasses";
-    for my $suffix2 (keys %metaclass_attrs) {
+    for my $suffix2 (keys %checked_metaclass_attrs) {
         my $method = $metaclass_attrs{$suffix2};
         isa_ok("Foo::All::Sub::CMOP::$suffix"->meta->$method, "Foo::Meta::$suffix2");
+    }
+    for my $suffix2 (keys %unchecked_metaclass_attrs) {
+        my $method = $metaclass_attrs{$suffix2};
+        isa_ok("Foo::All::Sub::CMOP::$suffix"->meta->$method, "Class::MOP::$suffix2");
     }
 }
 
@@ -182,7 +202,7 @@ isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
 {
     Class::MOP::Class->create(
         'Foo::Unsafe',
-        attribute_metaclass => 'Foo::Meta::Attribute',
+        instance_metaclass => 'Foo::Meta::Instance',
     );
     my $meta = Class::MOP::Class->create(
         'Foo::Unsafe::Sub',
@@ -190,7 +210,7 @@ isa_ok(Class::MOP::class_of('Foo::Reverse::Sub::Sub'), 'Foo::Meta::Class');
     $meta->add_attribute(foo => reader => 'foo');
     throws_ok { $meta->superclasses('Foo::Unsafe') }
               qr/compatibility.*pristine/,
-              "can't switch out the attribute metaclass of a class that already has attributes";
+              "can't switch out the metaclass of a class that already has attributes";
 }
 
 # immutability...
